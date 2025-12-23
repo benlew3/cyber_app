@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security+ Diagnostic</title>
+    <style>
+        body {
+            background: #09090b;
+            color: #fafafa;
+            font-family: system-ui, sans-serif;
+            padding: 20px;
+        }
+        .info-box {
+            background: #18181b;
+            border: 2px solid #27272a;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .success { border-color: #10b981; }
+        .error { border-color: #ef4444; }
+        .warning { border-color: #f59e0b; }
+        pre {
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Security+ Platform Diagnostic</h1>
+    
+    <div class="info-box">
+        <h2>Step 1: Check HTML Structure</h2>
+        <button onclick="checkHTMLStructure()">Check HTML Elements</button>
+        <pre id="html-check">Click button to check...</pre>
+    </div>
+    
+    <div class="info-box">
+        <h2>Step 2: Check JavaScript Loading</h2>
+        <button onclick="checkJSFiles()">Check JS Files</button>
+        <pre id="js-check">Click button to check...</pre>
+    </div>
+    
+    <div class="info-box">
+        <h2>Step 3: Check Data Loading</h2>
+        <button onclick="checkDataFiles()">Test Data Loading</button>
+        <pre id="data-check">Click button to check...</pre>
+    </div>
+    
+    <div class="info-box">
+        <h2>Step 4: Console Errors</h2>
+        <button onclick="checkConsole()">Show Console Errors</button>
+        <pre id="console-check">Click button to check...</pre>
+    </div>
+    
+    <div class="info-box warning">
+        <h2>Fix Instructions</h2>
+        <pre id="fix-instructions">Run diagnostics above first...</pre>
+    </div>
+
+    <script>
+        let errors = [];
+        window.addEventListener('error', (e) => {
+            errors.push(`${e.message} at ${e.filename}:${e.lineno}`);
+        });
+        
+        function checkHTMLStructure() {
+            const result = document.getElementById('html-check');
+            let findings = [];
+            
+            // Check for expected elements
+            const elementsToCheck = [
+                'app', 'loading', 'loading-screen', 'loadingScreen',
+                'mainApp', 'main-app', 'content', 'main-content',
+                'loadingStatus', 'progressFill'
+            ];
+            
+            elementsToCheck.forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem) {
+                    findings.push(`✅ Found: #${id} (${elem.tagName})`);
+                } else {
+                    findings.push(`❌ Missing: #${id}`);
+                }
+            });
+            
+            // Check what's in index.html
+            if (document.querySelector('.loading-screen')) {
+                findings.push('\n✅ Found: .loading-screen class');
+            }
+            if (document.querySelector('.app-container')) {
+                findings.push('✅ Found: .app-container class');
+            }
+            
+            result.textContent = findings.join('\n');
+        }
+        
+        function checkJSFiles() {
+            const result = document.getElementById('js-check');
+            let findings = [];
+            
+            // Check what scripts are loaded
+            const scripts = document.querySelectorAll('script');
+            findings.push(`Total scripts: ${scripts.length}`);
+            
+            scripts.forEach(script => {
+                if (script.src) {
+                    findings.push(`Script: ${script.src.split('/').pop()}`);
+                }
+            });
+            
+            // Check if APP exists
+            if (typeof APP !== 'undefined') {
+                findings.push('\n✅ APP object exists');
+                findings.push(`Questions: ${APP?.content?.questions?.length || 0}`);
+            } else {
+                findings.push('\n❌ APP object not found');
+            }
+            
+            result.textContent = findings.join('\n');
+        }
+        
+        async function checkDataFiles() {
+            const result = document.getElementById('data-check');
+            let findings = [];
+            
+            const files = ['questions.json', 'simulations.json', 'lessons.json'];
+            
+            for (const file of files) {
+                try {
+                    const response = await fetch(`data/${file}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        findings.push(`✅ ${file}: ${Array.isArray(data) ? data.length : Object.keys(data).length} items`);
+                    } else {
+                        findings.push(`❌ ${file}: HTTP ${response.status}`);
+                    }
+                } catch (error) {
+                    findings.push(`❌ ${file}: ${error.message}`);
+                }
+            }
+            
+            result.textContent = findings.join('\n');
+        }
+        
+        function checkConsole() {
+            const result = document.getElementById('console-check');
+            
+            if (errors.length > 0) {
+                result.textContent = '❌ JavaScript Errors:\n' + errors.join('\n');
+            } else {
+                result.textContent = '✅ No JavaScript errors detected';
+            }
+            
+            // Show fix based on findings
+            showFix();
+        }
+        
+        function showFix() {
+            const fix = document.getElementById('fix-instructions');
+            
+            fix.textContent = `
+MOST LIKELY FIX:
+
+1. Replace app.js with the minimal version:
+   - Download app_minimal.js
+   - Rename it to app.js
+   - Replace js/app.js in your repo
+   
+2. Check your index.html has these IDs:
+   - A loading screen with id="loading" or "loading-screen"
+   - A main container with id="mainApp" or "main-app"
+   - A content area with id="content"
+   
+3. Push changes:
+   git add .
+   git commit -m "Use minimal app version"
+   git push
+
+The minimal version will force the platform to load
+and show you what's working.
+            `;
+        }
+    </script>
+</body>
+</html>
