@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Security+ Platform - Data Loading Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        h1 { color: #6366f1; }
+        .test-item {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #666;
+        }
+        .success {
+            border-left-color: #10b981;
+            background: #064e3b;
+        }
+        .error {
+            border-left-color: #ef4444;
+            background: #7f1d1d;
+        }
+        .loading {
+            border-left-color: #f59e0b;
+            background: #78350f;
+        }
+        pre {
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #4f46e5;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Security+ Platform - Data Loading Test</h1>
+    <p>This page tests if your data files are accessible. Each file should load successfully.</p>
+    
+    <button onclick="runAllTests()">Run All Tests</button>
+    <button onclick="location.reload()">Reset</button>
+    
+    <div id="tests">
+        <div class="test-item loading" id="test-questions">
+            <h3>📄 questions.json</h3>
+            <div class="status">Testing...</div>
+        </div>
+        
+        <div class="test-item loading" id="test-simulations">
+            <h3>📄 simulations.json</h3>
+            <div class="status">Testing...</div>
+        </div>
+        
+        <div class="test-item loading" id="test-lessons">
+            <h3>📄 lessons.json</h3>
+            <div class="status">Testing...</div>
+        </div>
+        
+        <div class="test-item loading" id="test-pbqs">
+            <h3>📄 pbqs.json</h3>
+            <div class="status">Testing...</div>
+        </div>
+        
+        <div class="test-item loading" id="test-glossary">
+            <h3>📄 glossary.json</h3>
+            <div class="status">Testing...</div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <h2>📊 Summary</h2>
+        <div id="summary">Click "Run All Tests" to begin...</div>
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <h2>🔧 Debug Information</h2>
+        <pre id="debug">
+Current URL: <span id="current-url"></span>
+Base Path: <span id="base-path"></span>
+Protocol: <span id="protocol"></span>
+        </pre>
+    </div>
+
+    <script>
+        // Show current environment info
+        document.getElementById('current-url').textContent = window.location.href;
+        document.getElementById('base-path').textContent = window.location.pathname;
+        document.getElementById('protocol').textContent = window.location.protocol;
+        
+        async function testFile(filename, elementId) {
+            const element = document.getElementById(elementId);
+            const statusDiv = element.querySelector('.status');
+            
+            try {
+                console.log(`Testing ${filename}...`);
+                
+                const response = await fetch(`data/${filename}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const text = await response.text();
+                const data = JSON.parse(text);
+                
+                const count = Array.isArray(data) ? data.length : Object.keys(data).length;
+                
+                element.className = 'test-item success';
+                statusDiv.innerHTML = `
+                    ✅ <strong>SUCCESS</strong><br>
+                    Loaded ${count} items<br>
+                    File size: ${(text.length / 1024).toFixed(1)} KB<br>
+                    <small>Sample: ${JSON.stringify(data[0] || data, null, 2).substring(0, 100)}...</small>
+                `;
+                
+                return { file: filename, success: true, count: count };
+                
+            } catch (error) {
+                element.className = 'test-item error';
+                statusDiv.innerHTML = `
+                    ❌ <strong>FAILED</strong><br>
+                    Error: ${error.message}<br>
+                    <small>This file could not be loaded. Check if it exists in the data/ folder.</small>
+                `;
+                
+                console.error(`Failed to load ${filename}:`, error);
+                return { file: filename, success: false, error: error.message };
+            }
+        }
+        
+        async function runAllTests() {
+            console.log('Starting all tests...');
+            
+            const tests = [
+                { file: 'questions.json', id: 'test-questions' },
+                { file: 'simulations.json', id: 'test-simulations' },
+                { file: 'lessons.json', id: 'test-lessons' },
+                { file: 'pbqs.json', id: 'test-pbqs' },
+                { file: 'glossary.json', id: 'test-glossary' }
+            ];
+            
+            const results = [];
+            
+            for (const test of tests) {
+                const result = await testFile(test.file, test.id);
+                results.push(result);
+            }
+            
+            // Show summary
+            const successful = results.filter(r => r.success).length;
+            const failed = results.filter(r => !r.success).length;
+            
+            const summaryDiv = document.getElementById('summary');
+            
+            if (failed === 0) {
+                summaryDiv.innerHTML = `
+                    <div class="test-item success">
+                        <h3>✅ All Tests Passed!</h3>
+                        <p>All ${successful} data files loaded successfully.</p>
+                        <p>The platform should work correctly.</p>
+                    </div>
+                `;
+            } else if (successful > 0) {
+                summaryDiv.innerHTML = `
+                    <div class="test-item error">
+                        <h3>⚠️ Partial Success</h3>
+                        <p>${successful} files loaded, ${failed} failed.</p>
+                        <p>The platform may work with limited functionality.</p>
+                        <h4>Failed files:</h4>
+                        <ul>
+                            ${results.filter(r => !r.success).map(r => 
+                                `<li>${r.file}: ${r.error}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                `;
+            } else {
+                summaryDiv.innerHTML = `
+                    <div class="test-item error">
+                        <h3>❌ All Tests Failed</h3>
+                        <p>No data files could be loaded.</p>
+                        <h4>Possible causes:</h4>
+                        <ul>
+                            <li>data/ folder is missing</li>
+                            <li>Files are not uploaded to GitHub</li>
+                            <li>Files are in the wrong location</li>
+                            <li>CORS issues (if testing locally with file://)</li>
+                        </ul>
+                        <h4>To fix:</h4>
+                        <ol>
+                            <li>Verify data/ folder exists at repository root</li>
+                            <li>Check all JSON files are inside data/ folder</li>
+                            <li>Commit and push: <code>git add . && git commit -m "Add data files" && git push</code></li>
+                        </ol>
+                    </div>
+                `;
+            }
+            
+            console.log('Test results:', results);
+        }
+        
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 500);
+        });
+    </script>
+</body>
+</html>
