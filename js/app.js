@@ -151,10 +151,46 @@ if (document.readyState === 'loading') {
     setTimeout(initializeApp, 100);
 }
 
+// Ensure required containers exist (helps on GitHub Pages when HTML differs)
+function ensureMainContainers() {
+    try {
+        let main = document.getElementById('main-content');
+        if (!main) {
+            main = document.createElement('div');
+            main.id = 'main-content';
+            // Make visible by default so we never get a blank page
+            main.style.display = 'block';
+            main.style.opacity = '1';
+            document.body.appendChild(main);
+        }
+
+        let content = document.getElementById('content');
+        if (!content) {
+            content = document.createElement('div');
+            content.id = 'content';
+            main.appendChild(content);
+        }
+
+        // Optional loading screen (only create if missing)
+        let loading = document.getElementById('loading-screen');
+        if (!loading) {
+            loading = document.createElement('div');
+            loading.id = 'loading-screen';
+            loading.style.display = 'none';
+            document.body.insertBefore(loading, document.body.firstChild);
+        }
+    } catch (e) {
+        console.warn('ensureMainContainers failed:', e);
+    }
+}
+
 // Initialize application with comprehensive error handling
 function initializeApp() {
     try {
         console.log('🚀 Initializing Application...');
+
+        // Make sure expected DOM nodes exist
+        ensureMainContainers();
         
         // AGGRESSIVE removal of colored nav
         removeColoredNav();
@@ -973,7 +1009,7 @@ function showView(view, params = {}) {
 // Fallback dashboard for critical errors
 function fallbackDashboard() {
     try {
-        const content = document.getElementById('content');
+        let content = document.getElementById('content');
         if (!content) {
             // Try to create it
             const main = document.getElementById('main-content');
