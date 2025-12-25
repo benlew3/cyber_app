@@ -4,592 +4,164 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="CompTIA Security+ SY0-701 Training Platform - Complete certification preparation">
+    <meta name="description" content="CompTIA Security+ SY0-701 Training Platform">
     <meta name="theme-color" content="#09090b">
     <title>Security+ SY0-701 Training Platform</title>
     
-    <!-- Preload critical resources -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    
-    <!-- Base styles with error prevention -->
+    <!-- Optimized Critical CSS -->
     <style>
-        /* Critical CSS - Prevents flash of unstyled content */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* Reset and Base - Minimal FOUC */
+        *{margin:0;padding:0;box-sizing:border-box}
+        html,body{height:100%;background:#09090b;color:#fafafa;font-family:system-ui,-apple-system,sans-serif}
         
-        html {
-            height: 100%;
-            overflow-x: hidden;
-        }
+        /* Kill colored nav immediately */
+        [style*="linear-gradient"],[style*="Security+ SY0-701"],.colored-nav,.top-nav{display:none!important;height:0!important}
         
-        body {
-            min-height: 100vh;
-            background: #09090b;
-            color: #fafafa;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+        /* Loading screen */
+        #loading-screen{position:fixed;inset:0;background:#09090b;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;transition:opacity .3s}
+        #loading-screen.hide{opacity:0;pointer-events:none}
+        .loader{width:48px;height:48px;border:3px solid #27272a;border-top-color:#6366f1;border-radius:50%;animation:spin 1s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        #loading-text{margin-top:16px;color:#a1a1aa;font-size:14px}
         
-        /* Aggressive colored nav hiding - IMMEDIATE */
-        [style*="linear-gradient"],
-        [style*="Security+ SY0-701"],
-        [style*="Security+ SY0-701"],
-        .colored-nav,
-        .top-nav,
-        div[style*="background: linear"] {
-            display: none !important;
-            visibility: hidden !important;
-            height: 0 !important;
-            overflow: hidden !important;
-        }
+        /* Main content */
+        #main-content{display:none;min-height:100vh}
+        #main-content.show{display:block}
         
-        /* Loading screen styles */
-        #loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #09090b;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: opacity 0.3s ease;
-        }
-        
-        #loading-screen.fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
-        
-        .loader {
-            width: 50px;
-            height: 50px;
-            border: 3px solid #27272a;
-            border-top-color: #6366f1;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            margin-top: 20px;
-            color: #a1a1aa;
-            font-size: 14px;
-        }
-        
-        .loading-status {
-            margin-top: 10px;
-            color: #71717a;
-            font-size: 12px;
-            font-family: monospace;
-        }
-        
-        /* Main content container */
-        #main-content {
-            display: none;
-            min-height: 100vh;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        #main-content.visible {
-            opacity: 1;
-        }
-        
-        /* Content placeholder */
-        #content {
-            min-height: calc(100vh - 60px);
-        }
-        
-        /* Error screen styles */
-        .error-screen {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #09090b;
-            z-index: 9999;
-            padding: 20px;
-        }
-        
-        .error-container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 30px;
-            background: #18181b;
-            border: 1px solid #27272a;
-            border-radius: 12px;
-            text-align: center;
-        }
-        
-        .error-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-        
-        .error-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #fafafa;
-        }
-        
-        .error-message {
-            color: #a1a1aa;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-        
-        .error-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .error-btn {
-            background: #27272a;
-            color: #fafafa;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        
-        .error-btn:hover {
-            background: #3f3f46;
-            transform: translateY(-1px);
-        }
-        
-        .error-btn.primary {
-            background: #6366f1;
-        }
-        
-        .error-btn.primary:hover {
-            background: #4f46e5;
-        }
-        
-        /* No JavaScript fallback */
-        noscript {
-            display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: #ef4444;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            z-index: 10001;
-            font-weight: bold;
-        }
-        
-        /* Accessibility improvements */
-        :focus-visible {
-            outline: 2px solid #6366f1;
-            outline-offset: 2px;
-        }
-        
-        /* Hide elements during load */
-        .platform-header-bar {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .platform-header-bar.loaded {
-            opacity: 1;
-        }
-        
-        /* Mobile responsive base */
-        @media (max-width: 768px) {
-            .error-container {
-                margin: 20px auto;
-                padding: 20px;
-            }
-            
-            .error-actions {
-                flex-direction: column;
-            }
-            
-            .error-btn {
-                width: 100%;
-            }
-        }
-        
-        /* Print styles */
-        @media print {
-            #loading-screen,
-            .error-screen,
-            .platform-header-bar {
-                display: none !important;
-            }
-        }
+        /* Error handling */
+        .error-screen{display:none;position:fixed;inset:0;background:#09090b;padding:20px;z-index:9998}
+        .error-container{max-width:600px;margin:50px auto;padding:30px;background:#18181b;border:1px solid #27272a;border-radius:12px;text-align:center}
+        .error-btn{background:#27272a;color:#fafafa;border:none;padding:12px 24px;border-radius:6px;cursor:pointer;margin:5px}
+        .error-btn:hover{background:#3f3f46}
     </style>
 </head>
 <body>
-    <!-- No JavaScript Warning -->
+    <!-- JavaScript Check -->
     <noscript>
-        ⚠️ JavaScript is required for this application to work. Please enable JavaScript in your browser settings.
+        <div style="position:fixed;top:0;left:0;right:0;background:#ef4444;color:white;padding:15px;text-align:center;z-index:10000">
+            ⚠️ JavaScript is required. Please enable it in your browser.
+        </div>
     </noscript>
     
     <!-- Loading Screen -->
-    <div id="loading-screen" role="status" aria-live="polite">
-        <div class="loader" aria-hidden="true"></div>
-        <div class="loading-text">Loading Security+ Platform...</div>
-        <div class="loading-status" id="loading-status">Initializing...</div>
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <div id="loading-text">Loading Security+ Platform...</div>
     </div>
     
-    <!-- Error Screen (hidden by default) -->
-    <div class="error-screen" id="error-screen" role="alert">
+    <!-- Error Screen -->
+    <div class="error-screen" id="error-screen">
         <div class="error-container">
-            <div class="error-icon">⚠️</div>
-            <h1 class="error-title">Unable to Load Platform</h1>
-            <p class="error-message" id="error-message">
-                There was a problem loading the Security+ training platform. 
-                This might be due to a network issue or browser compatibility problem.
+            <h1 style="font-size:24px;margin-bottom:10px">⚠️ Loading Error</h1>
+            <p id="error-message" style="color:#a1a1aa;margin:20px 0">
+                Unable to load the platform. This may be a temporary issue.
             </p>
-            <div class="error-actions">
-                <button class="error-btn primary" onclick="window.location.reload()">
+            <div>
+                <button class="error-btn" onclick="location.reload(true)" style="background:#6366f1">
                     🔄 Reload Page
                 </button>
-                <button class="error-btn" onclick="clearCacheAndReload()">
+                <button class="error-btn" onclick="localStorage.clear();location.reload()">
                     🧹 Clear Cache & Reload
                 </button>
-                <button class="error-btn" onclick="showTroubleshooting()">
-                    🔧 Troubleshooting
-                </button>
-            </div>
-            <div id="troubleshooting" style="display: none; margin-top: 20px; text-align: left; color: #a1a1aa;">
-                <h3 style="margin-bottom: 10px;">Troubleshooting Steps:</h3>
-                <ol style="margin-left: 20px; line-height: 1.8;">
-                    <li>Check your internet connection</li>
-                    <li>Try using Chrome, Firefox, or Safari</li>
-                    <li>Disable browser extensions temporarily</li>
-                    <li>Clear browser cache (Ctrl+Shift+R or Cmd+Shift+R)</li>
-                    <li>Check if JavaScript is enabled</li>
-                    <li>Try incognito/private mode</li>
-                </ol>
             </div>
         </div>
     </div>
     
-    <!-- Main Application Container -->
-    <main id="main-content" role="main">
-        <!-- Header will be injected here by JavaScript -->
-        <!-- Content will be injected here by JavaScript -->
-        <div id="content" aria-live="polite"></div>
+    <!-- Main App Container -->
+    <main id="main-content">
+        <div id="content"></div>
     </main>
     
-    <!-- Inline Critical JavaScript for immediate execution -->
+    <!-- Immediate Colored Nav Killer -->
     <script>
-        'use strict';
-        
-        // Immediate colored nav removal
-        (function removeColoredNavImmediately() {
-            try {
-                const checkAndRemove = function() {
-                    const selectors = [
-                        '[style*="linear-gradient"]',
-                        '[style*="Security+ SY0-701"]',
-                        '.colored-nav',
-                        '.top-nav',
-                        'div[style*="background: linear"]'
-                    ];
-                    
-                    selectors.forEach(function(selector) {
-                        try {
-                            document.querySelectorAll(selector).forEach(function(elem) {
-                                if (elem && elem.parentNode) {
-                                    const text = elem.textContent || '';
-                                    const html = elem.innerHTML || '';
-                                    if (text.includes('Security+ SY0-701') || 
-                                        (html.includes('Dashboard') && html.includes('Quiz'))) {
-                                        elem.remove();
-                                    }
-                                }
-                            });
-                        } catch (e) {}
-                    });
-                };
-                
-                // Run immediately
-                checkAndRemove();
-                
-                // Run on DOM ready
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', checkAndRemove);
-                } else {
-                    checkAndRemove();
-                }
-                
-                // Keep checking for first 5 seconds
-                let checks = 0;
-                const interval = setInterval(function() {
-                    checkAndRemove();
-                    checks++;
-                    if (checks > 50) clearInterval(interval);
-                }, 100);
-                
-            } catch (e) {
-                console.warn('Error in immediate nav removal:', e);
-            }
+        // Kill colored nav IMMEDIATELY
+        (function(){
+            const kill = () => {
+                document.querySelectorAll('[style*="linear-gradient"],[style*="Security+ SY0-701"],.colored-nav,.top-nav').forEach(e => {
+                    if(e && e.parentNode && !e.classList?.contains('platform-header-bar')) e.remove();
+                });
+            };
+            kill();
+            let c=0;
+            const i=setInterval(()=>{kill();if(++c>30)clearInterval(i)},100);
         })();
         
-        // Loading status updater
-        function updateLoadingStatus(message) {
-            try {
-                const statusElem = document.getElementById('loading-status');
-                if (statusElem) {
-                    statusElem.textContent = message;
-                }
-            } catch (e) {}
-        }
-        
-        // Error handler
-        function showError(message) {
-            try {
-                console.error('Platform Error:', message);
-                
-                // Hide loading screen
-                const loadingScreen = document.getElementById('loading-screen');
-                if (loadingScreen) {
-                    loadingScreen.style.display = 'none';
-                }
-                
-                // Show error screen
-                const errorScreen = document.getElementById('error-screen');
-                const errorMessage = document.getElementById('error-message');
-                
-                if (errorScreen) {
-                    errorScreen.style.display = 'block';
-                }
-                
-                if (errorMessage && message) {
-                    errorMessage.textContent = message;
-                }
-            } catch (e) {
-                console.error('Error showing error screen:', e);
-            }
-        }
-        
-        // Clear cache and reload
-        function clearCacheAndReload() {
-            try {
-                // Clear localStorage
-                if (window.localStorage) {
-                    localStorage.clear();
-                }
-                
-                // Clear sessionStorage
-                if (window.sessionStorage) {
-                    sessionStorage.clear();
-                }
-                
-                // Hard reload
-                window.location.reload(true);
-            } catch (e) {
-                window.location.reload();
-            }
-        }
-        
-        // Show troubleshooting
-        function showTroubleshooting() {
-            try {
-                const troubleshooting = document.getElementById('troubleshooting');
-                if (troubleshooting) {
-                    troubleshooting.style.display = 
-                        troubleshooting.style.display === 'none' ? 'block' : 'none';
-                }
-            } catch (e) {}
-        }
-        
-        // Set up global error handler
-        window.addEventListener('error', function(event) {
-            console.error('Global error:', event.error);
-            
-            // Only show error screen for critical errors during load
-            if (!window.APP || !window.APP.initialized) {
-                showError('A critical error occurred while loading the platform. Please reload the page.');
-            }
-        });
-        
-        // Set up unhandled promise rejection handler
-        window.addEventListener('unhandledrejection', function(event) {
-            console.error('Unhandled promise rejection:', event.reason);
-        });
-        
-        // Check for browser compatibility
-        (function checkCompatibility() {
-            try {
-                // Check for required features
-                const required = [
-                    typeof window !== 'undefined',
-                    typeof document !== 'undefined',
-                    typeof document.querySelector === 'function',
-                    typeof document.addEventListener === 'function',
-                    typeof window.localStorage !== 'undefined',
-                    typeof JSON !== 'undefined',
-                    typeof Promise !== 'undefined'
-                ];
-                
-                const compatible = required.every(function(test) { return test; });
-                
-                if (!compatible) {
-                    showError('Your browser is not compatible with this application. Please use a modern browser like Chrome, Firefox, Safari, or Edge.');
-                    return false;
-                }
-                
-                updateLoadingStatus('Browser compatible ✓');
-                return true;
-            } catch (e) {
-                showError('Browser compatibility check failed.');
-                return false;
-            }
-        })();
-        
-        // Monitor app.js loading
-        let appLoadTimeout;
+        // App load monitoring
         let appLoaded = false;
+        let loadTimeout = null;
         
-        function onAppLoaded() {
-            appLoaded = true;
-            clearTimeout(appLoadTimeout);
-            updateLoadingStatus('Application loaded ✓');
+        // Show error if app doesn't load
+        function showError(msg) {
+            console.error('Error:', msg);
+            const ls = document.getElementById('loading-screen');
+            const es = document.getElementById('error-screen');
+            const em = document.getElementById('error-message');
+            if(ls) ls.style.display = 'none';
+            if(es) es.style.display = 'block';
+            if(em && msg) em.textContent = msg;
         }
         
-        // Set timeout for app.js loading
-        appLoadTimeout = setTimeout(function() {
-            if (!appLoaded && (!window.APP || !window.APP.initialized)) {
-                showError('The application took too long to load. This might be due to a slow network connection. Please try reloading the page.');
+        // Hide loading when app loads
+        function hideLoading() {
+            const ls = document.getElementById('loading-screen');
+            const mc = document.getElementById('main-content');
+            if(ls) {
+                ls.classList.add('hide');
+                setTimeout(() => ls.style.display = 'none', 300);
             }
-        }, 10000); // 10 second timeout
+            if(mc) mc.classList.add('show');
+        }
+        
+        // Set timeout for app loading (8 seconds)
+        loadTimeout = setTimeout(() => {
+            if(!appLoaded && (!window.APP || !window.APP.initialized)) {
+                showError('Application is taking too long to load. Please check your connection and reload.');
+            }
+        }, 8000);
+        
+        // Monitor app initialization
+        const checkApp = setInterval(() => {
+            if(window.APP && window.APP.initialized) {
+                appLoaded = true;
+                clearTimeout(loadTimeout);
+                clearInterval(checkApp);
+                hideLoading();
+                console.log('✅ App loaded successfully');
+            }
+        }, 100);
+        
+        // Fallback after 10 seconds
+        setTimeout(() => {
+            clearInterval(checkApp);
+            if(!appLoaded) {
+                hideLoading();
+                const content = document.getElementById('content');
+                if(content && !content.innerHTML) {
+                    content.innerHTML = `
+                        <div style="padding:40px;text-align:center;max-width:600px;margin:0 auto">
+                            <h1 style="font-size:2rem;margin-bottom:20px">Security+ Training Platform</h1>
+                            <p style="color:#a1a1aa;margin-bottom:20px">Loading in compatibility mode...</p>
+                            <button onclick="location.reload()" style="background:#6366f1;color:white;border:none;padding:12px 24px;border-radius:6px;cursor:pointer">
+                                Reload Full Platform
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+        }, 10000);
     </script>
     
-    <!-- Load main application with error handling -->
-    <script src="js/app.js" onerror="showError('Failed to load application script. Please check your connection and try again.')" onload="onAppLoaded()"></script>
+    <!-- Load Main App -->
+    <script src="js/app.js" defer></script>
     
-    <!-- Fallback inline script if app.js fails -->
+    <!-- Final Cleanup -->
     <script>
-        // Fallback initialization if app.js doesn't load properly
-        setTimeout(function() {
-            try {
-                // Check if APP exists
-                if (!window.APP || !window.APP.version) {
-                    console.warn('APP not initialized, attempting fallback...');
-                    
-                    // Try to hide loading and show basic content
-                    const loadingScreen = document.getElementById('loading-screen');
-                    const mainContent = document.getElementById('main-content');
-                    const content = document.getElementById('content');
-                    
-                    if (loadingScreen) {
-                        loadingScreen.style.display = 'none';
-                    }
-                    
-                    if (mainContent) {
-                        mainContent.style.display = 'block';
-                        mainContent.classList.add('visible');
-                    }
-                    
-                    if (content && (!content.innerHTML || content.innerHTML.trim() === '')) {
-                        // Show fallback content
-                        content.innerHTML = `
-                            <div style="padding: 40px; max-width: 800px; margin: 0 auto; text-align: center;">
-                                <h1 style="font-size: 2rem; margin-bottom: 20px; color: #fafafa;">
-                                    Security+ Training Platform
-                                </h1>
-                                <p style="color: #a1a1aa; margin-bottom: 30px;">
-                                    The platform is loading in compatibility mode. Some features may be limited.
-                                </p>
-                                <button onclick="window.location.reload()" 
-                                        style="background: #6366f1; color: white; border: none; 
-                                               padding: 12px 24px; border-radius: 6px; cursor: pointer; 
-                                               font-size: 16px;">
-                                    Reload Full Platform
-                                </button>
-                                <div style="margin-top: 40px; text-align: left; max-width: 600px; 
-                                           margin-left: auto; margin-right: auto;">
-                                    <h2 style="color: #fafafa; margin-bottom: 20px;">Quick Links:</h2>
-                                    <ul style="list-style: none; padding: 0;">
-                                        <li style="margin: 10px 0;">
-                                            <a href="#" onclick="alert('Loading lessons...')" 
-                                               style="color: #6366f1; text-decoration: none;">
-                                                📚 View Lessons
-                                            </a>
-                                        </li>
-                                        <li style="margin: 10px 0;">
-                                            <a href="#" onclick="alert('Loading simulations...')" 
-                                               style="color: #6366f1; text-decoration: none;">
-                                                🎮 Practice Simulations
-                                            </a>
-                                        </li>
-                                        <li style="margin: 10px 0;">
-                                            <a href="#" onclick="alert('Loading quiz...')" 
-                                               style="color: #6366f1; text-decoration: none;">
-                                                📝 Take Practice Quiz
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        `;
-                    }
-                } else {
-                    // APP loaded successfully
-                    console.log('APP initialized successfully:', window.APP.version);
-                }
-            } catch (e) {
-                console.error('Fallback initialization error:', e);
-            }
-        }, 3000); // Check after 3 seconds
-        
-        // Final safety net - remove colored nav one more time after everything loads
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                try {
-                    document.querySelectorAll('[style*="linear-gradient"], .colored-nav, .top-nav').forEach(function(elem) {
-                        if (elem && !elem.classList.contains('platform-header-bar')) {
-                            elem.remove();
-                        }
-                    });
-                    
-                    // Mark as fully loaded
-                    const mainContent = document.getElementById('main-content');
-                    if (mainContent) {
-                        mainContent.classList.add('visible');
-                    }
-                    
-                    // Mark header as loaded
-                    const header = document.querySelector('.platform-header-bar');
-                    if (header) {
-                        header.classList.add('loaded');
-                    }
-                    
-                    // Hide loading screen if still visible
-                    const loadingScreen = document.getElementById('loading-screen');
-                    if (loadingScreen && loadingScreen.style.display !== 'none') {
-                        loadingScreen.classList.add('fade-out');
-                        setTimeout(function() {
-                            loadingScreen.style.display = 'none';
-                        }, 300);
-                    }
-                } catch (e) {}
+        window.addEventListener('load', () => {
+            // Final colored nav removal
+            setTimeout(() => {
+                document.querySelectorAll('[style*="linear-gradient"]').forEach(e => {
+                    if(!e.classList?.contains('platform-header-bar')) e.remove();
+                });
             }, 500);
         });
     </script>
