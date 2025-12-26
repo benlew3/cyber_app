@@ -1,8 +1,8 @@
-// Security+ Platform v27 - FULLY FUNCTIONAL & AUDITED
-// Every function implemented, no placeholders, complete error handling
+// Security+ Platform v28 - ENHANCED with Lesson Navigation
+// Every function implemented + Previous/Next lesson navigation within domains
 // 41 lessons, 25 simulations, 15 remediation, 250 questions, 30 PBQs, 300+ glossary terms
 
-console.log('🚀 Security+ v27 Starting - Fully Functional & Audited Edition');
+console.log('🚀 Security+ v28 Starting - Enhanced with Lesson Navigation');
 
 // ============================================
 // IMMEDIATE LOADING FIX & ERROR PREVENTION
@@ -65,7 +65,7 @@ console.log('🚀 Security+ v27 Starting - Fully Functional & Audited Edition');
 // GLOBAL STATE MANAGEMENT
 // ============================================
 const APP = {
-    version: '27.0-FullyFunctional',
+    version: '28.0-LessonNav',
     initialized: false,
     content: {
         questions: [],
@@ -1067,7 +1067,7 @@ function createHeader() {
     header.innerHTML = `
         <div class="header-brand">
             <span>🛡️</span>
-            <span>Security+ v27</span>
+            <span>Security+ v28</span>
         </div>
         <nav class="header-nav">
             <button class="nav-btn" onclick="showDashboard()">🏠 Dashboard</button>
@@ -1115,7 +1115,7 @@ function showDashboard() {
     
     content.innerHTML = `
         <div class="container">
-            <h1 class="page-title">🛡️ Security+ Training Platform</h1>
+            <h1 class="page-title">🛡️ Security+ Training Platform v28</h1>
             <p class="page-subtitle">CompTIA Security+ SY0-701 - Complete Training System</p>
             
             <div class="stats-grid">
@@ -1300,6 +1300,37 @@ function showAllLessons() {
     updateNavigation();
 }
 
+// Helper functions for lesson navigation within domain
+function getPreviousLesson(currentLessonId) {
+    const currentLesson = ALL_LESSONS.find(l => l.id === currentLessonId);
+    if (!currentLesson) return null;
+    
+    // Get all lessons in the same domain
+    const domainLessons = ALL_LESSONS.filter(l => l.domain === currentLesson.domain);
+    const currentIndex = domainLessons.findIndex(l => l.id === currentLessonId);
+    
+    // Return previous lesson if exists
+    if (currentIndex > 0) {
+        return domainLessons[currentIndex - 1];
+    }
+    return null;
+}
+
+function getNextLesson(currentLessonId) {
+    const currentLesson = ALL_LESSONS.find(l => l.id === currentLessonId);
+    if (!currentLesson) return null;
+    
+    // Get all lessons in the same domain
+    const domainLessons = ALL_LESSONS.filter(l => l.domain === currentLesson.domain);
+    const currentIndex = domainLessons.findIndex(l => l.id === currentLessonId);
+    
+    // Return next lesson if exists
+    if (currentIndex < domainLessons.length - 1) {
+        return domainLessons[currentIndex + 1];
+    }
+    return null;
+}
+
 function showLessonViewer(lessonId) {
     const content = document.getElementById('content');
     const lesson = ALL_LESSONS.find(l => l.id === lessonId);
@@ -1312,18 +1343,53 @@ function showLessonViewer(lessonId) {
         keyPoints: []
     };
     
+    // Get previous and next lessons in the same domain
+    const prevLesson = getPreviousLesson(lessonId);
+    const nextLesson = getNextLesson(lessonId);
+    const domainLessons = ALL_LESSONS.filter(l => l.domain === lesson.domain);
+    const currentLessonIndex = domainLessons.findIndex(l => l.id === lessonId);
+    const totalLessonsInDomain = domainLessons.length;
+    
     content.innerHTML = `
         <div class="container">
-            <button class="back-btn" onclick="showAllLessons()">← Back to Lessons</button>
+            <button class="back-btn" onclick="showDomainLessons(${lesson.domain})">← Back to Domain ${lesson.domain} Lessons</button>
             
             <div class="lesson-viewer">
-                <h1>${lesson.title}</h1>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h1>${lesson.title}</h1>
+                    <div style="color: #71717a; font-size: 0.9rem;">
+                        Lesson ${currentLessonIndex + 1} of ${totalLessonsInDomain} in Domain ${lesson.domain}
+                    </div>
+                </div>
                 
                 <div style="display: flex; gap: 20px; color: #71717a; margin-bottom: 20px;">
                     ${lesson.objectives ? `<span>📍 Objectives: ${lesson.objectives.join(', ')}</span>` : ''}
                     ${lesson.duration ? `<span>⏱️ ${lesson.duration}</span>` : ''}
                     ${lesson.difficulty ? `<span class="difficulty-badge difficulty-${lesson.difficulty}">${lesson.difficulty}</span>` : ''}
                     ${isCompleted ? '<span style="color: #10b981;">✅ Completed</span>' : ''}
+                </div>
+                
+                <!-- Lesson Navigation Bar -->
+                <div style="display: flex; justify-content: space-between; margin-bottom: 30px; padding: 15px; background: #18181b; border-radius: 8px;">
+                    ${prevLesson ? `
+                        <button class="btn" onclick="showLessonViewer('${prevLesson.id}')" style="display: flex; align-items: center; gap: 10px;">
+                            <span>←</span>
+                            <div style="text-align: left;">
+                                <div style="font-size: 0.8rem; color: #71717a;">Previous</div>
+                                <div style="font-size: 0.9rem;">${prevLesson.title}</div>
+                            </div>
+                        </button>
+                    ` : '<div></div>'}
+                    
+                    ${nextLesson ? `
+                        <button class="btn btn-primary" onclick="showLessonViewer('${nextLesson.id}')" style="display: flex; align-items: center; gap: 10px;">
+                            <div style="text-align: right;">
+                                <div style="font-size: 0.8rem; color: #a1a1aa;">Next</div>
+                                <div style="font-size: 0.9rem;">${nextLesson.title}</div>
+                            </div>
+                            <span>→</span>
+                        </button>
+                    ` : '<div></div>'}
                 </div>
                 
                 ${lessonContent.introduction ? `
@@ -1367,18 +1433,40 @@ function showLessonViewer(lessonId) {
                     </div>
                 ` : ''}
                 
-                <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: space-between;">
-                    <button class="btn ${isCompleted ? 'btn-success' : 'btn-primary'}" 
-                            onclick="markLessonComplete('${lessonId}')">
-                        ${isCompleted ? '✅ Mark as Review' : '📌 Mark Complete'}
-                    </button>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn" onclick="startLessonQuiz(${lesson.domain})">
-                            Take Quiz →
+                <!-- Bottom Navigation with Previous/Next -->
+                <div style="margin-top: 30px; padding: 20px; background: #18181b; border-radius: 8px;">
+                    <div style="display: flex; gap: 10px; justify-content: space-between; margin-bottom: 20px;">
+                        <button class="btn ${isCompleted ? 'btn-success' : 'btn-primary'}" 
+                                onclick="markLessonComplete('${lessonId}')">
+                            ${isCompleted ? '✅ Mark as Review' : '📌 Mark Complete'}
                         </button>
-                        <button class="btn" onclick="showRelatedSimulation(${lesson.domain})">
-                            Try Simulation →
-                        </button>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn" onclick="startLessonQuiz(${lesson.domain})">
+                                Take Quiz →
+                            </button>
+                            <button class="btn" onclick="showRelatedSimulation(${lesson.domain})">
+                                Try Simulation →
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Previous/Next Navigation -->
+                    <div style="display: flex; justify-content: space-between; border-top: 1px solid #27272a; padding-top: 20px;">
+                        ${prevLesson ? `
+                            <button class="btn" onclick="showLessonViewer('${prevLesson.id}')">
+                                ← Previous: ${prevLesson.title}
+                            </button>
+                        ` : '<div></div>'}
+                        
+                        ${nextLesson ? `
+                            <button class="btn btn-primary" onclick="markLessonCompleteAndNext('${lessonId}', '${nextLesson.id}')">
+                                Complete & Next: ${nextLesson.title} →
+                            </button>
+                        ` : `
+                            <button class="btn btn-success" onclick="showDomainLessons(${lesson.domain})">
+                                ✅ Domain ${lesson.domain} Complete
+                            </button>
+                        `}
                     </div>
                 </div>
             </div>
@@ -1387,6 +1475,15 @@ function showLessonViewer(lessonId) {
     
     APP.state.currentLesson = lessonId;
     APP.state.currentView = 'lesson-viewer';
+}
+
+// New function to mark complete and go to next
+function markLessonCompleteAndNext(currentLessonId, nextLessonId) {
+    if (!APP.progress.completedLessons.includes(currentLessonId)) {
+        APP.progress.completedLessons.push(currentLessonId);
+        saveProgress();
+    }
+    showLessonViewer(nextLessonId);
 }
 
 function showAllSimulations() {
@@ -2380,8 +2477,8 @@ function updateNavigation() {
 
 function initApp() {
     console.log('════════════════════════════════════════');
-    console.log('🚀 INITIALIZING SECURITY+ v27');
-    console.log('   Fully Functional & Audited Edition');
+    console.log('🚀 INITIALIZING SECURITY+ v28');
+    console.log('   Enhanced with Lesson Navigation');
     console.log('════════════════════════════════════════');
     
     try {
@@ -2475,6 +2572,9 @@ const globalFunctions = {
     showDomainPBQs,
     showRelatedSimulation,
     markLessonComplete,
+    markLessonCompleteAndNext,
+    getPreviousLesson,
+    getNextLesson,
     saveProgress,
     loadProgress,
     updateNavigation
@@ -2489,7 +2589,7 @@ Object.keys(globalFunctions).forEach(key => {
 // STARTUP SEQUENCE
 // ============================================
 
-console.log('Starting Security+ Platform v27...');
+console.log('Starting Security+ Platform v28...');
 
 // Start immediately if DOM is ready
 if (document.readyState === 'loading') {
@@ -2508,6 +2608,6 @@ setTimeout(() => {
 }, 2000);
 
 // Final confirmation
-console.log('✅ Security+ v27 script loaded successfully');
-console.log('📊 Total lines: ~2500+');
-console.log('🎯 All functions implemented and working');
+console.log('✅ Security+ v28 script loaded successfully');
+console.log('📊 Total lines: ~2600+');
+console.log('🎯 All functions implemented with lesson navigation');
