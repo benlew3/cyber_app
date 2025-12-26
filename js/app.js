@@ -172,8 +172,158 @@ Compensating: Alternative when primary fails`
             ]
         }
     },
-    { id: 'D1-LESSON-002', title: 'CIA Triad Fundamentals', domain: 1, objectives: ['1.2'], duration: '45-55 min' },
-    { id: 'D1-LESSON-003', title: 'Authentication Methods', domain: 1, objectives: ['1.2'], duration: '50-60 min' },
+    { 
+        id: 'D1-LESSON-002', 
+        title: 'CIA Triad Fundamentals', 
+        domain: 1, 
+        objectives: ['1.2'], 
+        duration: '45-55 min',
+        difficulty: 'beginner',
+        content: {
+            introduction: 'The CIA Triad (Confidentiality, Integrity, Availability) forms the foundation of all information security. Every security decision, control, and practice ultimately serves to protect one or more of these three pillars.',
+            learningGoals: [
+                'Define and explain each component of the CIA Triad',
+                'Identify threats to confidentiality, integrity, and availability',
+                'Apply CIA principles to real-world security scenarios',
+                'Balance CIA requirements based on business needs'
+            ],
+            sections: [
+                {
+                    title: 'Confidentiality',
+                    content: `Confidentiality ensures that information is accessible only to authorized individuals.
+
+Key Methods:
+• Encryption (at rest and in transit)
+• Access controls and permissions
+• Data classification schemes
+• Need-to-know principles
+• Non-disclosure agreements (NDAs)
+
+Common Threats:
+• Eavesdropping and packet sniffing
+• Social engineering
+• Improper disposal of media
+• Unauthorized access
+• Data breaches`
+                },
+                {
+                    title: 'Integrity',
+                    content: `Integrity maintains data accuracy and prevents unauthorized modification.
+
+Key Methods:
+• Hashing and checksums
+• Digital signatures
+• Version control
+• Change management processes
+• Audit logging
+
+Common Threats:
+• Man-in-the-middle attacks
+• Data corruption
+• Unauthorized changes
+• Malware modifications
+• Insider threats`
+                },
+                {
+                    title: 'Availability',
+                    content: `Availability ensures authorized users have reliable access when needed.
+
+Key Methods:
+• Redundancy and failover
+• Load balancing
+• Backup and recovery
+• DDoS protection
+• Maintenance windows
+
+Common Threats:
+• Denial of Service attacks
+• Hardware failures
+• Natural disasters
+• Power outages
+• Human error`
+                }
+            ],
+            keyPoints: [
+                'CIA Triad components often conflict - balance is key',
+                'Different data requires different CIA priorities',
+                'Security controls typically address multiple CIA aspects',
+                'Risk assessment helps determine CIA requirements'
+            ],
+            examTips: [
+                'Know which controls protect which CIA component',
+                'Understand trade-offs (e.g., encryption helps C but may impact A)',
+                'Identify the PRIMARY concern in scenario questions'
+            ]
+        }
+    },
+    { 
+        id: 'D1-LESSON-003', 
+        title: 'Authentication Methods', 
+        domain: 1, 
+        objectives: ['1.2'], 
+        duration: '50-60 min',
+        difficulty: 'intermediate',
+        content: {
+            introduction: 'Authentication verifies the identity of users, devices, or services before granting access. Modern authentication goes beyond simple passwords to include multiple factors and advanced biometric methods.',
+            learningGoals: [
+                'Understand authentication factors and their strengths',
+                'Implement multi-factor authentication strategies',
+                'Evaluate biometric authentication methods',
+                'Configure authentication protocols and services'
+            ],
+            sections: [
+                {
+                    title: 'Authentication Factors',
+                    content: `The three primary authentication factors:
+
+Something You Know (Knowledge):
+• Passwords and passphrases
+• PINs
+• Security questions
+• Pattern locks
+
+Something You Have (Possession):
+• Smart cards
+• Hardware tokens
+• Mobile devices (SMS/App)
+• Security keys (FIDO2)
+
+Something You Are (Inherence):
+• Fingerprints
+• Facial recognition
+• Iris/retinal scans
+• Voice recognition`
+                },
+                {
+                    title: 'Multi-Factor Authentication (MFA)',
+                    content: `MFA combines two or more different authentication factors.
+
+Implementation Considerations:
+• User convenience vs. security
+• Backup authentication methods
+• Recovery procedures
+• Cost and complexity
+
+Common MFA Combinations:
+• Password + SMS code
+• Password + Authenticator app
+• Smart card + PIN
+• Biometric + Security key`
+                }
+            ],
+            keyPoints: [
+                'MFA significantly reduces account compromise risk',
+                'Biometrics cannot be changed if compromised',
+                'Consider false acceptance and false rejection rates',
+                'Authentication is different from authorization'
+            ],
+            examTips: [
+                'Know the three authentication factors',
+                'Understand MFA vs. 2FA (2FA is a subset of MFA)',
+                'Location and time can be additional factors'
+            ]
+        }
+    },
     { id: 'D1-LESSON-004', title: 'Cryptographic Fundamentals', domain: 1, objectives: ['1.4'], duration: '55-65 min' },
     { id: 'D1-LESSON-005', title: 'Zero Trust Architecture', domain: 1, objectives: ['1.2'], duration: '50-60 min' },
     { id: 'D1-LESSON-006', title: 'Physical Security Controls', domain: 1, objectives: ['1.1'], duration: '45-55 min' },
@@ -1337,10 +1487,71 @@ function showLessonViewer(lessonId) {
     if (!lesson) return;
     
     const isCompleted = APP.progress.completedLessons.includes(lessonId);
+    
+    // Generate default content if lesson doesn't have explicit content
     const lessonContent = lesson.content || {
-        introduction: 'Lesson content loading...',
-        sections: [],
-        keyPoints: []
+        introduction: `Welcome to ${lesson.title}. This comprehensive lesson covers key concepts and practical applications for the Security+ certification exam.`,
+        learningGoals: [
+            `Master the fundamentals of ${lesson.title}`,
+            'Understand implementation in real-world scenarios',
+            'Identify common threats and vulnerabilities',
+            'Apply best practices and security controls',
+            'Prepare for exam questions on this topic'
+        ],
+        sections: [
+            {
+                title: 'Core Concepts',
+                content: `This section covers the fundamental concepts of ${lesson.title}.
+
+Key areas include:
+• Definitions and terminology
+• Industry standards and frameworks
+• Common implementations
+• Best practices
+• Regulatory requirements
+
+Understanding these concepts is essential for both the exam and real-world application.`
+            },
+            {
+                title: 'Implementation and Configuration',
+                content: `Learn how to implement and configure solutions related to ${lesson.title}.
+
+Topics covered:
+• Planning and design considerations
+• Step-by-step implementation
+• Configuration best practices
+• Common mistakes to avoid
+• Troubleshooting tips
+
+These practical skills are frequently tested on the Security+ exam.`
+            },
+            {
+                title: 'Security Considerations',
+                content: `Explore the security implications and controls for ${lesson.title}.
+
+Important aspects:
+• Threat landscape and attack vectors
+• Vulnerability assessment
+• Risk mitigation strategies
+• Monitoring and detection
+• Incident response procedures
+
+This knowledge is critical for protecting organizational assets.`
+            }
+        ],
+        keyPoints: [
+            `${lesson.title} is essential for comprehensive security`,
+            'Balance security requirements with business needs',
+            'Regular assessment and updates are crucial',
+            'Documentation and training support effectiveness',
+            'Integration with other security controls is key'
+        ],
+        examTips: [
+            'Pay attention to scenario-based questions',
+            'Know the differences between similar concepts',
+            'Understand both technical and managerial aspects',
+            'Practice identifying the BEST answer, not just correct ones'
+        ]
     };
     
     // Get previous and next lessons in the same domain
@@ -1556,8 +1767,14 @@ function showSimulationStep() {
     
     // Check if simulation has steps
     if (!sim.steps || sim.steps.length === 0) {
-        // Show basic simulation interface
-        content.innerHTML = `
+        // Generate dynamic simulation content based on the simulation
+        const scenarios = {
+            'beginner': 'You are starting your security journey with foundational scenarios.',
+            'intermediate': 'You face realistic challenges that test your growing expertise.',
+            'advanced': 'You must handle complex, multi-layered security incidents.'
+        };
+        
+        const simulationContent = `
             <div class="container">
                 <button class="back-btn" onclick="showAllSimulations()">← Exit Simulation</button>
                 
@@ -1565,28 +1782,50 @@ function showSimulationStep() {
                     <h1>${sim.title}</h1>
                     ${sim.organization ? `<p style="color: #71717a;">Organization: ${sim.organization}</p>` : ''}
                     ${sim.role ? `<p style="color: #71717a;">Your Role: ${sim.role}</p>` : ''}
+                    ${sim.difficulty ? `<p style="color: #71717a;">Difficulty: <span class="difficulty-badge difficulty-${sim.difficulty}">${sim.difficulty}</span></p>` : ''}
                     
                     <div class="simulation-step">
-                        <h3>Scenario</h3>
-                        <p>${sim.scenario || 'Interactive scenario loading...'}</p>
+                        <h3>Scenario Overview</h3>
+                        <p>${sim.scenario || `In this ${sim.difficulty || 'interactive'} simulation, you will navigate through real-world security challenges and make critical decisions that impact organizational security.`}</p>
                     </div>
                     
-                    <div style="margin-top: 20px;">
-                        <p style="color: #a1a1aa;">This is a placeholder simulation. In the full version, you would:</p>
-                        <ul style="margin: 20px 0 20px 20px; color: #71717a;">
-                            <li>Make critical security decisions</li>
-                            <li>Respond to evolving situations</li>
-                            <li>See the impact of your choices</li>
-                            <li>Earn points based on effectiveness</li>
+                    <div class="simulation-step" style="margin-top: 20px;">
+                        <h3>Simulation Objectives</h3>
+                        <ul style="margin-left: 20px; line-height: 2;">
+                            <li>Identify security threats and vulnerabilities</li>
+                            <li>Make informed decisions based on best practices</li>
+                            <li>Apply Security+ concepts in practical scenarios</li>
+                            <li>Balance security needs with business requirements</li>
+                            <li>Demonstrate incident response capabilities</li>
                         </ul>
                     </div>
                     
-                    <button class="btn btn-primary" onclick="completeSimulation('${sim.id}')">
-                        Complete Simulation →
-                    </button>
+                    <div class="simulation-step" style="margin-top: 20px;">
+                        <h3>What You'll Practice</h3>
+                        <p>${scenarios[sim.difficulty] || scenarios['intermediate']}</p>
+                        <ul style="margin: 20px 0 20px 20px; color: #a1a1aa;">
+                            <li>Critical thinking and decision-making</li>
+                            <li>Risk assessment and mitigation</li>
+                            <li>Security control implementation</li>
+                            <li>Incident response procedures</li>
+                            <li>Communication with stakeholders</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-top: 30px; text-align: center;">
+                        <p style="color: #71717a; margin-bottom: 20px;">
+                            This simulation would normally present interactive decision points. 
+                            Click below to mark as complete and continue your training.
+                        </p>
+                        <button class="btn btn-primary" onclick="completeSimulation('${sim.id}')">
+                            Complete Simulation →
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
+        
+        content.innerHTML = simulationContent;
         return;
     }
     
@@ -1767,21 +2006,51 @@ function startRemediation(remId) {
                 ${remediation.focus ? `<p style="color: #71717a;">Focus Areas: ${remediation.focus}</p>` : ''}
                 
                 <div style="margin-top: 20px;">
-                    <p>This remediation scenario helps you practice weak areas identified from quizzes and simulations.</p>
+                    <div class="simulation-step">
+                        <h3>Remediation Overview</h3>
+                        <p>This targeted remediation scenario helps you strengthen weak areas and reinforce key concepts. 
+                        Based on quiz performance and identified knowledge gaps, this module provides focused practice.</p>
+                    </div>
                     
-                    <div style="background: #27272a; border-radius: 8px; padding: 20px; margin: 20px 0;">
-                        <h3>Practice Activities:</h3>
+                    <div class="simulation-step" style="margin-top: 20px;">
+                        <h3>What You'll Review</h3>
                         <ul style="margin-left: 20px; line-height: 2;">
-                            <li>Review fundamental concepts</li>
-                            <li>Work through practice problems</li>
-                            <li>Apply knowledge to scenarios</li>
-                            <li>Test understanding with questions</li>
+                            <li>Core concepts and definitions</li>
+                            <li>Common misconceptions and errors</li>
+                            <li>Best practices and implementation</li>
+                            <li>Exam-specific knowledge points</li>
+                            <li>Real-world application scenarios</li>
                         </ul>
                     </div>
                     
-                    <button class="btn btn-primary" onclick="completeRemediation('${remId}')">
-                        Complete Remediation →
-                    </button>
+                    <div style="background: #27272a; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                        <h3>Practice Activities</h3>
+                        <ul style="margin-left: 20px; line-height: 2;">
+                            <li>📖 Review fundamental concepts</li>
+                            <li>✍️ Work through practice problems</li>
+                            <li>🎯 Apply knowledge to scenarios</li>
+                            <li>📝 Test understanding with questions</li>
+                            <li>🔄 Reinforce through repetition</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="simulation-step" style="margin-top: 20px;">
+                        <h3>Key Learning Points</h3>
+                        <p style="color: #a1a1aa;">
+                        ${remediation.focus ? 
+                            `This remediation specifically addresses: ${remediation.focus}. 
+                            Focus on understanding not just the 'what' but the 'why' behind each concept.` :
+                            `Focus on understanding the core principles and their practical applications. 
+                            Remember that Security+ tests both theoretical knowledge and practical judgment.`
+                        }
+                        </p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button class="btn btn-primary" onclick="completeRemediation('${remId}')">
+                            Complete Remediation →
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1848,6 +2117,135 @@ function startPBQ(pbqId) {
     if (!pbq) return;
     
     const content = document.getElementById('content');
+    
+    // Generate type-specific content
+    const pbqTypeContent = {
+        'drag-drop': {
+            title: 'Drag and Drop Configuration',
+            description: 'Arrange items in the correct order or match them to appropriate categories.',
+            interface: `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                    <div>
+                        <h4>Available Items:</h4>
+                        <div class="drop-zone" style="min-height: 200px; background: #27272a;">
+                            <div class="drag-item">Security Control A</div>
+                            <div class="drag-item">Security Control B</div>
+                            <div class="drag-item">Security Control C</div>
+                            <div class="drag-item">Security Control D</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>Target Configuration:</h4>
+                        <div class="drop-zone" style="min-height: 200px;">
+                            <p style="color: #71717a; text-align: center; padding: 20px;">
+                                Drag items here in the correct order
+                            </p>
+                        </div>
+                    </div>
+                </div>`
+        },
+        'hotspot': {
+            title: 'Identify Security Issues',
+            description: 'Click on areas of concern in the network diagram or interface.',
+            interface: `
+                <div style="background: #27272a; border-radius: 8px; padding: 40px; text-align: center; min-height: 300px; position: relative;">
+                    <div style="border: 2px solid #3f3f46; border-radius: 8px; padding: 20px; margin: 20px auto; max-width: 400px;">
+                        <h4>Network Topology</h4>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px;">
+                            <div style="background: #18181b; padding: 10px; border-radius: 4px;">Internet</div>
+                            <div style="background: #18181b; padding: 10px; border-radius: 4px;">Firewall</div>
+                            <div style="background: #18181b; padding: 10px; border-radius: 4px;">DMZ</div>
+                            <div style="background: #18181b; padding: 10px; border-radius: 4px;">Router</div>
+                            <div style="background: #18181b; padding: 10px; border-radius: 4px;">Switch</div>
+                            <div style="background: #18181b; padding: 10px; border-radius: 4px;">Servers</div>
+                        </div>
+                    </div>
+                    <p style="color: #71717a; margin-top: 20px;">
+                        Click on vulnerable points in the network topology above.
+                    </p>
+                </div>`
+        },
+        'configuration': {
+            title: 'Configure Security Settings',
+            description: 'Set the appropriate values for security configuration.',
+            interface: `
+                <div style="background: #27272a; border-radius: 8px; padding: 20px;">
+                    <h4>Security Configuration Panel</h4>
+                    <div style="margin-top: 20px; display: grid; gap: 15px;">
+                        <div>
+                            <label>Password Minimum Length: </label>
+                            <input type="number" value="8" min="6" max="32" style="background: #18181b; color: white; padding: 5px; border-radius: 4px; border: 1px solid #3f3f46;">
+                        </div>
+                        <div>
+                            <label>Account Lockout Threshold: </label>
+                            <input type="number" value="3" min="1" max="10" style="background: #18181b; color: white; padding: 5px; border-radius: 4px; border: 1px solid #3f3f46;"> attempts
+                        </div>
+                        <div>
+                            <label>Session Timeout: </label>
+                            <input type="number" value="15" min="5" max="60" style="background: #18181b; color: white; padding: 5px; border-radius: 4px; border: 1px solid #3f3f46;"> minutes
+                        </div>
+                        <div>
+                            <label>Password Complexity: </label>
+                            <div style="margin-top: 5px;">
+                                <input type="checkbox" checked> Uppercase Letters
+                                <input type="checkbox" checked> Lowercase Letters
+                                <input type="checkbox"> Numbers
+                                <input type="checkbox"> Special Characters
+                            </div>
+                        </div>
+                    </div>
+                </div>`
+        },
+        'matching': {
+            title: 'Match Security Concepts',
+            description: 'Connect related items by matching them correctly.',
+            interface: `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 20px;">
+                    <div>
+                        <h4>Terms:</h4>
+                        <div style="display: grid; gap: 10px;">
+                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">1. Confidentiality</div>
+                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">2. Integrity</div>
+                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">3. Availability</div>
+                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">4. Non-repudiation</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>Definitions:</h4>
+                        <div style="display: grid; gap: 10px;">
+                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">A. Ensures data accuracy</div>
+                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">B. Prevents denial of actions</div>
+                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">C. Ensures authorized access</div>
+                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">D. Protects information privacy</div>
+                        </div>
+                    </div>
+                </div>`
+        },
+        'simulation': {
+            title: 'Interactive Security Simulation',
+            description: 'Navigate through a realistic security scenario.',
+            interface: `
+                <div style="background: #27272a; border-radius: 8px; padding: 20px;">
+                    <h4>Incident Response Simulation</h4>
+                    <div style="margin-top: 20px;">
+                        <div class="simulation-step">
+                            <p><strong>Alert:</strong> Suspicious network activity detected on Server-DB-01</p>
+                            <p style="margin-top: 10px;">What is your immediate action?</p>
+                            <div style="display: grid; gap: 10px; margin-top: 15px;">
+                                <button class="btn">Isolate the affected system</button>
+                                <button class="btn">Gather more information</button>
+                                <button class="btn">Notify management</button>
+                                <button class="btn">Begin forensic imaging</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`
+        }
+    };
+    
+    // Get content for this PBQ type, or use a default
+    const typeContent = pbqTypeContent[pbq.type] || pbqTypeContent['simulation'];
+    
     content.innerHTML = `
         <div class="container">
             <button class="back-btn" onclick="showAllPBQs()">← Back</button>
@@ -1861,60 +2259,26 @@ function startPBQ(pbqId) {
                 
                 <div class="pbq-scenario">
                     <h3>Scenario</h3>
-                    <p>${pbq.scenario || 'You are tasked with configuring security settings for the organization.'}</p>
+                    <p>${pbq.scenario || `You are tasked with ${typeContent.description} This Performance-Based Question tests your practical knowledge of security concepts and your ability to apply them in real-world situations.`}</p>
                 </div>
                 
-                ${pbq.type === 'drag-drop' ? `
-                    <div style="margin-top: 20px;">
-                        <h3>Drag items to correct positions:</h3>
-                        <div class="drop-zone">
-                            <div class="drag-item">Firewall Rule 1: Allow HTTPS</div>
-                            <div class="drag-item">Firewall Rule 2: Block FTP</div>
-                            <div class="drag-item">Firewall Rule 3: Allow SSH from Admin</div>
-                            <div class="drag-item">Firewall Rule 4: Deny All Others</div>
-                        </div>
-                        <p style="color: #71717a; margin-top: 10px;">
-                            In the actual exam, you would drag and drop these items into the correct order.
-                        </p>
-                    </div>
-                ` : pbq.type === 'hotspot' ? `
-                    <div style="margin-top: 20px;">
-                        <h3>Click on the areas of concern:</h3>
-                        <div style="background: #27272a; border-radius: 8px; padding: 20px; text-align: center;">
-                            <p>[ Network Diagram Would Appear Here ]</p>
-                            <p style="color: #71717a; margin-top: 10px;">
-                                Click on vulnerable points in the network topology.
-                            </p>
-                        </div>
-                    </div>
-                ` : pbq.type === 'configuration' ? `
-                    <div style="margin-top: 20px;">
-                        <h3>Configure the settings:</h3>
-                        <div style="background: #27272a; border-radius: 8px; padding: 20px;">
-                            <div style="margin-bottom: 15px;">
-                                <label>Password Length: </label>
-                                <input type="number" value="8" min="8" max="32" style="background: #18181b; color: white; padding: 5px;">
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <label>Complexity: </label>
-                                <input type="checkbox" checked> Uppercase
-                                <input type="checkbox" checked> Lowercase
-                                <input type="checkbox"> Numbers
-                                <input type="checkbox"> Symbols
-                            </div>
-                            <div>
-                                <label>Lockout After: </label>
-                                <input type="number" value="3" min="1" max="10" style="background: #18181b; color: white; padding: 5px;"> attempts
-                            </div>
-                        </div>
-                    </div>
-                ` : `
-                    <div style="margin-top: 20px;">
-                        <p>This PBQ type (${pbq.type}) would present an interactive interface for you to demonstrate your skills.</p>
-                    </div>
-                `}
+                <div style="margin-top: 20px;">
+                    <h3>${typeContent.title}</h3>
+                    ${typeContent.interface}
+                </div>
                 
-                <div style="margin-top: 30px;">
+                <div style="background: #1e1e2e; border-left: 4px solid #6366f1; padding: 15px; margin-top: 20px;">
+                    <p style="color: #a1a1aa;">
+                        <strong>Instructions:</strong> In the actual exam, you would interact with this interface to demonstrate your knowledge. 
+                        ${pbq.type === 'drag-drop' ? 'Drag items to arrange them correctly.' :
+                          pbq.type === 'hotspot' ? 'Click on the areas that represent security concerns.' :
+                          pbq.type === 'configuration' ? 'Configure the settings according to best practices.' :
+                          pbq.type === 'matching' ? 'Match each term with its correct definition.' :
+                          'Complete the simulation by making appropriate security decisions.'}
+                    </p>
+                </div>
+                
+                <div style="margin-top: 30px; text-align: center;">
                     <button class="btn btn-primary" onclick="completePBQ('${pbq.id}')">
                         Submit Answer →
                     </button>
