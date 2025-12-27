@@ -115,6 +115,9 @@ const APP = {
 // Make APP globally accessible
 window.APP = APP;
 
+// Global storage for simulation data from data/simulations.json
+let SIMULATION_DATA = {};
+
 // Domain configuration
 const DOMAINS = [
     { id: 1, name: 'General Security Concepts', weight: 0.12, color: '#6366f1', icon: '🔒', 
@@ -415,6 +418,41 @@ const SIMULATION_FILE_MAP = {
     'D5-SIM-004': 'D5-SIM-004_Compliance_Audit.json',
     'D5-SIM-005': 'D5-SIM-005_Security_Program.json'
 };
+
+// Load simulations from your data folder
+async function loadSimulationsFromDataFolder() {
+    console.log('📂 Loading simulations from data/simulations.json...');
+    
+    try {
+        const response = await fetch('./data/simulations.json');
+        const data = await response.json();
+        
+        // Store simulations for quick access
+        if (Array.isArray(data)) {
+            console.log(`Found ${data.length} simulations in array format`);
+            data.forEach(sim => {
+                const id = sim.id || sim.simulation_id || sim.scenario_id;
+                if (id) SIMULATION_DATA[id] = sim;
+            });
+        } else if (data.simulations) {
+            console.log(`Found ${data.simulations.length} simulations in simulations property`);
+            data.simulations.forEach(sim => {
+                const id = sim.id || sim.simulation_id || sim.scenario_id;
+                if (id) SIMULATION_DATA[id] = sim;
+            });
+        } else {
+            console.log('Found simulations in object format');
+            SIMULATION_DATA = data;
+        }
+        
+        console.log('✅ Loaded simulations:', Object.keys(SIMULATION_DATA).slice(0, 5).join(', ') + '...');
+        return true;
+    } catch (error) {
+        console.error('❌ Error loading simulations.json:', error);
+        console.log('Will use generated mock data as fallback');
+        return false;
+    }
+}
 
 // ALL 25 SIMULATIONS with scenarios (26 total with duplicate D2-SIM-001)
 const ALL_SIMULATIONS = [
@@ -2532,15 +2570,71 @@ function showAllSimulations() {
     updateNavigation();
 }
 
-function startSimulation(simId) {
-    const simulation = ALL_SIMULATIONS.find(s => s.id === simId);
-    if (!simulation) return;
+async function startSimulation(simId) {
+    console.log(`🎮 Starting simulation: ${simId}`);
     
-    APP.state.currentSimulation = simulation;
+    // Show loading state
+    const content = document.getElementById('content');
+    content.innerHTML = `
+        <div class="container">
+            <div style="text-align: center; padding: 100px 20px;">
+                <div class="loading-spinner" style="margin: 0 auto;"></div>
+                <h2>Loading Simulation...</h2>
+                <p style="color: #71717a;">Loading from data/simulations.json</p>
+            </div>
+        </div>
+    `;
+    
+    // Try to get from loaded data first
+    let simData = SIMULATION_DATA[simId];
+    
+    if (!simData) {
+        // Try reloading
+        await loadSimulationsFromDataFolder();
+        simData = SIMULATION_DATA[simId];
+    }
+    
+    // Fall back to basic simulation info if still not found
+    if (!simData) {
+        const simulation = ALL_SIMULATIONS.find(s => s.id === simId);
+        if (simulation) {
+            console.log(`⚠️ Using basic simulation data for ${simId}`);
+            simData = simulation;
+        } else {
+            alert(`Simulation ${simId} not found`);
+            showAllSimulations();
+            return;
+        }
+    }
+    
+    // Initialize simulation state
+    APP.state.currentSimulation = simData;
     APP.state.simulationStep = 0;
     APP.state.score = 0;
+    APP.state.currentDecisionIndex = 0;
+    APP.state.simulationScore = 0;
     
-    showSimulationStep();
+    // Check what format the data is in
+    if (simData.decision_points && simData.decision_points.length > 0) {
+        console.log(`✅ Loaded ${simData.decision_points.length} decision points from JSON`);
+        // If you have the enhanced functions, use them:
+        if (typeof showEnhancedSimulationIntro === 'function') {
+            showEnhancedSimulationIntro();
+        } else {
+            showSimulationStep();
+        }
+    } else if (simData.steps && simData.steps.length > 0) {
+        console.log(`✅ Loaded ${simData.steps.length} steps from JSON`);
+        simData.decision_points = simData.steps; // Convert steps to decision_points
+        if (typeof showEnhancedSimulationIntro === 'function') {
+            showEnhancedSimulationIntro();
+        } else {
+            showSimulationStep();
+        }
+    } else {
+        // Use basic v28 display
+        showSimulationStep();
+    }
 }
 
 function showSimulationStep() {
@@ -3627,6 +3721,16 @@ function initApp() {
     console.log('   All 25 Simulations Interactive');
     console.log('   All Content Fully Functional');
     console.log('════════════════════════════════════════');
+
+    setupDOM();
+    injectStyles();
+    loadProgress();
+    
+    // ADD THIS LINE HERE:
+    loadSimulationsFromDataFolder();  // Load from data/simulations.json
+    
+    createHeader();
+    showDashboard();
     
     try {
         console.log('Step 1: Setting up DOM...');
@@ -3753,6 +3857,29 @@ setTimeout(() => {
         initApp();
     }
 }, 2000);
+
+// Test function to verify data folder setup
+function testDataFolderSetup() {
+    console.log('🧪 Testing data/simulations.json setup...');
+    
+    fetch('./data/simulations.json')
+        .then(response => {
+            console.log(`Status: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ File loaded successfully!');
+            if (Array.isArray(data)) {
+                console.log(`Found ${data.length} simulations`);
+            } else if (data.simulations) {
+                console.log(`Found ${data.simulations.length} simulations`);
+            }
+            console.log('Run loadSimulationsFromDataFolder() to load them');
+        })
+        .catch(error => {
+            console.error('❌ Error:', error);
+        });
+}
 
 // Final confirmation
 console.log('✅ Security+ v29 COMPLETE loaded successfully');
