@@ -1,0 +1,350 @@
+[
+  {
+    "id": "D1-SIM-001",
+    "title": "Security Controls Under Attack",
+    "domain": 1,
+    "difficulty": "intermediate",
+    "duration": "30-45 minutes",
+    "organization": "Pinnacle Financial Services",
+    "role": "Security Operations Analyst",
+    
+    "scenario": "At 14:30, your SIEM dashboard lights up with multiple critical alerts. Initial analysis suggests a coordinated attack targeting your organization's authentication systems and attempting to establish persistence. The attack appears to be escalating rapidly.",
+    
+    "stages": [
+      {
+        "type": "briefing",
+        "title": "Critical Security Alert",
+        "content": "Multiple security controls have been triggered. You must respond immediately to contain the threat.",
+        "duration": "3 minutes",
+        "objectives": [
+          "Understand the scope of the incident",
+          "Identify your available resources",
+          "Prepare your investigation strategy"
+        ]
+      },
+      {
+        "type": "visual_analysis",
+        "title": "Network Topology Analysis",
+        "content": "Analyze the network diagram to identify compromised systems and attack paths.",
+        "visualType": "network_diagram",
+        "duration": "5-7 minutes",
+        "elements": {
+          "compromised": ["webserver", "workstation3"],
+          "suspicious": ["mailserver"],
+          "secure": ["database", "fileserver"]
+        }
+      },
+      {
+        "type": "interactive_tool",
+        "title": "Hands-On Investigation",
+        "content": "Use security tools to investigate, contain, and remediate the threat.",
+        "toolType": "terminal",
+        "duration": "15-20 minutes",
+        "available_tools": ["terminal", "siem", "firewall"]
+      },
+      {
+        "type": "report",
+        "title": "Incident Documentation",
+        "content": "Document your findings, actions taken, and recommendations.",
+        "duration": "5 minutes",
+        "required_sections": ["summary", "timeline", "actions", "evidence", "recommendations"]
+      }
+    ],
+    
+    "threats": [
+      {
+        "id": "T001",
+        "type": "Malware Detection",
+        "source": "192.168.1.105",
+        "target": "Web Server",
+        "severity": "critical",
+        "timestamp": "14:32:15",
+        "description": "Cryptominer process consuming 95% CPU",
+        "indicators": {
+          "process_name": "/tmp/.hidden/cryptominer",
+          "network_connections": ["185.234.67.89:31337"],
+          "cpu_usage": "95%"
+        }
+      },
+      {
+        "id": "T002",
+        "type": "Brute Force Attack",
+        "source": "185.234.67.89",
+        "target": "SSH Service",
+        "severity": "high",
+        "timestamp": "14:28:42",
+        "description": "Multiple failed authentication attempts",
+        "indicators": {
+          "attempts": 1247,
+          "targeted_accounts": ["root", "admin", "administrator"],
+          "success": false
+        }
+      },
+      {
+        "id": "T003",
+        "type": "Data Exfiltration",
+        "source": "Web Server",
+        "target": "103.75.201.4",
+        "severity": "critical",
+        "timestamp": "14:35:21",
+        "description": "Large outbound data transfer detected",
+        "indicators": {
+          "data_volume": "2.3 GB",
+          "protocol": "HTTPS",
+          "destination_country": "Unknown"
+        }
+      }
+    ],
+    
+    "network_topology": {
+      "internet": {
+        "threats_detected": true,
+        "malicious_ips": ["185.234.67.89", "103.75.201.4", "45.142.212.100"]
+      },
+      "firewall": {
+        "status": "operational",
+        "rules_count": 45,
+        "last_updated": "7 days ago",
+        "effectiveness": "partial"
+      },
+      "dmz": {
+        "webserver": {
+          "status": "infected",
+          "services": ["HTTP", "HTTPS", "SSH"],
+          "vulnerabilities": ["CVE-2023-1234", "Backdoor shell"]
+        },
+        "mailserver": {
+          "status": "suspicious",
+          "services": ["SMTP", "IMAP"],
+          "anomalies": ["Unusual SMTP traffic"]
+        },
+        "dns": {
+          "status": "secure",
+          "services": ["DNS"],
+          "queries": ["Normal activity"]
+        }
+      },
+      "internal": {
+        "workstations": {
+          "total": 6,
+          "infected": 1,
+          "suspicious": 2,
+          "secure": 3
+        },
+        "servers": {
+          "database": "secure",
+          "fileserver": "secure",
+          "domain_controller": "monitoring"
+        }
+      }
+    },
+    
+    "terminal_commands": {
+      "available": [
+        "nmap", "netstat", "ps", "kill", "iptables", 
+        "tail", "tcpdump", "find", "systemctl", "grep"
+      ],
+      "correct_sequence": [
+        "nmap -sV 192.168.1.0/24",
+        "ps aux | grep suspicious",
+        "kill -9 5823",
+        "iptables -A INPUT -s 185.234.67.89 -j DROP",
+        "tail -f /var/log/auth.log"
+      ],
+      "evidence_commands": [
+        "tcpdump -w evidence.pcap",
+        "find / -name '*.sh' -mtime -7",
+        "tar -czf /tmp/evidence.tar.gz /var/log/"
+      ]
+    },
+    
+    "siem_events": [
+      {
+        "id": "E001",
+        "timestamp": "14:32:15",
+        "severity": "critical",
+        "type": "Malware Detection",
+        "source": "192.168.1.105",
+        "description": "Cryptominer process detected",
+        "action_required": true
+      },
+      {
+        "id": "E002",
+        "timestamp": "14:35:21",
+        "severity": "critical",
+        "type": "Data Exfiltration",
+        "source": "Web Server",
+        "description": "Large data transfer to suspicious IP",
+        "action_required": true
+      },
+      {
+        "id": "E003",
+        "timestamp": "14:28:42",
+        "severity": "high",
+        "type": "Brute Force",
+        "source": "185.234.67.89",
+        "description": "SSH brute force attempt",
+        "action_required": true
+      }
+    ],
+    
+    "firewall_rules": [
+      {
+        "id": 1,
+        "priority": 1,
+        "action": "ALLOW",
+        "protocol": "TCP",
+        "source": "ANY",
+        "destination": "192.168.1.10",
+        "port": "80,443",
+        "enabled": true
+      },
+      {
+        "id": 2,
+        "priority": 100,
+        "action": "ALLOW",
+        "protocol": "ANY",
+        "source": "ANY",
+        "destination": "ANY",
+        "port": "ANY",
+        "enabled": true,
+        "comment": "Default allow - SECURITY RISK"
+      }
+    ],
+    
+    "required_actions": {
+      "immediate": [
+        "Identify compromised systems",
+        "Block malicious IP addresses",
+        "Kill malicious processes"
+      ],
+      "containment": [
+        "Isolate infected systems",
+        "Update firewall rules",
+        "Disable compromised accounts"
+      ],
+      "investigation": [
+        "Collect network traffic",
+        "Capture memory dumps",
+        "Preserve log files"
+      ],
+      "remediation": [
+        "Remove malware",
+        "Patch vulnerabilities",
+        "Reset credentials"
+      ]
+    },
+    
+    "scoring": {
+      "max_score": 100,
+      "passing_score": 70,
+      "scoring_criteria": {
+        "threat_identification": {
+          "points": 20,
+          "actions": ["identify_malware", "identify_exfiltration", "identify_bruteforce"]
+        },
+        "containment": {
+          "points": 30,
+          "actions": ["block_ips", "kill_processes", "isolate_systems"]
+        },
+        "investigation": {
+          "points": 20,
+          "actions": ["use_terminal", "check_logs", "analyze_traffic"]
+        },
+        "evidence_collection": {
+          "points": 15,
+          "actions": ["capture_packets", "save_logs", "document_timeline"]
+        },
+        "reporting": {
+          "points": 15,
+          "actions": ["complete_report", "provide_recommendations"]
+        }
+      },
+      "penalties": {
+        "hint_usage": -2,
+        "incorrect_action": -5,
+        "missed_critical": -10
+      }
+    },
+    
+    "feedback": {
+      "success": [
+        "Excellent threat identification and rapid response!",
+        "Your containment actions effectively stopped the attack.",
+        "Strong evidence collection for forensic analysis."
+      ],
+      "improvement": [
+        "Consider checking firewall rules earlier in the investigation.",
+        "Remember to document all actions for the incident report.",
+        "Network isolation should be a priority for infected systems."
+      ]
+    },
+    
+    "learning_outcomes": [
+      "Understand multi-vector attack patterns",
+      "Apply incident response procedures",
+      "Use command-line tools for investigation",
+      "Implement containment strategies",
+      "Document security incidents properly"
+    ]
+  },
+  
+  {
+    "id": "D2-SIM-001",
+    "title": "Ransomware Response Crisis",
+    "domain": 2,
+    "difficulty": "advanced",
+    "duration": "45-60 minutes",
+    "organization": "MedCare Health Systems",
+    "role": "Incident Response Lead",
+    
+    "scenario": "It's 3:00 AM when you receive an urgent call. Multiple systems at MedCare Health Systems are displaying ransom messages. Patient care systems are at risk, and the attack is actively spreading through the network. You have minutes to act before critical healthcare services are impacted.",
+    
+    "stages": [
+      {
+        "type": "briefing",
+        "title": "Ransomware Alert - Critical",
+        "content": "Ransomware detected on multiple systems. Healthcare operations at risk.",
+        "duration": "2 minutes",
+        "critical_info": {
+          "affected_systems": 47,
+          "spreading_rate": "3 systems/minute",
+          "ransom_demand": "500 Bitcoin",
+          "time_to_deadline": "48 hours"
+        }
+      },
+      {
+        "type": "visual_analysis",
+        "title": "Attack Spread Visualization",
+        "content": "Track the ransomware spread through the network in real-time.",
+        "visualType": "network_diagram",
+        "duration": "5 minutes"
+      },
+      {
+        "type": "interactive_tool",
+        "title": "Emergency Response",
+        "content": "Execute emergency containment and begin recovery procedures.",
+        "toolType": "terminal",
+        "duration": "20-25 minutes"
+      },
+      {
+        "type": "report",
+        "title": "Executive Brief",
+        "content": "Prepare immediate report for hospital administration and potential law enforcement.",
+        "duration": "8 minutes"
+      }
+    ],
+    
+    "threats": [
+      {
+        "id": "R001",
+        "type": "Ransomware",
+        "variant": "MedLock 3.0",
+        "source": "Phishing email to HR department",
+        "severity": "critical",
+        "encryption_algorithm": "AES-256 + RSA-4096",
+        "file_extensions_targeted": [".doc", ".pdf", ".xls", ".jpg", ".db", ".sql"]
+      }
+    ]
+  }
+]
