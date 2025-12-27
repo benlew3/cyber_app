@@ -2746,6 +2746,15 @@ function showSimulationStep() {
     `;
 }
 
+window.showEnhancedSimulationIntro = function() {
+    if (typeof showBriefingStage === 'function') {
+        showBriefingStage(simEngine.getCurrentStage());
+    } else {
+        // Fallback to basic display
+        showSimulationStep();
+    }
+};
+
 function selectSimulationOption(index, points) {
     APP.state.score += points;
     
