@@ -2569,7 +2569,10 @@ function showAllSimulations() {
     APP.state.currentView = 'simulations';
     updateNavigation();
 }
-
+async function startSimulation(simId) {
+    // Use the new interactive system
+    startInteractiveSimulation(simId);
+}
 async function startSimulation(simId) {
     console.log(`🎮 Starting simulation: ${simId}`);
     
