@@ -3886,3 +3886,4 @@ console.log('✅ Security+ v29 COMPLETE loaded successfully');
 console.log('📊 260 decision points across 26 simulations');
 console.log('🎯 All v28 features preserved + enhanced simulations');
 console.log('💯 Ready for professional Security+ training!');
+console.log('🧪 Run testDataFolderSetup() to verify data/simulations.json');
