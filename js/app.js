@@ -2570,11 +2570,22 @@ function showAllSimulations() {
     updateNavigation();
 }
 async function startSimulation(simId) {
-    // Use the new interactive system
-    startInteractiveSimulation(simId);
+    console.log(`🎮 Starting INTERACTIVE simulation: ${simId}`);
+    
+    // Check if interactive simulation system is loaded
+    if (typeof startInteractiveSimulation === 'function') {
+        // Use the new interactive system
+        startInteractiveSimulation(simId);
+    } else {
+        // Fallback to old system if interactive files aren't loaded
+        console.warn('Interactive simulation system not loaded, using fallback');
+        startSimulation_OLD(simId);
+    }
 }
-async function startSimulation(simId) {
-    console.log(`🎮 Starting simulation: ${simId}`);
+
+// OLD simulation system - kept as fallback
+async function startSimulation_OLD(simId) {
+    console.log(`🎮 Starting simulation (OLD FALLBACK): ${simId}`);
     
     // Show loading state
     const content = document.getElementById('content');
