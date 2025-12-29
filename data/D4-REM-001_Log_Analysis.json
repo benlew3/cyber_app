@@ -1,0 +1,506 @@
+{
+  "simulation_id": "D4-REM-001",
+  "title": "Log Analysis Fundamentals",
+  "domain": 4,
+  "category": "remediation",
+  "difficulty": "foundational",
+  "time_estimate": "20-25 minutes",
+  "passing_score": 40,
+  "max_score": 50,
+  
+  "target_weaknesses": [
+    "Understanding log types and their security value",
+    "SIEM concepts and alert interpretation",
+    "Correlating events across log sources",
+    "Identifying indicators of compromise in logs"
+  ],
+  
+  "exam_objectives": [
+    {
+      "id": "4.4",
+      "description": "Explain security alerting and monitoring concepts and tools",
+      "coverage": ["log types", "SIEM", "alerting", "correlation"]
+    },
+    {
+      "id": "4.9",
+      "description": "Given a scenario, use data sources to support an investigation",
+      "coverage": ["log analysis", "event correlation", "IOC identification"]
+    }
+  ],
+  
+  "scenario_context": {
+    "setting": "SOC analyst training - learning to analyze security logs",
+    "your_role": "Junior SOC Analyst in training",
+    "narrative": "Welcome to SOC analyst training. Today we'll learn the fundamentals of log analysis - how to read logs, what different log types tell us, and how to spot signs of malicious activity. These skills are essential for security monitoring and incident investigation."
+  },
+  
+  "teaching_modules": [
+    {
+      "id": "module_1",
+      "title": "Understanding Log Types",
+      "trigger": "before_decision_1",
+      "content": {
+        "concept": "Different systems generate different log types, each with unique security value",
+        "log_types": {
+          "authentication_logs": {
+            "source": "Active Directory, VPN, applications",
+            "contains": "Login attempts, successes, failures, logoffs",
+            "security_value": "Detect brute force, credential theft, unauthorized access",
+            "example": "Event ID 4625 - Failed login attempt"
+          },
+          "system_logs": {
+            "source": "Operating systems (Windows Event Log, Linux syslog)",
+            "contains": "System events, service status, errors",
+            "security_value": "Detect system changes, service manipulation, errors indicating attacks",
+            "example": "Service installed, process created, driver loaded"
+          },
+          "network_logs": {
+            "source": "Firewalls, proxies, IDS/IPS, DNS servers",
+            "contains": "Connections, traffic flows, blocked attempts",
+            "security_value": "Detect C2 communication, data exfiltration, lateral movement",
+            "example": "Connection to known-malicious IP blocked"
+          },
+          "application_logs": {
+            "source": "Web servers, databases, custom applications",
+            "contains": "Application events, errors, user actions",
+            "security_value": "Detect application attacks (SQLi, XSS), unauthorized data access",
+            "example": "SQL syntax error (possible injection attempt)"
+          }
+        },
+        "key_insight": "Each log type provides a piece of the puzzle. Security analysis combines multiple log types to understand the full picture."
+      }
+    },
+    {
+      "id": "module_2",
+      "title": "SIEM Fundamentals",
+      "trigger": "before_decision_2",
+      "content": {
+        "concept": "SIEM (Security Information and Event Management) aggregates logs from multiple sources for centralized analysis",
+        "siem_functions": {
+          "log_aggregation": "Collect logs from many sources into one place",
+          "normalization": "Convert different log formats into consistent format",
+          "correlation": "Connect related events across sources",
+          "alerting": "Generate alerts when suspicious patterns are detected",
+          "storage": "Retain logs for investigation and compliance"
+        },
+        "how_correlation_works": {
+          "single_event": "One failed login - probably typo",
+          "pattern": "100 failed logins in 5 minutes - brute force attack",
+          "cross_source": "Failed VPN login from IP X + successful login from IP X + malware detection on endpoint = compromise chain"
+        },
+        "alert_components": {
+          "trigger": "What condition caused the alert",
+          "severity": "How serious (Critical, High, Medium, Low)",
+          "source": "Which system generated the event",
+          "context": "Related information (user, asset, time)",
+          "recommended_action": "What to investigate or do"
+        },
+        "key_insight": "SIEM connects the dots - a single event might be benign, but SIEM can detect when multiple events together indicate an attack."
+      }
+    },
+    {
+      "id": "module_3",
+      "title": "Reading Log Entries",
+      "trigger": "before_decision_3",
+      "content": {
+        "concept": "Log entries contain structured information - knowing what to look for speeds analysis",
+        "common_fields": {
+          "timestamp": "When the event occurred - critical for timeline",
+          "source_ip": "Where the connection came from",
+          "destination_ip": "Where the connection went",
+          "user": "Account associated with the action",
+          "action": "What happened (login, file access, etc.)",
+          "result": "Success or failure",
+          "details": "Additional context"
+        },
+        "windows_event_ids": {
+          "4624": "Successful login",
+          "4625": "Failed login",
+          "4648": "Explicit credential login (runas)",
+          "4672": "Special privileges assigned (admin login)",
+          "4688": "Process created",
+          "4698": "Scheduled task created"
+        },
+        "linux_log_locations": {
+          "/var/log/auth.log": "Authentication events",
+          "/var/log/syslog": "System messages",
+          "/var/log/secure": "Security events (RHEL/CentOS)"
+        },
+        "key_insight": "Knowing common event IDs and log formats helps you quickly identify what happened without reading every detail."
+      }
+    },
+    {
+      "id": "module_4",
+      "title": "Identifying Indicators of Compromise",
+      "trigger": "before_decision_4",
+      "content": {
+        "concept": "Certain patterns in logs indicate malicious activity",
+        "network_iocs": {
+          "beaconing": "Regular connections at fixed intervals (C2 communication)",
+          "unusual_ports": "Non-standard ports for protocols (HTTP on port 8443)",
+          "known_bad_ips": "Connections to threat-intel-identified malicious IPs",
+          "dns_anomalies": "Queries to suspicious domains, high-entropy domain names"
+        },
+        "authentication_iocs": {
+          "brute_force": "Many failed logins followed by success",
+          "impossible_travel": "Logins from distant locations in short time",
+          "off_hours": "Admin login at 3 AM (if unusual for that user)",
+          "service_account_interactive": "Service account used for interactive login"
+        },
+        "endpoint_iocs": {
+          "unusual_processes": "PowerShell spawned by Word, cmd from unusual parent",
+          "persistence": "Registry run keys modified, scheduled tasks created",
+          "tool_usage": "PsExec, Mimikatz, credential dumping tools"
+        },
+        "key_insight": "IOCs aren't always definitive - context matters. 'PowerShell spawned by Word' is suspicious; 'PowerShell spawned by admin during maintenance' may be normal."
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Log Type Selection",
+      "narrative": "You're investigating a potential unauthorized access. A user claims their account was compromised and someone accessed company files. You need to find evidence of the unauthorized access.",
+      "question": "Which log type is MOST important for investigating unauthorized account access?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Firewall logs - to see network connections",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Firewall logs show network traffic but not account usage",
+            "detailed": "Firewall logs show what IPs connected but not which account was used or what they accessed. For account compromise, you need to see authentication events and access patterns tied to the user account."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Authentication logs - to see login activity for the account",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! Authentication logs show account usage patterns",
+            "detailed": "Authentication logs show: when the account logged in, from where (source IP), success/failure, and what systems were accessed. This directly answers 'was the account used by someone other than the owner?' Look for logins from unusual locations or times."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Application logs - to see what applications were used",
+          "is_correct": false,
+          "points": 4,
+          "feedback": {
+            "short": "Application logs are useful but authentication comes first",
+            "detailed": "Application logs might show what the attacker did once logged in, but you first need to establish that unauthorized access occurred. Start with authentication to prove the compromise, then use application logs to understand the impact."
+          }
+        },
+        {
+          "id": "D",
+          "text": "System logs - to see system events",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "System logs have limited visibility into account usage",
+            "detailed": "System logs show system-level events but have limited information about user authentication and access patterns. Authentication logs are purpose-built for tracking account usage."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "The investigation is about account access. What log type tracks account logins?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Authentication logs (Active Directory, VPN) show login times, source IPs, and success/failure for each account."
+        }
+      ],
+      "learning_note": "For account-based investigations, start with authentication logs. They show: when the account was used, from where, and whether logins succeeded. This establishes the timeline and identifies suspicious access patterns."
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "SIEM Alert Interpretation",
+      "narrative": "Your SIEM generates an alert: 'Brute Force Detected - Account: jsmith - 47 failed logins in 3 minutes from IP 185.220.101.X followed by successful login.'",
+      "question": "What does this SIEM alert indicate?",
+      "options": [
+        {
+          "id": "A",
+          "text": "A user forgot their password and tried multiple times",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "47 attempts in 3 minutes is too fast for manual typing",
+            "detailed": "A human typing passwords wrong would take much longer than 47 attempts in 3 minutes. This pace indicates automated attack tools. Additionally, the external IP (185.220.101.X is a Tor exit node pattern) suggests external attacker, not the legitimate user."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Likely credential stuffing or brute force attack that succeeded",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! High-speed attempts from external IP + success = account compromised",
+            "detailed": "This pattern indicates: automated attack (speed of attempts), external source (suspicious IP), and success (attacker found valid credentials). The account is likely compromised. Immediate actions: disable the account, investigate what the attacker accessed, determine if credentials were reused elsewhere."
+          }
+        },
+        {
+          "id": "C",
+          "text": "A false positive - failed logins happen all the time",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "The pattern strongly indicates an attack",
+            "detailed": "Individual failed logins might be benign, but SIEM correlation identified the pattern: 47 failures in 3 minutes followed by success. This is the signature of a successful brute force attack. The SIEM's value is detecting these patterns."
+          }
+        },
+        {
+          "id": "D",
+          "text": "A misconfigured application trying to authenticate",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Misconfigured apps usually fail consistently, not succeed after many failures",
+            "detailed": "Misconfigured applications typically either succeed or fail consistently with the same wrong password. They don't try 47 different passwords and then succeed - that's password guessing behavior."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "The key details: many failed attempts, very fast, then success. What attack does this describe?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Brute force/credential stuffing: automated tools try many passwords quickly. Success after many failures = attacker found valid credentials."
+        }
+      ],
+      "learning_note": "SIEM correlation detects attack patterns: multiple failed logins (brute force), followed by success (compromised), from suspicious source (external IP). Each element alone might be benign; together they indicate attack. Always check what happened AFTER the successful login."
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Windows Event Analysis",
+      "narrative": "You're reviewing Windows Security logs and see this sequence on a workstation:\n- 4624 (Logon) - User: SYSTEM\n- 4688 (Process Create) - powershell.exe spawned by winword.exe\n- 4688 (Process Create) - cmd.exe spawned by powershell.exe",
+      "question": "What does this log sequence indicate?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Normal Office activity - Word can use PowerShell for macros",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Word spawning PowerShell is a major red flag",
+            "detailed": "While technically possible, Word spawning PowerShell is the classic pattern for malicious macro execution. Legitimate Office macros rarely need PowerShell, and the chain Word â†’ PowerShell â†’ cmd is a common attack pattern. This should be investigated immediately."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Likely malicious macro execution - classic attack pattern",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! This is a textbook malware execution chain",
+            "detailed": "This process tree (Word â†’ PowerShell â†’ cmd) is the signature of malicious macro execution: user opens malicious document, macro runs PowerShell for flexibility/evasion, PowerShell spawns cmd or downloads additional malware. This pattern should trigger immediate investigation and potential endpoint isolation."
+          }
+        },
+        {
+          "id": "C",
+          "text": "System maintenance task running",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "System tasks don't run through Word",
+            "detailed": "System maintenance tasks would be spawned by system processes or scheduled tasks, not by Microsoft Word. The process parent (winword.exe) is the critical indicator here."
+          }
+        },
+        {
+          "id": "D",
+          "text": "User running a legitimate script from a document",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "This pattern is malicious until proven otherwise",
+            "detailed": "Even if a user intentionally ran a macro, Word spawning PowerShell spawning cmd is the exact pattern malware uses. Legitimate business processes rarely require this chain. Investigate as suspicious regardless of user intent."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Look at the process parent-child relationship. What spawned PowerShell?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Office applications (Word, Excel) spawning command-line tools (PowerShell, cmd) is the signature of malicious macro execution."
+        }
+      ],
+      "learning_note": "Process lineage is critical in log analysis. Suspicious parent-child relationships include: Office apps â†’ PowerShell/cmd (macro malware), browsers â†’ cmd/PowerShell (drive-by download), and services â†’ unusual processes. Know normal process trees to spot abnormal ones."
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Network IOC Detection",
+      "narrative": "DNS logs show a workstation making queries every 60 seconds to: xk7qm2.suspicious-domain.xyz. The domain was registered yesterday and resolves to an IP in Eastern Europe.",
+      "question": "What does this DNS activity indicate?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Normal web browsing activity",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Normal browsing doesn't query the same domain every 60 seconds",
+            "detailed": "Web browsing creates varied DNS queries as users visit different sites. Regular intervals to the same domain indicate automated behavior, not human browsing. The suspicious domain characteristics add to concern."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Likely Command and Control (C2) beaconing",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! Regular intervals + suspicious domain = C2 beaconing",
+            "detailed": "C2 beaconing indicators: regular interval timing (every 60 seconds = automated), suspicious domain (random-looking subdomain, newly registered), unusual destination (Eastern Europe IP), and persistent connections. The malware is checking in with its controller. Investigate the workstation immediately."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Software update check",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Legitimate update services use recognizable domains",
+            "detailed": "Software update services use well-known domains (microsoft.com, adobe.com) not random-looking subdomains on newly registered domains. The domain characteristics indicate malicious infrastructure, not legitimate software."
+          }
+        },
+        {
+          "id": "D",
+          "text": "CDN caching activity",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "CDNs use established, recognizable domains",
+            "detailed": "CDN providers (Cloudflare, Akamai, etc.) use established domains. A random subdomain on a day-old domain is not CDN infrastructure. The domain age and name pattern indicate attacker infrastructure."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What does regular-interval DNS queries to a suspicious domain suggest?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "C2 beaconing: malware checks in with its command server at regular intervals. Look for: fixed timing, suspicious domains (random names, newly registered), unusual destinations."
+        }
+      ],
+      "learning_note": "C2 beaconing indicators in DNS: regular timing intervals, suspicious domain characteristics (random strings, newly registered, low reputation), unusual geographic destinations, and persistence over time. DNS is valuable for detection because most malware needs DNS and it's hard for attackers to avoid."
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Log Correlation Challenge",
+      "narrative": "You have three events from different logs around the same time:\n1. VPN log: Successful login for admin account from unusual country\n2. AD log: Admin account added to Domain Admins group\n3. EDR log: PsExec.exe executed on domain controller",
+      "question": "What does correlating these three events reveal?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Routine administrative activity",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "The unusual country login makes this suspicious",
+            "detailed": "Each event alone might be normal, but: VPN from unusual country (suspicious), followed by privilege escalation (adding to Domain Admins), followed by lateral movement tool (PsExec on DC) is an attack chain. Correlating events reveals the full attack."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Active attack - credential compromise, privilege escalation, lateral movement",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! Correlation reveals the attack chain",
+            "detailed": "Correlating these events shows: Initial Access (VPN login from unusual location = compromised credentials), Privilege Escalation (added to Domain Admins = attacker elevating), and Lateral Movement (PsExec on DC = attacker spreading). This is an active attack requiring immediate response. Each event alone might be missed; together they're clearly malicious."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Software deployment activity",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Software deployment doesn't require adding accounts to Domain Admins",
+            "detailed": "Legitimate software deployment would use existing service accounts with appropriate permissions, not: login from unusual country, add to Domain Admins, then use PsExec. The sequence shows an attacker building access."
+          }
+        },
+        {
+          "id": "D",
+          "text": "VPN connectivity test",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "VPN tests don't involve privilege escalation and DC access",
+            "detailed": "A VPN test would be a login and perhaps basic connectivity verification. It wouldn't involve modifying group memberships or executing tools on domain controllers. The full sequence is clearly malicious."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Look at the sequence: access from unusual location â†’ privilege change â†’ tool execution. What's happening?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Attack chain: Initial Access (VPN compromise) â†’ Privilege Escalation (Domain Admin) â†’ Lateral Movement (PsExec). Correlation connects the dots."
+        }
+      ],
+      "learning_note": "Log correlation power: individual events may seem innocuous, but connected they reveal attack chains. Key correlation dimensions: time (events close together), account (same user/system), and action sequence (access â†’ escalation â†’ movement â†’ objective). This is why SIEM correlation rules are valuable."
+    }
+  ],
+  
+  "scoring": {
+    "max_points": 50,
+    "passing_score": 40,
+    "passing_percentage": 80
+  },
+  
+  "outcome_thresholds": {
+    "proficient": {"min_score": 45, "title": "Log Analysis Proficient", "description": "Strong understanding of log analysis fundamentals."},
+    "competent": {"min_score": 40, "title": "Log Analysis Competent", "description": "Adequate grasp of log analysis concepts."},
+    "developing": {"min_score": 30, "title": "Log Analysis Developing", "description": "Review log analysis concepts further."},
+    "needs_work": {"min_score": 0, "title": "Additional Study Needed", "description": "Significant review of log analysis required."}
+  },
+  
+  "remediation_focus": [
+    "Understanding different log types and their security value",
+    "SIEM correlation and alert interpretation",
+    "Reading and interpreting log entries",
+    "Identifying indicators of compromise in logs"
+  ],
+  
+  "next_steps": {
+    "passed": "Return to D4-SIM-001 for full SOC Operations scenario",
+    "failed": "Review teaching modules and retry"
+  },
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 4: Security Operations",
+    "prerequisite_for": ["D4-SIM-001", "D4-SIM-002"],
+    "estimated_time": "20-25 minutes"
+  }
+}

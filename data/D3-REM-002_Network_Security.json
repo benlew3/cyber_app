@@ -1,0 +1,343 @@
+{
+  "simulation_id": "D3-REM-002",
+  "title": "Network Security Basics Remediation",
+  "domain": 3,
+  "category": "remediation",
+  "difficulty": "foundational",
+  "time_estimate": "20-30 minutes",
+  "passing_score": 40,
+  "max_score": 50,
+  
+  "exam_objectives": [
+    {
+      "id": "3.2",
+      "description": "Given a scenario, apply security principles to secure enterprise infrastructure",
+      "coverage": ["network segmentation", "firewalls", "secure protocols", "defense in depth"]
+    }
+  ],
+  
+  "remediation_focus": {
+    "target_weaknesses": ["network_segmentation", "secure_protocols", "defense_in_depth"],
+    "prerequisite_for": ["D3-SIM-002", "D3-SIM-004"],
+    "concepts_covered": [
+      "Network segmentation and zones",
+      "Firewall types and placement",
+      "Secure vs. insecure protocols",
+      "Defense in depth architecture"
+    ]
+  },
+  
+  "scenario_context": {
+    "organization": "Valley Medical Clinic",
+    "industry": "Healthcare",
+    "size": "75 employees, single location",
+    "setting": "Network security assessment",
+    "your_role": "IT Security Intern",
+    "opening_narrative": "Valley Medical Clinic is a small healthcare provider with basic network infrastructure. As an IT security intern, you're learning network security fundamentals while helping assess their current setup. The IT manager is teaching you key concepts as you evaluate the network."
+  },
+  
+  "teaching_content": {
+    "introduction": {
+      "title": "Network Security Fundamentals",
+      "content": "Network security is about controlling who can communicate with whom, over what paths, using what protocols. Key concepts include segmentation (dividing networks), firewalls (enforcing rules), secure protocols (protecting traffic), and defense in depth (multiple layers of protection)."
+    },
+    "concepts": [
+      {
+        "id": "segmentation",
+        "title": "Network Segmentation",
+        "content": "Network segmentation divides a network into smaller, isolated sections. Benefits:\n\n**Security**: If one segment is compromised, attackers can't easily reach other segments. Limits 'blast radius.'\n\n**Compliance**: Sensitive data (PHI, PCI) can be isolated in controlled segments.\n\n**Performance**: Reduces broadcast traffic, improves efficiency.\n\n**Common Segments**: User workstations, servers, guest WiFi, IoT devices, management networks.\n\n**Technologies**: VLANs (Layer 2 separation), firewalls (policy enforcement), microsegmentation (workload-level).",
+        "key_point": "Flat networks allow attackers to move freely. Segmented networks contain breaches."
+      },
+      {
+        "id": "firewalls",
+        "title": "Firewalls and Access Control",
+        "content": "Firewalls enforce policies about what traffic is allowed:\n\n**Packet Filtering**: Basic - allows/blocks based on IP, port, protocol. Fast but limited visibility.\n\n**Stateful Inspection**: Tracks connection state. Understands that reply traffic relates to outbound request.\n\n**Next-Gen Firewall (NGFW)**: Application awareness, user identity, intrusion prevention, SSL inspection. Deeper visibility.\n\n**Web Application Firewall (WAF)**: Protects web applications from attacks like SQL injection, XSS.\n\n**Placement**: Perimeter (between internet and internal), internal (between segments), host-based (on individual systems).",
+        "key_point": "Firewalls enforce boundaries. Multiple firewalls at different layers provide defense in depth."
+      },
+      {
+        "id": "protocols",
+        "title": "Secure vs. Insecure Protocols",
+        "content": "Some protocols send data in cleartext - attackers can intercept credentials and data:\n\n**AVOID** (cleartext): Telnet (use SSH), FTP (use SFTP/FTPS), HTTP for sensitive data (use HTTPS), SNMPv1/v2 (use SNMPv3), SMBv1 (use SMBv2/v3).\n\n**USE** (encrypted): SSH (remote access), SFTP/FTPS (file transfer), HTTPS/TLS (web), SNMPv3 (management), SMBv2/v3 with signing (file sharing).\n\nAdditionally, some protocols have known vulnerabilities (SMBv1 has EternalBlue) and should be disabled regardless of encryption.",
+        "key_point": "If credentials or data traverse the network, use encrypted protocols. Disable legacy protocols with vulnerabilities."
+      },
+      {
+        "id": "defense_in_depth",
+        "title": "Defense in Depth",
+        "content": "Defense in depth uses multiple security layers so that if one fails, others still protect:\n\n**Perimeter**: Firewalls, IDS/IPS, DDoS protection\n**Network**: Segmentation, internal firewalls, NAC\n**Endpoint**: EDR, antimalware, host firewall, hardening\n**Application**: Secure coding, WAF, input validation\n**Data**: Encryption, DLP, access controls\n\nEach layer can detect or block attacks the others missed. No single point of failure.",
+        "key_point": "Assume any single control can fail. Multiple layers provide resilience."
+      }
+    ]
+  },
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Network Segmentation Benefits",
+      "narrative": "Valley Medical has a flat network - all devices can communicate with all other devices directly. The IT manager explains this is a problem. A workstation infected with ransomware recently was able to spread to the EHR server.",
+      "question": "What is the PRIMARY security benefit of network segmentation?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Faster network performance",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Performance is a benefit, but not the primary security reason",
+            "detailed": "Segmentation can improve performance by reducing broadcast traffic, but this is an operational benefit. The primary SECURITY benefit is limiting lateral movement - containing breaches to prevent spread."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Limits lateral movement - contains breaches to affected segment",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! Segmentation contains breaches",
+            "detailed": "The primary security benefit is limiting lateral movement. In the scenario, ransomware spread from a workstation to the EHR server because there were no barriers. With segmentation, the workstation segment would be separated from the server segment, requiring the malware to bypass firewall controls to spread."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Makes the network easier to manage",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Actually, segmentation adds management complexity",
+            "detailed": "Segmentation typically increases management complexity - more VLANs, more firewall rules, more configuration. Organizations accept this complexity because the security benefits outweigh the operational overhead."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Eliminates the need for firewalls",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - segmentation requires firewalls to be effective",
+            "detailed": "VLANs provide Layer 2 separation, but without firewall rules between segments, traffic can still flow freely via routing. Segmentation and firewalls work together - segmentation creates boundaries, firewalls enforce them."
+          }
+        }
+      ],
+      "learning_note": "Segmentation limits blast radius. In a flat network, one compromised system can attack everything. In a segmented network, attackers must bypass controls to reach other segments. This slows attacks and may trigger detection."
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "Firewall Placement",
+      "narrative": "The IT manager wants to improve network security by adding firewalls. Currently, there's only a basic router at the internet edge. The clinic has workstations, servers with patient data, and guest WiFi.",
+      "question": "Where should firewalls be placed for defense in depth?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Only at the perimeter between internet and internal network",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Perimeter-only misses internal threats",
+            "detailed": "Perimeter firewall protects against external threats but doesn't help once an attacker is inside (phishing, infected device). Internal threats and lateral movement bypass perimeter controls. Defense in depth requires internal firewalls too."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Perimeter AND between internal segments (servers, workstations, guest)",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! Multiple firewall layers provide defense in depth",
+            "detailed": "Defense in depth requires: perimeter firewall (external threats), internal firewalls between segments (lateral movement), and host firewalls on critical servers (last line). This provides protection at multiple layers - if one fails, others still protect."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Only between servers and workstations - perimeter is the router's job",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Basic router doesn't provide adequate perimeter protection",
+            "detailed": "Basic routers don't have firewall capabilities - they route traffic but don't inspect or filter it effectively. A proper perimeter firewall with stateful inspection and intrusion prevention is needed. Internal segmentation alone isn't sufficient."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Firewalls aren't needed - just use antivirus on all systems",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Antivirus and firewalls serve different purposes",
+            "detailed": "Antivirus detects malware on endpoints. Firewalls control network traffic. Both are needed - they're different layers of defense. Antivirus might catch ransomware on one system, but firewalls prevent it from spreading to others."
+          }
+        }
+      ],
+      "learning_note": "Defense in depth for network: perimeter firewall (external protection), internal firewalls/segmentation (lateral movement prevention), host firewalls (endpoint protection). Each layer catches what others might miss."
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Secure Protocols",
+      "narrative": "A vulnerability scan reveals several systems using Telnet for remote management. The IT manager asks you about the risk and what protocol should be used instead.",
+      "question": "Why is Telnet a security risk and what should replace it?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Telnet is slow - use FTP instead for better performance",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - FTP also transmits in cleartext",
+            "detailed": "FTP has the same fundamental problem as Telnet - it transmits credentials and data in cleartext. Both are insecure. SSH is the secure replacement for remote access."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Telnet sends credentials in cleartext - use SSH instead",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! SSH encrypts all traffic including credentials",
+            "detailed": "Telnet transmits everything in cleartext - anyone who can capture network traffic can see usernames, passwords, and all commands/output. SSH encrypts the entire session. This is a critical security improvement with no functional downside."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Telnet only works on old systems - use HTTP for modern management",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "HTTP is also cleartext for credentials",
+            "detailed": "HTTP (without TLS) transmits in cleartext just like Telnet. For web-based management, HTTPS must be used. For command-line remote access, SSH is the secure choice."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Telnet is fine if you use strong passwords",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Strong passwords don't help if they're transmitted in cleartext",
+            "detailed": "Password strength is irrelevant if the password is sent across the network in cleartext. An attacker capturing traffic will see the password no matter how strong it is. Encryption (SSH) is the only solution."
+          }
+        }
+      ],
+      "learning_note": "Protocol security: Cleartext protocols (Telnet, FTP, HTTP, SNMPv1/v2) expose credentials and data to interception. Replace with encrypted alternatives: Telnetâ†’SSH, FTPâ†’SFTP, HTTPâ†’HTTPS, SNMPv1/v2â†’SNMPv3. Password strength doesn't protect cleartext transmission."
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Legacy Protocol Risks",
+      "narrative": "The vulnerability scan also flags SMBv1 enabled on several servers. The IT manager remembers something about ransomware using SMB vulnerabilities.",
+      "question": "Why is SMBv1 particularly dangerous beyond cleartext concerns?",
+      "options": [
+        {
+          "id": "A",
+          "text": "SMBv1 is too slow for modern networks",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Performance isn't the security concern",
+            "detailed": "While SMBv1 is slower than newer versions, the critical concern is security vulnerabilities, not performance. SMBv1 has exploitable vulnerabilities that allow remote code execution."
+          }
+        },
+        {
+          "id": "B",
+          "text": "SMBv1 has wormable vulnerabilities (EternalBlue) enabling ransomware spread",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! SMBv1 vulnerabilities enabled WannaCry and other attacks",
+            "detailed": "SMBv1 has critical vulnerabilities including EternalBlue (MS17-010) that allow remote code execution without authentication. WannaCry and NotPetya ransomware used this to spread across networks automatically. SMBv1 should be disabled - there's no safe way to use it."
+          }
+        },
+        {
+          "id": "C",
+          "text": "SMBv1 only works on Windows systems",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Platform support isn't the security issue",
+            "detailed": "SMBv1 works across platforms (Windows, Linux Samba). The security issue is the protocol's vulnerabilities that allow attackers to execute code remotely, not its platform support."
+          }
+        },
+        {
+          "id": "D",
+          "text": "SMBv1 uses too much bandwidth",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Bandwidth isn't the security concern",
+            "detailed": "The critical issue with SMBv1 is exploitable vulnerabilities, not bandwidth usage. These vulnerabilities allow attackers to spread malware across networks without any user interaction."
+          }
+        }
+      ],
+      "learning_note": "Some protocols are dangerous not just because of cleartext but because of inherent vulnerabilities. SMBv1 has wormable exploits - malware can spread automatically without user interaction. Disable SMBv1 completely; use SMBv2/v3 with signing."
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Defense in Depth Principle",
+      "narrative": "The clinic administrator asks why they need multiple security controls. 'Can't we just buy one really good firewall?' The IT manager asks you to explain defense in depth.",
+      "question": "What is the core principle of defense in depth?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Buy the most expensive security product available",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Cost doesn't equal protection",
+            "detailed": "Defense in depth isn't about spending more on a single solution - it's about having multiple layers. An expensive firewall can still be bypassed through phishing. Multiple controls at different layers provide true protection."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Multiple security layers so if one fails, others still protect",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! No single point of failure",
+            "detailed": "Defense in depth assumes any single control can fail (bypassed, misconfigured, zero-day). Multiple layers mean: perimeter firewall might block the attack, but if not, internal segmentation limits spread, and if not, endpoint protection might detect it, and if not, data encryption protects the information. No single point of failure."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Configure security controls to maximum restrictiveness",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Restrictiveness helps but isn't the core principle",
+            "detailed": "Being restrictive is good practice, but defense in depth is specifically about multiple layers. A maximally restrictive single control is still a single point of failure. The depth (multiple layers) is the key concept."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Focus all security budget on perimeter defense",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Perimeter-only is the opposite of defense in depth",
+            "detailed": "Perimeter-focused security is 'castle and moat' thinking - strong outer wall, nothing inside. Defense in depth distributes controls across perimeter, network, endpoint, application, and data layers. Modern attacks often bypass perimeters (phishing, insider threat)."
+          }
+        }
+      ],
+      "learning_note": "Defense in depth: assume any control can fail, layer multiple controls so that failure of one doesn't mean complete compromise. Layers include perimeter, network, endpoint, application, and data. This is more effective than a single 'perfect' control that inevitably has gaps."
+    }
+  ],
+  
+  "scoring": {
+    "max_points": 50,
+    "passing_score": 40,
+    "passing_percentage": 80
+  },
+  
+  "completion_action": {
+    "on_pass": "Ready to attempt D3-SIM-002 Zero Trust or D3-SIM-004 Infrastructure Hardening",
+    "on_fail": "Review teaching content and retry"
+  },
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 3: Security Architecture",
+    "remediation_type": "Foundational concepts"
+  }
+}

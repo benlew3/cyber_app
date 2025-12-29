@@ -1,0 +1,1397 @@
+{
+  "simulation_id": "D3-SIM-002",
+  "title": "Zero Trust Implementation",
+  "domain": 3,
+  "category": "primary",
+  "difficulty": "intermediate",
+  "time_estimate": "45-60 minutes",
+  "passing_score": 200,
+  "max_score": 250,
+  
+  "exam_objectives": [
+    {
+      "id": "3.1",
+      "description": "Compare and contrast security implications of different architecture models",
+      "coverage": ["zero trust architecture", "network segmentation", "micro-segmentation"]
+    },
+    {
+      "id": "3.2",
+      "description": "Given a scenario, apply security principles to secure enterprise infrastructure",
+      "coverage": ["identity-based security", "least privilege", "continuous verification", "software-defined perimeter"]
+    }
+  ],
+  
+  "scenario_context": {
+    "organization": "NexGen Pharmaceuticals",
+    "industry": "Pharmaceutical/Biotech",
+    "size": "4,200 employees across 12 global locations",
+    "your_role": "Security Architect",
+    "environment": {
+      "current_state": "Traditional perimeter-based security",
+      "trigger": "Recent breach at competitor via VPN compromise prompted board mandate",
+      "initiative": "Zero Trust transformation program",
+      "timeline": "24-month implementation roadmap",
+      "budget": "$8.5M over 2 years",
+      "challenges": ["Research IP protection", "Global workforce", "Contractor access", "Lab equipment networks"],
+      "compliance": ["FDA 21 CFR Part 11", "HIPAA (clinical trials)", "GxP regulations"]
+    },
+    "opening_narrative": "NexGen Pharmaceuticals' board has mandated Zero Trust architecture after a competitor suffered a $200M breach when attackers compromised a contractor's VPN credentials. Your CISO assigns you to lead the transformation: 'We have 24 months and significant budget. Our research IP is our competitive advantage - we're developing treatments worth billions. Design a Zero Trust architecture that protects our crown jewels without crippling research productivity.'"
+  },
+  
+  "artifacts": [
+    {
+      "id": "artifact_1",
+      "title": "Current Network Architecture",
+      "type": "technical_document",
+      "unlocks_at": "start",
+      "content": {
+        "network_topology": {
+          "architecture": "Hub and spoke with central data center",
+          "perimeter": "Cisco ASA firewalls, Palo Alto for IDS/IPS",
+          "remote_access": "Cisco AnyConnect VPN - full tunnel to corporate network",
+          "internal_network": "Flat network with minimal segmentation",
+          "trust_model": "Once authenticated via VPN, users have broad internal access"
+        },
+        "current_segmentation": {
+          "zones": {
+            "dmz": "Web servers, email gateway, external-facing apps",
+            "corporate": "All internal users, applications, file shares",
+            "research": "R&D systems, but accessible from corporate zone",
+            "labs": "Lab equipment networks, some air-gapped",
+            "guest": "Separate SSID but same physical infrastructure"
+          },
+          "issues": [
+            "Flat corporate network enables lateral movement",
+            "Research zone accessible from any corporate system",
+            "VPN provides full network access regardless of need",
+            "No visibility into encrypted internal traffic",
+            "Contractor access same as employee access"
+          ]
+        },
+        "identity_infrastructure": {
+          "directory": "On-premises Active Directory",
+          "authentication": "Username/password + VPN certificate",
+          "mfa": "RSA tokens for VPN only",
+          "authorization": "AD groups, broadly applied",
+          "gaps": [
+            "No MFA for internal applications",
+            "Service accounts with excessive privileges",
+            "Contractor accounts in same AD as employees",
+            "No continuous authentication"
+          ]
+        },
+        "asset_inventory": {
+          "endpoints": {
+            "corporate_laptops": "3,800 Windows 10/11",
+            "research_workstations": "450 specialized systems",
+            "mobile_devices": "2,100 managed iOS/Android",
+            "byod": "~500 unmanaged devices"
+          },
+          "servers": "847 on-premises + 234 AWS",
+          "lab_equipment": "1,200+ networked instruments",
+          "iot_devices": "380 building management, security cameras"
+        },
+        "recent_incidents": {
+          "incident_1": "Phishing led to compromised credentials, attacker accessed research file shares before detection",
+          "incident_2": "Contractor accessed unauthorized projects - 'needed' access was never revoked",
+          "incident_3": "Lab equipment infected with ransomware via flat network connection"
+        }
+      }
+    },
+    {
+      "id": "artifact_2",
+      "title": "Zero Trust Architecture Framework",
+      "type": "reference",
+      "unlocks_at": "decision_1",
+      "content": {
+        "zero_trust_principles": {
+          "core_tenets": [
+            {
+              "principle": "Never Trust, Always Verify",
+              "description": "No implicit trust based on network location, every access request authenticated and authorized"
+            },
+            {
+              "principle": "Assume Breach",
+              "description": "Design as if attackers are already inside, minimize blast radius"
+            },
+            {
+              "principle": "Verify Explicitly",
+              "description": "Authenticate and authorize based on all available data points"
+            },
+            {
+              "principle": "Least Privilege Access",
+              "description": "Grant minimum necessary permissions, just-in-time access"
+            },
+            {
+              "principle": "Micro-segmentation",
+              "description": "Fine-grained network controls, segment by application not just zone"
+            }
+          ]
+        },
+        "nist_zero_trust_pillars": {
+          "identity": "User and entity identity verification",
+          "devices": "Device health and compliance verification",
+          "network": "Micro-segmentation and encrypted transport",
+          "application_workload": "Application-level controls and segmentation",
+          "data": "Data classification, protection, and access controls",
+          "visibility_analytics": "Comprehensive monitoring and threat detection",
+          "automation_orchestration": "Automated policy enforcement and response"
+        },
+        "zero_trust_architecture_components": {
+          "policy_engine": {
+            "description": "Makes access decisions based on policy",
+            "inputs": ["User identity", "Device state", "Resource requested", "Context/behavior"],
+            "output": "Allow/Deny decision"
+          },
+          "policy_administrator": {
+            "description": "Enforces policy engine decisions",
+            "actions": ["Establish/terminate connections", "Configure enforcement points"]
+          },
+          "policy_enforcement_point": {
+            "description": "Enforces access at resource boundary",
+            "examples": ["Next-gen firewall", "Proxy", "Identity-aware proxy", "Micro-segmentation controller"]
+          }
+        },
+        "trust_algorithm_inputs": {
+          "user_factors": ["Identity verification strength", "Role/attributes", "Behavior patterns"],
+          "device_factors": ["Device identity", "Health/compliance", "Patch level", "EDR status"],
+          "context_factors": ["Location", "Time", "Network type", "Resource sensitivity"],
+          "risk_signals": ["Threat intelligence", "Anomaly detection", "Recent incidents"]
+        }
+      }
+    },
+    {
+      "id": "artifact_3",
+      "title": "Identity-Centric Access Design",
+      "type": "technical_document",
+      "unlocks_at": "decision_2",
+      "content": {
+        "identity_architecture": {
+          "identity_provider": "Azure AD (Microsoft Entra ID)",
+          "directory_integration": "Azure AD Connect for hybrid identity",
+          "external_identities": "Azure AD B2B for contractors/partners",
+          "authentication": {
+            "primary": "Passwordless (FIDO2 keys, Windows Hello)",
+            "secondary": "Password + Microsoft Authenticator",
+            "phishing_resistant": "FIDO2 for privileged access required"
+          }
+        },
+        "conditional_access_policies": {
+          "research_applications": {
+            "requirements": [
+              "Compliant device required",
+              "MFA always required",
+              "Phishing-resistant MFA for sensitive projects",
+              "Named location restrictions",
+              "Session controls - limited duration"
+            ]
+          },
+          "corporate_applications": {
+            "requirements": [
+              "MFA required",
+              "Device compliance preferred",
+              "Unmanaged device = limited access (web only)"
+            ]
+          },
+          "administrative_access": {
+            "requirements": [
+              "Privileged Access Workstation (PAW) required",
+              "Phishing-resistant MFA mandatory",
+              "Just-in-time elevation via PIM",
+              "Session recording"
+            ]
+          }
+        },
+        "continuous_verification": {
+          "step_up_triggers": [
+            "Accessing higher-sensitivity resource",
+            "Unusual location or time",
+            "Risk score elevation",
+            "Session duration exceeded"
+          ],
+          "session_evaluation": "Continuous - not just at login"
+        },
+        "privileged_access_management": {
+          "approach": "Just-in-time, just-enough access",
+          "tool": "Azure AD PIM (Privileged Identity Management)",
+          "workflow": [
+            "No standing privileges for admin roles",
+            "Request access with justification",
+            "Approval workflow for sensitive roles",
+            "Time-limited elevation (max 8 hours)",
+            "Full audit trail"
+          ]
+        }
+      }
+    },
+    {
+      "id": "artifact_4",
+      "title": "Micro-Segmentation Design",
+      "type": "technical_document",
+      "unlocks_at": "decision_3",
+      "content": {
+        "segmentation_approach": {
+          "philosophy": "Segment by application/workload, not just network zone",
+          "implementation": "Software-defined micro-segmentation",
+          "tools": ["Illumio", "Guardicore", "VMware NSX"],
+          "enforcement": "Host-based firewalls + network controls"
+        },
+        "segment_definitions": {
+          "research_crown_jewels": {
+            "assets": ["IP database", "Research data stores", "Analysis systems"],
+            "policy": "Explicit allow list only, default deny all",
+            "access": "Authorized researchers only, device compliance required",
+            "monitoring": "Full packet capture for forensics"
+          },
+          "clinical_systems": {
+            "assets": ["Clinical trial data", "Patient information", "Regulatory submissions"],
+            "policy": "Strict HIPAA controls, encryption required",
+            "access": "Clinical team + need-to-know",
+            "monitoring": "Enhanced logging for compliance"
+          },
+          "corporate_apps": {
+            "assets": ["Email", "HR systems", "Finance", "Collaboration"],
+            "policy": "Role-based access, standard controls",
+            "access": "All employees with appropriate roles"
+          },
+          "lab_equipment": {
+            "assets": ["Networked instruments", "Analysis equipment", "IoT sensors"],
+            "policy": "Isolated segment, controlled egress only",
+            "access": "Management systems only, no direct user access"
+          },
+          "guest_contractor": {
+            "assets": ["Internet access only"],
+            "policy": "No internal resource access",
+            "access": "Isolated from all corporate resources"
+          }
+        },
+        "traffic_flows": {
+          "approved_flows": [
+            "User endpoint â†’ Identity verification â†’ Application",
+            "Application â†’ Database (specific ports only)",
+            "Lab equipment â†’ Data collection system (one-way)",
+            "Management systems â†’ All managed assets"
+          ],
+          "blocked_flows": [
+            "Direct user to database",
+            "Lateral between endpoints",
+            "Lab equipment to corporate network",
+            "Guest/contractor to internal resources"
+          ]
+        },
+        "visualization": {
+          "dependency_mapping": "Discover actual traffic flows before policy",
+          "policy_simulation": "Test policies before enforcement",
+          "real_time_visibility": "Show allowed and blocked traffic"
+        }
+      }
+    },
+    {
+      "id": "artifact_5",
+      "title": "Device Trust Architecture",
+      "type": "technical_document",
+      "unlocks_at": "decision_4",
+      "content": {
+        "device_trust_levels": {
+          "fully_managed": {
+            "definition": "Corporate-owned, MDM enrolled, all agents installed",
+            "verification": ["EDR active", "Patches current", "Encryption enabled", "Compliant configuration"],
+            "access_level": "Full access to all authorized resources"
+          },
+          "managed_byod": {
+            "definition": "Personal device with MDM enrollment and work profile",
+            "verification": ["Work profile isolated", "Minimum OS version", "No jailbreak/root"],
+            "access_level": "Access to corporate apps, no research systems"
+          },
+          "unmanaged": {
+            "definition": "No management enrollment",
+            "verification": "None - cannot verify state",
+            "access_level": "Web-only access to limited apps via browser"
+          },
+          "privileged_workstation": {
+            "definition": "Hardened PAW for administrative access",
+            "verification": ["Hardware attestation", "Enhanced monitoring", "Restricted software"],
+            "access_level": "Required for all administrative actions"
+          }
+        },
+        "device_health_attestation": {
+          "windows": {
+            "method": "Windows Health Attestation + TPM",
+            "checks": ["Secure Boot", "BitLocker", "Code integrity", "Early-launch anti-malware"]
+          },
+          "macos_ios": {
+            "method": "Apple MDM attestation",
+            "checks": ["OS version", "FileVault", "SIP enabled", "MDM profile active"]
+          },
+          "android": {
+            "method": "SafetyNet/Play Integrity",
+            "checks": ["Verified boot", "No root", "CTS compatible"]
+          }
+        },
+        "continuous_device_evaluation": {
+          "frequency": "Every access request + periodic re-evaluation",
+          "triggers_for_revocation": [
+            "EDR detects threat",
+            "Patch compliance fails",
+            "MDM profile removed",
+            "Jailbreak/root detected"
+          ],
+          "response": "Immediate session termination, quarantine"
+        }
+      }
+    },
+    {
+      "id": "artifact_6",
+      "title": "Application Access Architecture",
+      "type": "technical_document",
+      "unlocks_at": "decision_5",
+      "content": {
+        "identity_aware_proxy": {
+          "purpose": "Proxy all application access through identity verification layer",
+          "implementation": "Zscaler Private Access / Azure AD App Proxy / Google BeyondCorp",
+          "benefits": [
+            "No direct network access to applications",
+            "Every request authenticated and authorized",
+            "No VPN required",
+            "Application-level access, not network-level"
+          ]
+        },
+        "software_defined_perimeter": {
+          "concept": "Create one-to-one connections between users and resources",
+          "components": {
+            "controller": "Authorizes connections based on policy",
+            "client": "On user device, requests access",
+            "gateway": "Protects resources, accepts authorized connections"
+          },
+          "flow": [
+            "User authenticates to SDP controller",
+            "Controller verifies identity + device + context",
+            "Controller authorizes specific resource access",
+            "Encrypted tunnel created directly to resource",
+            "Resource invisible to unauthorized users"
+          ]
+        },
+        "application_categories": {
+          "modern_saas": {
+            "access": "Direct with SSO + conditional access",
+            "examples": ["Microsoft 365", "Workday", "Salesforce"]
+          },
+          "modern_internal": {
+            "access": "Via identity-aware proxy",
+            "examples": ["Custom web apps", "APIs"]
+          },
+          "legacy_internal": {
+            "access": "Via SDP gateway or app proxy",
+            "examples": ["Client-server apps", "Thick clients"]
+          },
+          "rdp_ssh": {
+            "access": "Via PAM solution with session recording",
+            "examples": ["Server management", "Database access"]
+          }
+        },
+        "api_security": {
+          "authentication": "OAuth 2.0 / OpenID Connect",
+          "authorization": "Fine-grained scope-based access",
+          "rate_limiting": "Per-client quotas",
+          "monitoring": "Full API request logging"
+        }
+      }
+    },
+    {
+      "id": "artifact_7",
+      "title": "Data Protection in Zero Trust",
+      "type": "technical_document",
+      "unlocks_at": "decision_6",
+      "content": {
+        "data_centric_security": {
+          "philosophy": "Protect the data itself, not just the perimeter",
+          "layers": [
+            "Classification - understand what data you have",
+            "Labeling - mark data with protection level",
+            "Encryption - protect data at rest and in transit",
+            "Access control - who can access what data",
+            "DLP - prevent unauthorized data movement"
+          ]
+        },
+        "classification_scheme": {
+          "public": "No restrictions",
+          "internal": "Employee access only",
+          "confidential": "Need-to-know, business sensitive",
+          "restricted_research": "Critical IP, strictest controls",
+          "restricted_clinical": "HIPAA/regulatory controlled"
+        },
+        "encryption_strategy": {
+          "at_rest": {
+            "endpoints": "Full disk encryption (BitLocker, FileVault)",
+            "servers": "Transparent Data Encryption",
+            "cloud": "Customer-managed keys",
+            "databases": "Column-level for sensitive fields"
+          },
+          "in_transit": {
+            "external": "TLS 1.3 required",
+            "internal": "TLS for all traffic (no unencrypted)",
+            "api": "Mutual TLS for service-to-service"
+          }
+        },
+        "data_loss_prevention": {
+          "endpoint_dlp": "Microsoft Purview / Symantec",
+          "cloud_dlp": "CASB integration",
+          "network_dlp": "SSL inspection at egress",
+          "policies": [
+            "Block research data to personal cloud",
+            "Encrypt clinical data in email",
+            "Warn on bulk file downloads",
+            "Block USB for sensitive classifications"
+          ]
+        },
+        "rights_management": {
+          "tool": "Microsoft Purview Information Protection",
+          "capabilities": [
+            "Persistent encryption attached to files",
+            "Access revocation even after sharing",
+            "Watermarking and tracking",
+            "Audit trail of document access"
+          ],
+          "use_case": "Research documents remain protected even if exfiltrated"
+        }
+      }
+    },
+    {
+      "id": "artifact_8",
+      "title": "Monitoring and Analytics",
+      "type": "technical_document",
+      "unlocks_at": "decision_7",
+      "content": {
+        "visibility_requirements": {
+          "zero_trust_depends_on": "Comprehensive visibility to make trust decisions",
+          "data_sources": [
+            "Identity events (authentication, authorization)",
+            "Device telemetry (health, compliance, threats)",
+            "Network flows (who talked to what)",
+            "Application logs (what was accessed)",
+            "Data access (who accessed sensitive data)"
+          ]
+        },
+        "security_operations": {
+          "siem": "Microsoft Sentinel / Splunk",
+          "xdr": "Microsoft Defender XDR / CrowdStrike",
+          "soar": "Automated response playbooks",
+          "integration": "All ZT components feed into SOC"
+        },
+        "user_behavior_analytics": {
+          "ueba": "Microsoft Sentinel / Exabeam",
+          "baselines": [
+            "Normal access patterns per user",
+            "Typical data volumes",
+            "Expected applications and resources",
+            "Working hours and locations"
+          ],
+          "anomaly_detection": [
+            "Access from unusual location",
+            "Abnormal data download volume",
+            "Access to unusual resources",
+            "Impossible travel"
+          ],
+          "response": "Risk score feeds into conditional access decisions"
+        },
+        "continuous_trust_evaluation": {
+          "initial_authentication": "Establish baseline trust",
+          "ongoing_monitoring": "Continuously evaluate risk signals",
+          "dynamic_response": [
+            "Low risk: maintain access",
+            "Medium risk: step-up authentication",
+            "High risk: terminate session, require re-auth",
+            "Critical risk: block access, alert SOC"
+          ]
+        },
+        "reporting_and_compliance": {
+          "dashboards": "Real-time security posture",
+          "compliance_reports": "FDA, HIPAA, GxP evidence",
+          "access_reviews": "Periodic certification of access rights",
+          "audit_trails": "Complete history of all access decisions"
+        }
+      }
+    },
+    {
+      "id": "artifact_9",
+      "title": "Implementation Roadmap",
+      "type": "project_document",
+      "unlocks_at": "decision_8",
+      "content": {
+        "phased_approach": {
+          "phase_1": {
+            "name": "Foundation",
+            "duration": "Months 1-6",
+            "focus": "Identity and device trust",
+            "deliverables": [
+              "Azure AD deployment, SSO for all apps",
+              "MFA rollout for all users",
+              "Device compliance policies",
+              "Conditional access baseline",
+              "EDR deployment completion"
+            ],
+            "success_criteria": "100% MFA adoption, 90% device compliance"
+          },
+          "phase_2": {
+            "name": "Network Evolution",
+            "duration": "Months 7-12",
+            "focus": "Segmentation and access",
+            "deliverables": [
+              "Micro-segmentation for research crown jewels",
+              "Identity-aware proxy deployment",
+              "VPN replacement for remote access",
+              "Network visibility implementation"
+            ],
+            "success_criteria": "Research segment isolated, VPN usage reduced 50%"
+          },
+          "phase_3": {
+            "name": "Data Protection",
+            "duration": "Months 13-18",
+            "focus": "Data-centric security",
+            "deliverables": [
+              "Data classification rollout",
+              "DLP implementation",
+              "Rights management for sensitive data",
+              "Full internal encryption"
+            ],
+            "success_criteria": "All sensitive data classified and protected"
+          },
+          "phase_4": {
+            "name": "Optimization",
+            "duration": "Months 19-24",
+            "focus": "Analytics and automation",
+            "deliverables": [
+              "UEBA deployment",
+              "Automated response playbooks",
+              "Continuous access evaluation",
+              "Full ZT maturity assessment"
+            ],
+            "success_criteria": "ZT maturity score of 4+ out of 5"
+          }
+        },
+        "critical_success_factors": [
+          "Executive sponsorship maintained throughout",
+          "Change management and user communication",
+          "Staged rollout - pilot before broad deployment",
+          "Metrics tracking and regular reporting"
+        ]
+      }
+    },
+    {
+      "id": "artifact_10",
+      "title": "Risk and Exception Management",
+      "type": "policy_document",
+      "unlocks_at": "decision_9",
+      "content": {
+        "exception_process": {
+          "purpose": "Handle legitimate needs that don't fit standard policies",
+          "types": [
+            "Temporary: time-limited deviation",
+            "Permanent: ongoing business requirement",
+            "Emergency: immediate need, documented after"
+          ],
+          "workflow": {
+            "request": "Business justification documented",
+            "risk_assessment": "Security evaluates risk",
+            "approval": "Risk owner sign-off required",
+            "compensating_controls": "Additional controls to reduce risk",
+            "review": "Periodic re-evaluation",
+            "expiration": "Auto-expire unless renewed"
+          }
+        },
+        "compensating_controls_examples": {
+          "unmanaged_device_access": {
+            "exception": "Contractor needs access from personal device",
+            "compensating": [
+              "Web-only access (no data download)",
+              "Enhanced session monitoring",
+              "Watermarking on displayed documents",
+              "Session recording"
+            ]
+          },
+          "legacy_app_no_mfa": {
+            "exception": "Application doesn't support MFA",
+            "compensating": [
+              "Network-level access control",
+              "Jump server with MFA for access",
+              "Enhanced logging",
+              "Planned migration timeline"
+            ]
+          },
+          "service_account_long_lived": {
+            "exception": "System requires long-lived credentials",
+            "compensating": [
+              "Regular credential rotation (90 days)",
+              "Restricted network access",
+              "Dedicated monitoring rules",
+              "Secrets vault storage"
+            ]
+          }
+        },
+        "risk_acceptance": {
+          "levels": {
+            "low": "Team lead approval",
+            "medium": "Director approval",
+            "high": "CISO approval",
+            "critical": "CISO + Business VP approval"
+          },
+          "documentation": [
+            "Risk description",
+            "Potential impact",
+            "Compensating controls",
+            "Expiration date",
+            "Approval signatures"
+          ],
+          "tracking": "Central exception register, quarterly review"
+        }
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Zero Trust Starting Point",
+      "narrative": "The CISO asks for your recommendation on where to start the Zero Trust transformation. The IT Director suggests starting with network micro-segmentation: 'That's what Zero Trust is about - segmenting the network.' The Identity team argues for identity-first: 'Users are the biggest risk, start there.' You need to make a recommendation.",
+      "question": "Where should NexGen begin its Zero Trust implementation?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Start with network micro-segmentation - isolate the crown jewels immediately",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Segmentation without identity creates policy complexity",
+            "detailed": "Micro-segmentation requires knowing WHO is accessing resources to create effective policies. Without strong identity, you're segmenting based on IP addresses and network zones - the old model. Identity provides the foundation for policy decisions: 'researcher X can access research data' not 'subnet Y can access server Z'. Start with identity to enable meaningful segmentation.",
+            "consequence": "Segmentation policies based on network addresses. Complex rule management. Limited effectiveness."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Start with identity - strong authentication and conditional access as foundation",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Identity is the foundation of Zero Trust",
+            "detailed": "Identity is the control plane for Zero Trust. Start by: (1) Establishing strong identity (Azure AD, MFA for all users), (2) Building conditional access policies, (3) Achieving device compliance visibility. This creates the foundation for all other Zero Trust capabilities. Network controls, application access, and data protection all depend on knowing who the user is and whether to trust them.",
+            "consequence": "Strong identity foundation enables meaningful policies across all other ZT pillars."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Start everywhere at once - comprehensive transformation is faster",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Boiling the ocean overwhelms the organization",
+            "detailed": "Zero Trust transformation touches every aspect of IT - network, identity, devices, applications, data. Attempting everything simultaneously overwhelms the organization, spreads resources thin, and increases failure risk. Phased approach with identity first creates the foundation that other capabilities build upon.",
+            "consequence": "Scope overwhelm. Multiple parallel initiatives conflict. Limited progress everywhere."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Start with data protection - protecting the crown jewels is the ultimate goal",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Data protection needs identity to be effective",
+            "detailed": "Data protection (classification, DLP, rights management) requires knowing who should access what data - that requires identity. DLP policies like 'prevent researchers from sending IP externally' need to know who is a researcher. Start with identity, then layer data protection on top of that foundation.",
+            "consequence": "Data protection rules can't reference user context effectively. Generic rules miss nuance."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What Zero Trust pillar do all other pillars depend on to make policy decisions?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Identity is the foundation - 'who is requesting access' informs all other decisions about network, apps, and data access."
+        }
+      ],
+      "learning_note": "Zero Trust implementation typically starts with identity because it's the foundation for all other capabilities. Strong identity enables: meaningful network policies (segment by user role, not just IP), application access control (conditional access), and data protection (policies based on user context). NIST recommends identity and device pillars as primary starting points.",
+      "unlocks_artifact": "artifact_2"
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "Authentication Strategy",
+      "narrative": "The identity team presents authentication options. Currently, users have username/password plus RSA tokens for VPN. The team proposes upgrading to Microsoft Authenticator push notifications for all MFA. A security researcher on your team argues for phishing-resistant methods: 'Push notifications can be MFA-fatigued. We need FIDO2 everywhere.'",
+      "question": "What authentication strategy should you recommend?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Microsoft Authenticator for everyone - good balance of security and usability",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Push notifications are vulnerable to MFA fatigue attacks",
+            "detailed": "Push notification MFA is better than SMS or no MFA, but it's vulnerable to 'MFA fatigue' attacks where attackers spam authentication requests until the user accepts one. For a pharmaceutical company protecting billions in research IP, this risk is significant. Phishing-resistant MFA should be required for sensitive access.",
+            "consequence": "3 months later, attacker uses MFA fatigue to access researcher account after phishing credentials."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Tiered approach - phishing-resistant (FIDO2) for privileged/research access, push for general",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Risk-based authentication with phishing-resistant for sensitive access",
+            "detailed": "Tiered authentication balances security and usability: FIDO2 security keys or Windows Hello for business (phishing-resistant) required for research systems, privileged access, and sensitive data. Push notification MFA acceptable for general corporate applications. This protects crown jewels with strongest authentication while maintaining usability for lower-risk access.",
+            "consequence": "High-value assets protected by phishing-resistant MFA. User experience maintained for general access."
+          }
+        },
+        {
+          "id": "C",
+          "text": "FIDO2 for everyone - maximum security across the board",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "FIDO2 everywhere creates adoption challenges",
+            "detailed": "FIDO2 security keys are the most secure but require hardware distribution and user training. Mandating them for all 4,200 users (including those who only access email) creates adoption friction and increases help desk burden. Risk-based tiering applies strongest controls where they matter most.",
+            "consequence": "Hardware key deployment challenges. User resistance. Delayed rollout."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Keep RSA tokens - proven technology, why change?",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "RSA tokens are outdated and don't support modern Zero Trust",
+            "detailed": "RSA SecurID tokens (TOTP) don't integrate well with modern conditional access policies, don't support passwordless, and are vulnerable to real-time phishing. Modern Zero Trust requires adaptive MFA that can evaluate risk signals and adjust requirements. Legacy tokens should be migrated to modern methods.",
+            "consequence": "Legacy authentication limits Zero Trust capabilities. Can't implement conditional access properly."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What's the risk of push notification MFA? What method is immune to this attack?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "MFA fatigue attacks target push notifications. FIDO2/passkeys are phishing-resistant. Tier based on risk."
+        }
+      ],
+      "learning_note": "Authentication tiering in Zero Trust: (1) Phishing-resistant MFA (FIDO2, passkeys, Windows Hello) for privileged access and sensitive resources, (2) Strong MFA (push notifications with number matching) for general access, (3) No single-factor for anything. MFA fatigue attacks demonstrate that push notifications alone aren't sufficient for high-value assets.",
+      "unlocks_artifact": "artifact_3"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Micro-Segmentation Approach",
+      "narrative": "The network team is designing micro-segmentation. They propose starting with the research network: create strict segments around IP databases and research systems. A concern is raised: 'We don't actually know all the traffic flows in the research network. If we segment wrong, we'll break things.' The team asks for guidance.",
+      "question": "How should you approach micro-segmentation implementation?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy strict segmentation immediately - better to be secure and fix issues as they arise",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Breaking production systems creates resistance and rollback",
+            "detailed": "Enforcing segmentation without understanding traffic flows will break legitimate communications. Research systems have complex dependencies that may not be documented. Breaking production research creates backlash against the security program and likely rollback. Discovery before enforcement is essential.",
+            "consequence": "Critical research workflows broken. Emergency exceptions created. Segmentation project loses credibility."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Map traffic flows in learning mode first, then create policies based on actual behavior",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Discover, design, then enforce",
+            "detailed": "Proper micro-segmentation workflow: (1) Deploy in learning/visibility mode - observe actual traffic flows, (2) Map dependencies - understand what talks to what and why, (3) Design policies based on observed legitimate flows + business requirements, (4) Simulate enforcement - show what would be blocked, (5) Remediate issues before enforcement, (6) Enforce in stages with rollback capability.",
+            "consequence": "Policies based on actual behavior. Minimal disruption. Stakeholder confidence maintained."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Skip segmentation - VPN removal and identity-based access is enough",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Network segmentation is a critical Zero Trust layer",
+            "detailed": "Identity and network controls are complementary, not alternatives. If credentials are compromised, network segmentation limits what the attacker can access. Defense in depth requires both. Micro-segmentation contains breaches and prevents lateral movement even if identity controls fail.",
+            "consequence": "Single layer of defense. Compromised credentials provide broad network access."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Let the network team decide - this is a network operations issue",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Security architect must guide security strategy",
+            "detailed": "As Security Architect, you own the Zero Trust strategy. The network team implements, but the approach (discovery first, policy design, staged enforcement) is a security decision. Abdicating this guidance results in either broken systems (enforce too fast) or ineffective segmentation (too permissive).",
+            "consequence": "No clear strategy. Implementation varies. Inconsistent security posture."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What happens if you enforce network rules without knowing actual traffic patterns?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Micro-segmentation phases: Learn (observe flows) â†’ Design (create policies) â†’ Simulate â†’ Enforce. Discovery before enforcement."
+        }
+      ],
+      "learning_note": "Micro-segmentation implementation phases: (1) Discovery - observe actual traffic flows in learning mode, (2) Dependency mapping - document legitimate communications, (3) Policy design - allow legitimate, deny everything else, (4) Simulation - validate policies won't break production, (5) Staged enforcement - gradually enforce with monitoring, (6) Continuous refinement - adjust as applications change.",
+      "unlocks_artifact": "artifact_4"
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Device Trust Implementation",
+      "narrative": "The BYOD policy allows researchers to use personal devices. The compliance team is nervous: 'How can we trust unmanaged devices with research data?' The research director pushes back: 'Our scientists need flexibility. Don't restrict their devices.' You need to define device trust levels.",
+      "question": "How should you handle device trust for unmanaged/BYOD devices?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Ban all unmanaged devices - security requires control",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Complete ban creates shadow IT and productivity issues",
+            "detailed": "Banning personal devices entirely drives users to work around controls (shadow IT). Researchers may email data to personal devices or use unauthorized cloud storage. Better to provide controlled access that meets user needs within security boundaries. Zero Trust is about appropriate access, not denial of all access.",
+            "consequence": "Researchers find workarounds. Data ends up in uncontrolled locations. Security visibility lost."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Allow unmanaged devices with reduced access - web-only, no sensitive data, enhanced monitoring",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Tiered access based on device trust level",
+            "detailed": "Device trust tiers enable appropriate access: Unmanaged devices can access web-based applications only (email via browser, collaboration tools) with no data download capability. Managed devices required for research systems and sensitive data. This balances flexibility with protection - users have choice, but access is commensurate with trust level.",
+            "consequence": "Users have flexibility for general work. Sensitive access requires trusted devices. Risk managed appropriately."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Trust all devices equally - focus security on data protection instead",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Device posture is a critical Zero Trust factor",
+            "detailed": "Data protection alone isn't sufficient - malware on a compromised device can steal data, capture credentials, or manipulate applications regardless of data-level controls. Device health verification is a core Zero Trust principle: is the device secure? Is it compromised? Device trust enables risk-appropriate access decisions.",
+            "consequence": "Compromised personal device accesses research systems. Malware steals credentials and data."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Require MDM enrollment for all BYOD - partial management as minimum",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Forced MDM creates adoption friction",
+            "detailed": "Requiring MDM enrollment on personal devices creates privacy concerns and adoption resistance. Some users won't enroll their personal devices. A tiered approach (full access = full management, limited access = no management) gives users the choice rather than forcing management on unwilling users.",
+            "consequence": "Users resist MDM on personal devices. Either reduced productivity or workarounds emerge."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can you provide access flexibility while still protecting sensitive resources?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Device trust tiers: managed devices = full access, unmanaged = limited access (web only, no sensitive data)."
+        }
+      ],
+      "learning_note": "Device trust in Zero Trust uses tiered access: (1) Fully managed = full access to authorized resources, (2) Partially managed (BYOD with MDM) = access to corporate apps, not sensitive data, (3) Unmanaged = web-only access with no data download. Users choose their access level based on device management acceptance. This balances security with usability.",
+      "unlocks_artifact": "artifact_5"
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Remote Access Architecture",
+      "narrative": "The VPN replacement discussion is underway. Current state: Cisco AnyConnect provides full network tunnel to corporate network. The network team proposes replacing VPN with identity-aware proxy for web applications but keeping VPN for legacy client-server applications. A consultant suggests going fully VPN-less with Software-Defined Perimeter (SDP).",
+      "question": "What remote access architecture should you implement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep VPN for everything - it's proven and users know it",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "VPN provides network access, not Zero Trust application access",
+            "detailed": "Traditional VPN provides broad network access once connected - antithetical to Zero Trust's 'least privilege' principle. Once on VPN, users can reach any resource on the network, enabling lateral movement if compromised. Zero Trust requires application-level access control, not network-level access.",
+            "consequence": "VPN remains single point of compromise. Attackers who breach VPN have broad network access."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Identity-aware proxy for web apps, SDP for legacy apps, eliminate traditional VPN",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Application-level access for all resources, no network-level VPN",
+            "detailed": "Modern Zero Trust remote access: (1) Identity-aware proxy (Zscaler, Azure AD App Proxy) for web applications - verify identity before granting access to specific app, (2) SDP/ZTNA for legacy client-server apps - create authorized tunnels to specific applications, not the whole network, (3) Eliminate traditional VPN - no more 'connect and access everything'. Every access request is authenticated and authorized at the application level.",
+            "consequence": "Users access specific applications, not networks. Lateral movement eliminated. Access logged at application granularity."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Require all users to work from corporate locations - no remote access needed",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Remote work is business reality",
+            "detailed": "Eliminating remote access isn't realistic for a global company with 12 locations and modern work expectations. Researchers, executives, and many employees need remote access. The goal is secure remote access, not eliminating remote work. Zero Trust enables secure access from anywhere.",
+            "consequence": "Business can't function. Talent leaves for more flexible employers."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Identity-aware proxy for web apps, keep VPN for everything else",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Hybrid approach still leaves VPN risk for legacy apps",
+            "detailed": "Keeping VPN for legacy apps maintains the network-level access problem for those applications. SDP/ZTNA solutions can handle legacy client-server applications without providing broad network access. The goal is eliminating network-level access entirely, not just for web apps.",
+            "consequence": "VPN remains for legacy apps. Attackers target VPN for those applications. Partial Zero Trust."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What's the fundamental problem with VPN from a Zero Trust perspective?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "VPN = network access. Zero Trust = application access. Replace VPN with application-level solutions (identity-aware proxy, SDP)."
+        }
+      ],
+      "learning_note": "Zero Trust replaces VPN with application-level access: (1) Identity-Aware Proxy - authenticate users, verify context, grant access to specific web applications, (2) Software-Defined Perimeter - create one-to-one tunnels between users and applications (even legacy), (3) No network-level access - users can only reach authorized applications, not network segments. This eliminates lateral movement risk inherent in VPN.",
+      "unlocks_artifact": "artifact_6"
+    },
+    {
+      "id": "decision_6",
+      "sequence": 6,
+      "title": "Data Protection Strategy",
+      "narrative": "The research IP protection discussion is getting serious. The CISO asks: 'If an attacker compromises a researcher's account, how do we prevent them from exfiltrating our most valuable research data?' The compliance team adds: 'We also need to track and control clinical trial data for FDA requirements.'",
+      "question": "What data protection approach should you implement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Network-based DLP at the perimeter - inspect all outbound traffic",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Perimeter DLP doesn't protect data that leaves via authorized channels",
+            "detailed": "Perimeter DLP only sees traffic at network boundaries. Cloud storage, encrypted channels, and data on devices bypass it. If a compromised account uploads data to an authorized cloud service or encrypted connection, perimeter DLP is blind. Modern data protection must be data-centric - protecting the data itself regardless of location.",
+            "consequence": "Data exfiltrated via cloud services and encrypted channels. Perimeter DLP sees nothing."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Multi-layer data protection: classification, encryption, rights management, DLP at all layers",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Data-centric protection across all layers",
+            "detailed": "Comprehensive data protection: (1) Classification - know what data you have and its sensitivity, (2) Encryption - at rest and in transit, customer-managed keys, (3) Rights management - persistent protection that travels with data, can revoke access after sharing, (4) DLP - endpoint, cloud, and network to detect/prevent unauthorized movement, (5) Monitoring - alert on unusual data access patterns. Protection stays with data regardless of where it goes.",
+            "consequence": "Research data protected even if exfiltrated - encrypted and can revoke access. Multiple layers of detection."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Focus on access control only - if you control access, you control data",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Access control doesn't protect data once accessed",
+            "detailed": "Access control determines who can reach data initially, but once accessed, the data can be copied, downloaded, emailed, or moved. A researcher with legitimate access can exfiltrate data. Data-centric controls (encryption, rights management, DLP) provide protection even for authorized users and after data leaves controlled systems.",
+            "consequence": "Authorized user exfiltrates data. Access control didn't prevent data theft."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Air-gap all research systems - complete isolation from external networks",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Complete isolation prevents collaboration and productivity",
+            "detailed": "Modern pharmaceutical research requires collaboration with partners, regulatory submissions, cloud-based analysis tools, and remote access for researchers. Complete air-gapping cripples research productivity. The goal is secure access to research data, not isolation that prevents legitimate work.",
+            "consequence": "Research productivity severely impacted. Scientists can't collaborate or use modern tools."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can you protect data even after it leaves your controlled environment?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Data-centric security: classification, encryption, rights management (persistent protection), DLP at all layers."
+        }
+      ],
+      "learning_note": "Data protection in Zero Trust is data-centric: (1) Classification - understand data sensitivity, (2) Encryption - protect data at rest and transit, (3) Rights management - persistent protection that travels with data, access can be revoked, (4) DLP - detect and prevent unauthorized data movement at endpoint, cloud, and network, (5) Access control - limit who can access based on need and context. Protection stays with data, not just at perimeter.",
+      "unlocks_artifact": "artifact_7"
+    },
+    {
+      "id": "decision_7",
+      "sequence": 7,
+      "title": "Continuous Verification Implementation",
+      "narrative": "You're implementing continuous verification - the 'never trust, always verify' principle. The team asks: 'How often should we verify users? At login only? Continuously? What risk signals should trigger step-up authentication?' A researcher complains about current MFA: 'I authenticate once in the morning - why would you make me authenticate more often?'",
+      "question": "How should continuous verification be implemented?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Authentication at login only - re-authenticating constantly frustrates users",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Login-only authentication doesn't detect mid-session compromise",
+            "detailed": "If authentication only happens at login, an attacker who hijacks an active session has free access until session timeout. Continuous verification monitors risk signals throughout the session and triggers re-authentication when risk increases. This catches: device compromise, credential theft, unusual behavior patterns - all of which can happen after initial login.",
+            "consequence": "Session hijacking attacks successful. No detection of mid-session compromise."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Risk-based continuous evaluation - monitor signals, step-up authentication when risk elevates",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Continuous verification based on risk signals",
+            "detailed": "Continuous verification monitors risk signals throughout the session: device health changes, location anomalies, unusual behavior patterns, time-based policies. When risk elevates: (1) Low risk â†’ maintain access, (2) Medium risk â†’ step-up authentication (re-verify with MFA), (3) High risk â†’ terminate session, require full re-authentication. Users aren't constantly interrupted if behavior is normal - only when risk signals indicate a problem.",
+            "consequence": "Sessions terminated when risk signals indicate compromise. Normal usage uninterrupted. Balance of security and usability."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Re-authenticate every 30 minutes regardless of activity",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Time-based only creates friction without targeting actual risk",
+            "detailed": "Fixed interval re-authentication frustrates users and doesn't target actual risk. A user working normally from their usual location doesn't need re-authentication every 30 minutes. Risk-based approach only prompts when signals indicate a problem, reducing friction while improving security.",
+            "consequence": "User frustration with constant re-authentication. Help desk tickets increase. Security not improved."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Monitor continuously but only take action manually - security team reviews alerts",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Manual response is too slow for session-based attacks",
+            "detailed": "Session hijacking and credential compromise move faster than manual response can handle. By the time the security team reviews an alert and takes action, data may already be exfiltrated. Automated response (session termination, step-up auth) happens immediately based on policy, with security team notified for investigation.",
+            "consequence": "Alerts generated but response delayed. Attack completes before manual intervention."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How do you verify users without constant interruption?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Risk-based continuous evaluation: monitor signals silently, only prompt when risk increases. Normal behavior = no interruption."
+        }
+      ],
+      "learning_note": "Continuous verification in Zero Trust: (1) Monitor risk signals throughout session (device health, location, behavior), (2) Risk-based response - not fixed intervals, (3) Automated action - session termination or step-up auth when risk elevates, (4) Minimal user friction for normal behavior. User experience is good when risk is low; security prompts only when signals indicate a problem.",
+      "unlocks_artifact": "artifact_8"
+    },
+    {
+      "id": "decision_8",
+      "sequence": 8,
+      "title": "Lab Equipment Security",
+      "narrative": "The 1,200 networked lab instruments present a challenge. They run embedded operating systems that can't be patched or monitored like regular endpoints. Many have remote maintenance connections to vendors. The lab manager warns: 'These are $500K+ instruments. Don't break our research by restricting them too much.'",
+      "question": "How should you secure the lab equipment network?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Apply standard endpoint security - EDR agents and full monitoring",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Lab equipment can't support standard security agents",
+            "detailed": "Lab instruments run specialized embedded systems that don't support EDR agents, can't be patched like regular systems, and may have FDA validation that prohibits modifications. Standard endpoint security doesn't work for operational technology. Different approach required.",
+            "consequence": "Cannot deploy agents. Lab equipment remains unprotected with standard approach."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Isolate in dedicated network segment with strict access control and network-based monitoring",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Network segmentation and monitoring for OT/IoT devices",
+            "detailed": "Lab equipment security approach: (1) Dedicated isolated network segment - lab equipment can only communicate with data collection systems, not general network, (2) Network access control - only authorized management systems can reach equipment, (3) Network-based anomaly detection - monitor traffic patterns without agents, (4) Vendor remote access controlled via jump server with approval workflow, (5) Documented baseline of normal communication patterns.",
+            "consequence": "Lab equipment isolated and monitored. Vendor access controlled. Research operations unimpacted."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Air-gap completely - no network connectivity for lab equipment",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Air-gap prevents necessary data collection and vendor support",
+            "detailed": "Lab equipment needs to send data to collection systems for analysis, and vendors need remote access for maintenance and troubleshooting. Complete air-gap would require manual data transfer (USB, etc.) and on-site vendor visits - impractical for 1,200 instruments. Controlled connectivity with isolation is more practical.",
+            "consequence": "Data collection requires manual transfer. Vendor support response time dramatically increased. Operational impact."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Accept the risk - lab equipment is too specialized to secure",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Accepting risk without mitigations isn't appropriate",
+            "detailed": "Lab equipment was involved in a recent ransomware incident - the risk is real. While these devices can't be secured like standard endpoints, network segmentation and monitoring provide significant risk reduction without impacting the devices themselves. Accepting unmitigated risk isn't appropriate for a Zero Trust architecture.",
+            "consequence": "Lab equipment remains attack vector. Another ransomware incident spreads from lab network."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How do you secure devices that can't run security agents?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Network-based security: isolate in segment, control access, monitor traffic patterns, controlled vendor access."
+        }
+      ],
+      "learning_note": "OT/IoT/Lab equipment security in Zero Trust: (1) Network segmentation - isolate from general network, (2) Strict access control - only management systems can communicate, (3) Network-based monitoring - detect anomalies without agents, (4) Controlled vendor access - jump server with approval, session recording, (5) Baseline normal behavior - detect deviations. Protect the network around devices you can't protect directly.",
+      "unlocks_artifact": "artifact_9"
+    },
+    {
+      "id": "decision_9",
+      "sequence": 9,
+      "title": "Exception Handling",
+      "narrative": "Implementation is underway, but exceptions are piling up. A research team needs to use an old application that doesn't support MFA. A contractor needs access from an unmanaged device for a critical project. A legacy system requires a service account with broad permissions. The team asks: 'How do we handle exceptions without breaking Zero Trust?'",
+      "question": "How should you manage Zero Trust policy exceptions?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No exceptions - Zero Trust means zero exceptions",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Inflexibility creates workarounds and shadow IT",
+            "detailed": "Absolute 'no exceptions' policy sounds secure but drives users to workarounds. If the old research application is critical and exceptions aren't allowed, researchers might find unsanctioned ways to access it. A mature security program acknowledges exceptions exist and manages them with compensating controls and time limits.",
+            "consequence": "Critical research work blocked. Researchers find workarounds that bypass security entirely."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Formal exception process with risk assessment, compensating controls, time limits, and approval",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Managed exceptions with compensating controls",
+            "detailed": "Mature exception process: (1) Formal request with business justification, (2) Risk assessment by security, (3) Compensating controls to reduce risk (network isolation, enhanced monitoring, session recording), (4) Risk owner approval at appropriate level, (5) Time limit and expiration, (6) Tracking and periodic review. Exceptions are managed, not eliminated. Risk is acknowledged and mitigated.",
+            "consequence": "Exceptions handled with appropriate controls. Risk documented and managed. Business operations continue."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Allow exceptions freely - business needs come first",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Uncontrolled exceptions undermine the entire Zero Trust program",
+            "detailed": "If exceptions are granted freely without process, compensating controls, or review, Zero Trust erodes quickly. Every exception is a potential entry point. Without documentation and management, you won't know how many exceptions exist or their cumulative risk. Exceptions need governance.",
+            "consequence": "Exceptions proliferate. Unknown attack surface. Zero Trust exists on paper only."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Eliminate all systems that need exceptions - modernize or retire",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Modernization takes time - business needs immediate solutions",
+            "detailed": "Modernizing legacy applications to support Zero Trust takes time and budget. Meanwhile, business operations must continue. The right approach is: managed exceptions with compensating controls NOW, combined with modernization roadmap for the future. Temporary exceptions with time limits and upgrade plans.",
+            "consequence": "Business operations halted while waiting for modernization. Unrealistic timeline."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How do you allow exceptions without undermining security?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Formal exception process: risk assessment, compensating controls, approval, time limits, tracking, periodic review."
+        }
+      ],
+      "learning_note": "Zero Trust exception management: (1) Formal process with documentation, (2) Risk assessment for each exception, (3) Compensating controls to reduce risk, (4) Approval at appropriate level based on risk, (5) Time limits - exceptions expire, (6) Tracking and periodic review, (7) Modernization plan to eliminate need for exception. Managed exceptions are better than denied requests driving shadow IT.",
+      "unlocks_artifact": "artifact_10"
+    },
+    {
+      "id": "decision_10",
+      "sequence": 10,
+      "title": "Measuring Zero Trust Success",
+      "narrative": "Six months into implementation, the board asks: 'How do we know Zero Trust is working? What metrics prove we're more secure?' The CFO adds: 'We've spent $3M so far - what's our return on security investment?' You need to present Zero Trust success metrics.",
+      "question": "What metrics should you use to measure Zero Trust success?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Number of policies created and tools deployed",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Activity metrics don't measure security outcomes",
+            "detailed": "Counting policies and tools measures activity, not security. You could have thousands of policies and still be insecure if they're misconfigured. Outcome metrics - what's the security RESULT - are more meaningful. Did lateral movement decrease? Are threats detected faster? Is the blast radius of incidents smaller?",
+            "consequence": "Board sees activity but not security improvement. Questions continue."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Security outcomes: lateral movement prevention, time to detect, blast radius reduction, access anomaly detection",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Outcome-based metrics demonstrate actual security improvement",
+            "detailed": "Zero Trust outcome metrics: (1) Lateral movement attempts blocked (segmentation working), (2) Mean time to detect anomalies (continuous verification working), (3) Blast radius of test incidents (micro-segmentation limiting spread), (4) Unauthorized access attempts blocked by conditional access, (5) VPN usage reduction (application-level access working), (6) Exception count and trend (maturity improving). These demonstrate actual security improvement.",
+            "consequence": "Board sees measurable security improvement. Investment justified. Program supported."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Compliance audit results only - auditors will validate",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Compliance doesn't equal security",
+            "detailed": "Compliance audits validate specific control requirements but don't measure overall security posture. You can be compliant and still vulnerable. Zero Trust metrics should measure security outcomes - are we detecting threats? Is lateral movement prevented? Compliance is one input, not the only measure.",
+            "consequence": "Compliance achieved but security improvement unclear. Board wants more."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Zero security incidents - no breaches means Zero Trust works",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Absence of incidents doesn't prove protection",
+            "detailed": "No incidents could mean excellent security OR it could mean attacks weren't detected, or you were lucky, or you're not a target. Positive metrics (blocked attacks, detected anomalies, contained incidents) are more meaningful than absence of negative outcomes. What you catch and contain demonstrates the system is working.",
+            "consequence": "No incidents (that you know of). Doesn't prove Zero Trust is working."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What metrics show that Zero Trust controls are actively working?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Outcome metrics: blocked lateral movement, detected anomalies, contained incidents, reduced blast radius."
+        }
+      ],
+      "learning_note": "Zero Trust success metrics should measure outcomes: (1) Lateral movement blocked by segmentation, (2) Access anomalies detected by continuous verification, (3) Blast radius limited when incidents occur, (4) Time to detect threats, (5) Unauthorized access attempts blocked by conditional access, (6) VPN usage reduction (moving to application-level access). Activity metrics (tools deployed) don't prove security improvement."
+    }
+  ],
+  
+  "summary_teaching_points": [
+    {
+      "topic": "Zero Trust Principles",
+      "key_points": [
+        "Never trust, always verify - no implicit trust based on network location",
+        "Assume breach - design for attacker already inside",
+        "Least privilege - minimum necessary access",
+        "Verify explicitly - all available signals"
+      ]
+    },
+    {
+      "topic": "Identity-First Approach",
+      "key_points": [
+        "Identity is the foundation of Zero Trust",
+        "Phishing-resistant MFA for sensitive access",
+        "Conditional access based on user + device + context",
+        "Continuous verification, not just at login"
+      ]
+    },
+    {
+      "topic": "Micro-Segmentation",
+      "key_points": [
+        "Segment by application/workload, not just zone",
+        "Discover flows before enforcing policies",
+        "Default deny, explicit allow",
+        "Limits blast radius of compromise"
+      ]
+    },
+    {
+      "topic": "Device Trust",
+      "key_points": [
+        "Tiered access based on device trust level",
+        "Managed devices = full access, unmanaged = limited",
+        "Continuous device health evaluation",
+        "Balance security with user flexibility"
+      ]
+    },
+    {
+      "topic": "Application Access",
+      "key_points": [
+        "Replace VPN with application-level access",
+        "Identity-aware proxy for web apps",
+        "SDP/ZTNA for legacy applications",
+        "No network-level access"
+      ]
+    }
+  ],
+  
+  "weakness_mapping": {
+    "weak_on_identity": {
+      "indicators": ["Confusion about authentication methods", "Not understanding conditional access"],
+      "remediation": "D3-REM-001"
+    },
+    "weak_on_segmentation": {
+      "indicators": ["Proposing enforcement before discovery", "Network-zone thinking vs application"],
+      "remediation": "Review segmentation section"
+    },
+    "weak_on_device_trust": {
+      "indicators": ["All-or-nothing device approaches", "Not understanding tiered access"],
+      "remediation": "Review device trust section"
+    }
+  },
+  
+  "prerequisites": ["D3-SIM-001"],
+  "unlocks": ["D3-SIM-004", "D3-SIM-005"],
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 3: Security Architecture",
+    "job_role_alignment": ["Security Architect", "Network Security Engineer", "Identity Engineer"],
+    "industry_context": "Pharmaceutical research IP protection"
+  }
+}

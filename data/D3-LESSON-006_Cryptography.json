@@ -1,0 +1,419 @@
+{
+  "lesson_id": "D3-LESSON-006",
+  "domain": 3,
+  "title": "Cryptography",
+  "objectives_covered": ["3.3"],
+  "estimated_duration": "55-65 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": ["D1-LESSON-004"],
+
+  "introduction": {
+    "hook": "In 2013, Edward Snowden's revelations showed that the NSA had been collecting vast amounts of internet traffic. What protected sensitive communications wasn't policy or lawâ€”it was math. Strong encryption meant that even with access to the data, agencies couldn't read properly encrypted content. Cryptography is the foundation of digital trust, protecting everything from your banking transactions to national secrets. Understanding how it worksâ€”and how it can failâ€”is essential for any security professional.",
+    "learning_goals": [
+      "Understand symmetric and asymmetric encryption concepts and use cases",
+      "Apply appropriate cryptographic algorithms for different scenarios",
+      "Implement hashing for integrity verification and password storage",
+      "Understand digital signatures and their role in authentication",
+      "Recognize cryptographic weaknesses and deprecated algorithms"
+    ],
+    "why_it_matters": "Cryptography protects data confidentiality, verifies integrity, and enables authentication. Security professionals select appropriate algorithms, configure encryption, and identify cryptographic weaknesses. Poor cryptographic choices can expose sensitive data even when 'encrypted.' Expect 6-8 Security+ questions on encryption types, algorithms, hashing, and cryptographic concepts."
+  },
+
+  "sections": [
+    {
+      "section_id": "D3-L006-S01",
+      "title": "Symmetric Encryption",
+      "content": "Symmetric encryption uses the same key for encryption and decryption, providing fast, efficient encryption for bulk data.\n\n**Symmetric Key Concepts**\n\n*How It Works*\n- Same key encrypts and decrypts\n- Both parties must have the key\n- Key must be kept secret\n- Fast and efficient\n- Good for large data volumes\n\n*Key Challenge*\n- How to share key securely?\n- Key distribution problem\n- Often solved with asymmetric encryption\n- Or out-of-band key exchange\n\n**Block Ciphers**\n\n*Concept*\n- Encrypt fixed-size blocks\n- Typically 128 bits\n- Padding for non-block sizes\n- Modes of operation matter\n\n*AES (Advanced Encryption Standard)*\n- Current standard\n- Key sizes: 128, 192, 256 bits\n- Block size: 128 bits\n- Fast in hardware and software\n- Replaced DES\n\n*3DES (Triple DES)*\n- DES applied three times\n- 168-bit effective key\n- Slower than AES\n- Being deprecated\n- Legacy compatibility\n\n*DES (Data Encryption Standard)*\n- 56-bit key (weak)\n- Obsoleteâ€”never use\n- Crackable in hours\n- Historical importance only\n\n**Modes of Operation**\n\n*ECB (Electronic Codebook)*\n- Each block independent\n- Same plaintext = same ciphertext\n- Patterns visible\n- NEVER use for encryption\n\n*CBC (Cipher Block Chaining)*\n- Blocks chained together\n- IV (Initialization Vector) required\n- Hides patterns\n- Common, but has weaknesses\n\n*GCM (Galois/Counter Mode)*\n- Counter mode with authentication\n- Provides integrity (AEAD)\n- Parallelizable\n- Preferred for modern use\n\n*CTR (Counter Mode)*\n- Uses counter, not chaining\n- Parallelizable\n- No padding needed\n- Random access possible\n\n**Stream Ciphers**\n\n*Concept*\n- Encrypt bit by bit or byte by byte\n- Generates keystream\n- XOR with plaintext\n- Fast for real-time\n\n*ChaCha20*\n- Modern stream cipher\n- Used in TLS\n- Mobile-friendly (no AES hardware)\n- Paired with Poly1305 (ChaCha20-Poly1305)\n\n*RC4*\n- Older stream cipher\n- Multiple weaknesses found\n- DEPRECATEDâ€”never use\n- Was used in WEP, early SSL",
+
+      "key_points": [
+        "Symmetric: same key encrypts and decrypts; fast for bulk data",
+        "AES is current standard (128/192/256-bit keys); DES is obsolete",
+        "ECB mode reveals patternsâ€”never use for encryption",
+        "GCM provides encryption + integrity (AEAD); preferred mode",
+        "RC4 is deprecated; ChaCha20 is modern stream cipher"
+      ],
+
+      "real_world_example": {
+        "scenario": "Encryption mode vulnerability",
+        "company": "Adobe Systems (real case)",
+        "application": "In 2013, Adobe suffered a breach exposing 153 million user records. A critical flaw was their use of 3DES in ECB mode for password encryption: PROBLEM (ECB mode encrypts identical plaintext to identical ciphertext), RESULT (users with same password had identical encrypted values, '123456' appeared millions of timesâ€”same ciphertext), ANALYSIS (attackers could identify common passwords without decrypting, password hints stored in plaintext helped confirm), LESSON (ECB mode should never be used for encryption, passwords should be hashed not encrypted, proper modes like CBC or GCM hide patterns). This was entirely preventable with proper cryptographic choices."
+      },
+
+      "exam_tips": [
+        "Symmetric = same key for encrypt/decrypt; fast for bulk data",
+        "AES = current standard; DES = obsolete (56-bit); 3DES = deprecated",
+        "ECB = patterns visible (NEVER use); GCM = encryption + integrity (use this)",
+        "RC4 = deprecated stream cipher; ChaCha20 = modern alternative",
+        "Key distribution is main symmetric encryption challenge"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Symmetric Encryption",
+          "definition": "Encryption that uses the same key for both encryption and decryption, efficient for bulk data but requiring secure key distribution.",
+          "exam_note": "Same key both ways. Fast. Key distribution problem. AES is standard."
+        },
+        {
+          "term": "AES (Advanced Encryption Standard)",
+          "definition": "The current symmetric encryption standard, supporting 128, 192, and 256-bit keys with a 128-bit block size.",
+          "exam_note": "Current standard. 128/192/256-bit keys. Replaced DES. Fast and secure."
+        },
+        {
+          "term": "GCM (Galois/Counter Mode)",
+          "definition": "An encryption mode providing both confidentiality and integrity verification (AEAD), preferred for modern applications.",
+          "exam_note": "Encryption + integrity. AEAD. Parallelizable. Preferred mode."
+        },
+        {
+          "term": "ECB (Electronic Codebook)",
+          "definition": "A block cipher mode where each block is encrypted independently, revealing patterns in the ciphertext.",
+          "exam_note": "Patterns visible. Same plaintext = same ciphertext. NEVER use."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A developer is implementing AES encryption and wants to ensure both confidentiality and integrity verification are provided. Which mode of operation should be used?",
+        "options": [
+          "ECB because it's simple to implement",
+          "CBC because it chains blocks together",
+          "GCM because it provides encryption and integrity",
+          "CTR because it's parallelizable"
+        ],
+        "correct": 2,
+        "explanation": "GCM (Galois/Counter Mode) provides both encryption and integrity verification (AEAD - Authenticated Encryption with Associated Data). ECB should never be used as it reveals patterns. CBC provides encryption but not built-in integrity. CTR is parallelizable but doesn't include integrity verification."
+      }
+    },
+    {
+      "section_id": "D3-L006-S02",
+      "title": "Asymmetric Encryption",
+      "content": "Asymmetric encryption uses paired keysâ€”public and privateâ€”enabling secure communication without pre-shared secrets.\n\n**Asymmetric Key Concepts**\n\n*Key Pairs*\n- Public key: Shared openly\n- Private key: Kept secret\n- Mathematically related\n- One encrypts, other decrypts\n\n*Use Cases*\n- Encrypt with public â†’ Only private can decrypt (confidentiality)\n- Encrypt with private â†’ Anyone can decrypt (digital signature)\n- Key exchange for symmetric keys\n- Authentication\n\n*Characteristics*\n- Slower than symmetric\n- Smaller data sizes\n- Solves key distribution\n- Often used to exchange symmetric keys\n\n**RSA**\n\n*Concept*\n- Based on factoring large primes\n- Most widely used\n- Encryption and signatures\n- Key sizes: 2048+ bits required\n\n*Key Sizes*\n- 1024-bit: Deprecated (insecure)\n- 2048-bit: Current minimum\n- 3072-bit: Recommended for sensitive\n- 4096-bit: Long-term security\n\n**Elliptic Curve Cryptography (ECC)**\n\n*Advantages*\n- Smaller keys, same security\n- 256-bit ECC â‰ˆ 3072-bit RSA\n- Faster operations\n- Less computational resources\n- Better for mobile/IoT\n\n*Common Curves*\n- P-256 (NIST)\n- P-384 (NIST)\n- Curve25519 (modern, widely trusted)\n\n*ECDSA*\n- Elliptic Curve Digital Signature Algorithm\n- Used for digital signatures\n- Smaller signatures than RSA\n\n*ECDH*\n- Elliptic Curve Diffie-Hellman\n- Key exchange\n- Establishes shared secret\n\n**Diffie-Hellman Key Exchange**\n\n*Purpose*\n- Establish shared secret over insecure channel\n- Neither party sends the secret\n- Mathematical exchange\n- Basis for many protocols\n\n*Versions*\n- DH: Original Diffie-Hellman\n- DHE: Ephemeral (new keys each session)\n- ECDHE: Elliptic Curve Ephemeral\n- ECDHE preferred (PFS + efficiency)\n\n**Perfect Forward Secrecy (PFS)**\n\n*Concept*\n- Compromise of long-term key doesn't expose past sessions\n- New session keys each connection\n- Ephemeral key exchange\n- Required in TLS 1.3\n\n*How Achieved*\n- Use DHE or ECDHE\n- Ephemeral keys discarded after session\n- Past traffic stays protected",
+
+      "key_points": [
+        "Asymmetric: public key encrypts, private key decrypts (or vice versa for signing)",
+        "RSA: 2048-bit minimum; 3072+ recommended; based on prime factoring",
+        "ECC: smaller keys, same security (256-bit ECC â‰ˆ 3072-bit RSA)",
+        "Diffie-Hellman enables key exchange; ECDHE provides PFS",
+        "Perfect Forward Secrecy: compromised key doesn't expose past sessions"
+      ],
+
+      "real_world_example": {
+        "scenario": "Perfect Forward Secrecy protecting past communications",
+        "company": "Security industry (Heartbleed context)",
+        "application": "When Heartbleed was discovered in 2014, it exposed private keys on affected servers: WITHOUT PFS (if server used static RSA key exchange, attackers who captured past encrypted traffic could now decrypt it all using the exposed private keyâ€”years of communications potentially exposed), WITH PFS (servers using ECDHE had new session keys for each connection, even with private key exposed, past sessions couldn't be decryptedâ€”each session's keys were discarded), LESSON (PFS should always be enabled, TLS 1.3 requires it, past captured traffic remains protected even if private key is later compromised). This real-world scenario demonstrated PFS value."
+      },
+
+      "exam_tips": [
+        "Asymmetric: public encrypts (confidentiality), private signs (authentication)",
+        "RSA: 2048 minimum, 3072+ recommended; ECC: smaller keys, same security",
+        "256-bit ECC â‰ˆ 3072-bit RSA security",
+        "ECDHE = Elliptic Curve Diffie-Hellman Ephemeral (PFS)",
+        "PFS = past sessions protected even if key compromised later"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "RSA",
+          "definition": "An asymmetric encryption algorithm based on the difficulty of factoring large prime numbers, widely used for encryption and digital signatures.",
+          "exam_note": "Asymmetric. Prime factoring. 2048-bit minimum. Encryption and signing."
+        },
+        {
+          "term": "Elliptic Curve Cryptography (ECC)",
+          "definition": "Asymmetric cryptography based on elliptic curves, providing equivalent security to RSA with much smaller key sizes.",
+          "exam_note": "Smaller keys, same security. 256-bit ECC â‰ˆ 3072-bit RSA. Mobile-friendly."
+        },
+        {
+          "term": "Diffie-Hellman",
+          "definition": "A key exchange protocol that allows two parties to establish a shared secret over an insecure channel.",
+          "exam_note": "Key exchange. Shared secret. DHE/ECDHE for PFS. Foundation of TLS."
+        },
+        {
+          "term": "Perfect Forward Secrecy (PFS)",
+          "definition": "A property where compromise of long-term keys doesn't compromise past session keys, protecting historical communications.",
+          "exam_note": "Past sessions protected. Ephemeral keys. ECDHE provides. Required in TLS 1.3."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An organization wants to use asymmetric encryption with smaller key sizes while maintaining equivalent security to 3072-bit RSA. Which approach should they use?",
+        "options": [
+          "Increase RSA to 4096 bits for better security",
+          "Use 256-bit Elliptic Curve Cryptography",
+          "Use DES with triple encryption",
+          "Use 1024-bit RSA for efficiency"
+        ],
+        "correct": 1,
+        "explanation": "256-bit Elliptic Curve Cryptography provides equivalent security to 3072-bit RSA with much smaller key sizes. This makes ECC more efficient for mobile and resource-constrained devices. Increasing RSA size doesn't solve the key size problem. DES is symmetric and obsolete. 1024-bit RSA is insecure."
+      }
+    },
+    {
+      "section_id": "D3-L006-S03",
+      "title": "Hashing and Integrity",
+      "content": "Hash functions create fixed-size fingerprints of data, enabling integrity verification and secure password storage.\n\n**Hash Function Properties**\n\n*Characteristics*\n- Fixed output size regardless of input\n- One-way (can't reverse)\n- Deterministic (same input = same output)\n- Avalanche effect (small change = completely different hash)\n- Collision resistant (hard to find two inputs with same hash)\n\n*Uses*\n- Integrity verification\n- Password storage\n- Digital signatures\n- File identification\n- Blockchain\n\n**Common Hash Algorithms**\n\n*MD5*\n- 128-bit output\n- BROKENâ€”collisions found\n- Never use for security\n- Acceptable only for checksums (non-security)\n\n*SHA-1*\n- 160-bit output\n- DEPRECATEDâ€”collisions demonstrated\n- Being phased out\n- Don't use for new applications\n\n*SHA-2 Family*\n- SHA-256: 256-bit output (most common)\n- SHA-384: 384-bit output\n- SHA-512: 512-bit output\n- Current standard\n- Use SHA-256 or higher\n\n*SHA-3*\n- Newest standard\n- Different internal structure than SHA-2\n- Not widely deployed yet\n- Backup if SHA-2 weakened\n\n**Password Hashing**\n\n*Why Different?*\n- Need to be slow (prevent brute force)\n- Need salting (prevent rainbow tables)\n- General hashes are too fast\n\n*Password Algorithms*\n\n*bcrypt*\n- Designed for passwords\n- Built-in salt\n- Adjustable work factor\n- Widely used\n\n*PBKDF2*\n- Password-Based Key Derivation Function\n- Configurable iterations\n- NIST approved\n- Used in many standards\n\n*Argon2*\n- Winner of Password Hashing Competition\n- Memory-hard (resists GPU attacks)\n- Current best practice\n- Variants: Argon2d, Argon2i, Argon2id\n\n**Salting**\n\n*Purpose*\n- Random value added to password before hashing\n- Prevents rainbow table attacks\n- Same password = different hash\n- Unique per user\n\n*Implementation*\n- Generate random salt per password\n- Store salt with hash\n- Don't reuse salts\n- Long salts (16+ bytes)\n\n**HMAC (Hash-based Message Authentication Code)**\n\n*Purpose*\n- Hash + secret key\n- Provides integrity AND authentication\n- Verifies message wasn't tampered\n- Verifies sender has key\n\n*Usage*\n- API authentication\n- Message integrity\n- Session tokens\n- HMAC-SHA256 common",
+
+      "key_points": [
+        "MD5 is broken (collisions); SHA-1 deprecated; SHA-256+ is current standard",
+        "Password hashing needs to be slow: bcrypt, PBKDF2, Argon2 (best)",
+        "Salting prevents rainbow tables; unique salt per password",
+        "HMAC = hash + secret key (integrity AND authentication)",
+        "General hashes (SHA-256) too fast for passwords; use purpose-built algorithms"
+      ],
+
+      "real_world_example": {
+        "scenario": "Proper password hashing preventing breach impact",
+        "company": "Dropbox (real case, 2016)",
+        "application": "When Dropbox's 2012 breach was fully disclosed in 2016 (68 million accounts): OLD HASHES (some passwords stored with SHA-1, relatively easy to crack), NEW HASHES (Dropbox had migrated to bcrypt before disclosure), ATTACKER REALITY (bcrypt hashes extremely slow to crack, even with powerful hardware, simple passwords took days, complex passwords effectively uncrackable), USER PROTECTION (despite having the database, attackers couldn't crack bcrypt-hashed passwords in practical time), LESSON (proper password hashing (bcrypt/Argon2) protects users even after database theft, organizations should upgrade legacy password hashing). The algorithm choice was the difference between catastrophe and containment."
+      },
+
+      "exam_tips": [
+        "MD5 = broken (128-bit); SHA-1 = deprecated (160-bit)",
+        "SHA-256 = current standard (256-bit); SHA-3 = newest (backup)",
+        "Passwords: bcrypt (common), PBKDF2 (NIST), Argon2 (best)",
+        "Salt = random value per password (prevents rainbow tables)",
+        "HMAC = hash + key (integrity AND authentication)"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Hash Function",
+          "definition": "A one-way function that takes input of any size and produces a fixed-size output (digest), used for integrity verification and password storage.",
+          "exam_note": "One-way. Fixed output. Deterministic. Collision resistant."
+        },
+        {
+          "term": "SHA-256",
+          "definition": "A 256-bit hash algorithm from the SHA-2 family, the current standard for cryptographic hashing.",
+          "exam_note": "256-bit output. SHA-2 family. Current standard. Replaced MD5/SHA-1."
+        },
+        {
+          "term": "bcrypt",
+          "definition": "A password hashing algorithm designed to be slow and include automatic salting, resistant to brute force attacks.",
+          "exam_note": "Password-specific. Built-in salt. Adjustable work factor. Slow by design."
+        },
+        {
+          "term": "Salt",
+          "definition": "A random value added to a password before hashing to ensure identical passwords produce different hashes.",
+          "exam_note": "Prevents rainbow tables. Unique per password. Stored with hash."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A security audit finds that an application stores passwords using SHA-256 hashing without any additional security measures. What is the PRIMARY concern?",
+        "options": [
+          "SHA-256 is broken and can be reversed",
+          "SHA-256 is too fast, enabling rapid brute force attacks",
+          "SHA-256 output is too small",
+          "SHA-256 doesn't work with passwords"
+        ],
+        "correct": 1,
+        "explanation": "SHA-256 is a general-purpose hash that's designed to be fastâ€”which is exactly the opposite of what you want for password hashing. Attackers with GPUs can try billions of SHA-256 hashes per second. Password hashing should use slow algorithms like bcrypt, PBKDF2, or Argon2 that resist brute force. SHA-256 is not broken and works cryptographically, but it's not appropriate for passwords."
+      }
+    },
+    {
+      "section_id": "D3-L006-S04",
+      "title": "Digital Signatures and Certificates",
+      "content": "Digital signatures provide authentication, integrity, and non-repudiation using asymmetric cryptography.\n\n**Digital Signature Concepts**\n\n*How It Works*\n1. Sender hashes the message\n2. Sender encrypts hash with private key\n3. Encrypted hash = digital signature\n4. Recipient decrypts signature with sender's public key\n5. Recipient hashes received message\n6. Compare hashesâ€”if match, signature valid\n\n*What It Provides*\n- Authentication (only private key holder could sign)\n- Integrity (any change invalidates signature)\n- Non-repudiation (sender can't deny signing)\n\n**Signature Algorithms**\n\n*RSA Signatures*\n- Most common\n- RSA-SHA256 typical\n- Larger signatures\n- Well-understood\n\n*ECDSA*\n- Elliptic Curve DSA\n- Smaller signatures\n- Used in Bitcoin, TLS\n- More efficient\n\n*EdDSA*\n- Edwards-curve DSA\n- Modern, fast\n- Ed25519 popular variant\n- Deterministic (no random needed)\n\n**Digital Certificates (X.509)**\n\n*Contents*\n- Subject (who certificate is for)\n- Issuer (CA that issued it)\n- Public key\n- Validity period\n- Serial number\n- Signature (CA's signature)\n\n*Types*\n- DV (Domain Validation): Domain ownership only\n- OV (Organization Validation): Organization verified\n- EV (Extended Validation): Extensive verification\n\n**Public Key Infrastructure (PKI)**\n\n*Components*\n- Certificate Authority (CA): Issues certificates\n- Registration Authority (RA): Verifies requests\n- Certificate Repository: Stores certificates\n- Certificate Revocation List (CRL): Lists revoked certs\n- OCSP: Real-time revocation checking\n\n*Trust Model*\n- Hierarchical (root CA â†’ intermediate â†’ end entity)\n- Root CA must be trusted\n- Chain of trust\n- Browser/OS trust stores\n\n**Certificate Lifecycle**\n\n*Issuance*\n1. Generate key pair\n2. Create Certificate Signing Request (CSR)\n3. Submit to CA\n4. CA validates\n5. CA issues certificate\n\n*Revocation*\n- Certificate compromised\n- Key compromised\n- Information changed\n- CA revokes and publishes\n\n*Renewal*\n- Before expiration\n- May require new keys\n- Don't let certificates expire",
+
+      "key_points": [
+        "Digital signature: hash message, encrypt hash with private key",
+        "Provides: authentication, integrity, non-repudiation",
+        "X.509 certificate contains: subject, issuer, public key, validity, CA signature",
+        "PKI: CA issues certs, CRL/OCSP for revocation checking",
+        "Certificate types: DV (domain), OV (organization), EV (extended validation)"
+      ],
+
+      "real_world_example": {
+        "scenario": "Certificate revocation preventing fraud",
+        "company": "DigiNotar CA (real case, 2011)",
+        "application": "DigiNotar, a Dutch certificate authority, was compromised and attackers issued fraudulent certificates: ATTACK (hackers breached DigiNotar, issued fake Google certificate, used for man-in-the-middle attacks against Iranian users), DETECTION (users noticed certificate warnings, security researchers investigated), REVOCATION (all DigiNotar certificates revoked by browsers/OS vendors, DigiNotar root removed from trust stores), IMPACT (DigiNotar went bankrupt, 300,000+ Iranian users potentially affected), LESSONS (certificate revocation is critical, browser trust store management matters, CA security is paramount). This incident led to Certificate Transparency logs and stricter CA requirements."
+      },
+
+      "exam_tips": [
+        "Digital signature = hash encrypted with private key",
+        "Provides: authentication + integrity + non-repudiation",
+        "X.509 = certificate standard; contains public key, issuer, validity",
+        "CRL = list of revoked certs; OCSP = real-time revocation check",
+        "DV = domain only; OV = organization; EV = extended validation"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Digital Signature",
+          "definition": "A cryptographic mechanism where a message hash is encrypted with the sender's private key, providing authentication, integrity, and non-repudiation.",
+          "exam_note": "Hash encrypted with private key. Verify with public key. Non-repudiation."
+        },
+        {
+          "term": "Certificate Authority (CA)",
+          "definition": "A trusted entity that issues digital certificates, binding public keys to identities after verification.",
+          "exam_note": "Issues certificates. Validates identity. Signs with CA private key. Trust anchor."
+        },
+        {
+          "term": "CRL (Certificate Revocation List)",
+          "definition": "A list published by a CA containing serial numbers of certificates that have been revoked before their expiration.",
+          "exam_note": "List of revoked certs. Published by CA. Periodic updates. Check before trusting."
+        },
+        {
+          "term": "OCSP",
+          "definition": "Online Certificate Status Protocolâ€”a method for real-time checking of certificate revocation status.",
+          "exam_note": "Real-time revocation check. Query CA. More current than CRL. OCSP stapling."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A user receives a digitally signed document and wants to verify the signature. What does the user need to perform this verification?",
+        "options": [
+          "The sender's private key",
+          "The sender's public key",
+          "A shared symmetric key",
+          "The CA's private key"
+        ],
+        "correct": 1,
+        "explanation": "To verify a digital signature, the recipient needs the sender's public key. The signature was created by encrypting a hash with the sender's private key, so it can be decrypted with the corresponding public key. The private key must remain secret with the sender. Symmetric keys aren't used in digital signatures. The CA's private key is used for signing certificates, not verifying document signatures."
+      }
+    },
+    {
+      "section_id": "D3-L006-S05",
+      "title": "Cryptographic Implementation and Challenges",
+      "content": "Proper cryptographic implementation is as important as algorithm selectionâ€”many breaches result from implementation errors.\n\n**Key Management**\n\n*Key Lifecycle*\n1. Generation (secure random)\n2. Distribution (secure channel)\n3. Storage (protected, access controlled)\n4. Usage (appropriate algorithms)\n5. Rotation (periodic replacement)\n6. Destruction (secure deletion)\n\n*Key Storage*\n- Hardware Security Module (HSM)\n- Key Management Service (KMS)\n- Never in source code\n- Encrypted at rest\n- Access logging\n\n*Key Escrow*\n- Third party holds copy\n- Recovery capability\n- Legal/compliance requirements\n- Security vs. recovery tradeoff\n\n**Cryptographic Attacks**\n\n*Brute Force*\n- Try all possible keys\n- Defeated by key length\n- 128-bit = computationally infeasible\n\n*Dictionary Attack*\n- Try common passwords/keys\n- Defeated by complexity/randomness\n- Relevant to password cracking\n\n*Rainbow Tables*\n- Pre-computed hash lookups\n- Defeated by salting\n- Trade storage for time\n\n*Birthday Attack*\n- Find hash collisions\n- Reduces collision search\n- Affects hash functions\n- Why 128-bit hashes are weak\n\n*Downgrade Attack*\n- Force weaker algorithm\n- POODLE, FREAK attacks\n- Disable weak algorithms\n\n**Deprecated and Weak Cryptography**\n\n*Never Use*\n- DES (56-bit key)\n- RC4 (stream cipher vulnerabilities)\n- MD5 (collisions)\n- SHA-1 (collisions demonstrated)\n\n*Avoid When Possible*\n- 3DES (being deprecated)\n- RSA 1024-bit (too short)\n- TLS 1.0/1.1 (deprecated)\n\n*Current Standards*\n- AES-256 for symmetric\n- RSA 2048+ or ECC\n- SHA-256+ for hashing\n- TLS 1.2 minimum, 1.3 preferred\n\n**Quantum Computing Threat**\n\n*Impact*\n- Shor's algorithm breaks RSA/ECC\n- Grover's algorithm weakens symmetric\n- Current asymmetric vulnerable\n- Planning needed now\n\n*Post-Quantum Cryptography*\n- New algorithms being standardized\n- NIST post-quantum standards\n- Lattice-based cryptography\n- Begin transition planning\n\n**Entropy and Randomness**\n\n*Importance*\n- Keys must be random\n- Predictable = breakable\n- Use cryptographic RNG\n- Seed entropy sources properly\n\n*Sources*\n- Hardware random number generators\n- Operating system entropy pools\n- /dev/urandom (Linux)\n- CryptGenRandom (Windows)",
+
+      "key_points": [
+        "Key lifecycle: generate â†’ distribute â†’ store â†’ use â†’ rotate â†’ destroy",
+        "HSM provides hardware-protected key storage; never store keys in code",
+        "Deprecated: DES, RC4, MD5, SHA-1; use AES-256, SHA-256+, RSA 2048+",
+        "Quantum computing will break RSA/ECC; post-quantum planning needed",
+        "Randomness is critical; use cryptographic RNG, not regular random"
+      ],
+
+      "real_world_example": {
+        "scenario": "Weak random number generator causing breach",
+        "company": "Various Bitcoin wallet providers (2013-2015)",
+        "application": "Multiple cryptocurrency theft incidents traced to weak randomness: PROBLEM (some Bitcoin wallets used weak random number generators for key generation), EXPLOIT (attackers could predict or narrow down possible private keys, reconstructed private keys from public key and known weak random patterns), IMPACT (millions of dollars in Bitcoin stolen across multiple incidents), ROOT CAUSE (developers used system random instead of cryptographic random, insufficient entropy during key generation), LESSON (cryptographic operations require cryptographic-grade randomness, weak RNG can completely undermine otherwise strong encryption, security libraries should handle thisâ€”don't roll your own)."
+      },
+
+      "exam_tips": [
+        "HSM = hardware security module (protected key storage)",
+        "Never use: DES, RC4, MD5, SHA-1 (all broken/weak)",
+        "Use: AES-256, RSA 2048+/ECC, SHA-256+, TLS 1.2/1.3",
+        "Quantum threatens asymmetric (RSA/ECC); doubles symmetric key needs",
+        "Key escrow = third party holds key copy (recovery capability)"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "HSM (Hardware Security Module)",
+          "definition": "A physical device that safeguards cryptographic keys and performs cryptographic operations in a tamper-resistant environment.",
+          "exam_note": "Hardware key protection. Tamper-resistant. FIPS certified. High security."
+        },
+        {
+          "term": "Key Escrow",
+          "definition": "An arrangement where cryptographic keys are held by a third party, enabling key recovery in specific circumstances.",
+          "exam_note": "Third party holds keys. Recovery capability. Compliance use. Security tradeoff."
+        },
+        {
+          "term": "Downgrade Attack",
+          "definition": "An attack that forces systems to use weaker, vulnerable cryptographic protocols instead of stronger ones.",
+          "exam_note": "Forces weak crypto. POODLE, FREAK examples. Disable weak algorithms."
+        },
+        {
+          "term": "Post-Quantum Cryptography",
+          "definition": "Cryptographic algorithms designed to be secure against both classical and quantum computer attacks.",
+          "exam_note": "Quantum-resistant. NIST standards coming. Lattice-based. Future-proofing."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An organization is concerned about future quantum computing threats to their current RSA-based encryption. What is the recommended approach?",
+        "options": [
+          "Increase RSA key size to 8192 bits",
+          "Switch to ECC which is quantum-resistant",
+          "Begin planning transition to post-quantum cryptography",
+          "Quantum computers are decades away, no action needed"
+        ],
+        "correct": 2,
+        "explanation": "Organizations should begin planning transition to post-quantum cryptography. Both RSA and ECC are vulnerable to quantum attacks via Shor's algorithm. Larger RSA keys don't help against quantum attacks. ECC is also vulnerable. While practical quantum computers may be years away, encrypted data captured today could be decrypted later ('harvest now, decrypt later'), so planning should start now."
+      }
+    }
+  ],
+
+  "hands_on_activity": {
+    "title": "Cryptographic Assessment and Implementation",
+    "objective": "Assess cryptographic implementations and recommend improvements",
+    "scenario": "You're conducting a cryptographic assessment at Apex Consulting Group.",
+    "steps": [
+      "Step 1: Inventory current cryptographic usage:\n   - Data at rest encryption (algorithms, key management)\n   - Data in transit encryption (TLS versions, cipher suites)\n   - Password storage (hashing algorithm)\n   - Digital signatures in use\n   - Certificate management",
+      "Step 2: Identify deprecated cryptography:\n   - Any DES, 3DES, RC4?\n   - MD5 or SHA-1 for security purposes?\n   - TLS 1.0 or 1.1 enabled?\n   - RSA keys < 2048 bits?",
+      "Step 3: Assess key management:\n   - Where are keys stored?\n   - How are keys generated?\n   - Is there key rotation?\n   - Key access controls?\n   - Key backup/recovery?",
+      "Step 4: Evaluate password hashing:\n   - Algorithm used (bcrypt, PBKDF2, Argon2?)\n   - Is salting implemented?\n   - Work factor/iterations appropriate?",
+      "Step 5: Review certificate management:\n   - Certificate expiration monitoring\n   - Revocation checking (CRL/OCSP)\n   - Private key protection\n   - Certificate automation?",
+      "Step 6: Assess for quantum readiness:\n   - Inventory asymmetric cryptography\n   - Data sensitivity and longevity\n   - Post-quantum planning needed?",
+      "Step 7: Create remediation roadmap with prioritized recommendations"
+    ],
+    "expected_outcome": "Complete cryptographic assessment including inventory, deprecated algorithm findings, key management evaluation, password hashing review, certificate management assessment, and prioritized remediation recommendations.",
+    "reflection_questions": [
+      "Why is using fast hash functions (like SHA-256) bad for passwords?",
+      "What's the difference between encryption providing confidentiality and signing providing authentication?",
+      "How does 'harvest now, decrypt later' affect your cryptographic planning?"
+    ]
+  },
+
+  "what_would_you_do": {
+    "scenario": "You're the security engineer at Pinnacle Financial. During a security assessment, you discover that a legacy application is storing customer passwords using MD5 without salt. The application has 500,000 users and is scheduled for replacement in 18 months. The development team says they can't make changes because the application is in 'maintenance mode.'",
+    "context": "MD5 is cryptographically broken. Rainbow tables exist for common MD5 hashes. No salt means identical passwords have identical hashes. A breach would expose passwords quickly. Changing the hashing algorithm requires users to reset passwords.",
+    "question": "How do you address this vulnerability?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Accept the risk since the application is being replaced in 18 months",
+        "is_best": false,
+        "feedback": "18 months is a very long timeâ€”if a breach occurs, all 500,000 passwords would be trivially cracked. MD5 without salt can be reversed using rainbow tables almost instantly. The risk is too high to accept for that duration, especially for a financial services company.",
+        "consequences": "Passwords exposed if breach occurs. Credential stuffing attacks likely. Regulatory issues. Reputational damage. 18 months of exposure."
+      },
+      {
+        "id": "b",
+        "text": "Force all users to reset passwords to a new system immediately",
+        "is_best": false,
+        "feedback": "While this would solve the problem, forcing 500,000 users to immediately reset passwords would cause massive support burden and user frustration. There are less disruptive approaches that still address the risk. This is also operationally difficult for a maintenance-mode application.",
+        "consequences": "Huge user impact. Support overload. Business disruption. May not be operationally feasible. Could drive users away."
+      },
+      {
+        "id": "c",
+        "text": "Implement hash wrappingâ€”bcrypt the existing MD5 hashes without user action",
+        "is_best": true,
+        "feedback": "Hash wrapping is an elegant solution: take each existing MD5 hash and run it through bcrypt. Store bcrypt(MD5(password)). Users don't need to do anythingâ€”on next login, verify by MD5 hashing their input, then bcrypt comparing. Over time, migrate to direct bcrypt as users log in. This dramatically improves security without user impact.",
+        "consequences": "Immediate security improvement. No user action required. Gradual migration to clean hashing. Technical debt addressed. Compliant approach."
+      },
+      {
+        "id": "d",
+        "text": "Add additional monitoring and wait for the replacement system",
+        "is_best": false,
+        "feedback": "Monitoring doesn't prevent the breach impactâ€”if attackers get the database, MD5 hashes will be cracked in seconds regardless of monitoring. This is a detective control when a preventive control is needed. The underlying vulnerability remains fully exploitable.",
+        "consequences": "Still vulnerable. Monitoring doesn't prevent cracking. False sense of security. Regulatory non-compliance likely."
+      }
+    ],
+    "key_lesson": "Hash wrapping is a technique to improve password security without requiring user password resets. By wrapping existing weak hashes with a strong algorithm (bcrypt of MD5 hash), you immediately improve security. On subsequent logins, you can migrate users to clean strong hashes. 'Maintenance mode' shouldn't mean 'accept all risks'â€”there are often creative solutions that don't require major application changes."
+  },
+
+  "summary": {
+    "key_takeaways": [
+      "Symmetric (AES): same key, fast for bulk data; Asymmetric (RSA/ECC): key pairs, solves distribution",
+      "AES-GCM provides encryption + integrity; ECB mode reveals patterns (never use)",
+      "SHA-256 is current hash standard; MD5/SHA-1 are broken/deprecated",
+      "Passwords need slow hashing: bcrypt, PBKDF2, Argon2 (with salting)",
+      "Digital signatures: hash encrypted with private key; provides non-repudiation",
+      "Quantum computing threatens RSA/ECC; post-quantum planning needed"
+    ],
+    "exam_essentials": [
+      "Symmetric = same key; Asymmetric = public/private pair",
+      "AES = current standard; DES/RC4 = never use; GCM = encryption + integrity",
+      "SHA-256+ = current hash standard; MD5/SHA-1 = broken",
+      "Passwords: bcrypt/PBKDF2/Argon2 (slow, salted); NOT SHA-256 (too fast)",
+      "Digital signature = hash encrypted with private key",
+      "ECC: smaller keys, same security (256 ECC â‰ˆ 3072 RSA)"
+    ],
+    "connection_to_next": "Cryptography protects data through mathematical operations. The next lesson explores resilience and recoveryâ€”how organizations prepare for, respond to, and recover from disruptions including backups, disaster recovery, and business continuity planning."
+  },
+
+  "related_content": {
+    "simulations": ["D3-SIM-003"],
+    "remediation": ["D3-REM-003"],
+    "next_lesson": "D3-LESSON-007",
+    "previous_lesson": "D3-LESSON-005"
+  }
+}

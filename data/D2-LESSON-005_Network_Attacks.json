@@ -1,0 +1,423 @@
+{
+  "lesson_id": "D2-LESSON-005",
+  "domain": 2,
+  "title": "Network-Based Attacks",
+  "objectives_covered": ["2.4"],
+  "estimated_duration": "45-55 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": ["D2-LESSON-004"],
+
+  "introduction": {
+    "hook": "In October 2016, the Mirai botnet launched the largest DDoS attack in history, taking down Twitter, Netflix, Reddit, and CNN by flooding Dyn's DNS infrastructure with traffic from millions of compromised IoT devices. In 2020, attackers used BGP hijacking to reroute cryptocurrency traffic worth millions through their own servers. Network attacks strike at the foundation of connectivity itselfâ€”without networks, modern organizations simply cannot function. Understanding how attackers exploit network protocols, intercept traffic, and overwhelm services is essential for defending the digital highways that connect everything.",
+    "learning_goals": [
+      "Identify and explain common network attack techniques including DoS, DDoS, and amplification attacks",
+      "Analyze man-in-the-middle attacks and their variants (ARP poisoning, DNS spoofing)",
+      "Evaluate on-path attacks and session hijacking techniques",
+      "Understand DNS-based attacks including DNS poisoning, tunneling, and hijacking",
+      "Implement appropriate defenses against network-based threats"
+    ],
+    "why_it_matters": "Networks are the circulatory system of modern organizationsâ€”they carry all data, enable all communication, and connect all systems. Network attacks can intercept sensitive data, disrupt operations, redirect traffic, and enable further exploitation. As a security professional, you'll configure firewalls, implement network segmentation, monitor traffic, and respond to network incidents. The Security+ exam covers network attacks extensivelyâ€”expect 6-8 questions on attack types, techniques, and mitigations."
+  },
+
+  "sections": [
+    {
+      "section_id": "D2-L005-S01",
+      "title": "Denial of Service Attacks",
+      "content": "Denial of Service (DoS) attacks aim to make systems or services unavailable to legitimate users by overwhelming resources or exploiting vulnerabilities.\n\n**DoS Attack Categories**\n\n*Volumetric Attacks*\n- Flood target with traffic\n- Consume bandwidth\n- Overwhelm network capacity\n- Measured in bits per second (bps)\n- Examples: UDP flood, ICMP flood\n\n*Protocol Attacks*\n- Exploit protocol weaknesses\n- Exhaust server resources\n- Target connection handling\n- Measured in packets per second (pps)\n- Examples: SYN flood, Ping of Death\n\n*Application Layer Attacks*\n- Target application vulnerabilities\n- Appear as legitimate requests\n- Harder to detect\n- Measured in requests per second (rps)\n- Examples: HTTP flood, Slowloris\n\n**Common DoS Techniques**\n\n*SYN Flood*\n- Exploits TCP three-way handshake\n- Attacker sends SYN packets\n- Never completes handshake (no ACK)\n- Server holds half-open connections\n- Exhausts connection table\n\n*UDP Flood*\n- Sends large volumes of UDP packets\n- Target must process each packet\n- No connection establishment\n- Easy to spoof source addresses\n\n*ICMP Flood (Ping Flood)*\n- Overwhelms with ping requests\n- Target must respond to each\n- Consumes bandwidth both directions\n- Often blocked at perimeter\n\n*Slowloris*\n- Opens many HTTP connections\n- Sends partial requests very slowly\n- Keeps connections open indefinitely\n- Exhausts web server connection pool\n- Very low bandwidth required\n\n**Distributed Denial of Service (DDoS)**\n\n*Characteristics*\n- Attack from many sources simultaneously\n- Uses botnets (thousands/millions of devices)\n- Much harder to block (no single source)\n- Can generate massive traffic volumes\n- Amplification multiplies impact\n\n*DDoS Attack Sources*\n- Compromised computers (traditional botnets)\n- IoT devices (cameras, routers, DVRs)\n- Rented/purchased attack services (DDoS-for-hire)\n- Reflection from legitimate services\n\n**Amplification Attacks**\n\n*Concept*\n- Small request generates large response\n- Spoof source IP to victim's address\n- Response goes to victim, not attacker\n- Multiplies attacker's bandwidth\n\n*Common Amplification Vectors*\n- DNS amplification (up to 70x)\n- NTP amplification (up to 556x)\n- Memcached (up to 51,000x)\n- SSDP (up to 30x)\n- SNMP (up to 6x)",
+
+      "key_points": [
+        "DoS categories: volumetric (bandwidth), protocol (resources), application layer (requests)",
+        "SYN flood exploits TCP handshake with half-open connections",
+        "DDoS uses multiple sources (botnets), much harder to block than single-source DoS",
+        "Amplification attacks use spoofed source IPs to multiply attack volume",
+        "DNS and NTP amplification are common vectors (70x and 556x multiplication)"
+      ],
+
+      "real_world_example": {
+        "scenario": "Mirai botnet DDoS attack on DNS provider",
+        "company": "Dyn DNS (2016)",
+        "application": "The Mirai botnet launched a devastating DDoS attack: BOTNET (comprised of ~100,000 IoT devicesâ€”cameras, DVRs, routersâ€”infected with Mirai malware), TARGET (Dyn, a major DNS provider serving Twitter, Netflix, Reddit, CNN, and others), ATTACK (multiple waves of DDoS traffic exceeding 1.2 Tbps), IMPACT (major websites unreachable for hours, estimated $110 million in losses), TECHNIQUE (TCP SYN floods and HTTP GET floods from geographically distributed IoT devices), VULNERABILITY (IoT devices with default credentials, no security updates). The attack demonstrated: IoT as attack platform, DNS as critical dependency, cascading impact of infrastructure attacks."
+      },
+
+      "exam_tips": [
+        "DoS = single source; DDoS = distributed (multiple sources/botnet)",
+        "SYN flood = half-open TCP connections exhausting connection table",
+        "Slowloris = slow HTTP requests keeping connections open (low bandwidth)",
+        "Amplification = small request â†’ large response to spoofed victim IP",
+        "Know amplification factors: DNS ~70x, NTP ~556x, Memcached ~51,000x"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Denial of Service (DoS)",
+          "definition": "An attack that attempts to make a system or service unavailable to legitimate users by overwhelming it with traffic or exploiting vulnerabilities to crash it.",
+          "exam_note": "Makes service unavailable. Single source. Categories: volumetric, protocol, application."
+        },
+        {
+          "term": "Distributed Denial of Service (DDoS)",
+          "definition": "A DoS attack conducted from multiple sources simultaneously, typically using a botnet, making the attack much harder to mitigate.",
+          "exam_note": "Multiple sources (botnet). Harder to block. Can generate massive traffic."
+        },
+        {
+          "term": "SYN Flood",
+          "definition": "A DoS attack that exploits the TCP three-way handshake by sending many SYN packets without completing connections, exhausting the target's connection table.",
+          "exam_note": "Sends SYN, never sends ACK. Half-open connections. Defense: SYN cookies."
+        },
+        {
+          "term": "Amplification Attack",
+          "definition": "A DDoS technique where attackers send small requests with spoofed source addresses to servers that respond with much larger replies, amplifying attack volume.",
+          "exam_note": "Small request â†’ big response to victim. DNS, NTP, Memcached common vectors."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An attacker sends DNS queries to public DNS servers with the source IP address spoofed to be the victim's IP. The DNS servers send large responses to the victim. This attack is called:",
+        "options": [
+          "DNS poisoning because it manipulates DNS records",
+          "DNS amplification because small queries generate large responses to the victim",
+          "DNS tunneling because it uses DNS for the attack",
+          "DNS hijacking because it redirects DNS traffic"
+        ],
+        "correct": 1,
+        "explanation": "This is DNS amplificationâ€”using DNS servers as unwitting participants in a DDoS attack. The attacker sends small queries with the victim's spoofed IP, and DNS servers send large responses to the victim. The amplification factor can be up to 70x. DNS poisoning modifies records, tunneling exfiltrates data, and hijacking redirects to malicious servers."
+      }
+    },
+    {
+      "section_id": "D2-L005-S02",
+      "title": "Man-in-the-Middle and On-Path Attacks",
+      "content": "Man-in-the-Middle (MitM) or on-path attacks position the attacker between two communicating parties, enabling interception, modification, or injection of traffic.\n\n**On-Path Attack Fundamentals**\n\n*Definition*\n- Attacker positioned between victim and destination\n- Can intercept, read, modify traffic\n- Both parties unaware of attacker\n- Enables credential theft, session hijacking\n\n*Attack Positions*\n- Network level (routing)\n- Local network (ARP, DHCP)\n- Application level (proxy)\n- Physical (wiretapping)\n\n**ARP Poisoning/Spoofing**\n\n*How ARP Works (Normal)*\n- ARP maps IP addresses to MAC addresses\n- Device broadcasts: 'Who has 192.168.1.1?'\n- Gateway responds: 'I do, here's my MAC'\n- Requester caches the mapping\n\n*ARP Poisoning Attack*\n1. Attacker sends fake ARP replies\n2. Claims to be the gateway (or other target)\n3. Victim updates ARP cache with attacker's MAC\n4. Victim's traffic goes to attacker\n5. Attacker forwards to real destination\n6. Both directions intercepted\n\n*Attack Capabilities*\n- Intercept all traffic on segment\n- Capture credentials\n- Modify data in transit\n- Inject malicious content\n- Session hijacking\n\n**DNS Spoofing/Poisoning**\n\n*DNS Cache Poisoning*\n- Corrupt DNS server's cache\n- Insert false DNS records\n- Victims redirected to malicious sites\n- Affects all users of that DNS server\n\n*Local DNS Spoofing*\n- Attacker on same network\n- Responds to DNS queries faster than real server\n- Victim accepts attacker's response\n- Combined with ARP poisoning\n\n**DHCP Attacks**\n\n*Rogue DHCP Server*\n- Attacker sets up fake DHCP server\n- Responds to DHCP requests\n- Provides attacker-controlled gateway\n- All traffic routes through attacker\n\n*DHCP Starvation*\n- Request all available IP addresses\n- Legitimate clients can't get addresses\n- Denial of service\n- Combined with rogue DHCP server\n\n**SSL/TLS Stripping**\n\n*Attack Process*\n1. Attacker intercepts HTTPS redirect\n2. Connects to server over HTTPS\n3. Serves HTTP to victim\n4. Victim sees HTTP (often unnoticed)\n5. Attacker decrypts and re-encrypts\n\n*Defenses*\n- HSTS (HTTP Strict Transport Security)\n- HSTS preload lists\n- User awareness (check for HTTPS)\n- Certificate pinning",
+
+      "key_points": [
+        "MitM/On-path attacks position attacker between communicating parties",
+        "ARP poisoning sends fake ARP replies to redirect traffic through attacker",
+        "DNS spoofing provides false DNS responses directing victims to malicious sites",
+        "Rogue DHCP provides attacker-controlled network settings (gateway, DNS)",
+        "SSL stripping downgrades HTTPS to HTTP for interception; HSTS defends"
+      ],
+
+      "real_world_example": {
+        "scenario": "ARP poisoning attack at coffee shop",
+        "company": "Multiple victims at public WiFi",
+        "application": "A penetration tester demonstrated ARP poisoning risks: SETUP (connected to coffee shop WiFi with laptop running Ettercap), ARP POISONING (sent gratuitous ARP replies claiming to be the gateway), TRAFFIC INTERCEPTION (all victim traffic routed through attacker's laptop), CREDENTIAL CAPTURE (captured HTTP login credentials for several sites, saw unencrypted email traffic), SSL STRIPPING (intercepted HTTPS redirects for some sites, served HTTP to victims), FINDINGS (captured 12 sets of credentials in 2 hours, 3 email sessions, 2 social media logins). Lessons: public WiFi is inherently dangerous, always use VPN, verify HTTPS, HSTS protects major sites."
+      },
+
+      "exam_tips": [
+        "ARP poisoning = fake ARP replies to redirect traffic through attacker",
+        "DNS spoofing/poisoning = false DNS responses directing to malicious IPs",
+        "DHCP attack = rogue server provides attacker-controlled gateway",
+        "SSL stripping = downgrade HTTPS to HTTP for interception",
+        "HSTS (HTTP Strict Transport Security) defends against SSL stripping"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Man-in-the-Middle (MitM)",
+          "definition": "An attack where the attacker secretly positions themselves between two communicating parties, intercepting and potentially altering their communications.",
+          "exam_note": "Also called 'on-path attack.' Attacker between victim and destination. Can read/modify traffic."
+        },
+        {
+          "term": "ARP Poisoning",
+          "definition": "An attack where fake ARP messages are sent to associate the attacker's MAC address with the IP address of another host, redirecting traffic through the attacker.",
+          "exam_note": "Fake ARP replies. Redirects local network traffic. Defense: Dynamic ARP Inspection (DAI)."
+        },
+        {
+          "term": "DNS Spoofing",
+          "definition": "An attack that provides false DNS responses to victims, redirecting them to malicious sites while believing they are visiting legitimate destinations.",
+          "exam_note": "False DNS answers. Redirects to malicious sites. Defense: DNSSEC, DNS over HTTPS."
+        },
+        {
+          "term": "SSL Stripping",
+          "definition": "A MitM attack that intercepts HTTPS connections and serves unencrypted HTTP to the victim while maintaining HTTPS to the server.",
+          "exam_note": "Downgrades HTTPS to HTTP. Victim may not notice. Defense: HSTS."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An attacker on the local network sends falsified ARP responses claiming that the attacker's MAC address is associated with the default gateway's IP address. Victims' traffic is then routed through the attacker. This attack is called:",
+        "options": [
+          "DNS poisoning because it redirects traffic",
+          "DHCP starvation because it affects network addressing",
+          "ARP poisoning because it manipulates ARP cache entries",
+          "MAC flooding because it involves MAC addresses"
+        ],
+        "correct": 2,
+        "explanation": "This is ARP poisoning (also called ARP spoofing)â€”sending false ARP replies to associate the attacker's MAC address with another device's IP (like the gateway). Victims update their ARP cache and send traffic to the attacker. DNS poisoning affects DNS resolution. DHCP starvation exhausts IP addresses. MAC flooding targets switches."
+      }
+    },
+    {
+      "section_id": "D2-L005-S03",
+      "title": "DNS-Based Attacks",
+      "content": "DNS (Domain Name System) is critical infrastructure that translates domain names to IP addresses. Its essential role makes it a valuable target for attackers.\n\n**DNS Attack Categories**\n\n*Attacks ON DNS*\n- Target DNS infrastructure\n- DDoS against DNS servers\n- DNS server compromise\n- Zone transfer exploitation\n\n*Attacks USING DNS*\n- DNS as attack vector\n- DNS tunneling\n- Domain generation algorithms\n- Fast flux networks\n\n**DNS Hijacking**\n\n*Types*\n\n*Local Hijacking*\n- Modify victim's DNS settings\n- Malware changes DNS configuration\n- Router DNS modification\n- Hosts file modification\n\n*Router Hijacking*\n- Compromise home/office router\n- Change DNS server settings\n- All devices affected\n- Very common attack\n\n*ISP-Level Hijacking*\n- Compromise ISP DNS servers\n- Redirect traffic at scale\n- Affects all ISP customers\n- Nation-state capability\n\n**DNS Tunneling**\n\n*Concept*\n- Encode data in DNS queries/responses\n- Bypass firewalls (DNS often allowed)\n- Covert communication channel\n- Data exfiltration\n- C2 communication\n\n*How It Works*\n1. Attacker controls authoritative DNS for a domain\n2. Malware encodes data in DNS queries (subdomains)\n3. Query: data123.encoded456.attacker.com\n4. Attacker's DNS server extracts and responds\n5. Response contains commands or acknowledgment\n\n*Detection*\n- Unusual DNS query volume\n- Long domain names\n- High entropy in subdomains\n- Queries to unusual TLDs\n- DNS traffic analysis\n\n**Domain Generation Algorithms (DGA)**\n\n*Purpose*\n- Automatically generate C2 domains\n- Evade domain blacklisting\n- Resilient C2 infrastructure\n- Attacker registers subset of generated domains\n\n*Characteristics*\n- Algorithmically generated domain names\n- Often look random (nxdomain responses expected)\n- Time-seeded (changes daily/hourly)\n- Examples: Conficker, CryptoLocker, Zeus\n\n**Fast Flux**\n\n*Single Flux*\n- Rapidly change DNS A records\n- Multiple IPs behind single domain\n- IPs of compromised hosts\n- Hides true location\n\n*Double Flux*\n- Change both A records and NS records\n- Even more resilient\n- Harder to take down\n- Used by sophisticated operations\n\n**DNS Security**\n\n*DNSSEC*\n- Digitally signs DNS records\n- Prevents DNS spoofing\n- Validates response authenticity\n- Adoption still limited\n\n*DNS over HTTPS (DoH)*\n- Encrypts DNS queries\n- Prevents eavesdropping\n- Privacy improvement\n- Security trade-offs (visibility loss)\n\n*DNS over TLS (DoT)*\n- Encrypts DNS on dedicated port (853)\n- Similar to DoH\n- Enterprise controllable",
+
+      "key_points": [
+        "DNS hijacking: local (malware), router (compromise), ISP-level (nation-state)",
+        "DNS tunneling encodes data in DNS queries to bypass firewalls for C2 or exfiltration",
+        "DGA (Domain Generation Algorithm) generates C2 domains to evade blacklists",
+        "Fast flux rapidly changes DNS records to hide malicious infrastructure",
+        "DNSSEC signs records to prevent spoofing; DoH/DoT encrypt DNS queries"
+      ],
+
+      "real_world_example": {
+        "scenario": "DNS tunneling for data exfiltration",
+        "company": "Pinnacle Financial Services",
+        "application": "Pinnacle discovered data exfiltration via DNS tunneling: ATTACK (attacker compromised internal system, traditional C2 blocked by firewall), DNS CHANNEL (malware encoded stolen data in DNS queries to attacker-controlled domain), TECHNIQUE (queries like 'Y3VzdG9tZXJkYXRh.base64.data.attacker.com' where subdomain is Base64-encoded data), VOLUME (thousands of queries over weeks, small amounts per query), DETECTION (security team noticed unusual DNS patternsâ€”long subdomains, queries to obscure domain, high entropy names), EXFILTRATED DATA (50,000 customer records sent via DNS before detection). Lesson: monitor DNS traffic patterns, not just block malicious domains."
+      },
+
+      "exam_tips": [
+        "DNS tunneling = encode data in DNS queries for covert C2 or exfiltration",
+        "DGA = malware generates domain names algorithmically to evade blocking",
+        "Fast flux = rapidly changing DNS records (single = A records, double = A + NS)",
+        "DNSSEC = digital signatures on DNS records (prevents spoofing)",
+        "DoH = DNS over HTTPS; DoT = DNS over TLS (both encrypt DNS)"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "DNS Hijacking",
+          "definition": "An attack that redirects DNS queries to malicious DNS servers or modifies DNS responses to direct victims to attacker-controlled destinations.",
+          "exam_note": "Redirects DNS resolution. Levels: local, router, ISP. Defense: secure DNS settings."
+        },
+        {
+          "term": "DNS Tunneling",
+          "definition": "A technique that encodes data within DNS queries and responses to bypass firewalls and establish covert communication channels.",
+          "exam_note": "Data in DNS queries. Bypasses firewalls. Used for C2 and exfiltration."
+        },
+        {
+          "term": "Domain Generation Algorithm (DGA)",
+          "definition": "An algorithm used by malware to generate large numbers of domain names that can be used for command and control, evading static blacklists.",
+          "exam_note": "Generates C2 domains algorithmically. Evades blacklists. Examples: Conficker, CryptoLocker."
+        },
+        {
+          "term": "DNSSEC",
+          "definition": "DNS Security Extensionsâ€”a suite of specifications that add authentication and integrity to DNS through digital signatures.",
+          "exam_note": "Signs DNS records. Prevents spoofing. Validates authenticity. Adoption limited."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A malware sample is generating requests to seemingly random domain names like 'ax7kj2m.net', 'pk4ls9n.net', and 'qm2xv8r.net', most of which return NXDOMAIN responses. This behavior is characteristic of:",
+        "options": [
+          "DNS tunneling for data exfiltration",
+          "Domain generation algorithm (DGA) for C2 resilience",
+          "Fast flux for hiding infrastructure",
+          "DNS amplification attack preparation"
+        ],
+        "correct": 1,
+        "explanation": "This is a Domain Generation Algorithm (DGA)â€”malware algorithmically generates domain names for command and control. Most domains won't be registered (NXDOMAIN), but the attacker registers a subset. This provides C2 resilience against takedowns and blacklisting. DNS tunneling uses actual data encoding. Fast flux rapidly changes records for registered domains."
+      }
+    },
+    {
+      "section_id": "D2-L005-S04",
+      "title": "Session and Credential Attacks",
+      "content": "Session hijacking and credential attacks target the mechanisms that authenticate users and maintain their sessions, enabling attackers to impersonate legitimate users.\n\n**Session Hijacking**\n\n*Concept*\n- Take over active user session\n- Attacker assumes victim's identity\n- Bypasses authentication\n- Access victim's privileges\n\n*Session Hijacking Methods*\n\n*Session Token Theft*\n- Steal session cookies/tokens\n- XSS attacks\n- Network sniffing\n- Malware on endpoint\n\n*Session Prediction*\n- Guess or calculate session IDs\n- Weak random number generation\n- Sequential session IDs\n- Rare with modern frameworks\n\n*Session Fixation*\n- Attacker sets session ID for victim\n- Victim authenticates with known ID\n- Attacker uses same ID\n- Access victim's authenticated session\n\n**Replay Attacks**\n\n*Concept*\n- Capture valid authentication data\n- Retransmit to gain access\n- Works if no replay protection\n- Timestamps and nonces defend\n\n*Examples*\n- Captured authentication hash\n- Recorded authentication exchange\n- Stolen session token reuse\n- Pass-the-hash attacks\n\n*Defenses*\n- Timestamps in authentication\n- Nonces (numbers used once)\n- Challenge-response protocols\n- Short-lived tokens\n\n**Pass-the-Hash**\n\n*Concept*\n- Use captured password hash\n- No need to crack the password\n- NTLM authentication vulnerable\n- Common in Windows environments\n\n*Attack Process*\n1. Attacker compromises one system\n2. Extracts password hashes from memory\n3. Uses hash to authenticate to other systems\n4. No plaintext password needed\n5. Lateral movement achieved\n\n*Defenses*\n- Limit admin account use\n- Protected Users group (Windows)\n- Credential Guard\n- Reduce lateral movement paths\n\n**Credential Stuffing**\n\n*Concept*\n- Use stolen credentials from breaches\n- Try on multiple services\n- Exploit password reuse\n- Automated at scale\n\n*Attack Characteristics*\n- Uses breach databases\n- Millions of attempts possible\n- Low success rate but high volume\n- Targets password reuse\n\n*Defenses*\n- MFA (primary defense)\n- Breach monitoring\n- Rate limiting\n- CAPTCHA\n- Unique passwords (user responsibility)\n\n**Password Spraying**\n\n*Concept*\n- Try common passwords against many accounts\n- Avoids account lockout\n- One password, many users\n- Then next password, many users\n\n*vs. Brute Force*\n- Brute force: many passwords, one account\n- Spraying: one password, many accounts\n- Spraying avoids lockouts\n\n*Defenses*\n- Ban common passwords\n- Smart lockout (Microsoft)\n- Behavioral analytics\n- MFA",
+
+      "key_points": [
+        "Session hijacking takes over active sessions via token theft, prediction, or fixation",
+        "Replay attacks retransmit captured authentication; defend with timestamps/nonces",
+        "Pass-the-hash uses captured hashes without cracking; common in Windows",
+        "Credential stuffing uses breached credentials; exploits password reuse",
+        "Password spraying tries few passwords on many accounts; avoids lockout"
+      ],
+
+      "real_world_example": {
+        "scenario": "Pass-the-hash for lateral movement",
+        "company": "MedCare Health Systems",
+        "application": "Attackers used pass-the-hash to move through the network: INITIAL COMPROMISE (phishing led to malware on workstation), CREDENTIAL EXTRACTION (Mimikatz extracted NTLM hashes from memoryâ€”including domain admin who had logged into that machine), LATERAL MOVEMENT (used admin hash to authenticate to domain controllerâ€”no password cracking needed), PERSISTENCE (created additional admin accounts), IMPACT (full domain compromise from single workstation). Key vulnerabilities: admin logged into regular workstation, no Credential Guard, NTLM allowed, no lateral movement restrictions. Defense: never log privileged accounts into lower-trust systems, implement tiered admin model."
+      },
+
+      "exam_tips": [
+        "Session hijacking = take over active session (token theft, fixation)",
+        "Pass-the-hash = use hash without cracking (NTLM vulnerability)",
+        "Credential stuffing = breached credentials tried across services",
+        "Password spraying = few passwords, many accounts (avoids lockout)",
+        "Replay attack defense = timestamps, nonces, short-lived tokens"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Session Hijacking",
+          "definition": "An attack where an attacker takes over an active user session by stealing or manipulating session tokens, gaining access with the victim's privileges.",
+          "exam_note": "Takes over session. Methods: token theft, prediction, fixation. Bypasses authentication."
+        },
+        {
+          "term": "Replay Attack",
+          "definition": "An attack where valid authentication data is captured and retransmitted to gain unauthorized access.",
+          "exam_note": "Retransmit captured auth. Defense: timestamps, nonces. Pass-the-hash is a type."
+        },
+        {
+          "term": "Pass-the-Hash",
+          "definition": "An attack technique that uses captured password hashes to authenticate to systems without needing to know the actual password.",
+          "exam_note": "Uses hash directly (NTLM). No cracking needed. Windows lateral movement technique."
+        },
+        {
+          "term": "Credential Stuffing",
+          "definition": "An automated attack that uses username/password pairs from data breaches to attempt access to multiple services, exploiting password reuse.",
+          "exam_note": "Uses breached credentials. Exploits password reuse. Defense: MFA, unique passwords."
+        },
+        {
+          "term": "Password Spraying",
+          "definition": "An attack that tries a small number of commonly used passwords against many accounts, avoiding account lockout by spreading attempts across users.",
+          "exam_note": "Few passwords, many accounts. Avoids lockout. Different from brute force."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An attacker compromises a workstation and uses Mimikatz to extract password hashes from memory. They then use these hashes to authenticate to other systems without knowing the actual passwords. This technique is called:",
+        "options": [
+          "Credential stuffing using breached passwords",
+          "Pass-the-hash using captured NTLM hashes",
+          "Password spraying across multiple accounts",
+          "Brute force attack on the password hashes"
+        ],
+        "correct": 1,
+        "explanation": "This is pass-the-hashâ€”using captured NTLM password hashes to authenticate directly without cracking them to plaintext. This is possible because Windows NTLM authentication accepts the hash itself. Credential stuffing uses breached plaintext credentials. Password spraying tries common passwords. Brute force would attempt to crack the hash."
+      }
+    },
+    {
+      "section_id": "D2-L005-S05",
+      "title": "Network Attack Defenses",
+      "content": "Defending against network attacks requires layered controls addressing prevention, detection, and response across the network infrastructure.\n\n**DoS/DDoS Defenses**\n\n*Network Architecture*\n- Over-provisioned bandwidth\n- Geographic distribution (anycast)\n- Load balancers\n- CDN for content delivery\n- Redundant paths\n\n*Filtering and Rate Limiting*\n- Ingress filtering (BCP38)\n- Rate limiting connections\n- SYN cookies (SYN flood defense)\n- Connection timeouts\n- Blackholing (extreme cases)\n\n*DDoS Mitigation Services*\n- Cloud-based scrubbing\n- Traffic analysis and filtering\n- Absorb volumetric attacks\n- Examples: Cloudflare, Akamai, AWS Shield\n\n**MitM Attack Defenses**\n\n*ARP Attack Defenses*\n- Dynamic ARP Inspection (DAI)\n- Static ARP entries (critical systems)\n- Port security\n- Private VLANs\n- 802.1X authentication\n\n*DHCP Attack Defenses*\n- DHCP snooping\n- Trusted/untrusted ports\n- Rate limiting DHCP messages\n- IP Source Guard\n\n*SSL/TLS Protections*\n- HSTS (HTTP Strict Transport Security)\n- Certificate pinning\n- TLS everywhere\n- Certificate transparency monitoring\n\n**DNS Security**\n\n*DNS Infrastructure*\n- DNSSEC deployment\n- DNS monitoring and logging\n- Redundant DNS providers\n- Response rate limiting\n\n*DNS Visibility*\n- Monitor DNS query patterns\n- Detect tunneling (high entropy, long names)\n- Block known malicious domains\n- DNS sinkholing\n\n*Encrypted DNS*\n- DNS over HTTPS (DoH)\n- DNS over TLS (DoT)\n- Balance privacy vs. visibility\n\n**Network Segmentation**\n\n*Benefits*\n- Limit lateral movement\n- Contain breaches\n- Reduce attack surface\n- Enable focused monitoring\n\n*Implementation*\n- VLANs\n- Firewalls between segments\n- Zero trust network access\n- Micro-segmentation\n\n**Network Monitoring**\n\n*Traffic Analysis*\n- NetFlow/IPFIX analysis\n- Packet capture capabilities\n- Baseline normal behavior\n- Anomaly detection\n\n*Intrusion Detection/Prevention*\n- IDS/IPS deployment\n- Signature and behavioral detection\n- Strategic placement\n- Regular rule updates\n\n**Incident Response**\n\n*Preparation*\n- Network maps and diagrams\n- Baseline traffic patterns\n- Response procedures\n- Communication plans\n\n*During Attack*\n- Identify attack type and source\n- Implement filtering/blocking\n- Coordinate with upstream providers\n- Document actions",
+
+      "key_points": [
+        "DDoS defense: CDN, cloud scrubbing, rate limiting, SYN cookies, over-provisioning",
+        "ARP defense: Dynamic ARP Inspection (DAI), port security, 802.1X",
+        "DHCP defense: DHCP snooping with trusted/untrusted ports",
+        "SSL stripping defense: HSTS (HTTP Strict Transport Security)",
+        "Network segmentation limits lateral movement and contains breaches"
+      ],
+
+      "real_world_example": {
+        "scenario": "Implementing layered network defenses",
+        "company": "GlobalRetail Inc.",
+        "application": "After a DDoS attack disrupted their e-commerce site, GlobalRetail implemented comprehensive defenses: DDoS PROTECTION (deployed Cloudflare for traffic scrubbing, over-provisioned bandwidth, implemented rate limiting), MITM DEFENSES (enabled Dynamic ARP Inspection on all switches, DHCP snooping, 802.1X for network access), DNS SECURITY (DNSSEC on their domains, multiple DNS providers, DNS monitoring for tunneling detection), SEGMENTATION (separated POS systems into isolated VLAN, implemented zero trust for internal systems), MONITORING (deployed network IDS at key points, NetFlow analysis, real-time alerting). Results: survived subsequent DDoS attempts, detected internal compromise attempt via ARP monitoring, blocked DNS tunneling exfiltration attempt."
+      },
+
+      "exam_tips": [
+        "SYN cookies defend against SYN flood attacks",
+        "Dynamic ARP Inspection (DAI) prevents ARP poisoning",
+        "DHCP snooping prevents rogue DHCP servers",
+        "HSTS forces HTTPS, preventing SSL stripping",
+        "Ingress filtering (BCP38) blocks spoofed source addresses"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Dynamic ARP Inspection (DAI)",
+          "definition": "A security feature that validates ARP packets by checking them against a trusted database, preventing ARP spoofing attacks.",
+          "exam_note": "Validates ARP packets. Prevents ARP poisoning. Uses DHCP snooping database."
+        },
+        {
+          "term": "DHCP Snooping",
+          "definition": "A security feature that monitors DHCP messages and builds a binding database of valid IP-MAC-port mappings, blocking rogue DHCP servers.",
+          "exam_note": "Monitors DHCP. Trusted/untrusted ports. Blocks rogue DHCP. Feeds DAI."
+        },
+        {
+          "term": "HSTS",
+          "definition": "HTTP Strict Transport Securityâ€”a web security policy mechanism that forces browsers to only use HTTPS connections to a site.",
+          "exam_note": "Forces HTTPS. Prevents SSL stripping. Browser enforced. Preload lists available."
+        },
+        {
+          "term": "SYN Cookies",
+          "definition": "A technique to defend against SYN flood attacks by encoding connection state in the initial sequence number, eliminating the need to store state for half-open connections.",
+          "exam_note": "Defense against SYN flood. No state for half-open connections. Enables connection completion."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A network administrator wants to prevent rogue DHCP servers from providing malicious network configurations to users. Which feature should be enabled on the network switches?",
+        "options": [
+          "Dynamic ARP Inspection to validate DHCP responses",
+          "DHCP snooping to control DHCP message flow",
+          "Port security to limit MAC addresses",
+          "SYN cookies to prevent connection attacks"
+        ],
+        "correct": 1,
+        "explanation": "DHCP snooping is the correct defense against rogue DHCP servers. It designates switch ports as trusted (where legitimate DHCP servers connect) or untrusted (user ports), blocking DHCP server messages from untrusted ports. DAI prevents ARP attacks. Port security limits MAC addresses. SYN cookies defend against SYN floods."
+      }
+    }
+  ],
+
+  "hands_on_activity": {
+    "title": "Network Attack Analysis and Defense Planning",
+    "objective": "Analyze network attack scenarios and design appropriate defenses",
+    "scenario": "You're the network security engineer at Coastal Community Bank. You need to assess network attack risks and implement defenses.",
+    "steps": [
+      "Step 1: Analyze these attack indicators and identify the attack type:\n   Scenario A: Firewall logs show millions of UDP packets per second from thousands of source IPs, all targeting your DNS servers\n   Scenario B: Network monitoring shows a workstation sending ARP replies claiming to be the default gateway\n   Scenario C: DNS logs show queries with very long subdomain names containing what appears to be Base64 encoded data",
+      "Step 2: For each identified attack, determine:\n   - Attack category and technique\n   - Attacker objective\n   - Immediate response actions\n   - Long-term defensive measures",
+      "Step 3: Design a DDoS defense strategy including:\n   - Infrastructure preparations\n   - Detection mechanisms\n   - Mitigation options (in-house vs. cloud service)\n   - Response procedures",
+      "Step 4: Create a switch security configuration plan including:\n   - DHCP snooping (which ports trusted/untrusted)\n   - Dynamic ARP Inspection\n   - Port security settings\n   - 802.1X considerations",
+      "Step 5: Develop DNS security recommendations:\n   - DNSSEC deployment\n   - DNS monitoring for tunneling\n   - Encrypted DNS (DoH/DoT) trade-offs\n   - DNS redundancy",
+      "Step 6: Create a network attack response checklist for the SOC team"
+    ],
+    "expected_outcome": "Comprehensive network security assessment and defense plan covering DDoS, MitM, and DNS attacks with specific configurations and procedures.",
+    "reflection_questions": [
+      "Why is layered defense (defense in depth) important for network security?",
+      "What trade-offs exist between network visibility and encrypted protocols?",
+      "How does network segmentation limit the impact of successful attacks?"
+    ]
+  },
+
+  "what_would_you_do": {
+    "scenario": "You're the security analyst at NexaTech Solutions. At 10 AM, users report that the company website is slow and intermittently unavailable. Network monitoring shows incoming traffic has spiked to 10x normal levels, mostly UDP packets from thousands of IP addresses targeting your web servers. Your ISP confirms traffic is overwhelming their connection to your network.",
+    "context": "This appears to be a DDoS attack. Your web servers host both external website and customer-facing applications. You have a contract with a cloud DDoS mitigation provider but have never activated it. Normal business operations depend on the website being available.",
+    "question": "What is your immediate response?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Block all UDP traffic at the firewall since it appears to be the attack vector",
+        "is_best": false,
+        "feedback": "While UDP is the immediate vector, blocking all UDP may not stop the attack (attackers can switch protocols) and will break legitimate services like DNS. This is too blunt a response and may cause additional problems.",
+        "consequences": "May break DNS and other UDP-based services. Attackers likely switch to TCP flood. Collateral damage to legitimate services. Partial mitigation at best."
+      },
+      {
+        "id": "b",
+        "text": "Activate the DDoS mitigation service and route traffic through their scrubbing centers",
+        "is_best": true,
+        "feedback": "This is the correct response. Cloud DDoS mitigation services are designed for exactly this situation. They have the bandwidth capacity to absorb volumetric attacks and can filter malicious traffic while allowing legitimate users through. Activate immediately.",
+        "consequences": "Traffic routed through scrubbing service. Attack traffic filtered. Legitimate users can access services. May be some initial latency during transition. Attack effectively mitigated."
+      },
+      {
+        "id": "c",
+        "text": "Contact law enforcement to trace the attack source",
+        "is_best": false,
+        "feedback": "While law enforcement notification may be appropriate eventually, this isn't the immediate priority during an active attack. First, mitigate the attack and restore services. Investigation can happen after stability is restored.",
+        "consequences": "Attack continues unmitigated. Services remain down. Law enforcement process is slow. Attribution during active attack is very difficult. Business impact continues."
+      },
+      {
+        "id": "d",
+        "text": "Add more bandwidth by contacting your ISP for an emergency upgrade",
+        "is_best": false,
+        "feedback": "You cannot out-bandwidth a significant DDoS attack. Modern attacks can generate hundreds of Gbps or more. ISP upgrades take time and still may not match attack volume. This is not a sustainable or effective defense strategy.",
+        "consequences": "ISP upgrade takes time (hours/days). Attack volume likely exceeds any reasonable bandwidth purchase. Expensive and ultimately ineffective. Attack continues during upgrade process."
+      }
+    ],
+    "key_lesson": "DDoS attacks require prepared defensesâ€”you cannot respond ad hoc to volumetric attacks. Cloud-based DDoS mitigation services provide the scale and expertise to handle attacks. Have these services contracted and understand the activation process before you need them. Immediate response should focus on mitigation, not investigation or prosecution."
+  },
+
+  "summary": {
+    "key_takeaways": [
+      "DoS = single source; DDoS = distributed (botnet); Amplification multiplies volume",
+      "MitM/on-path attacks use ARP poisoning, DNS spoofing, or rogue DHCP to intercept",
+      "DNS attacks: hijacking (redirect), tunneling (covert channel), DGA (resilient C2)",
+      "Session attacks: hijacking, replay, pass-the-hash (use hash without cracking)",
+      "Credential attacks: stuffing (breached creds) vs. spraying (few passwords, many accounts)",
+      "Defenses: DAI for ARP, DHCP snooping, HSTS for SSL stripping, cloud DDoS mitigation"
+    ],
+    "exam_essentials": [
+      "DDoS amplification uses spoofed IPs; DNS ~70x, NTP ~556x amplification factors",
+      "ARP poisoning = fake ARP replies; Defense = Dynamic ARP Inspection (DAI)",
+      "DNS tunneling = data in DNS queries for C2/exfiltration; Monitor query patterns",
+      "Pass-the-hash = use NTLM hash without cracking; Common Windows lateral movement",
+      "Credential stuffing = breached creds at scale; Password spraying = few passwords, many accounts",
+      "SYN cookies defend SYN flood; HSTS defends SSL stripping"
+    ],
+    "connection_to_next": "Network attacks can provide initial access or enable data theft, but attackers also target applications directly. The next lesson explores application attacksâ€”SQL injection, cross-site scripting, and other techniques that exploit vulnerabilities in software."
+  },
+
+  "related_content": {
+    "simulations": ["D2-SIM-002"],
+    "remediation": ["D2-REM-001"],
+    "next_lesson": "D2-LESSON-006",
+    "previous_lesson": "D2-LESSON-004"
+  }
+}

@@ -1,0 +1,708 @@
+{
+  "scenario": {
+    "id": "D1-SIM-003",
+    "title": "The Encryption Emergency",
+    "type": "primary",
+    "difficulty": "intermediate",
+    "role": "security_engineer",
+    "estimated_duration": "35-45 minutes",
+    "prerequisites": ["D1-SIM-001"],
+    "unlocks": ["D1-SIM-004", "D1-REM-003"],
+    
+    "objectives_covered": ["1.4"],
+    "topics_covered": ["Cryptographic Concepts", "PKI", "Certificate Management", "Key Management", "Encryption Types"],
+    
+    "study_links": [
+      {"topic": "Cryptographic Concepts", "path": "domain1/topic4/study-guide"},
+      {"topic": "PKI Infrastructure", "path": "domain1/topic4/study-guide"},
+      {"topic": "Key Management", "path": "domain1/topic4/study-guide"}
+    ],
+
+    "overview": {
+      "situation": "Quantum Financial Services has discovered that their primary SSL/TLS certificate for their customer-facing banking portal expires in 72 hours. Worse, the security team has found that several internal systems are still using deprecated encryption algorithms (3DES, SHA-1), and the certificate authority they've been using has announced it's being distrusted by major browsers next month. You must orchestrate an emergency cryptographic modernization while maintaining service availability.",
+      "your_role": "Senior Security Engineer - Cryptographic Infrastructure",
+      "mission": "Manage the certificate emergency, audit and upgrade deprecated encryption across the enterprise, and establish a sustainable PKI and key management strategy."
+    },
+
+    "company_context": {
+      "name": "Quantum Financial Services",
+      "industry": "Financial Services / Banking",
+      "size": "Regional bank, 2,500 employees, 500,000 customers",
+      "infrastructure": "Hybrid cloud, 200+ internal applications, customer portal, mobile banking app",
+      "compliance_requirements": ["PCI DSS", "SOX", "GLBA", "State Banking Regulations"],
+      "recent_events": "Acquired smaller credit union 6 months ago, integration still ongoing"
+    },
+
+    "artifacts": [
+      {
+        "id": "D1S3-ART-001",
+        "type": "certificate_report",
+        "title": "Certificate Inventory Scan Results",
+        "available_at_start": true,
+        "content": "CERTIFICATE INVENTORY REPORT - Generated: Current Date\n\n=== CRITICAL EXPIRING ===\nCertificate: *.quantumfinancial.com\nIssuer: TrustMark CA (BEING DISTRUSTED)\nExpires: 72 hours\nKey Size: 2048-bit RSA\nSignature: SHA-256\nSAN: quantumfinancial.com, www.quantumfinancial.com, portal.quantumfinancial.com, api.quantumfinancial.com\nUsage: Customer portal, API gateway, public web\n\n=== EXPIRING 30 DAYS ===\nCertificate: mail.quantumfinancial.com\nIssuer: TrustMark CA\nExpires: 28 days\nKey Size: 2048-bit RSA\n\nCertificate: vpn.quantumfinancial.com\nIssuer: Internal CA\nExpires: 21 days\nKey Size: 1024-bit RSA [WEAK]\n\n=== DEPRECATED ALGORITHMS DETECTED ===\n- internal-legacy.quantumfs.local: SHA-1 signature\n- payroll.quantumfs.local: 3DES encryption\n- acquired-cu.quantumfs.local: MD5 checksums in use\n- fileserver02: SSL 3.0 enabled\n- db-backup-01: TLS 1.0 only\n\n=== CERTIFICATE AUTHORITIES ===\nExternal: TrustMark CA (distrusted in 30 days)\nInternal: Quantum Internal Root CA (SHA-256, 4096-bit, expires 2030)"
+      },
+      {
+        "id": "D1S3-ART-002",
+        "type": "email",
+        "title": "CA Distrust Notification",
+        "available_at_start": true,
+        "content": "FROM: security-notifications@trustmarkca.com\nTO: ssl-admin@quantumfinancial.com\nSUBJECT: URGENT: TrustMark CA Browser Distrust Notice\n\nDear Valued Customer,\n\nDue to recent compliance issues identified during our WebTrust audit, major browser vendors (Chrome, Firefox, Safari, Edge) have announced they will remove TrustMark CA from their trusted root stores effective next month.\n\nACTION REQUIRED:\n- All certificates issued by TrustMark CA will show security warnings\n- Reissue certificates from an alternative CA before the distrust date\n- We are offering free migration assistance\n\nWe apologize for any inconvenience.\n\nTrustMark Security Team"
+      },
+      {
+        "id": "D1S3-ART-003",
+        "type": "architecture_diagram",
+        "title": "Cryptographic Infrastructure Map",
+        "available_at_start": true,
+        "content": "QUANTUM FINANCIAL - CRYPTO ARCHITECTURE\n\n[Internet] --> [WAF/CDN] --> [Load Balancer]\n                                    |\n                    +---------------+---------------+\n                    |               |               |\n              [Web Servers]   [API Gateway]   [Mobile Backend]\n                    |               |               |\n                    +-------+-------+-------+-------+\n                            |               |\n                      [App Servers]    [Integration Layer]\n                            |               |\n                    +-------+-------+       |\n                    |       |       |       |\n                 [HSM]  [Key Mgmt] [Internal CA]\n                    |       |               |\n              [Database] [File Storage] [Legacy Systems]\n\nENCRYPTION LAYERS:\n- TLS 1.2/1.3: External traffic\n- TLS 1.0-1.2: Internal (inconsistent)\n- AES-256: Database encryption at rest\n- 3DES: Legacy payroll system\n- PGP: Some file transfers"
+      },
+      {
+        "id": "D1S3-ART-004",
+        "type": "policy_document",
+        "title": "Current Cryptographic Standards Policy",
+        "available_at_start": false,
+        "unlock_after": "D1S3-DP-003",
+        "content": "QUANTUM FINANCIAL - CRYPTOGRAPHIC STANDARDS (v2.1 - 2022)\n\n3.1 APPROVED ALGORITHMS\nSymmetric: AES-128, AES-256, 3DES (legacy only)\nAsymmetric: RSA 2048+, ECDSA P-256+\nHashing: SHA-256, SHA-384, SHA-512\nKey Exchange: ECDHE, DHE (2048+)\n\n3.2 DEPRECATED (phase out by 2024)\n- SHA-1 (signing)\n- RSA 1024-bit\n- TLS 1.0, 1.1\n- SSL 3.0\n\n3.3 PROHIBITED\n- MD5 (all uses)\n- DES\n- RC4\n- Export ciphers\n\n4.1 CERTIFICATE REQUIREMENTS\n- Minimum 2048-bit RSA or 256-bit ECC\n- Maximum validity: 1 year (public), 2 years (internal)\n- Must use SHA-256 or stronger signature\n\n5.1 KEY MANAGEMENT\n- HSM required for CA private keys\n- Key rotation: Annual for symmetric, per-certificate for asymmetric\n- Secure key destruction procedures required"
+      }
+    ],
+
+    "decision_points": [
+      {
+        "id": "D1S3-DP-001",
+        "sequence": 1,
+        "title": "Emergency Response Priority",
+        "context": "You've just been briefed on the situation. The CISO wants your immediate assessment and action plan. You have 72 hours before the main certificate expires, but multiple cryptographic issues need attention.",
+        "question": "What should be your FIRST priority action?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Immediately purchase and install a new wildcard certificate from a trusted CA for the customer portal",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Correct. The 72-hour expiring certificate for customer-facing services is the most critical and time-sensitive issue. Certificate expiration would cause immediate service disruption and security warnings for all 500,000 customers. While other issues are important, they don't have the same immediate deadline.",
+            "consequence": "You initiate emergency certificate procurement. The new CA can issue within 24 hours after domain validation.",
+            "next_dp": "D1S3-DP-002"
+          },
+          {
+            "id": "B",
+            "text": "Focus on upgrading all deprecated algorithms (3DES, SHA-1) since these are active security vulnerabilities",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "While deprecated algorithms are security concerns, they're not causing immediate service disruption. The expiring certificate will break the customer portal in 72 hours - that's your most urgent deadline. Algorithm upgrades can be planned more carefully.",
+            "consequence": "While you work on algorithm upgrades, time ticks away on the certificate deadline.",
+            "next_dp": "D1S3-DP-002"
+          },
+          {
+            "id": "C",
+            "text": "Set up a new internal Certificate Authority to handle all certificates going forward",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Internal CAs can't be used for public-facing services - browsers won't trust them. Your customer portal needs a certificate from a publicly trusted CA. Additionally, setting up a proper internal CA takes time you don't have.",
+            "consequence": "You realize internal CA certificates would cause browser warnings for external users. You've lost valuable time.",
+            "next_dp": "D1S3-DP-002"
+          },
+          {
+            "id": "D",
+            "text": "Disable HTTPS temporarily and run the portal on HTTP until the certificate situation is resolved",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "This would be a massive security and compliance violation for a financial institution. Running a banking portal without encryption exposes all customer credentials, session tokens, and financial data. PCI DSS absolutely prohibits this, and you'd face immediate regulatory action.",
+            "consequence": "The CISO immediately rejects this suggestion. This would violate PCI DSS, GLBA, and basic security principles for financial services.",
+            "next_dp": "D1S3-DP-002"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Consider which issue has the hardest deadline and most immediate customer impact.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Certificate expiration causes immediate, visible service disruption. Deprecated algorithms are vulnerabilities but services still function.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "In incident response and security operations, triage based on business impact and time sensitivity. A 72-hour deadline with customer-facing impact takes priority over longer-term security debt."
+      },
+      {
+        "id": "D1S3-DP-002",
+        "sequence": 2,
+        "title": "Certificate Type Selection",
+        "context": "You're procuring a new certificate from DigiCert, a well-trusted CA. You need to decide what type of certificate to order for the customer-facing infrastructure.",
+        "question": "Which certificate type is MOST appropriate for Quantum Financial's customer portal?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Domain Validation (DV) wildcard certificate - fastest issuance, covers all subdomains",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "DV certificates only verify domain ownership, not organization identity. For a financial institution handling sensitive customer data, this provides minimal trust assurance. Customers and regulators expect higher validation for banking services.",
+            "consequence": "The certificate would work technically, but provides no organizational verification for customers.",
+            "next_dp": "D1S3-DP-003"
+          },
+          {
+            "id": "B",
+            "text": "Extended Validation (EV) certificate for the main domain only",
+            "is_correct": false,
+            "points": 15,
+            "feedback": "EV provides the highest validation level and was traditionally shown with green bar indicators. However, a single-domain EV won't cover your subdomains (portal, api, www), requiring multiple certificates or leaving services unprotected.",
+            "consequence": "You'd need separate certificates for each subdomain, complicating management and increasing costs.",
+            "next_dp": "D1S3-DP-003"
+          },
+          {
+            "id": "C",
+            "text": "Organization Validation (OV) wildcard certificate with specific SANs for critical subdomains",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent choice. OV certificates verify organizational identity (appropriate for financial services), wildcards cover subdomains efficiently, and adding specific SANs ensures critical services are explicitly covered. This balances security assurance, coverage, and manageability.",
+            "consequence": "DigiCert begins organization validation. With your existing relationship, expedited processing is available.",
+            "next_dp": "D1S3-DP-003"
+          },
+          {
+            "id": "D",
+            "text": "Self-signed certificate as a temporary measure while proper certificates are obtained",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Self-signed certificates would trigger security warnings in all browsers, alarming customers and likely violating PCI DSS requirements for trusted certificates. This is not acceptable for a production financial services portal.",
+            "consequence": "Compliance team immediately flags this as a PCI DSS violation risk.",
+            "next_dp": "D1S3-DP-003"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Consider what level of identity assurance is appropriate for a financial institution.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "OV balances identity verification with practical coverage needs. Think about subdomain coverage too.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Certificate types provide different levels of identity assurance: DV (domain only), OV (organization verified), EV (extended verification). Financial services typically require OV or EV. Wildcards (*.domain.com) cover subdomains efficiently."
+      },
+      {
+        "id": "D1S3-DP-003",
+        "sequence": 3,
+        "title": "Key Generation Security",
+        "context": "The new certificate requires generating a new key pair. Your team asks where and how the private key should be generated.",
+        "question": "What is the MOST secure method for generating the private key for this critical certificate?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Generate on the web server where it will be used, then back up to network storage",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Generating keys on production servers is risky - the server may be compromised, and the key is immediately exposed to potential attacks. Backing up private keys to network storage creates additional exposure points and violates key management best practices.",
+            "consequence": "The key is generated but exists in multiple locations, increasing exposure risk.",
+            "next_dp": "D1S3-DP-004"
+          },
+          {
+            "id": "B",
+            "text": "Use the CA's key generation service - they generate it and send both certificate and key",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Never let a third party generate your private keys. The fundamental principle of PKI is that private keys should never leave the entity that owns them. If the CA generates your key, they have a copy, which defeats the purpose of asymmetric cryptography.",
+            "consequence": "Your security team strongly objects - this violates fundamental PKI principles and your cryptographic policy.",
+            "next_dp": "D1S3-DP-004"
+          },
+          {
+            "id": "C",
+            "text": "Generate on an air-gapped workstation, create CSR, securely transfer to HSM after certificate issuance",
+            "is_correct": false,
+            "points": 15,
+            "feedback": "Air-gapped generation is good practice, but the key should ideally be generated directly in the HSM and never exist outside it. Transferring keys, even securely, creates a window of exposure and complexity.",
+            "consequence": "This works but isn't optimal. The key exists temporarily outside the HSM during transfer.",
+            "next_dp": "D1S3-DP-004"
+          },
+          {
+            "id": "D",
+            "text": "Generate the key pair directly within the Hardware Security Module (HSM), export only the CSR",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Perfect. HSM-generated keys never exist outside the tamper-resistant hardware. Only the Certificate Signing Request (CSR) containing the public key is exported to send to the CA. This provides the highest level of private key protection and meets compliance requirements.",
+            "consequence": "The HSM generates a 4096-bit RSA key pair. The private key is hardware-protected and non-exportable.",
+            "next_dp": "D1S3-DP-004"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "The private key should never exist in an unprotected state or be known to third parties.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "HSMs provide tamper-resistant key storage where keys are generated and used without ever being exposed.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Hardware Security Modules (HSMs) provide the highest level of key protection. Keys generated in HSMs never exist in extractable form. Only public keys (via CSR) leave the HSM. This is required by many compliance frameworks for critical keys."
+      },
+      {
+        "id": "D1S3-DP-004",
+        "sequence": 4,
+        "title": "Algorithm Selection for New Certificate",
+        "context": "When generating the CSR, you need to specify the key algorithm and size. The certificate will protect financial transactions for the next year.",
+        "question": "Which key algorithm and parameters should you select for the new certificate?",
+        "options": [
+          {
+            "id": "A",
+            "text": "RSA 2048-bit with SHA-256 signature",
+            "is_correct": false,
+            "points": 15,
+            "feedback": "RSA 2048 with SHA-256 meets current minimum standards and is widely compatible. However, for a financial institution looking forward, this represents the floor rather than a strong security posture. NIST recommends transitioning to stronger options.",
+            "consequence": "The certificate is technically compliant but uses minimum acceptable parameters.",
+            "next_dp": "D1S3-DP-005"
+          },
+          {
+            "id": "B",
+            "text": "RSA 4096-bit with SHA-384 signature",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent choice. RSA 4096 provides strong security margin for the certificate's lifetime and beyond. SHA-384 offers stronger collision resistance than SHA-256. This combination offers excellent compatibility while exceeding minimum requirements - appropriate for financial services.",
+            "consequence": "The HSM generates a robust 4096-bit key pair with SHA-384 CSR signature.",
+            "next_dp": "D1S3-DP-005"
+          },
+          {
+            "id": "C",
+            "text": "ECDSA P-256 (secp256r1) with SHA-256 signature",
+            "is_correct": false,
+            "points": 20,
+            "feedback": "ECDSA P-256 provides equivalent security to RSA 3072 with much smaller keys and faster operations. It's a valid modern choice. However, some older systems and clients may have compatibility issues with ECC certificates, which could affect some customers.",
+            "consequence": "ECC is efficient and secure, but you may encounter compatibility issues with older client systems.",
+            "next_dp": "D1S3-DP-005"
+          },
+          {
+            "id": "D",
+            "text": "RSA 1024-bit for performance, since the load balancer handles many connections",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "RSA 1024-bit has been deprecated and considered insecure since 2013. NIST, PCI DSS, and all major standards prohibit its use. Modern computing can factor 1024-bit keys. This would fail compliance audits and provide inadequate protection.",
+            "consequence": "The HSM refuses to generate a 1024-bit key - it's below the configured minimum security threshold.",
+            "next_dp": "D1S3-DP-005"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Consider both current security requirements and forward-looking protection for the certificate's lifetime.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Financial services should exceed minimums. RSA 4096 or ECC P-384 provide strong margins.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Key strength comparison: RSA 2048 â‰ˆ ECC P-256 â‰ˆ 112-bit symmetric security. RSA 4096 â‰ˆ ECC P-384 â‰ˆ 128+ bit symmetric security. For sensitive applications, exceed minimum requirements. Consider compatibility needs when choosing between RSA and ECC."
+      },
+      {
+        "id": "D1S3-DP-005",
+        "sequence": 5,
+        "title": "Legacy System Encryption Upgrade",
+        "context": "While the new certificate is being issued, you turn attention to the deprecated encryption findings. The payroll system using 3DES processes sensitive employee financial data. The vendor says the system 'requires' 3DES.",
+        "question": "How should you approach the legacy payroll system's 3DES usage?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Accept the vendor's statement - if the system requires 3DES, document it as a compensating control exception",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Simply accepting vendor limitations without investigation isn't due diligence. 3DES is deprecated and will eventually be prohibited entirely. A compensating control exception requires actual compensating controls, not just documentation of the weakness.",
+            "consequence": "The auditor questions whether you've actually implemented compensating controls or just documented the vulnerability.",
+            "next_dp": "D1S3-DP-006"
+          },
+          {
+            "id": "B",
+            "text": "Immediately disable 3DES on the system to enforce compliance",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Abruptly disabling encryption without a migration path could break the payroll system entirely, preventing employees from being paid. This could cause more harm than the vulnerability. Changes need to be planned and tested.",
+            "consequence": "Payroll processing fails. HR and Finance escalate immediately - employees can't be paid this cycle.",
+            "next_dp": "D1S3-DP-006"
+          },
+          {
+            "id": "C",
+            "text": "Research the system's actual capabilities, engage vendor support for upgrade path, implement network segmentation as interim control",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent systematic approach. Many 'requirements' are actually defaults that can be changed. Engaging the vendor properly often reveals upgrade paths. Network segmentation reduces exposure while you work on the permanent fix - a true compensating control.",
+            "consequence": "Vendor confirms AES-256 is supported in the latest patch. You schedule the upgrade and implement VLAN isolation immediately.",
+            "next_dp": "D1S3-DP-006"
+          },
+          {
+            "id": "D",
+            "text": "Replace the entire payroll system with a modern cloud-based solution",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "While modernization may be the right long-term answer, replacing an entire payroll system is a major project taking months or years. It doesn't address the immediate vulnerability and introduces significant business risk. You need interim solutions.",
+            "consequence": "Finance approves a future replacement project, but you still need to address the current system's security.",
+            "next_dp": "D1S3-DP-006"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Vendor claims should be verified. Also consider interim risk reduction while working on permanent fixes.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Network segmentation can limit exposure of vulnerable systems. Always check if upgrades or configuration changes are actually available.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "When dealing with legacy cryptography: 1) Verify vendor claims - many 'requirements' are changeable defaults, 2) Implement compensating controls (segmentation, monitoring) for interim protection, 3) Plan migration path with realistic timelines, 4) Document risk acceptance decisions properly."
+      },
+      {
+        "id": "D1S3-DP-006",
+        "sequence": 6,
+        "title": "TLS Configuration Hardening",
+        "context": "The scan found servers with TLS 1.0 and SSL 3.0 enabled. You need to establish a secure TLS configuration standard for the environment.",
+        "question": "What TLS configuration should be your new standard?",
+        "options": [
+          {
+            "id": "A",
+            "text": "TLS 1.2 minimum, disable TLS 1.0/1.1/SSL 3.0, prefer ECDHE cipher suites, disable CBC mode ciphers",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent configuration. TLS 1.2 minimum aligns with PCI DSS requirements and industry standards. ECDHE provides perfect forward secrecy. Disabling CBC mode prevents BEAST/POODLE class attacks. This balances strong security with reasonable compatibility.",
+            "consequence": "You create a TLS hardening standard document and begin phased rollout across the infrastructure.",
+            "next_dp": "D1S3-DP-007"
+          },
+          {
+            "id": "B",
+            "text": "TLS 1.3 only - it's the most secure and eliminates all legacy vulnerabilities",
+            "is_correct": false,
+            "points": 15,
+            "feedback": "TLS 1.3 is the most secure, but requiring it exclusively may break compatibility with older clients, partners, or integrated systems. Some financial partners and older mobile apps may not support TLS 1.3 yet. A 1.2/1.3 approach is more practical.",
+            "consequence": "Several partner integrations and some older customer mobile apps fail to connect after the change.",
+            "next_dp": "D1S3-DP-007"
+          },
+          {
+            "id": "C",
+            "text": "Keep TLS 1.0 enabled for compatibility but disable SSL 3.0 and weak ciphers",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "TLS 1.0 has been deprecated and is explicitly prohibited by PCI DSS as of 2018. Keeping it enabled would be a compliance violation. The compatibility argument no longer holds - virtually all modern systems support TLS 1.2.",
+            "consequence": "The PCI QSA flags TLS 1.0 as a compliance violation during the next assessment.",
+            "next_dp": "D1S3-DP-007"
+          },
+          {
+            "id": "D",
+            "text": "Allow all TLS versions but prioritize the strongest ciphers through server preference",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Protocol version downgrade attacks can force connections to use weaker versions even with server preference. If TLS 1.0 or SSL 3.0 is enabled, attackers can exploit their known vulnerabilities. Weak protocols must be disabled entirely.",
+            "consequence": "A security researcher demonstrates a downgrade attack during a penetration test, exploiting the enabled legacy protocols.",
+            "next_dp": "D1S3-DP-007"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "PCI DSS requires TLS 1.2 minimum for cardholder data environments. Consider compliance requirements.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Balance security with compatibility. TLS 1.2 is widely supported. Perfect forward secrecy (ECDHE) protects past sessions if keys are compromised.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "TLS configuration best practices: Minimum TLS 1.2 (1.3 preferred where compatible), ECDHE for forward secrecy, AES-GCM for authenticated encryption, disable all SSL and TLS 1.0/1.1. Cipher suite order matters - configure server preference for strongest options."
+      },
+      {
+        "id": "D1S3-DP-007",
+        "sequence": 7,
+        "title": "Certificate Installation Validation",
+        "context": "The new certificate has been issued and installed on the load balancers. Before switching production traffic, you need to validate the installation.",
+        "question": "What is the MOST comprehensive way to validate the certificate installation?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Check that the browser shows a padlock icon when accessing the site",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "The padlock only indicates a valid TLS connection exists, not that the certificate is correctly configured. It doesn't verify the full certificate chain, proper hostname coverage, cipher suite configuration, or other critical parameters.",
+            "consequence": "Basic validation passes, but you may miss chain or configuration issues.",
+            "next_dp": "D1S3-DP-008"
+          },
+          {
+            "id": "B",
+            "text": "Use SSL/TLS testing tools (SSL Labs, testssl.sh) to perform comprehensive configuration analysis",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. Tools like SSL Labs or testssl.sh provide comprehensive analysis including: certificate chain validation, hostname matching, cipher suite evaluation, protocol support, known vulnerability checks (Heartbleed, ROBOT, etc.), and overall security grading.",
+            "consequence": "SSL Labs scan returns an A+ rating. All checks pass: valid chain, strong ciphers, no vulnerabilities detected.",
+            "next_dp": "D1S3-DP-008"
+          },
+          {
+            "id": "C",
+            "text": "Verify the certificate expiration date is correct in the server configuration",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Expiration date is just one attribute. You also need to verify: complete certificate chain is installed, hostname/SAN matches all required domains, no configuration errors, strong cipher suites, and no protocol vulnerabilities.",
+            "consequence": "Expiration looks good, but you haven't verified the complete configuration.",
+            "next_dp": "D1S3-DP-008"
+          },
+          {
+            "id": "D",
+            "text": "Run openssl s_client to check if the connection establishes successfully",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "openssl s_client is useful for debugging but doesn't automatically check for misconfigurations, weak ciphers, or vulnerabilities. It shows what's configured but doesn't evaluate whether it's secure or complete.",
+            "consequence": "Connection works, but you need more comprehensive testing for security validation.",
+            "next_dp": "D1S3-DP-008"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Manual checks can miss subtle issues. Automated testing tools check many parameters simultaneously.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "SSL Labs (ssllabs.com) is the industry standard for TLS configuration testing and provides letter grades with detailed findings.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Always validate TLS configurations with comprehensive tools before production deployment. SSL Labs (Qualys) and testssl.sh check: certificate validity and chain, cipher suite strength, protocol vulnerabilities, configuration best practices, and provide security ratings."
+      },
+      {
+        "id": "D1S3-DP-008",
+        "sequence": 8,
+        "title": "Key Management Policy",
+        "context": "With the immediate crisis resolved, the CISO asks you to recommend improvements to prevent future certificate emergencies. Current processes are informal with no centralized tracking.",
+        "question": "What key management improvement should be your TOP recommendation?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implement certificate lifecycle management with automated discovery, inventory, and expiration alerts",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. Automated certificate lifecycle management (CLM) addresses the root cause - lack of visibility and proactive management. Features include: automatic discovery of all certificates, centralized inventory, expiration alerts (90/60/30 days), renewal automation, and compliance reporting.",
+            "consequence": "You propose a CLM solution. The CISO approves budget for implementation after seeing how the current emergency could have been prevented.",
+            "next_dp": "D1S3-DP-009"
+          },
+          {
+            "id": "B",
+            "text": "Create a spreadsheet to track all certificates and their expiration dates",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Spreadsheet tracking is better than nothing but is error-prone, requires manual updates, doesn't discover unknown certificates, and depends on someone remembering to check it. In an environment with 200+ applications, manual tracking will fail.",
+            "consequence": "A spreadsheet is created, but within months it's outdated as new systems are deployed without updating it.",
+            "next_dp": "D1S3-DP-009"
+          },
+          {
+            "id": "C",
+            "text": "Require longer certificate validity periods (2-3 years) to reduce management burden",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Industry trend is actually toward shorter validity (maximum 398 days for public certificates since 2020). Longer validity increases the impact window if a private key is compromised and delays adoption of stronger algorithms. Better automation is the solution, not less frequent rotation.",
+            "consequence": "You discover major CAs no longer issue public certificates longer than 1 year - this isn't a viable option.",
+            "next_dp": "D1S3-DP-009"
+          },
+          {
+            "id": "D",
+            "text": "Move all certificates to a single CA for simplified management",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "CA consolidation provides some simplification but doesn't address discovery, tracking, or alerting. It also creates single-point-of-failure risk - as you just experienced when TrustMark was distrusted. Multi-CA strategy with good management tooling is more resilient.",
+            "consequence": "Consolidating CAs helps somewhat, but the TrustMark situation showed the risk of over-reliance on any single CA.",
+            "next_dp": "D1S3-DP-009"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "What was the root cause of this emergency? Lack of visibility into certificate status.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Certificate Lifecycle Management (CLM) tools automate discovery, tracking, alerting, and can even automate renewals.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Certificate Lifecycle Management (CLM) is essential for enterprise environments. Key features: automatic discovery (finds unknown certs), centralized inventory, multi-stage expiration alerts, integration with CAs for automated renewal, compliance reporting. Examples: Venafi, DigiCert CertCentral, Let's Encrypt with ACME."
+      },
+      {
+        "id": "D1S3-DP-009",
+        "sequence": 9,
+        "title": "Cryptographic Agility Planning",
+        "context": "Looking further ahead, the CISO mentions concerns about quantum computing threats to current cryptography. They ask for your perspective on future-proofing the cryptographic infrastructure.",
+        "question": "What should be your approach to quantum computing cryptographic threats?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Quantum computers are decades away from being a real threat - focus on current issues only",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "This underestimates the 'harvest now, decrypt later' threat and the time required for cryptographic transitions. Nation-states may already be capturing encrypted traffic to decrypt when quantum capability arrives. Organizations need years to transition algorithms.",
+            "consequence": "The CISO notes that competitors are already planning for post-quantum cryptography.",
+            "next_dp": "D1S3-DP-010"
+          },
+          {
+            "id": "B",
+            "text": "Immediately switch all systems to post-quantum cryptographic algorithms",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Post-quantum algorithms are still being standardized (NIST finalized first standards in 2024). Immediate wholesale replacement is premature, risky, and would face compatibility issues. A measured, phased approach is needed.",
+            "consequence": "You find that post-quantum algorithms aren't widely supported in current systems and tooling.",
+            "next_dp": "D1S3-DP-010"
+          },
+          {
+            "id": "C",
+            "text": "Develop a cryptographic agility strategy: inventory current algorithms, monitor NIST standards, plan phased migration, prioritize high-value data",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent strategic approach. Cryptographic agility means designing systems that can transition to new algorithms with minimal disruption. Key steps: complete crypto inventory, track emerging standards, identify long-retention sensitive data, plan migration timeline, and build agility into new systems.",
+            "consequence": "You draft a 3-year cryptographic modernization roadmap that addresses both current weaknesses and future quantum threats.",
+            "next_dp": "D1S3-DP-010"
+          },
+          {
+            "id": "D",
+            "text": "Increase all current key sizes to maximum (RSA 8192, AES-512) to resist quantum attacks",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Larger keys for current algorithms don't protect against quantum attacks. Shor's algorithm breaks RSA/ECC regardless of key size. Grover's algorithm halves effective symmetric key strength (AES-256 â†’ 128-bit equivalent), but AES-512 doesn't exist. Different algorithm families are needed.",
+            "consequence": "The security architect explains that key size increases don't address the fundamental quantum vulnerability.",
+            "next_dp": "D1S3-DP-010"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Balance current practicality with future preparedness. Wholesale immediate changes aren't practical.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Cryptographic agility - the ability to swap algorithms without major system changes - is the recommended approach for quantum preparedness.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Post-quantum cryptography (PQC) preparedness requires: 1) Crypto inventory - know what algorithms you use where, 2) Monitor standards - NIST finalized ML-KEM, ML-DSA, SLH-DSA in 2024, 3) Cryptographic agility - design systems for algorithm flexibility, 4) Prioritize - focus on long-retention sensitive data first, 5) Plan timelines - crypto transitions take years."
+      },
+      {
+        "id": "D1S3-DP-010",
+        "sequence": 10,
+        "title": "Documentation and Handoff",
+        "context": "The emergency is resolved. The CISO asks you to document the incident and improvements for the security team and future reference.",
+        "question": "What should be the PRIMARY focus of your documentation?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Technical details of every configuration change made during the emergency",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Technical changes should be documented, but purely technical documentation doesn't address the systemic issues that caused the emergency or help prevent recurrence. Focus on lessons learned and process improvements.",
+            "consequence": "Detailed technical docs are created, but they don't drive organizational improvement.",
+            "next_dp": null
+          },
+          {
+            "id": "B",
+            "text": "A blame analysis identifying who was responsible for the certificate lapse",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Blame-focused analysis creates a culture where people hide problems rather than report them. Blameless post-mortems that focus on systemic causes and improvements are far more effective at preventing future incidents.",
+            "consequence": "The team becomes defensive. Future certificate issues may be hidden rather than reported early.",
+            "next_dp": null
+          },
+          {
+            "id": "C",
+            "text": "Blameless post-mortem covering root causes, timeline, actions taken, and systemic improvements to prevent recurrence",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. A blameless post-mortem focuses on: What happened (timeline), Why it happened (root causes), How we responded (actions and effectiveness), What we're changing (systemic improvements). This builds a learning culture and drives real improvement.",
+            "consequence": "Your post-mortem document becomes a template for future incident reviews and drives adoption of the CLM tool.",
+            "next_dp": null
+          },
+          {
+            "id": "D",
+            "text": "An executive summary for leadership highlighting the successful resolution",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Executive communication is important but shouldn't be the primary documentation. Leadership needs a summary, but the organization needs detailed lessons learned and improvement tracking to prevent future incidents.",
+            "consequence": "Leadership is happy, but operational teams lack the detailed analysis needed for improvement.",
+            "next_dp": null
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "The goal of incident documentation is organizational learning and preventing recurrence.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Blameless post-mortems focus on systemic causes and improvements, not individual fault.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Blameless post-mortem structure: 1) Incident summary and timeline, 2) Root cause analysis (usually multiple contributing factors), 3) Impact assessment, 4) Response evaluation, 5) Action items with owners and deadlines, 6) Lessons learned. Focus on systems and processes, not individual blame."
+      }
+    ],
+
+    "completion_criteria": {
+      "pass_threshold": 80,
+      "points_possible": 250,
+      "minimum_decisions": 10
+    },
+
+    "summary_teaching_points": [
+      "Certificate lifecycle management prevents emergency situations through proactive monitoring and automated alerts",
+      "Private keys should be generated and stored in HSMs for maximum protection - they should never be exportable or exist in plaintext",
+      "Certificate types (DV/OV/EV) provide different levels of identity assurance appropriate for different use cases",
+      "TLS configuration requires disabling legacy protocols (SSL, TLS 1.0/1.1) and preferring forward-secrecy cipher suites",
+      "Legacy cryptographic algorithms require planned migration with compensating controls during transition",
+      "Cryptographic agility prepares organizations for algorithm transitions including post-quantum migration",
+      "Comprehensive testing tools (SSL Labs, testssl.sh) should validate TLS configurations before production deployment",
+      "Blameless post-mortems drive organizational learning and systemic improvement"
+    ],
+
+    "weakness_mapping": [
+      {
+        "if_missed": ["D1S3-DP-001", "D1S3-DP-008"],
+        "weak_topic": "Certificate Lifecycle Management",
+        "objectives": ["1.4"],
+        "suggested_review": "domain1/topic4/study-guide",
+        "suggested_simulation": "D1-REM-003"
+      },
+      {
+        "if_missed": ["D1S3-DP-002", "D1S3-DP-004"],
+        "weak_topic": "Certificate Types and Key Algorithms",
+        "objectives": ["1.4"],
+        "suggested_review": "domain1/topic4/study-guide",
+        "suggested_simulation": "D1-REM-003"
+      },
+      {
+        "if_missed": ["D1S3-DP-003"],
+        "weak_topic": "Key Generation and HSM Usage",
+        "objectives": ["1.4"],
+        "suggested_review": "domain1/topic4/study-guide",
+        "suggested_simulation": "D1-REM-003"
+      },
+      {
+        "if_missed": ["D1S3-DP-005", "D1S3-DP-006"],
+        "weak_topic": "Encryption Standards and TLS Configuration",
+        "objectives": ["1.4"],
+        "suggested_review": "domain1/topic4/study-guide",
+        "suggested_simulation": "D1-REM-003"
+      },
+      {
+        "if_missed": ["D1S3-DP-009"],
+        "weak_topic": "Post-Quantum Cryptography and Crypto Agility",
+        "objectives": ["1.4"],
+        "suggested_review": "domain1/topic4/study-guide",
+        "suggested_simulation": "D1-REM-003"
+      }
+    ],
+
+    "next_recommended": "D1-SIM-004"
+  }
+}

@@ -1,0 +1,1095 @@
+{
+  "scenario_id": "D1-REM-003",
+  "title": "Cryptography Clinic",
+  "type": "remediation",
+  "domain": 1,
+  "domain_name": "General Security Concepts",
+  "objectives_covered": ["1.4"],
+  "objective_descriptions": {
+    "1.4": "Explain the importance of using appropriate cryptographic solutions"
+  },
+  "difficulty": "foundational",
+  "estimated_duration_minutes": 35,
+  "role": "security_analyst",
+  "role_title": "Junior Security Analyst",
+  
+  "remediation_context": {
+    "triggered_by": ["D1-SIM-003", "D1-SIM-004", "D1-SIM-005"],
+    "weakness_areas": [
+      "Symmetric vs asymmetric encryption",
+      "Hash algorithm selection",
+      "PKI and certificate concepts",
+      "Key management fundamentals",
+      "Encryption use cases"
+    ],
+    "learning_approach": "Structured walkthrough with progressive concept building"
+  },
+  
+  "scenario_context": {
+    "organization": "TechStart Academy",
+    "industry": "Technology Training & Education",
+    "org_size": "200 employees, 5,000 active students",
+    "your_position": "Junior Security Analyst (4 months into role)",
+    "team": "Security Operations team of 3",
+    "reporting_to": "Security Manager",
+    "current_situation": "TechStart Academy has hired you to help modernize their security infrastructure. Your manager recognizes you need structured training on cryptographic concepts before tackling bigger projects. She's created a 'Cryptography Clinic' - a series of real scenarios from the training center that will build your crypto expertise systematically. Each challenge builds on the previous one, starting from fundamentals."
+  },
+  
+  "learning_objectives": [
+    "Distinguish between symmetric and asymmetric encryption and their use cases",
+    "Select appropriate hash algorithms based on security requirements",
+    "Understand PKI components and certificate lifecycle",
+    "Apply key management best practices",
+    "Recognize common cryptographic mistakes and vulnerabilities",
+    "Choose appropriate cryptographic solutions for different scenarios"
+  ],
+  
+  "initial_briefing": {
+    "narrative": "Your manager, Sarah Chen, welcomes you to the cryptography clinic.\n\n'I've assembled a set of real scenarios from our environment and past incidents,' she explains. 'Each one will teach you a core cryptographic concept. Think of it like building blocks - we start with foundations and add complexity.'\n\nShe hands you a coffee and a notebook. 'Don't worry about getting everything perfect. This is about learning. Ask questions, use the reference materials, and focus on understanding WHY, not just WHAT.'\n\nThe first scenario is already on your screen - a helpdesk ticket about password storage.",
+    "clinic_structure": [
+      "Module 1: Hash Functions and Password Storage",
+      "Module 2: Symmetric Encryption Fundamentals",
+      "Module 3: Asymmetric Encryption and Digital Signatures",
+      "Module 4: PKI and Certificates",
+      "Module 5: Key Management Practices",
+      "Module 6: Cryptographic Selection Framework"
+    ],
+    "available_resources": [
+      "Cryptographic standards quick reference guide",
+      "NIST algorithm recommendations",
+      "Company encryption policy",
+      "Sarah Chen (mentor) for questions",
+      "Lab environment for testing"
+    ]
+  },
+  
+  "reference_materials": {
+    "hash_quick_reference": {
+      "title": "Hash Algorithm Quick Reference",
+      "content": "HASH FUNCTION OVERVIEW\n\n=== What Hashes Do ===\n- Convert any input to fixed-size output (digest)\n- One-way function (cannot reverse)\n- Deterministic (same input = same output)\n- Small change = completely different hash (avalanche)\n\n=== Common Algorithms ===\n\nMD5 (128-bit output)\n- Status: BROKEN - collision attacks practical\n- Use: Legacy file checksums only (non-security)\n- Never for: Passwords, signatures, security\n\nSHA-1 (160-bit output)\n- Status: DEPRECATED - collision attacks demonstrated\n- Use: Legacy compatibility only\n- Never for: New implementations, signatures\n\nSHA-256 (256-bit output)\n- Status: CURRENT STANDARD\n- Use: Digital signatures, integrity verification\n- Part of SHA-2 family\n\nSHA-3 (Variable output)\n- Status: ALTERNATIVE STANDARD\n- Use: When SHA-2 alternative needed\n- Different internal structure than SHA-2\n\n=== Password Hashing (Different!) ===\nNOT SHA-256 or similar - too fast!\n\nbcrypt\n- Intentionally slow, adjustable work factor\n- Built-in salt generation\n- Industry standard for passwords\n\nArgon2 (id/d/i variants)\n- Memory-hard (resists GPU attacks)\n- OWASP recommended\n- Newest standard\n\nPBKDF2\n- Key derivation function\n- Acceptable with high iterations\n- FIPS compliant option\n\n=== Key Concept ===\nSpeed matters: Fast hash = bad for passwords (attacker can try billions)\nSlow hash + salt = good for passwords (attacker limited)"
+    },
+    "encryption_quick_reference": {
+      "title": "Encryption Types Quick Reference",
+      "content": "ENCRYPTION OVERVIEW\n\n=== Symmetric Encryption ===\n(Same key encrypts and decrypts)\n\nCharacteristics:\n- Fast - suitable for bulk data\n- Key distribution challenge\n- Key must be shared securely\n\nAES (Advanced Encryption Standard)\n- AES-128: 128-bit key, very secure\n- AES-256: 256-bit key, quantum-resistant\n- Block cipher (128-bit blocks)\n- Modes: GCM (authenticated), CBC (legacy)\n\n3DES (Triple DES)\n- DEPRECATED - 64-bit blocks vulnerable\n- Sweet32 attack at high volumes\n- Migrate to AES\n\nChaCha20\n- Stream cipher alternative to AES\n- Good for mobile/low-power\n- Often paired with Poly1305 (ChaCha20-Poly1305)\n\n=== Asymmetric Encryption ===\n(Public key encrypts, private key decrypts)\n(Private key signs, public key verifies)\n\nCharacteristics:\n- Slower than symmetric\n- Solves key distribution\n- Enables digital signatures\n\nRSA\n- 2048-bit: current minimum\n- 3072-bit: recommended through 2030\n- 4096-bit: high security / CA keys\n- NOT quantum resistant\n\nECC (Elliptic Curve)\n- Smaller keys, equivalent security\n- P-256: ~RSA-3072 strength\n- P-384: ~RSA-7680 strength\n- NOT quantum resistant\n\n=== Use Case Summary ===\n- Encrypt stored data: AES-256 (symmetric)\n- Encrypt in transit: TLS (asymmetric for key exchange, symmetric for data)\n- Digital signatures: RSA or ECDSA\n- Password storage: bcrypt/Argon2 (NOT encryption!)"
+    },
+    "pki_quick_reference": {
+      "title": "PKI Quick Reference",
+      "content": "PKI COMPONENTS\n\n=== Certificate Authority (CA) ===\n\nRoot CA:\n- Top of trust hierarchy\n- Self-signed certificate\n- Kept OFFLINE for security\n- Long validity (10-20 years)\n- Issues intermediate CA certs\n\nIntermediate/Issuing CA:\n- Signed by root CA\n- Issues end-entity certificates\n- Can be online (with HSM)\n- Medium validity (5-10 years)\n\n=== Certificate Types ===\n\nDomain Validated (DV):\n- Proves domain control only\n- Automated issuance (minutes)\n- Basic encryption, no identity\n\nOrganization Validated (OV):\n- Verifies organization exists\n- Manual verification (days)\n- Shows org name in cert\n\nExtended Validation (EV):\n- Thorough verification\n- Legal entity confirmation\n- Highest identity assurance\n\n=== Certificate Lifecycle ===\n\n1. Key Generation\n   - Generate private key (ideally in HSM)\n   - Create CSR (Certificate Signing Request)\n\n2. Certificate Issuance\n   - Submit CSR to CA\n   - CA validates request\n   - CA signs certificate\n\n3. Certificate Deployment\n   - Install cert and private key\n   - Configure application\n   - Test certificate chain\n\n4. Certificate Monitoring\n   - Track expiration dates\n   - Monitor revocation status\n   - Automated alerts\n\n5. Certificate Renewal/Replacement\n   - Renew before expiration\n   - Rotate keys periodically\n   - Update pinned certificates\n\n=== Revocation ===\n\nCRL (Certificate Revocation List):\n- Periodic download of revoked certs\n- Can be stale between updates\n\nOCSP (Online Certificate Status Protocol):\n- Real-time status check\n- More current than CRL\n- Privacy concerns (CA sees requests)"
+    }
+  },
+  
+  "decision_points": [
+    {
+      "dp_id": "D1-REM-003-DP01",
+      "sequence": 1,
+      "title": "Module 1: The Password Problem",
+      "module": "Hash Functions and Password Storage",
+      "narrative": "Your first clinic scenario arrives via helpdesk ticket.\n\n**Ticket #4721:** 'We're building a new student registration portal. The developer asks how to store passwords securely. She's currently using MD5 to hash passwords before storing them. Is this okay?'\n\nSarah looks at you: 'This is foundational. Why do we hash passwords instead of encrypting them? And what's wrong with MD5?'",
+      "teaching_moment": {
+        "concept": "Password Storage Fundamentals",
+        "explanation": "Passwords are HASHED, not encrypted, because:\n1. We only need to verify, not retrieve\n2. No key management required\n3. Even administrators can't see passwords\n\nGood password hashing requires:\n- One-way function (can't reverse)\n- Unique salt per password\n- Computational cost (slow is good!)\n- Collision resistance"
+      },
+      "question": "What do you tell the developer about MD5 for password storage?",
+      "options": [
+        {
+          "id": "A",
+          "text": "MD5 is cryptographically broken and too fast. Recommend bcrypt or Argon2 with automatic salting and configurable work factor.",
+          "is_optimal": true,
+          "points": 25,
+          "feedback": "Excellent! You've identified both problems: MD5 has collision vulnerabilities AND it's too fast. Modern password hashing algorithms like bcrypt and Argon2 are intentionally slow (preventing brute force) and include built-in salting (preventing rainbow tables). The work factor can be increased over time as hardware improves.",
+          "consequence": "The developer appreciates the clear explanation and implements Argon2id. You document this as a standard for the development team.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "MD5 is broken - practical collision attacks exist",
+              "Speed is bad for password hashing - attackers can try billions per second",
+              "Salts prevent rainbow table attacks",
+              "bcrypt/Argon2 are PURPOSE-BUILT for passwords",
+              "Work factor should be tuned to take ~250ms per hash"
+            ]
+          }
+        },
+        {
+          "id": "B",
+          "text": "MD5 is fine as long as you add a salt before hashing.",
+          "is_optimal": false,
+          "points": 5,
+          "feedback": "Adding salt to MD5 only prevents rainbow table attacks. MD5's fundamental problems remain: it's collision-vulnerable and extremely fast. GPUs can compute billions of MD5 hashes per second. A salt doesn't slow down targeted brute-force attacks against individual passwords.",
+          "consequence": "The developer adds salts, but six months later a security audit flags the MD5 usage as critical. You have to migrate passwords anyway.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Salts alone don't fix algorithm weaknesses",
+              "Speed remains a problem even with salts",
+              "Purpose-built password algorithms are essential"
+            ]
+          }
+        },
+        {
+          "id": "C",
+          "text": "Use SHA-256 instead - it's the current hashing standard.",
+          "is_optimal": false,
+          "points": 10,
+          "feedback": "SHA-256 is excellent for data integrity and signatures, but it's still too FAST for password storage. It can compute billions of hashes per second on GPUs. Password hashing requires intentionally slow algorithms to resist brute-force attacks.",
+          "consequence": "The implementation passes initial review but fails the security assessment. SHA-256 is not on the approved list for password storage - only for checksums and signatures.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "SHA-256 is secure but designed for speed",
+              "Different use cases need different algorithms",
+              "Password hashing = slow by design"
+            ]
+          }
+        },
+        {
+          "id": "D",
+          "text": "Encrypt the passwords with AES-256 instead of hashing them.",
+          "is_optimal": false,
+          "points": 5,
+          "feedback": "Encrypting passwords is wrong for several reasons: you'd need to store the encryption key somewhere (new attack target), anyone with the key could decrypt ALL passwords, and you don't actually need to retrieve passwords - just verify them. Hashing is one-way by design.",
+          "consequence": "Sarah stops you here for a quick lesson on why encryption is inappropriate for password storage. This is a fundamental concept you need to understand.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Encryption is reversible - passwords shouldn't be",
+              "Key storage creates new attack surface",
+              "Verification doesn't require retrieval",
+              "Hashing is one-way = no key to compromise"
+            ]
+          }
+        }
+      ],
+      "hints": [
+        {
+          "hint_number": 1,
+          "text": "MD5 has two problems for passwords: known vulnerabilities AND speed. What addresses both?",
+          "penalty": 2
+        },
+        {
+          "hint_number": 2,
+          "text": "Check your reference card - what algorithms are specifically designed for password storage?",
+          "penalty": 3
+        }
+      ],
+      "objectives_tested": ["1.4"],
+      "difficulty": "foundational"
+    },
+    {
+      "dp_id": "D1-REM-003-DP02",
+      "sequence": 2,
+      "title": "Module 1B: Integrity Verification",
+      "module": "Hash Functions - Integrity Use Case",
+      "narrative": "Building on the hashing lesson, Sarah presents another ticket:\n\n**Ticket #4725:** 'The software team distributes training materials as ZIP downloads. They want to help students verify their downloads weren't corrupted or tampered with. What should they provide?'\n\nSarah explains: 'This is a different use case for hashes. Here, speed is actually beneficial since we're checking large files. But we still need collision resistance. What do you recommend?'",
+      "teaching_moment": {
+        "concept": "Hash Use Cases Vary",
+        "explanation": "Not all hash uses have the same requirements:\n\nPassword storage: Slow + salt + collision resistant\nFile integrity: Fast + collision resistant\nDigital signatures: Collision resistant (speed varies)\nChecksums: Can be fast, collision resistance depends on threat model\n\nChoose the algorithm based on what you're protecting against."
+      },
+      "question": "What hash algorithm do you recommend for download verification?",
+      "options": [
+        {
+          "id": "A",
+          "text": "SHA-256 - provides collision resistance for integrity verification and is computationally efficient for large files.",
+          "is_optimal": true,
+          "points": 25,
+          "feedback": "Perfect choice. SHA-256 is ideal for file integrity because: it's collision-resistant (prevents attackers from creating malicious files with matching hashes), fast enough for large files, and widely supported. This is exactly what SHA-256 was designed for.",
+          "consequence": "You implement SHA-256 checksums for all downloads. Students can easily verify their files using built-in OS tools or simple scripts.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "SHA-256 is ideal for integrity verification",
+              "Speed is acceptable/beneficial for file checks",
+              "Collision resistance prevents malicious substitution",
+              "Different from password use case - same algorithm family, different choice"
+            ]
+          }
+        },
+        {
+          "id": "B",
+          "text": "bcrypt - it's the most secure hashing algorithm available.",
+          "is_optimal": false,
+          "points": 5,
+          "feedback": "bcrypt is designed specifically for passwords, not file integrity. It would be extremely slow for large files (by design!) and doesn't provide benefits for this use case. Using the wrong tool for the job creates problems.",
+          "consequence": "Generating bcrypt hashes for large training videos takes minutes instead of seconds. Users complain about verification taking forever. You switch to SHA-256.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "bcrypt is for passwords only",
+              "Its slowness is intentional - bad for files",
+              "Match algorithm to use case"
+            ]
+          }
+        },
+        {
+          "id": "C",
+          "text": "MD5 - it's fast and still commonly used for file checksums.",
+          "is_optimal": false,
+          "points": 10,
+          "feedback": "MD5 is indeed fast and still commonly used for non-security checksums (detecting accidental corruption). However, for TAMPER detection, MD5's collision vulnerabilities are a problem. An attacker could create a malicious file with the same MD5 hash. For security purposes, use SHA-256.",
+          "consequence": "The security team reviews your recommendation and flags MD5 as inadequate for tamper detection. You learn the difference between accidental corruption and intentional modification.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "MD5 okay for accidental corruption only",
+              "Collision attacks enable intentional substitution",
+              "Security use cases need collision resistance"
+            ]
+          }
+        },
+        {
+          "id": "D",
+          "text": "CRC32 - it's the fastest option for file verification.",
+          "is_optimal": false,
+          "points": 5,
+          "feedback": "CRC32 is not a cryptographic hash - it's a checksum designed for error detection only. It has no collision resistance and is trivial to manipulate. Anyone can create a different file with the same CRC32. Never use CRC for security purposes.",
+          "consequence": "Sarah gently explains that CRC is not a security control. This is an important distinction between error-checking codes and cryptographic hashes.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "CRC is NOT cryptographic",
+              "No collision resistance",
+              "Only detects accidental errors",
+              "Cryptographic hashes are required for security"
+            ]
+          }
+        }
+      ],
+      "hints": [
+        {
+          "hint_number": 1,
+          "text": "For file integrity, you need collision resistance (security) but speed is fine. What fits?",
+          "penalty": 2
+        },
+        {
+          "hint_number": 2,
+          "text": "SHA-256 is the current standard for integrity verification where tampering is a concern.",
+          "penalty": 3
+        }
+      ],
+      "objectives_tested": ["1.4"],
+      "difficulty": "foundational"
+    },
+    {
+      "dp_id": "D1-REM-003-DP03",
+      "sequence": 3,
+      "title": "Module 2: The Encryption Question",
+      "module": "Symmetric Encryption Fundamentals",
+      "narrative": "Module 2 begins with a database security question.\n\n**Ticket #4730:** 'The student records database contains sensitive information including SSNs and grades. We need to encrypt this data at rest. What encryption should we use?'\n\nSarah adds context: 'This is bulk data encryption - potentially millions of records. Think about what encryption type makes sense for large amounts of data that one system needs to access.'",
+      "teaching_moment": {
+        "concept": "Symmetric vs Asymmetric Use Cases",
+        "explanation": "Rule of thumb:\n- Symmetric (AES): Fast, bulk data, one system\n- Asymmetric (RSA): Slow, small data, key exchange, signatures\n\nData at rest (stored data) is typically encrypted with symmetric encryption because:\n1. Large volume requires speed\n2. Same system encrypts and decrypts\n3. Key management is simpler (one key)"
+      },
+      "question": "What encryption do you recommend for the student records database?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AES-256 symmetric encryption with proper key management stored in a hardware security module (HSM).",
+          "is_optimal": true,
+          "points": 25,
+          "feedback": "Excellent recommendation. AES-256 is the standard for data-at-rest encryption: it's fast enough for large databases, provides strong security, and is FIPS-approved. Storing the encryption key in an HSM protects it from extraction. This is industry best practice.",
+          "consequence": "The database team implements AES-256 with HSM-protected keys. The implementation passes both security and compliance audits.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "AES-256 is standard for data at rest",
+              "Symmetric = fast = good for bulk data",
+              "Key protection is critical (HSM)",
+              "FIPS 140-2/3 compliance for regulated data"
+            ]
+          }
+        },
+        {
+          "id": "B",
+          "text": "RSA-4096 asymmetric encryption for maximum security.",
+          "is_optimal": false,
+          "points": 5,
+          "feedback": "RSA is asymmetric encryption - designed for small amounts of data like keys and signatures. Encrypting a database with RSA would be extremely slow (thousands of times slower than AES) and isn't how RSA is meant to be used. RSA typically encrypts symmetric keys, not bulk data.",
+          "consequence": "A proof-of-concept shows RSA encryption taking 45 minutes for a dataset AES processes in seconds. The team switches to AES.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "RSA is for keys and signatures, not bulk data",
+              "Asymmetric encryption is slow by nature",
+              "Use RSA to protect AES keys, not data directly"
+            ]
+          }
+        },
+        {
+          "id": "C",
+          "text": "3DES encryption since it's been used reliably for decades.",
+          "is_optimal": false,
+          "points": 5,
+          "feedback": "3DES is deprecated and should not be used for new implementations. Its 64-bit block size makes it vulnerable to Sweet32 birthday attacks when encrypting large amounts of data - exactly what a database does. NIST withdrew 3DES approval in 2023. Use AES.",
+          "consequence": "The compliance team rejects 3DES immediately - it's on the prohibited list. You learn that 'time-tested' doesn't mean 'still appropriate.'",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "3DES is deprecated (NIST 2023)",
+              "64-bit blocks = Sweet32 vulnerability",
+              "Legacy doesn't mean secure",
+              "AES is the required replacement"
+            ]
+          }
+        },
+        {
+          "id": "D",
+          "text": "SHA-256 to secure the database contents.",
+          "is_optimal": false,
+          "points": 0,
+          "feedback": "SHA-256 is a hash function, not encryption. Hashing is one-way - you couldn't retrieve the data! Encryption must be reversible (two-way) so authorized users can access the original data. This is a fundamental distinction.",
+          "consequence": "Sarah pauses to clarify the encryption vs hashing distinction. This is core knowledge you need to master.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Hashing = one-way (verify)",
+              "Encryption = two-way (protect then retrieve)",
+              "Cannot retrieve data from a hash",
+              "Completely different use cases"
+            ]
+          }
+        }
+      ],
+      "hints": [
+        {
+          "hint_number": 1,
+          "text": "For large amounts of data, symmetric encryption is appropriate. What's the current standard?",
+          "penalty": 2
+        },
+        {
+          "hint_number": 2,
+          "text": "AES-256 is the industry standard for data-at-rest encryption.",
+          "penalty": 3
+        }
+      ],
+      "objectives_tested": ["1.4"],
+      "difficulty": "foundational"
+    },
+    {
+      "dp_id": "D1-REM-003-DP04",
+      "sequence": 4,
+      "title": "Module 3: Digital Signatures",
+      "module": "Asymmetric Encryption - Signatures",
+      "narrative": "Module 3 introduces digital signatures.\n\n**Ticket #4735:** 'The CEO needs to digitally sign important announcements to prove they're authentic and haven't been modified. How do digital signatures work, and what do we need to set up?'\n\nSarah explains: 'This is where asymmetric cryptography shines. The CEO will use her private key to sign, and anyone can use her public key to verify. Walk me through it.'",
+      "teaching_moment": {
+        "concept": "Digital Signature Process",
+        "explanation": "Digital signatures provide:\n1. Authentication - proves who signed\n2. Integrity - proves content wasn't modified\n3. Non-repudiation - signer can't deny signing\n\nProcess:\n1. Create hash of document (SHA-256)\n2. Encrypt hash with signer's PRIVATE key\n3. Attach encrypted hash as signature\n\nVerification:\n1. Decrypt signature with signer's PUBLIC key\n2. Independently hash the document\n3. Compare hashes - match = valid signature"
+      },
+      "question": "How do you explain the digital signature process to the CEO's office?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The document is hashed, then the hash is encrypted with your private key. Anyone can verify by decrypting with your public key and comparing hashes. This proves authenticity and integrity.",
+          "is_optimal": true,
+          "points": 25,
+          "feedback": "Perfect explanation! You've correctly described how digital signatures work. The private key creates the signature (only the CEO has it), and the public key verifies it (anyone can check). The hash ensures the document wasn't modified. This provides authentication, integrity, and non-repudiation.",
+          "consequence": "The CEO's office implements digital signing for official communications. Staff can verify authentic messages from leadership.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Hash the document first",
+              "Private key encrypts (signs) the hash",
+              "Public key decrypts (verifies) the signature",
+              "Provides authentication + integrity + non-repudiation",
+              "Different from encryption (which hides content)"
+            ]
+          }
+        },
+        {
+          "id": "B",
+          "text": "Encrypt the entire document with the CEO's private key so only authorized people can read it.",
+          "is_optimal": false,
+          "points": 5,
+          "feedback": "This confuses signing with encryption. Encrypting with a private key doesn't hide the content - anyone with the public key could decrypt it. Also, asymmetric encryption of entire documents is impractical. Digital signatures prove authenticity, not confidentiality.",
+          "consequence": "Sarah explains the distinction: signatures prove WHO and UNCHANGED, encryption hides CONTENT. Different purposes.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Signing â‰  encrypting",
+              "Signatures prove identity and integrity",
+              "Anyone can verify (that's the point)",
+              "Use encryption to hide content"
+            ]
+          }
+        },
+        {
+          "id": "C",
+          "text": "Create a hash of the document and publish it alongside the announcement.",
+          "is_optimal": false,
+          "points": 10,
+          "feedback": "A hash alone proves integrity (document wasn't modified) but NOT authenticity. Anyone could create a hash. Without the private key signature, there's no proof the CEO created it. Digital signatures combine hashing WITH asymmetric cryptography.",
+          "consequence": "An attacker creates a fake announcement with its own valid hash. Without cryptographic signing, there's no way to prove the real CEO wrote either one.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Hash alone = integrity only",
+              "Signature adds authentication",
+              "Private key proves identity",
+              "Both components are required"
+            ]
+          }
+        },
+        {
+          "id": "D",
+          "text": "Use the CEO's public key to encrypt the document so it can be verified.",
+          "is_optimal": false,
+          "points": 5,
+          "feedback": "You've got the keys reversed. Signing uses the PRIVATE key (proves identity). If you encrypted with the public key, anyone could do it - it wouldn't prove the CEO created it. The private key is secret, which is what makes the signature meaningful.",
+          "consequence": "Sarah diagrams the key usage: Private key = sign (prove identity). Public key = verify (anyone can check).",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Private key signs (secret, proves identity)",
+              "Public key verifies (anyone can check)",
+              "Reverse of encryption flow",
+              "Key confusion is common - memorize the pattern"
+            ]
+          }
+        }
+      ],
+      "hints": [
+        {
+          "hint_number": 1,
+          "text": "For signatures, which key proves identity - the one that's secret (private) or the one anyone can have (public)?",
+          "penalty": 2
+        },
+        {
+          "hint_number": 2,
+          "text": "Sign with private (proves it was you), verify with public (anyone can check).",
+          "penalty": 3
+        }
+      ],
+      "objectives_tested": ["1.4"],
+      "difficulty": "foundational"
+    },
+    {
+      "dp_id": "D1-REM-003-DP05",
+      "sequence": 5,
+      "title": "Module 4: Certificate Fundamentals",
+      "module": "PKI and Certificates",
+      "narrative": "Module 4 tackles certificates.\n\n**Ticket #4740:** 'A user reported a certificate warning when accessing our learning portal. The browser says the certificate is untrusted. But we have a valid certificate - why would browsers not trust it?'\n\nSarah asks: 'Before we troubleshoot, let's make sure you understand HOW certificate trust works. What makes a browser trust a certificate?'",
+      "teaching_moment": {
+        "concept": "Certificate Trust Chain",
+        "explanation": "Browsers trust certificates because:\n1. A trusted Certificate Authority (CA) signed them\n2. That CA's root certificate is in the browser's trust store\n3. The chain is complete from leaf â†’ intermediate â†’ root\n\nTrust fails when:\n- Certificate expired\n- Chain is incomplete (missing intermediate)\n- CA isn't trusted\n- Certificate revoked\n- Name mismatch"
+      },
+      "question": "After investigation, you find the server is only sending the end-entity certificate, not the intermediate CA certificate. What's the fix?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Configure the server to send the full certificate chain including the intermediate CA certificate. Browsers need the complete chain to verify trust.",
+          "is_optimal": true,
+          "points": 25,
+          "feedback": "Correct diagnosis and fix. Browsers have root CA certificates in their trust stores, but intermediate CAs must be provided by the server. Without the intermediate, browsers can't build the chain from your certificate to a trusted root. Always deploy the full chain.",
+          "consequence": "You export and deploy the full certificate chain. Browser warnings disappear immediately. Users access the portal without security warnings.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Certificate chain: Leaf â†’ Intermediate â†’ Root",
+              "Browsers have roots, servers provide intermediates",
+              "Missing intermediate = broken chain = untrusted",
+              "Always deploy full chain"
+            ]
+          }
+        },
+        {
+          "id": "B",
+          "text": "Add the root CA certificate to the server configuration since browsers need to see it.",
+          "is_optimal": false,
+          "points": 10,
+          "feedback": "You're close, but browsers already have root CA certificates in their trust stores. Sending the root is unnecessary (and slightly wasteful). What browsers need is the INTERMEDIATE certificate that connects your certificate to the root they already have.",
+          "consequence": "Adding the root doesn't fix the problem - the intermediate is still missing. After more troubleshooting, you add the intermediate and the issue resolves.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Browsers have root CAs pre-installed",
+              "Intermediate is what's usually missing",
+              "Chain: Your cert â†’ Intermediate â†’ Root (in browser)"
+            ]
+          }
+        },
+        {
+          "id": "C",
+          "text": "The certificate must be corrupt. Request a new certificate from the CA.",
+          "is_optimal": false,
+          "points": 5,
+          "feedback": "The certificate itself is probably fine - the issue is missing chain certificates in the server configuration. Before requesting new certificates, always check the chain configuration. Most 'untrusted certificate' errors are configuration issues, not certificate problems.",
+          "consequence": "You get a new certificate, but it has the same problem - you haven't fixed the configuration. Time and money wasted.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Most cert issues are configuration",
+              "Check chain before reissuing",
+              "Use tools like SSL Labs to diagnose"
+            ]
+          }
+        },
+        {
+          "id": "D",
+          "text": "Tell users to click through the warning since the certificate is valid.",
+          "is_optimal": false,
+          "points": 0,
+          "feedback": "Never train users to ignore security warnings! This creates terrible security habits and may indicate a real issue. Additionally, browsers are increasingly preventing click-through for certificate errors. Fix the configuration properly.",
+          "consequence": "Sarah strongly corrects this approach. Training users to ignore warnings is a security anti-pattern that creates organization-wide risk.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Never normalize ignoring warnings",
+              "Users shouldn't need to bypass security",
+              "Fix root cause, don't work around",
+              "Modern browsers may not allow bypass"
+            ]
+          }
+        }
+      ],
+      "hints": [
+        {
+          "hint_number": 1,
+          "text": "What connects your end-entity certificate to the root CA that browsers trust?",
+          "penalty": 2
+        },
+        {
+          "hint_number": 2,
+          "text": "Intermediate CA certificates must be provided by the server - browsers don't have them pre-installed.",
+          "penalty": 3
+        }
+      ],
+      "objectives_tested": ["1.4"],
+      "difficulty": "intermediate"
+    },
+    {
+      "dp_id": "D1-REM-003-DP06",
+      "sequence": 6,
+      "title": "Module 4B: Certificate Types",
+      "module": "PKI - Certificate Validation Levels",
+      "narrative": "Continuing with certificates, the marketing team has a question.\n\n**Ticket #4745:** 'We're launching a new e-commerce store for TechStart merchandise. Should we get a DV, OV, or EV certificate? What's the difference and which is best for our store?'\n\nSarah notes: 'This is about certificate validation levels. Each type provides different assurance about who owns the certificate.'",
+      "teaching_moment": {
+        "concept": "Certificate Validation Types",
+        "explanation": "DV (Domain Validated):\n- Proves control of domain only\n- Automated, minutes to issue\n- No organization identity\n- Good for: blogs, basic sites\n\nOV (Organization Validated):\n- Verifies organization exists\n- Manual verification, 1-3 days\n- Org name in certificate\n- Good for: business sites\n\nEV (Extended Validation):\n- Thorough legal entity verification\n- Multiple validation steps, 1-2 weeks\n- Highest identity assurance\n- Good for: banks, high-value transactions\n\nAll provide the SAME encryption strength!"
+      },
+      "question": "What certificate type do you recommend for the merchandise store?",
+      "options": [
+        {
+          "id": "A",
+          "text": "OV (Organization Validated) - it confirms TechStart is a real organization while being practical for e-commerce. Customers can verify they're buying from the actual company.",
+          "is_optimal": true,
+          "points": 25,
+          "feedback": "Great recommendation. OV provides organizational identity verification at a reasonable cost and timeline. For an e-commerce store, customers benefit from seeing the verified organization name. EV would be overkill for merchandise, and DV doesn't provide enough identity assurance for payment processing.",
+          "consequence": "The OV certificate is issued in 2 days. The store launches with proper organizational validation visible to customers.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "OV balances identity and practicality",
+              "Shows verified organization name",
+              "Appropriate for standard e-commerce",
+              "2-3 day validation typical"
+            ]
+          }
+        },
+        {
+          "id": "B",
+          "text": "DV (Domain Validated) - it's cheapest and provides the same encryption as other types.",
+          "is_optimal": false,
+          "points": 10,
+          "feedback": "While DV provides the same encryption strength, it only proves domain control - not organization identity. For e-commerce where customers are entering payment information, OV or EV provides assurance they're on the real company's site. DV is fine for informational sites but less appropriate for transactions.",
+          "consequence": "The store launches, but the payment processor notes that DV certificates don't provide organizational identity. You upgrade to OV to satisfy their requirements.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "DV = domain only, no org identity",
+              "Payment processors may require OV+",
+              "Encryption same, identity different"
+            ]
+          }
+        },
+        {
+          "id": "C",
+          "text": "EV (Extended Validation) - e-commerce should have the highest level of trust.",
+          "is_optimal": false,
+          "points": 15,
+          "feedback": "EV provides maximum identity assurance, but for a merchandise store, it may be overkill. EV is expensive and time-consuming (1-2 weeks). It's typically reserved for financial institutions and high-value transaction sites. OV provides appropriate assurance for general e-commerce.",
+          "consequence": "The EV certificate takes 2 weeks to issue, delaying the store launch. The extra cost provides minimal practical benefit for merchandise sales.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "EV is maximum but not always necessary",
+              "Cost/time may not be justified",
+              "Match validation level to use case"
+            ]
+          }
+        },
+        {
+          "id": "D",
+          "text": "Self-signed certificate - we can generate it ourselves for free and it provides the same encryption.",
+          "is_optimal": false,
+          "points": 0,
+          "feedback": "Self-signed certificates aren't trusted by browsers - customers would see scary security warnings. While technically providing encryption, without CA validation, users can't verify they're on your real site. Never use self-signed certificates for public-facing services.",
+          "consequence": "Browser warnings drive away customers immediately. The self-signed certificate is replaced within days. This was a costly mistake.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Self-signed = not trusted by browsers",
+              "Security warnings kill conversion",
+              "CA validation is essential for public sites",
+              "Only for testing/internal use"
+            ]
+          }
+        }
+      ],
+      "hints": [
+        {
+          "hint_number": 1,
+          "text": "Consider what customers need to trust when making purchases. Domain control alone, or organizational identity?",
+          "penalty": 2
+        },
+        {
+          "hint_number": 2,
+          "text": "OV verifies the organization exists - important for e-commerce where customers enter payment info.",
+          "penalty": 3
+        }
+      ],
+      "objectives_tested": ["1.4"],
+      "difficulty": "intermediate"
+    },
+    {
+      "dp_id": "D1-REM-003-DP07",
+      "sequence": 7,
+      "title": "Module 5: Key Management",
+      "module": "Key Management Practices",
+      "narrative": "Module 5 addresses key management with a concerning discovery.\n\n**Ticket #4750:** 'During a security review, we found that the encryption key for the student database is stored in a config file on the application server. The file has restricted permissions, but is this acceptable?'\n\nSarah looks concerned: 'Key management is where many encryption implementations fail. Let's talk about where keys should and shouldn't be stored.'",
+      "teaching_moment": {
+        "concept": "Key Storage Hierarchy",
+        "explanation": "Key storage from worst to best:\n\nâŒ Hardcoded in application code\nâŒ Plain text config files\nâš ï¸ Encrypted config files (key for key?)\nâœ“ Operating system credential store\nâœ“ Dedicated key management system\nâœ“âœ“ Hardware Security Module (HSM)\n\nThe key is only as secure as its storage!"
+      },
+      "question": "What do you recommend for securing the database encryption key?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Move the key to a dedicated key management system (KMS) or HSM. Application servers should retrieve keys at runtime, never store them persistently.",
+          "is_optimal": true,
+          "points": 25,
+          "feedback": "Excellent recommendation. A KMS or HSM provides: secure key storage, access control, audit logging, and key lifecycle management. Keys should never be stored in files on application servers - if the server is compromised, so are all keys. KMS retrieval at runtime limits exposure.",
+          "consequence": "You implement AWS KMS for key storage. The application retrieves the data encryption key at startup. Audit logs track all key access.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "KMS/HSM = proper key storage",
+              "Keys retrieved at runtime, not stored",
+              "Compromise of server doesn't expose keys",
+              "Audit logging for compliance"
+            ]
+          }
+        },
+        {
+          "id": "B",
+          "text": "Encrypt the config file that contains the key. Problem solved.",
+          "is_optimal": false,
+          "points": 5,
+          "feedback": "This creates a 'key for the key' problem - where do you store THAT key? You haven't eliminated the problem, just moved it. Eventually you need secure hardware storage. Config file encryption can add a layer but isn't a complete solution.",
+          "consequence": "The auditor asks where the key-encryption-key is stored. You've created a new problem without solving the original one.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Encrypting keys creates recursion",
+              "Need secure root of trust",
+              "HSM/KMS breaks the chain properly"
+            ]
+          }
+        },
+        {
+          "id": "C",
+          "text": "The restricted file permissions are sufficient. Only root can read the file.",
+          "is_optimal": false,
+          "points": 5,
+          "feedback": "File permissions are better than nothing, but insufficient for sensitive keys. Server compromise, backup exposure, and privileged user abuse can all expose the key. Compliance frameworks typically require dedicated key management for encryption keys.",
+          "consequence": "A compliance audit flags the key storage as a finding. You'll need to implement proper key management anyway.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "File permissions are insufficient",
+              "Multiple exposure vectors remain",
+              "Compliance requires proper KMS"
+            ]
+          }
+        },
+        {
+          "id": "D",
+          "text": "Store the key in the database alongside the encrypted data for convenience.",
+          "is_optimal": false,
+          "points": 0,
+          "feedback": "This defeats the purpose of encryption entirely! If an attacker gets the database, they get both the encrypted data AND the key. The encryption provides zero protection. Keys must be stored separately from the data they protect.",
+          "consequence": "Sarah stops you immediately - this is a fundamental security mistake. Keys and encrypted data must be separated.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Keys NEVER with encrypted data",
+              "Separation is fundamental",
+              "Database dump = everything exposed"
+            ]
+          }
+        }
+      ],
+      "hints": [
+        {
+          "hint_number": 1,
+          "text": "What happens to the key if the application server is compromised? Where would it be safer?",
+          "penalty": 2
+        },
+        {
+          "hint_number": 2,
+          "text": "KMS and HSM solutions provide hardware-protected key storage with access controls and auditing.",
+          "penalty": 3
+        }
+      ],
+      "objectives_tested": ["1.4"],
+      "difficulty": "intermediate"
+    },
+    {
+      "dp_id": "D1-REM-003-DP08",
+      "sequence": 8,
+      "title": "Module 5B: Key Rotation",
+      "module": "Key Management - Lifecycle",
+      "narrative": "Continuing with key management, another issue surfaces.\n\n**Ticket #4755:** 'The same AES key has been used for database encryption since the system was built 5 years ago. Should we change it? How do we rotate encryption keys without losing access to old data?'\n\nSarah explains: 'Key rotation is essential but tricky. You need to decrypt old data with the old key while encrypting new data with the new key. Let's work through this.'",
+      "teaching_moment": {
+        "concept": "Key Rotation Strategy",
+        "explanation": "Why rotate keys:\n- Limits exposure if key is compromised\n- Compliance requirements (often annual)\n- Cryptographic hygiene\n\nKey rotation steps:\n1. Generate new key in KMS\n2. Mark new key as 'current' for encryption\n3. Keep old key for decryption (read-only)\n4. Gradually re-encrypt old data with new key\n5. Eventually retire old key\n\nKey envelope encryption helps: encrypt data with data key, encrypt data key with master key."
+      },
+      "question": "How do you recommend implementing key rotation for the database encryption?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Implement envelope encryption: use key-versioning in KMS where new data uses the current key and old data can still be decrypted with previous key versions until re-encrypted.",
+          "is_optimal": true,
+          "points": 25,
+          "feedback": "This is the proper approach. Envelope encryption and key versioning allow: new data encrypted with current key, old data accessible via previous key versions, gradual re-encryption without downtime, and clean audit trail of which key version encrypted which data.",
+          "consequence": "You implement key versioning. New records use the new key, while old records remain accessible. A background process gradually re-encrypts old data.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Key versioning enables gradual rotation",
+              "Never delete keys with data still encrypted",
+              "Envelope encryption separates concerns",
+              "Background re-encryption for zero downtime"
+            ]
+          }
+        },
+        {
+          "id": "B",
+          "text": "Generate a new key, decrypt all data with the old key, re-encrypt with the new key, then delete the old key.",
+          "is_optimal": false,
+          "points": 10,
+          "feedback": "This works but has problems: massive operation (millions of records), requires downtime, all-or-nothing risk. If the process fails midway, you could have data encrypted with both keys, creating complexity. Key versioning is more practical.",
+          "consequence": "The re-encryption process takes 18 hours and requires database downtime. It works, but stakeholders aren't happy about the service window.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Big-bang rotation is risky",
+              "Downtime often required",
+              "Versioning is more practical",
+              "Consider scale of operation"
+            ]
+          }
+        },
+        {
+          "id": "C",
+          "text": "5 years without rotation is fine. The key hasn't been compromised, so why change it?",
+          "is_optimal": false,
+          "points": 0,
+          "feedback": "How do you know it hasn't been compromised? One reason for key rotation is that compromise may be undetected. Additionally, compliance frameworks typically require annual rotation. Cryptographic best practices recommend regular rotation regardless of known compromise.",
+          "consequence": "The compliance audit flags the 5-year-old key as a critical finding. Immediate rotation is now required under time pressure.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Compromise may be undetected",
+              "Rotation limits exposure window",
+              "Compliance often requires annual rotation",
+              "Proactive is better than reactive"
+            ]
+          }
+        },
+        {
+          "id": "D",
+          "text": "Create the new key and immediately delete the old key. The old encrypted data isn't important.",
+          "is_optimal": false,
+          "points": 0,
+          "feedback": "Never delete a key while data encrypted with it still exists! You would permanently lose access to all data encrypted with that key. Key retirement must wait until all data has been re-encrypted with the new key.",
+          "consequence": "If you did this, years of student records would become permanently inaccessible. Sarah intervenes before this happens.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "NEVER delete keys with encrypted data",
+              "Key deletion = data loss",
+              "Keep old keys read-only",
+              "Retire only after re-encryption complete"
+            ]
+          }
+        }
+      ],
+      "hints": [
+        {
+          "hint_number": 1,
+          "text": "How can you encrypt new data with a new key while still decrypting old data with the old key?",
+          "penalty": 2
+        },
+        {
+          "hint_number": 2,
+          "text": "Key versioning lets you maintain multiple key versions - current for new data, previous for old data.",
+          "penalty": 3
+        }
+      ],
+      "objectives_tested": ["1.4"],
+      "difficulty": "intermediate"
+    },
+    {
+      "dp_id": "D1-REM-003-DP09",
+      "sequence": 9,
+      "title": "Module 6: Transport Security",
+      "module": "Cryptographic Selection - Data in Transit",
+      "narrative": "The final module focuses on selecting the right cryptographic solutions.\n\n**Ticket #4760:** 'The network team asks about TLS configuration for our web servers. We currently support TLS 1.0 through 1.3. What versions should we allow, and what cipher suites are acceptable?'\n\nSarah notes: 'TLS configuration is about balancing security with compatibility. Let's work through the decisions.'",
+      "teaching_moment": {
+        "concept": "TLS Configuration Best Practices",
+        "explanation": "TLS Version Security:\n- SSL 2.0/3.0: BROKEN - disable completely\n- TLS 1.0/1.1: DEPRECATED - disable if possible\n- TLS 1.2: SECURE - current standard\n- TLS 1.3: MOST SECURE - preferred\n\nCipher Suite Priorities:\n- Use AEAD ciphers (GCM)\n- Require forward secrecy (ECDHE, DHE)\n- Disable weak algorithms (RC4, 3DES, MD5)\n- Prefer AES-256-GCM or ChaCha20-Poly1305"
+      },
+      "question": "What TLS configuration do you recommend?",
+      "options": [
+        {
+          "id": "A",
+          "text": "TLS 1.2 minimum, TLS 1.3 preferred. Require forward secrecy (ECDHE), use AEAD ciphers (AES-GCM), disable all weak algorithms including RC4, 3DES, and SHA-1 for MAC.",
+          "is_optimal": true,
+          "points": 25,
+          "feedback": "Excellent configuration. TLS 1.2 minimum disables known-vulnerable protocols. TLS 1.3 preferred gets the best security where supported. Forward secrecy ensures session keys can't be recovered even if private keys are compromised later. AEAD ciphers provide authenticated encryption.",
+          "consequence": "You implement the hardened TLS configuration. SSL Labs scores it A+. Security and compatibility are balanced.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "TLS 1.2 minimum, 1.3 preferred",
+              "Forward secrecy is essential (ECDHE)",
+              "AEAD ciphers (GCM) for authenticated encryption",
+              "Disable legacy: TLS 1.0/1.1, RC4, 3DES, SHA-1"
+            ]
+          }
+        },
+        {
+          "id": "B",
+          "text": "Keep TLS 1.0 enabled for compatibility with older systems. Security can't break functionality.",
+          "is_optimal": false,
+          "points": 5,
+          "feedback": "TLS 1.0 has known vulnerabilities (BEAST, POODLE variants). PCI DSS prohibited TLS 1.0 since 2018. While compatibility matters, keeping vulnerable protocols enabled creates real risk. Modern browsers have disabled TLS 1.0/1.1 anyway.",
+          "consequence": "The compliance audit fails immediately due to TLS 1.0. Turns out 'compatibility' wasn't needed - no clients actually used it.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "TLS 1.0 has real vulnerabilities",
+              "PCI DSS prohibits TLS 1.0",
+              "Check actual usage before keeping legacy",
+              "Modern browsers don't support 1.0/1.1"
+            ]
+          }
+        },
+        {
+          "id": "C",
+          "text": "TLS 1.3 only - it's the most secure, so we should use only that.",
+          "is_optimal": false,
+          "points": 15,
+          "feedback": "TLS 1.3 only may break compatibility with older but still legitimate systems (some enterprise proxies, older mobile devices). TLS 1.2 is still secure and widely needed. Unless you know all clients support 1.3, allow 1.2 as well.",
+          "consequence": "Several enterprise partners can't connect - their security proxies don't support TLS 1.3 yet. You have to add TLS 1.2 support.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "TLS 1.3 only may be too restrictive",
+              "TLS 1.2 is still secure",
+              "Know your client requirements",
+              "Balance security with compatibility"
+            ]
+          }
+        },
+        {
+          "id": "D",
+          "text": "Disable TLS entirely and use SSH tunnels for all web traffic.",
+          "is_optimal": false,
+          "points": 0,
+          "feedback": "SSH tunnels aren't appropriate for general web traffic. Browsers expect HTTPS (TLS). SSH is for terminal access and file transfers. Using the wrong protocol for the use case creates usability and security problems.",
+          "consequence": "Sarah explains that SSH and TLS serve different purposes. Web browsers require HTTPS/TLS.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "TLS for web traffic (HTTPS)",
+              "SSH for terminal/file access",
+              "Use appropriate protocol for use case"
+            ]
+          }
+        }
+      ],
+      "hints": [
+        {
+          "hint_number": 1,
+          "text": "What's the minimum TLS version that's considered secure? What versions are deprecated?",
+          "penalty": 2
+        },
+        {
+          "hint_number": 2,
+          "text": "TLS 1.2 minimum is current best practice. TLS 1.0/1.1 are deprecated and prohibited by PCI DSS.",
+          "penalty": 3
+        }
+      ],
+      "objectives_tested": ["1.4"],
+      "difficulty": "intermediate"
+    },
+    {
+      "dp_id": "D1-REM-003-DP10",
+      "sequence": 10,
+      "title": "Module 6B: Algorithm Selection Framework",
+      "module": "Putting It All Together",
+      "narrative": "Final challenge - Sarah presents a summary scenario.\n\n**Scenario:** 'A new application is being built with these requirements:\n- Store user passwords securely\n- Encrypt database containing PII\n- Digitally sign software releases\n- Secure API communications\n- Verify integrity of downloaded content\n\nFor each requirement, which cryptographic solution applies?'\n\nSarah adds: 'This ties together everything from the clinic. Walk me through your algorithm selections.'",
+      "teaching_moment": {
+        "concept": "Cryptographic Selection Summary",
+        "explanation": "Match algorithm to use case:\n\nPasswords â†’ bcrypt/Argon2 (slow hash + salt)\nData at rest â†’ AES-256 (symmetric)\nDigital signatures â†’ RSA/ECDSA + SHA-256 (asymmetric)\nData in transit â†’ TLS 1.2/1.3 (protocol)\nIntegrity verification â†’ SHA-256 (hash)\n\nNever use:\n- MD5/SHA-1 for security\n- Encryption for passwords\n- Asymmetric for bulk data\n- Deprecated algorithms (3DES, RC4)"
+      },
+      "question": "Which set of cryptographic solutions correctly addresses all five requirements?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Passwords: Argon2 | Database: AES-256 | Signatures: ECDSA + SHA-256 | API: TLS 1.2+ | Downloads: SHA-256 hashes",
+          "is_optimal": true,
+          "points": 25,
+          "feedback": "Perfect selections across the board! You've correctly matched each use case to the appropriate cryptographic solution. Password hashing with Argon2, symmetric encryption for data at rest, asymmetric signatures for software, TLS for transport, and SHA-256 for integrity. This demonstrates comprehensive understanding.",
+          "consequence": "Your recommendations are implemented across the application. Each security requirement is addressed with the appropriate cryptographic tool. Sarah is impressed with your clinic performance.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Argon2 for passwords (slow, salted)",
+              "AES-256 for stored data (fast, symmetric)",
+              "ECDSA + SHA-256 for signatures (identity + integrity)",
+              "TLS 1.2+ for transport (established protocol)",
+              "SHA-256 for integrity checks (collision resistant)"
+            ]
+          }
+        },
+        {
+          "id": "B",
+          "text": "Passwords: SHA-256 | Database: AES-256 | Signatures: RSA | API: TLS 1.2+ | Downloads: MD5 hashes",
+          "is_optimal": false,
+          "points": 10,
+          "feedback": "Two issues: SHA-256 is too fast for passwords (use Argon2/bcrypt), and MD5 is insecure for integrity verification (use SHA-256). The other selections are acceptable, but these mismatches show gaps in understanding algorithm selection.",
+          "consequence": "Password storage fails security review (SHA-256 too fast). Download integrity is questioned (MD5 deprecated). You need to revise these choices.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "SHA-256 is fast - wrong for passwords",
+              "MD5 is broken - not for security",
+              "Algorithm selection must match use case"
+            ]
+          }
+        },
+        {
+          "id": "C",
+          "text": "Passwords: AES-256 | Database: RSA-4096 | Signatures: SHA-256 | API: TLS 1.0 | Downloads: CRC32",
+          "is_optimal": false,
+          "points": 0,
+          "feedback": "Multiple fundamental errors: passwords should be hashed not encrypted, RSA is wrong for bulk database encryption, SHA-256 alone isn't a signature algorithm, TLS 1.0 is deprecated, and CRC32 isn't cryptographic. This shows confusion about basic cryptographic concepts.",
+          "consequence": "Sarah recognizes you need more time with the fundamentals. She schedules additional review sessions.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "Hash passwords, don't encrypt",
+              "Symmetric for bulk data",
+              "Signatures need hash + asymmetric",
+              "TLS 1.0 is deprecated",
+              "CRC isn't cryptographic"
+            ]
+          }
+        },
+        {
+          "id": "D",
+          "text": "Passwords: bcrypt | Database: 3DES | Signatures: MD5 + RSA | API: SSL 3.0 | Downloads: SHA-1",
+          "is_optimal": false,
+          "points": 5,
+          "feedback": "bcrypt is correct for passwords, but everything else is deprecated or broken: 3DES is deprecated, MD5 is broken, SSL 3.0 is insecure, and SHA-1 is deprecated. You understand password hashing but need work on other algorithm selection.",
+          "consequence": "Only the password storage passes review. All other selections are flagged as using deprecated algorithms.",
+          "knowledge_reinforcement": {
+            "key_points": [
+              "bcrypt correct for passwords",
+              "3DES, MD5, SSL 3.0, SHA-1 all deprecated",
+              "Know what's current vs legacy"
+            ]
+          }
+        }
+      ],
+      "hints": [
+        {
+          "hint_number": 1,
+          "text": "Work through each use case: What's special about passwords? What's good for bulk data? What makes a signature?",
+          "penalty": 2
+        },
+        {
+          "hint_number": 2,
+          "text": "Passwords=Argon2/bcrypt, Database=AES, Signatures=asymmetric+hash, Transport=TLS, Integrity=SHA-256",
+          "penalty": 3
+        }
+      ],
+      "objectives_tested": ["1.4"],
+      "difficulty": "intermediate"
+    }
+  ],
+  
+  "scoring": {
+    "passing_threshold": 75,
+    "excellence_threshold": 90,
+    "max_possible_points": 250,
+    "passing_points": 188,
+    "excellence_points": 225,
+    "remediation_complete_bonus": 15
+  },
+  
+  "completion_outcomes": {
+    "success": {
+      "threshold_percentage": 80,
+      "narrative": "Congratulations! You've completed the Cryptography Clinic with strong performance. Sarah reviews your results:\n\n'Excellent work. You now understand the key distinctions between hash types, encryption methods, and their appropriate use cases. You can select the right cryptographic tool for different security requirements.'\n\nShe hands you a certificate of completion. 'You're ready to tackle real cryptographic challenges. Remember - always match the algorithm to the use case, and never use deprecated algorithms for new implementations.'\n\nYour cryptographic foundation is solid, and you're cleared to work on production security implementations.",
+      "unlocks": ["D1-SIM-003", "D1-SIM-004"],
+      "achievements": ["Crypto Clinician", "Algorithm Selector"],
+      "knowledge_verified": [
+        "Hash vs encryption distinction",
+        "Password hashing requirements",
+        "Symmetric vs asymmetric use cases",
+        "PKI and certificate fundamentals",
+        "Key management best practices",
+        "TLS configuration standards"
+      ]
+    },
+    "partial_success": {
+      "threshold_percentage": 60,
+      "narrative": "You've completed the Cryptography Clinic with passing performance. Sarah provides feedback:\n\n'You've got the basics, but some concepts need reinforcement. I'd recommend reviewing the areas where you struggled before tackling complex implementations.'\n\nShe marks specific topics for review. 'Work through the reference materials again, and don't hesitate to ask questions. Cryptography is fundamental - it's worth taking the time to master.'",
+      "unlocks": ["D1-SIM-003"],
+      "suggested_review": "Review reference materials focusing on weak areas"
+    },
+    "needs_work": {
+      "threshold_percentage": 0,
+      "narrative": "Sarah looks at your clinic results with concern.\n\n'Cryptography is foundational to security - we need to strengthen your understanding before you work on production systems. Let's schedule some additional sessions and work through the concepts more slowly.'\n\nShe provides additional study materials. 'Don't be discouraged. These concepts take time to internalize. Review the materials, and we'll try the clinic again when you're ready.'",
+      "repeat_available": true,
+      "study_materials_provided": [
+        "Cryptography fundamentals guide",
+        "Algorithm selection cheat sheet",
+        "PKI concepts overview",
+        "Practice scenarios"
+      ]
+    }
+  },
+  
+  "knowledge_summary": {
+    "hash_functions": {
+      "passwords": "bcrypt, Argon2, PBKDF2 (slow + salt)",
+      "integrity": "SHA-256, SHA-3 (collision resistant)",
+      "deprecated": "MD5, SHA-1 (broken/weak)"
+    },
+    "symmetric_encryption": {
+      "current": "AES-256, ChaCha20",
+      "deprecated": "3DES, DES, RC4",
+      "use_for": "Bulk data, data at rest"
+    },
+    "asymmetric_encryption": {
+      "current": "RSA-3072+, ECC P-256+",
+      "use_for": "Key exchange, signatures, small data",
+      "not_for": "Bulk data encryption"
+    },
+    "digital_signatures": {
+      "process": "Hash â†’ encrypt hash with private key",
+      "verify": "Decrypt with public key â†’ compare hashes",
+      "provides": "Authentication, integrity, non-repudiation"
+    },
+    "pki": {
+      "trust_chain": "End-entity â†’ Intermediate CA â†’ Root CA",
+      "validation_types": "DV (domain) < OV (org) < EV (extended)",
+      "common_issues": "Missing intermediate, expiration, revocation"
+    },
+    "key_management": {
+      "storage": "KMS or HSM, never in files",
+      "rotation": "Regular, with versioning",
+      "separation": "Keys separate from encrypted data"
+    },
+    "tls_configuration": {
+      "versions": "TLS 1.2 minimum, 1.3 preferred",
+      "ciphers": "AEAD (GCM), forward secrecy (ECDHE)",
+      "deprecated": "SSL 3.0, TLS 1.0/1.1, RC4, 3DES"
+    }
+  },
+  
+  "related_content": {
+    "study_materials": [
+      {
+        "title": "Cryptographic Concepts Study Guide",
+        "path": "domain1/topic4/study-guide",
+        "relevance": "primary"
+      }
+    ],
+    "triggered_from": ["D1-SIM-003", "D1-SIM-004", "D1-SIM-005"],
+    "unlocks_scenarios": ["D1-SIM-003", "D1-SIM-004"]
+  },
+  
+  "metadata": {
+    "version": "1.0.0",
+    "created_date": "2024-12-16",
+    "last_updated": "2024-12-16",
+    "author": "Security+ Training Platform",
+    "exam_alignment": "CompTIA Security+ SY0-701",
+    "review_status": "complete",
+    "tags": ["remediation", "cryptography", "hashing", "encryption", "pki", "certificates", "key-management", "domain1", "foundational"]
+  }
+}

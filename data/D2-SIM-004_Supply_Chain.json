@@ -1,0 +1,1280 @@
+{
+  "simulation_id": "D2-SIM-004",
+  "title": "Supply Chain Compromise",
+  "domain": 2,
+  "category": "primary",
+  "difficulty": "advanced",
+  "time_estimate": "50-65 minutes",
+  "passing_score": 200,
+  "max_score": 250,
+  
+  "exam_objectives": [
+    {
+      "id": "2.1",
+      "description": "Compare and contrast common threat actors and motivations",
+      "coverage": ["APT", "nation-state actors", "supply chain attacks", "long-term persistence"]
+    },
+    {
+      "id": "2.2",
+      "description": "Explain common threat vectors and attack surfaces",
+      "coverage": ["supply chain", "trusted relationships", "software updates", "third-party risk"]
+    },
+    {
+      "id": "2.4",
+      "description": "Given a scenario, analyze indicators of malicious activity",
+      "coverage": ["APT indicators", "living off the land", "data staging", "covert channels"]
+    }
+  ],
+  
+  "scenario_context": {
+    "organization": "NexGen Software Solutions",
+    "industry": "Enterprise Software (B2B)",
+    "size": "450 employees, 2,800 enterprise customers",
+    "your_role": "Senior Security Engineer",
+    "environment": {
+      "product": "NexGen Endpoint Manager - deployed to customer networks",
+      "customers": "Fortune 500 companies, government agencies, defense contractors",
+      "development": "Azure DevOps CI/CD, GitHub Enterprise, code signing infrastructure",
+      "infrastructure": "AWS production, Azure DevOps, on-prem build servers",
+      "security_tools": ["CrowdStrike Falcon", "Splunk", "Wiz (cloud security)", "Snyk (code scanning)"]
+    },
+    "opening_narrative": "It's Monday morning when your threat intelligence feed highlights a concerning report: CISA has issued an advisory about a suspected supply chain compromise affecting enterprise software vendors. The advisory mentions indicators associated with a sophisticated threat actor targeting software build pipelines. While reviewing the indicators, your stomach drops - one of the C2 domains has been seen in DNS logs from your build server environment. You pull the logs and confirm: your build server has been communicating with known APT infrastructure for the past 6 weeks. Your software has been distributed to 2,800 enterprise customers, including defense contractors and government agencies. This could be the next SolarWinds."
+  },
+  
+  "artifacts": [
+    {
+      "id": "artifact_1",
+      "title": "CISA Advisory Excerpt",
+      "type": "intelligence",
+      "unlocks_at": "start",
+      "content": {
+        "advisory_id": "AA24-038A",
+        "title": "APT Activity Targeting Software Build Infrastructure",
+        "threat_actor": {
+          "designation": "COZY SPIDER (also tracked as APT29, The Dukes)",
+          "attribution": "Russian Foreign Intelligence Service (SVR)",
+          "motivation": "Espionage targeting government, defense, and technology sectors",
+          "known_targets": ["SolarWinds", "Microsoft", "Multiple software vendors"]
+        },
+        "summary": "CISA has observed sophisticated threat actor activity targeting software development and build infrastructure at enterprise software vendors. The actor gains access to build systems, injects malicious code into software updates, and leverages the vendor's trusted update mechanism to distribute backdoors to downstream customers.",
+        "indicators_of_compromise": {
+          "c2_domains": [
+            "update-service[.]azureedge[.]net",
+            "telemetry-cdn[.]cloudfront[.]net",
+            "config-sync[.]akamaized[.]net"
+          ],
+          "c2_ips": [
+            "13.107.42.XX",
+            "104.18.XX.XX"
+          ],
+          "file_hashes": [
+            "SHA256: 32519b85c0b422e4656de6e6c41878e9... (backdoored update package)",
+            "SHA256: a7b2c3d4e5f6... (implant DLL)"
+          ],
+          "behavioral_indicators": [
+            "Unusual Azure Blob Storage connections from build servers",
+            "Code signing certificate access outside business hours",
+            "Modification of build scripts or CI/CD configurations",
+            "DNS queries to CDN-masquerading domains"
+          ]
+        }
+      }
+    },
+    {
+      "id": "artifact_2",
+      "title": "Initial DNS Log Analysis",
+      "type": "evidence",
+      "unlocks_at": "decision_1",
+      "content": {
+        "dns_query_analysis": {
+          "query_period": "2024-01-02 to 2024-02-12 (42 days)",
+          "source_systems": [
+            {
+              "hostname": "BUILD-SRV-01",
+              "ip": "10.20.5.15",
+              "role": "Primary build server for NexGen Endpoint Manager",
+              "queries_to_ioc": 847,
+              "first_seen": "2024-01-02 02:15:33 UTC",
+              "last_seen": "2024-02-12 14:22:47 UTC",
+              "pattern": "Regular beaconing - approximately every 4 hours"
+            },
+            {
+              "hostname": "BUILD-SRV-02",
+              "ip": "10.20.5.16",
+              "role": "Secondary build server",
+              "queries_to_ioc": 12,
+              "first_seen": "2024-01-15 11:42:18 UTC",
+              "pattern": "Sporadic - possible lateral movement testing"
+            }
+          ],
+          "query_destinations": [
+            {
+              "domain": "telemetry-cdn[.]cloudfront[.]net",
+              "queries": 723,
+              "resolved_to": "104.18.XX.XX",
+              "note": "NOT a legitimate CloudFront distribution"
+            },
+            {
+              "domain": "config-sync[.]akamaized[.]net",
+              "queries": 136,
+              "resolved_to": "13.107.42.XX",
+              "note": "Masquerading as Akamai CDN"
+            }
+          ]
+        },
+        "baseline_comparison": {
+          "normal_build_server_dns": "Azure DevOps, GitHub, package registries",
+          "anomaly": "CDN domains not expected from build infrastructure",
+          "detection_gap": "DNS logging enabled but not actively monitored"
+        }
+      }
+    },
+    {
+      "id": "artifact_3",
+      "title": "APT Threat Actor Profile",
+      "type": "reference",
+      "unlocks_at": "decision_2",
+      "content": {
+        "threat_actor_deep_dive": {
+          "designation": "COZY SPIDER / APT29 / The Dukes",
+          "nation_state": "Russia (SVR - Foreign Intelligence Service)",
+          "active_since": "At least 2008",
+          "notable_operations": [
+            "2016 DNC breach",
+            "2020 SolarWinds supply chain attack",
+            "2021 Microsoft/Nobelium attacks",
+            "COVID-19 vaccine research targeting"
+          ],
+          "characteristics": {
+            "sophistication": "Very High - custom tooling, zero-days, operational security",
+            "patience": "Will maintain access for months/years before action",
+            "stealth": "Prioritizes avoiding detection over speed",
+            "targets": "Government, defense, technology, think tanks, NGOs"
+          },
+          "typical_ttps": {
+            "initial_access": ["Spear-phishing", "Supply chain compromise", "Trusted relationships"],
+            "persistence": ["Scheduled tasks", "Registry modifications", "Token theft", "Firmware implants"],
+            "defense_evasion": ["Living off the land", "Traffic blending", "Time-based execution"],
+            "collection": ["Targeted data theft", "Email collection", "Credential harvesting"],
+            "exfiltration": ["Encrypted channels", "Cloud storage abuse", "Steganography"]
+          }
+        },
+        "supply_chain_methodology": {
+          "phase_1": "Compromise software vendor through targeted phishing or exploit",
+          "phase_2": "Establish persistence in development/build environment",
+          "phase_3": "Inject malicious code into software build process",
+          "phase_4": "Leverage vendor's code signing and update mechanism",
+          "phase_5": "Backdoored software distributed to all customers",
+          "phase_6": "Selectively activate backdoor on high-value targets"
+        }
+      }
+    },
+    {
+      "id": "artifact_4",
+      "title": "Build Server Forensic Analysis",
+      "type": "evidence",
+      "unlocks_at": "decision_3",
+      "content": {
+        "build_srv_01_analysis": {
+          "hostname": "BUILD-SRV-01",
+          "os": "Windows Server 2022",
+          "role": "Azure DevOps build agent, code signing host",
+          "forensic_findings": {
+            "malicious_artifacts": [
+              {
+                "file": "C:\\Windows\\System32\\mscoree.dll.bak",
+                "type": "Renamed legitimate DLL",
+                "purpose": "DLL side-loading preparation"
+              },
+              {
+                "file": "C:\\Windows\\System32\\mscoree.dll",
+                "type": "Malicious DLL",
+                "hash": "SHA256: a7b2c3d4e5f6...",
+                "purpose": "Backdoor implant loaded by .NET applications"
+              },
+              {
+                "file": "C:\\ProgramData\\Microsoft\\Crypto\\update.cfg",
+                "type": "Encrypted configuration",
+                "purpose": "C2 configuration and encryption keys"
+              }
+            ],
+            "persistence_mechanisms": [
+              {
+                "type": "DLL side-loading",
+                "details": "Malicious mscoree.dll loaded automatically by .NET build processes",
+                "stealth": "Very high - executes within legitimate process context"
+              },
+              {
+                "type": "Scheduled task",
+                "name": "\\Microsoft\\Windows\\Maintenance\\ConfigSync",
+                "action": "Executes PowerShell beacon every 4 hours",
+                "created": "2024-01-02 02:14:55 UTC"
+              }
+            ],
+            "build_modification": {
+              "file_modified": "D:\\BuildAgent\\_work\\scripts\\post-build.ps1",
+              "modification_date": "2024-01-05 03:22:41 UTC",
+              "change": "Added code injection routine that modifies compiled binaries before signing",
+              "detection_evasion": "Injected code only activates for release builds, not debug/test"
+            }
+          }
+        },
+        "timeline_reconstruction": [
+          {"date": "2024-01-02 02:14", "event": "Initial compromise - implant deployed"},
+          {"date": "2024-01-02 02:15", "event": "First C2 beacon"},
+          {"date": "2024-01-02-05", "event": "Reconnaissance of build environment"},
+          {"date": "2024-01-05 03:22", "event": "Build script modification"},
+          {"date": "2024-01-08", "event": "First backdoored build (v4.2.1)"},
+          {"date": "2024-01-15", "event": "Lateral movement to BUILD-SRV-02 attempted"},
+          {"date": "2024-01-22", "event": "Second backdoored build (v4.2.2)"},
+          {"date": "2024-02-05", "event": "Third backdoored build (v4.3.0)"}
+        ]
+      }
+    },
+    {
+      "id": "artifact_5",
+      "title": "Backdoor Technical Analysis",
+      "type": "technical",
+      "unlocks_at": "decision_4",
+      "content": {
+        "backdoor_analysis": {
+          "injection_point": "NexGenCore.dll - main product DLL",
+          "injection_method": "Code added during post-compilation, pre-signing",
+          "backdoor_capabilities": {
+            "c2_communication": "HTTPS to CDN-masquerading domains",
+            "command_execution": "Remote shell with SYSTEM privileges",
+            "file_operations": "Upload/download arbitrary files",
+            "credential_theft": "LSASS memory access, token impersonation",
+            "lateral_movement": "WMI, PsExec, RDP capability",
+            "self_protection": "Process injection, anti-analysis checks"
+          },
+          "activation_logic": {
+            "description": "Backdoor contains targeting logic - only activates on specific systems",
+            "criteria": [
+              "Domain name contains .gov or .mil",
+              "Domain name matches list of defense contractor domains",
+              "IP range matches known government/defense networks",
+              "Specific environment variables present"
+            ],
+            "default_behavior": "On non-target systems, backdoor remains dormant",
+            "implication": "Most customers have dormant backdoor; select targets have active compromise"
+          },
+          "detection_evasion": {
+            "code_signing": "Backdoored DLL is legitimately signed with NexGen's certificate",
+            "traffic_blending": "C2 mimics legitimate CDN traffic patterns",
+            "execution_timing": "Only executes during business hours in target timezone",
+            "anti_analysis": "Sandbox detection, debugger checks, VM detection"
+          }
+        },
+        "affected_versions": {
+          "v4.2.1": {"release_date": "2024-01-08", "downloads": 847},
+          "v4.2.2": {"release_date": "2024-01-22", "downloads": 1203},
+          "v4.3.0": {"release_date": "2024-02-05", "downloads": 956},
+          "total_affected_installations": "Approximately 3,006 installations across 2,800 customers"
+        }
+      }
+    },
+    {
+      "id": "artifact_6",
+      "title": "Customer Impact Assessment",
+      "type": "operational",
+      "unlocks_at": "decision_5",
+      "content": {
+        "customer_analysis": {
+          "total_customers": 2800,
+          "affected_by_backdoor": 2156,
+          "customer_breakdown": {
+            "federal_government": {
+              "count": 47,
+              "agencies_affected": ["DOD components", "Civilian agencies", "Intel community"],
+              "backdoor_status": "LIKELY ACTIVE - targeting criteria match",
+              "priority": "CRITICAL"
+            },
+            "defense_contractors": {
+              "count": 156,
+              "examples": ["Major primes", "Cleared defense contractors"],
+              "backdoor_status": "LIKELY ACTIVE - targeting criteria match",
+              "priority": "CRITICAL"
+            },
+            "state_local_government": {
+              "count": 234,
+              "backdoor_status": "LIKELY DORMANT - doesn't match .gov targeting",
+              "priority": "HIGH"
+            },
+            "enterprise_commercial": {
+              "count": 1892,
+              "backdoor_status": "LIKELY DORMANT - default behavior",
+              "priority": "HIGH"
+            },
+            "international": {
+              "count": 471,
+              "includes": ["NATO allies", "Five Eyes partners"],
+              "backdoor_status": "VARIES - some may match targeting criteria",
+              "priority": "HIGH"
+            }
+          }
+        },
+        "high_value_target_examples": {
+          "redacted_agency_1": {
+            "type": "Federal civilian agency",
+            "deployment": "Enterprise-wide (15,000 endpoints)",
+            "data_exposure": "PII, sensitive but unclassified (SBU)",
+            "status": "Backdoor likely active since Jan 8"
+          },
+          "redacted_contractor_1": {
+            "type": "Top 10 defense contractor",
+            "deployment": "Multiple networks (classified and unclassified)",
+            "data_exposure": "CUI, potentially classified spillage",
+            "status": "Backdoor likely active since Jan 22"
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_7",
+      "title": "Initial Access Investigation",
+      "type": "evidence",
+      "unlocks_at": "decision_6",
+      "content": {
+        "initial_access_findings": {
+          "method": "Compromised developer credentials + GitHub token",
+          "target_user": "mchen - Senior Build Engineer",
+          "timeline": {
+            "2023-12-15": "Spear-phishing email to mchen's personal email",
+            "2023-12-15": "Credential harvesting page mimicking GitHub SSO",
+            "2023-12-18": "Attacker accessed mchen's GitHub Enterprise account",
+            "2023-12-22": "PAT (Personal Access Token) created for persistent access",
+            "2023-12-28": "SSH key added to mchen's GitHub profile",
+            "2024-01-02": "Direct access to BUILD-SRV-01 via stolen SSH credentials"
+          }
+        },
+        "phishing_email": {
+          "from": "security-team@github-enterprise.com (spoofed)",
+          "to": "mchen.personal@gmail.com",
+          "subject": "Action Required: GitHub Enterprise Security Review",
+          "content": "Your organization's GitHub Enterprise instance requires security verification. Please complete the verification at [malicious link] within 48 hours to maintain repository access.",
+          "delivery": "Personal email - bypassed corporate email security"
+        },
+        "attacker_access_scope": {
+          "github_access": "Full access to all repositories mchen could access",
+          "build_server_access": "SSH access with mchen's credentials (local admin)",
+          "code_signing": "Indirect access via build process",
+          "azure_devops": "Limited - mchen's permissions insufficient for direct access"
+        },
+        "security_gaps_identified": [
+          "Personal email phishing bypassed corporate controls",
+          "No MFA on GitHub Enterprise personal access tokens",
+          "Build server SSH allowed password authentication",
+          "Code signing ceremony not implemented - automated signing",
+          "Limited monitoring of build infrastructure"
+        ]
+      }
+    },
+    {
+      "id": "artifact_8",
+      "title": "Notification Decision Matrix",
+      "type": "operational",
+      "unlocks_at": "decision_7",
+      "content": {
+        "notification_requirements": {
+          "regulatory": {
+            "sec_8k": {
+              "applies": "Yes - material cybersecurity incident",
+              "deadline": "4 business days from determination of materiality",
+              "content": "Nature, scope, timing, material impact"
+            },
+            "cisa": {
+              "applies": "Yes - critical infrastructure implications",
+              "deadline": "24 hours for CIRCIA covered entities",
+              "channel": "CISA incident reporting portal"
+            },
+            "fbi": {
+              "applies": "Yes - nation-state actor with national security implications",
+              "channel": "FBI Cyber Division, IC3",
+              "benefit": "Access to classified threat intelligence"
+            }
+          },
+          "contractual": {
+            "federal_customers": {
+              "requirement": "DFARS 7012 - 72 hour notification to DoD CIO",
+              "applies_to": "All federal contract customers",
+              "content": "Incident details, potentially affected data"
+            },
+            "defense_contractors": {
+              "requirement": "Flow-down from federal contracts",
+              "deadline": "Varies - typically 72 hours",
+              "action": "Notify and coordinate with customer security teams"
+            },
+            "commercial_customers": {
+              "requirement": "Per contract terms - review each agreement",
+              "typical": "Notification within 24-72 hours"
+            }
+          },
+          "ethical": {
+            "all_affected_customers": {
+              "rationale": "Customers need to take defensive action",
+              "timing": "As soon as practical after initial assessment",
+              "content": "Affected versions, detection methods, remediation steps"
+            }
+          }
+        },
+        "communication_strategy": {
+          "phase_1": "Immediate notification to CISA, FBI, and critical customers (24 hours)",
+          "phase_2": "Broader customer notification with remediation guidance (48-72 hours)",
+          "phase_3": "Public disclosure coordinated with CISA (timing TBD)",
+          "phase_4": "Ongoing updates as investigation progresses"
+        }
+      }
+    },
+    {
+      "id": "artifact_9",
+      "title": "Remediation Planning",
+      "type": "operational",
+      "unlocks_at": "decision_9",
+      "content": {
+        "internal_remediation": {
+          "immediate_actions": [
+            "Isolate build infrastructure from network",
+            "Revoke all developer credentials and tokens",
+            "Disable code signing certificate",
+            "Preserve forensic images of all build systems"
+          ],
+          "eradication": [
+            "Rebuild build servers from known-good images",
+            "Implement new code signing infrastructure with HSM",
+            "New developer credentials with mandatory MFA",
+            "Deploy EDR to all development infrastructure"
+          ],
+          "verification": [
+            "Verify clean builds produce matching hashes (without backdoor)",
+            "Third-party code audit of build process",
+            "Red team assessment of new build infrastructure"
+          ]
+        },
+        "customer_remediation": {
+          "detection_guidance": {
+            "iocs": "Publish full IoC list for customer hunting",
+            "detection_rules": "Provide YARA, Sigma, and EDR rules",
+            "hunting_queries": "Provide queries for common SIEMs"
+          },
+          "remediation_steps": [
+            "Update to clean version (v4.3.1 when released)",
+            "Hunt for backdoor activation indicators",
+            "If activation detected: full incident response required",
+            "Credential reset for any systems running affected versions"
+          ],
+          "clean_version_timeline": {
+            "target_release": "48-72 hours",
+            "distribution": "Direct download initially, then normal update channels",
+            "verification": "Multiple third parties validating clean build"
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_10",
+      "title": "Lessons Learned Framework",
+      "type": "reference",
+      "unlocks_at": "decision_10",
+      "content": {
+        "root_causes": {
+          "initial_access": {
+            "cause": "Personal email phishing bypassed corporate controls",
+            "fix": "Security awareness, monitoring of privileged user personal accounts (with consent)"
+          },
+          "persistence": {
+            "cause": "Insufficient monitoring of build infrastructure",
+            "fix": "EDR, enhanced logging, behavioral monitoring on all build systems"
+          },
+          "impact_amplification": {
+            "cause": "Automated code signing without ceremony",
+            "fix": "Hardware security modules, multi-party signing ceremony"
+          },
+          "detection_delay": {
+            "cause": "DNS logs collected but not analyzed",
+            "fix": "Active threat hunting, IoC monitoring, SIEM correlation rules"
+          }
+        },
+        "security_improvements": {
+          "supply_chain_security": [
+            "SLSA Level 3+ compliance for build process",
+            "Reproducible builds verification",
+            "Binary authorization and attestation",
+            "Third-party build verification"
+          ],
+          "build_infrastructure": [
+            "Hardened, ephemeral build environments",
+            "Privileged access workstations for build engineers",
+            "Network segmentation of build environment",
+            "Continuous monitoring with EDR and SIEM"
+          ],
+          "code_signing": [
+            "HSM-protected signing keys",
+            "Multi-party signing ceremony",
+            "Time-limited signing tokens",
+            "Independent verification before release"
+          ],
+          "detection_capabilities": [
+            "Threat intelligence integration",
+            "Active threat hunting program",
+            "Build artifact integrity monitoring",
+            "Customer-side detection mechanisms"
+          ]
+        },
+        "industry_frameworks": {
+          "slsa": "Supply-chain Levels for Software Artifacts",
+          "ssdf": "NIST Secure Software Development Framework",
+          "cisa_sbom": "Software Bill of Materials requirements"
+        }
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Initial Threat Assessment",
+      "narrative": "You've matched CISA IoCs to DNS traffic from your build server. The C2 domain 'telemetry-cdn.cloudfront.net' has been queried 847 times over 42 days from BUILD-SRV-01. This is your primary build server for NexGen Endpoint Manager, which is deployed to 2,800 enterprise customers.",
+      "question": "What is your FIRST priority after confirming this IoC match?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Immediately shut down all build infrastructure to stop potential malware distribution",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Right instinct but may be premature",
+            "detailed": "While stopping further contamination is important, immediate shutdown destroys volatile forensic evidence (memory, network connections, running processes). With 42 days of activity, this isn't a racing-clock scenario. A brief pause to capture forensic state won't significantly increase risk but will dramatically improve investigation capability.",
+            "consequence": "Build servers shut down. Running processes terminated. Volatile evidence lost. Investigation significantly hampered."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Capture forensic images and volatile data, then isolate build infrastructure",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Evidence preservation before containment",
+            "detailed": "With a sophisticated APT that's been active for 42 days, the immediate risk window is hours, not minutes. Capturing memory dumps, network connection state, and running processes before isolation preserves critical evidence. Then isolate to prevent further activity. This balanced approach enables effective investigation while containing the threat.",
+            "consequence": "Memory dumps captured showing active C2 connection. Process list preserved. Build servers then isolated. Rich forensic evidence available."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Investigate quietly without isolating - we don't want to alert the attackers",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Dangerous - continued access means continued compromise",
+            "detailed": "While not alerting attackers has value, allowing continued access to build infrastructure means potentially more compromised builds, more customer impact, and more data exfiltration. The attackers have had 42 days - the priority now is stopping the bleeding. Sophisticated attackers assume they'll eventually be detected.",
+            "consequence": "Investigation continues while attackers maintain access. Additional backdoored build released during investigation. More customers affected."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Contact CISA and FBI before taking any technical actions",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important but shouldn't delay evidence preservation",
+            "detailed": "Law enforcement and CISA notification is absolutely required for a suspected nation-state supply chain attack. However, waiting for them before preserving evidence could mean losing volatile data. Capture forensic state, isolate systems, THEN contact authorities. They'll want to see your evidence anyway.",
+            "consequence": "FBI contacted. They ask what evidence you have. You realize volatile evidence should have been captured first."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What evidence exists only while systems are running that would be lost if you shut them down?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Memory dumps, active network connections, running processes, and logged-in sessions are volatile evidence. Capture before isolation."
+        }
+      ],
+      "learning_note": "Incident response for sophisticated threats requires balanced evidence preservation and containment. Volatile evidence (memory, network state, processes) is lost when systems are shut down. For threats that have been active for days/weeks, a brief evidence collection period before isolation is appropriate. Racing to shut down destroys the evidence needed to understand the full scope.",
+      "unlocks_artifact": "artifact_2"
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "Threat Actor Assessment",
+      "narrative": "The CISA advisory attributes this activity to APT29/COZY SPIDER, associated with Russian intelligence services. Your CEO asks: 'Is this really a nation-state attack or could it be regular criminals? How confident should we be in this attribution?'",
+      "question": "How should you characterize this threat actor to leadership?",
+      "options": [
+        {
+          "id": "A",
+          "text": "We can't confirm attribution - focus on the technical indicators, not who's behind it",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Attribution matters for risk assessment",
+            "detailed": "While technical response is similar regardless of attacker, attribution significantly impacts risk assessment: nation-state actors have different objectives (espionage vs. financial), resources (extensive), patience (years-long operations), and targets (government/defense customers). Leadership needs accurate threat characterization to make informed decisions about notification, resources, and business impact.",
+            "consequence": "Leadership treats this as ordinary malware. Resources allocated accordingly. Severity underestimated."
+          }
+        },
+        {
+          "id": "B",
+          "text": "CISA attributes to APT29 (Russian SVR) - a sophisticated nation-state actor focused on espionage against government and defense",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Communicate attribution with appropriate context",
+            "detailed": "CISA's attribution to APT29 is significant intelligence that leadership needs. APT29's characteristics - targeting government/defense, supply chain methodology, patient long-term access, espionage motivation - directly impact risk assessment. Their government and defense customers face the highest risk. Attribution also triggers specific notification requirements.",
+            "consequence": "Leadership understands severity. Resources appropriately allocated. Government customers prioritized. FBI engagement accelerated."
+          }
+        },
+        {
+          "id": "C",
+          "text": "This is definitely Russian government hackers - we need to go public immediately",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Overconfident and premature",
+            "detailed": "While CISA's attribution is credible, stating 'definitely' overstates certainty. Attribution is probabilistic, not absolute. Additionally, going public immediately without investigation, customer notification, and coordination with authorities could cause more harm. Communicate what's known with appropriate confidence levels.",
+            "consequence": "Premature public statement. Attribution questioned. Customers learn from press before company notification. Authorities frustrated."
+          }
+        },
+        {
+          "id": "D",
+          "text": "It's probably just cybercriminals who copied APT29's tools - nation-states wouldn't target us",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Dangerous underestimation",
+            "detailed": "Software vendors with government/defense customers are prime targets for supply chain attacks - exactly APT29's methodology (see: SolarWinds). Dismissing the attribution because 'they wouldn't target us' ignores the attack pattern. Your product is deployed across government agencies and defense contractors - exactly APT29's target set.",
+            "consequence": "Leadership underestimates threat. Inadequate resources allocated. Government customers not prioritized. Risk to national security increased."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What distinguishes nation-state APTs from cybercriminals in terms of motivation, targets, and methods?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "APT29 specifically targets government, defense, and their supply chain for espionage purposes. They conduct supply chain attacks to reach their actual targets."
+        }
+      ],
+      "learning_note": "Threat actor attribution, while never 100% certain, is valuable for risk assessment. Nation-state actors like APT29 have different motivations (espionage vs. profit), target sets (government/defense), patience (years-long operations), and resources than cybercriminals. Communicate attribution from credible sources (CISA, FBI) with appropriate confidence levels to inform leadership decisions.",
+      "unlocks_artifact": "artifact_3"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Scope Determination",
+      "narrative": "Forensic analysis of BUILD-SRV-01 reveals a sophisticated implant using DLL side-loading, plus modifications to post-build scripts. The build logs show three release builds were created after the compromise: v4.2.1, v4.2.2, and v4.3.0. All were signed with your code signing certificate and distributed to customers.",
+      "question": "What is the scope of the supply chain compromise?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Only systems that received version 4.3.0 (the most recent) are affected",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Understates the scope significantly",
+            "detailed": "The forensic timeline shows the build script was modified on January 5th, before v4.2.1 was released. All three builds (v4.2.1, v4.2.2, v4.3.0) were created after the script modification. Any customer who installed any of these versions received compromised software.",
+            "consequence": "Only v4.3.0 customers notified. 1,847 installations of v4.2.1/v4.2.2 remain compromised and unaware."
+          }
+        },
+        {
+          "id": "B",
+          "text": "All customers who installed v4.2.1, v4.2.2, or v4.3.0 received compromised software",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! All post-compromise builds are affected",
+            "detailed": "The build script modification predates all three releases. Timeline: compromise Jan 2, script modification Jan 5, v4.2.1 released Jan 8, v4.2.2 released Jan 22, v4.3.0 released Feb 5. All 3,006 installations across these versions received backdoored software. This affects approximately 2,156 unique customers.",
+            "consequence": "Complete scope identified. All affected customers can be notified. No compromised installations overlooked."
+          }
+        },
+        {
+          "id": "C",
+          "text": "All customers are affected since we don't know how far back the compromise goes",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Overstates scope unnecessarily",
+            "detailed": "While conservative, forensic evidence clearly shows the compromise began January 2nd. Versions released before this date (4.1.x and earlier) are not affected. Overstating scope creates unnecessary panic and diverts resources from actually affected customers.",
+            "consequence": "All customers alerted including those with clean versions. Resources spread thin. Credibility questioned when older versions verified clean."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Only customers actively targeted by the backdoor's activation logic are truly affected",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Misunderstands the risk",
+            "detailed": "All customers received compromised software with a backdoor - they're all affected. The activation logic determines which customers have ACTIVE compromise vs. dormant backdoor. But dormant backdoors can be activated later, and all customers need to remediate. The distinction is priority, not whether they're affected.",
+            "consequence": "Non-targeted customers told they're fine. Dormant backdoors remain in thousands of customer environments."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "The timeline shows exactly when the build script was modified. Which versions were built after that modification?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Build script modified January 5th. Any version released after January 5th went through the compromised build process."
+        }
+      ],
+      "learning_note": "Supply chain compromise scope is determined by when the build process was compromised, not when it was detected. All software built after compromise is potentially affected. Forensic timeline reconstruction is essential for accurate scope assessment. Both 'all versions ever' and 'only latest version' are typically wrong - the answer is versions built after compromise.",
+      "unlocks_artifact": "artifact_4"
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Backdoor Behavior Analysis",
+      "narrative": "Reverse engineering reveals the backdoor has selective activation logic: it only fully activates on systems matching certain criteria (.gov/.mil domains, defense contractor domain lists, specific IP ranges). On other systems, it remains dormant. This means most customers have an inactive backdoor, but government/defense customers likely have active compromise.",
+      "question": "How does this selective activation change your response priorities?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Focus exclusively on government and defense customers - others have dormant backdoors",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Dormant backdoors still require remediation",
+            "detailed": "While government/defense are highest priority due to likely active compromise, all affected customers have backdoored software. Dormant backdoors can be activated later, the targeting logic could change, and customers deserve to know they have compromised software. Prioritize, but don't ignore non-targeted customers.",
+            "consequence": "Commercial customers not notified. Backdoors remain dormant but present. Attacker could activate them later. Trust destroyed when customers eventually learn."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Prioritize government/defense customers for immediate notification while preparing broader notification",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Prioritized response based on risk level",
+            "detailed": "The selective activation creates tiers of urgency: Tier 1 (Critical) - government and defense customers with likely ACTIVE compromise need immediate notification to begin incident response. Tier 2 (High) - all other affected customers need notification to remediate dormant backdoors. All customers need notification; sequencing is based on risk.",
+            "consequence": "Government/defense customers notified immediately with IR support. Broader customer notification follows within 24-48 hours. Resources allocated by risk level."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Treat all customers equally - notify everyone simultaneously",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Fails to account for differing risk levels",
+            "detailed": "While fairness seems appropriate, resource constraints mean you can't provide equal support to 2,800 customers simultaneously. Government/defense customers have active compromise requiring immediate IR support. Trying to treat everyone equally means high-risk customers don't get the urgency they need. Prioritization isn't unfair - it's necessary risk management.",
+            "consequence": "Government customer with active APT29 compromise waits in queue behind low-risk commercial customer. Critical damage occurs during delay."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Wait until you have complete analysis before any notification - partial information causes panic",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Dangerous delay for high-risk customers",
+            "detailed": "Customers with active APT29 compromise are experiencing ongoing espionage RIGHT NOW. Every hour of delay is more data exfiltrated. You have enough information to enable customers to begin defensive actions. Perfect analysis shouldn't be the enemy of timely notification. Update notifications as you learn more.",
+            "consequence": "Government contractor with active compromise continues leaking classified information for additional days while you refine your analysis."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What's the difference in urgency between a customer with active APT compromise vs. one with dormant backdoor?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Active compromise means ongoing espionage happening now - immediate IR response needed. Dormant backdoor is a time bomb - needs remediation but hours matter less."
+        }
+      ],
+      "learning_note": "Supply chain compromise response requires risk-based prioritization. Selective targeting means different customers face different risk levels. Customers with active compromise need immediate notification and IR support. Customers with dormant backdoors need notification and remediation guidance but have more time. Don't delay high-risk notifications waiting for complete analysis or equal treatment.",
+      "unlocks_artifact": "artifact_5"
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Downstream Impact Assessment",
+      "narrative": "Your customer database shows 47 federal government agencies and 156 defense contractors among affected customers. Given APT29's targeting criteria match, these customers likely have active backdoors with ongoing espionage. Some defense contractors handle classified programs.",
+      "question": "What is the primary concern for defense contractor customers?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Financial liability from breach lawsuits",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Real but not the primary concern",
+            "detailed": "Financial liability is a legitimate concern for any breach, but defense contractors face more critical issues. When APT29 targets defense contractors, the primary concern is national security - access to classified programs, defense technology, and strategic information. The stakes transcend financial liability.",
+            "consequence": "Focus on liability while national security implications are underweighted in response."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Potential access to classified information and national security implications",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! National security is the critical concern",
+            "detailed": "APT29 targeting defense contractors isn't about money - it's about accessing classified programs, defense technology, and strategic intelligence. A backdoor running with SYSTEM privileges on contractor networks could access CUI (Controlled Unclassified Information) and potentially classified data if networks aren't properly segmented. This is a national security incident.",
+            "consequence": "Notification to DoD and CISA prioritized. Classified program security assessed. Counterintelligence notified. National security implications addressed."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Compliance violations with DFARS and CMMC requirements",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Important but secondary",
+            "detailed": "DFARS/CMMC compliance is relevant and the contractors will face scrutiny, but regulatory compliance is a secondary concern when a sophisticated nation-state actor may have accessed defense programs. The immediate priority is understanding and containing the national security damage, not regulatory compliance status.",
+            "consequence": "Compliance review initiated while active compromise continues. Priorities misaligned."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Reputational damage to contractor relationships",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Misses the severity entirely",
+            "detailed": "When APT29 has potential access to defense programs, reputation is irrelevant compared to national security. The contractors aren't worried about your reputation - they're worried about whether their classified programs have been compromised. This is potential espionage, not a PR issue.",
+            "consequence": "PR strategy prioritized while counterintelligence agencies wonder why you're focused on reputation."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Why would Russian intelligence specifically target defense contractors? What information would they want?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "APT29's mission is espionage. Defense contractors hold classified programs, weapons technology, and strategic intelligence. The concern is national security, not just business risk."
+        }
+      ],
+      "learning_note": "Supply chain attacks targeting government and defense customers have national security implications beyond typical business incidents. Nation-state actors target the defense industrial base to access classified programs, defense technology, and strategic intelligence. Response must prioritize national security considerations, including coordination with counterintelligence and defense agencies.",
+      "unlocks_artifact": "artifact_6"
+    },
+    {
+      "id": "decision_6",
+      "sequence": 6,
+      "title": "Initial Access Vector",
+      "narrative": "Investigation reveals the initial compromise: a developer with build server access was spear-phished through their personal email. Their GitHub credentials were stolen, a PAT was created for persistence, and the attacker used their access to reach the build server. The phishing email bypassed corporate email security because it targeted personal email.",
+      "question": "What attack vector category does this represent?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Zero-day exploit of email infrastructure",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "No exploit was involved in initial access",
+            "detailed": "This attack used social engineering (phishing) and stolen credentials - no technical vulnerability was exploited. The 'bypass' of corporate email security wasn't a vulnerability - the email was simply sent to a personal address that corporate security doesn't protect. Understanding the attack vector correctly is essential for prevention.",
+            "consequence": "Resources spent hunting for non-existent email infrastructure vulnerability."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Social engineering via phishing, targeting personal accounts to bypass corporate controls",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Targeted social engineering exploiting the human factor",
+            "detailed": "APT29 used classic social engineering: identify a valuable target (build engineer), research their personal email, craft a convincing phishing email, and harvest credentials. By targeting personal email, they bypassed corporate email security entirely. This is a trusted relationship attack - compromising an employee to gain access to their employer's systems.",
+            "consequence": "Root cause correctly identified. Security improvements focus on human factors, privileged user protection, and credential security."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Insider threat from the compromised employee",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "The employee was a victim, not a threat",
+            "detailed": "The developer was victimized by sophisticated nation-state spear-phishing, not acting maliciously. Characterizing this as 'insider threat' misunderstands the attack and could damage the employee unfairly. The attack vector is social engineering that compromised an insider's credentials - the insider themselves isn't the threat.",
+            "consequence": "Investigation focuses on employee as suspect. Employee is further victimized. Actual vulnerability (phishing susceptibility) not addressed."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Third-party supply chain compromise via GitHub",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "GitHub wasn't compromised",
+            "detailed": "GitHub's infrastructure wasn't compromised - the attacker stole a user's GitHub credentials through phishing. The 'supply chain' compromise is YOUR software becoming weaponized to attack YOUR customers. Don't confuse the attack path (compromised GitHub credentials) with the impact (your supply chain compromised).",
+            "consequence": "Incorrectly blame GitHub. Actual attack vector (phishing) not addressed."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How did the attacker first gain access? What did they trick the human into doing?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Phishing targeting personal email accounts bypasses corporate email security. The attack exploits trust in the employee, not technical vulnerabilities."
+        }
+      ],
+      "learning_note": "Sophisticated attackers often target employees through personal channels to bypass corporate security controls. Personal email phishing, social media engineering, and SMS phishing reach individuals directly. Organizations with privileged users (developers, admins) must address this gap through awareness training, clear policies on work credentials in personal accounts, and monitoring that extends to understand human-factor risks.",
+      "unlocks_artifact": "artifact_7"
+    },
+    {
+      "id": "decision_7",
+      "sequence": 7,
+      "title": "Notification Strategy",
+      "narrative": "You're developing the notification strategy. You need to coordinate with CISA, FBI, notify affected customers, and eventually make public disclosure. The timing and sequencing of these notifications will impact customer trust, regulatory compliance, and national security.",
+      "question": "What is the correct notification sequence?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Public disclosure first to ensure transparency, then agency and customer notification",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Public disclosure should come last",
+            "detailed": "Public disclosure before customer notification means customers learn about their compromise from the news rather than from you. This destroys trust, prevents coordinated response, and may tip off attackers who then accelerate their operations. Disclosure sequence: authorities â†’ affected parties â†’ public.",
+            "consequence": "Customers learn from news. Government agencies can't prepare classified assessment. Attackers see disclosure and accelerate data exfiltration."
+          }
+        },
+        {
+          "id": "B",
+          "text": "CISA/FBI first, then prioritized customer notification, then coordinated public disclosure",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Coordinate with authorities, protect customers, then disclose",
+            "detailed": "Proper sequence: (1) CISA/FBI notification enables government response and potential intelligence sharing; (2) Prioritized customer notification (government/defense first) enables defensive action; (3) Coordinated public disclosure after customers can protect themselves. This balances transparency with responsible disclosure that minimizes harm.",
+            "consequence": "CISA can coordinate government-wide response. Customers notified before public learns. Defense agencies can assess classified impact. Disclosure coordinated professionally."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Customer notification first, then authorities, then public disclosure",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Close but should coordinate with authorities first",
+            "detailed": "Customer notification is essential, but coordinating with CISA/FBI first enables: government-wide threat awareness, potential classified intelligence sharing, coordinated response across multiple affected entities, and legal protection for your notification process. Authorities first (briefly), then customers quickly.",
+            "consequence": "Notification goes out without government coordination. Missed opportunity for intelligence sharing. Government learns from customers rather than coordinated disclosure."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Notify all parties simultaneously for fairness",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Prevents coordinated response",
+            "detailed": "Simultaneous notification sounds fair but prevents coordinated response. Public disclosure alongside customer notification means press inquiries flood in before customers can assess their exposure. Government agencies can't prepare classified assessments. Sequencing enables coordinated, effective response.",
+            "consequence": "Press calls overwhelm customer support. Government agencies scrambling. No coordinated response. Chaos instead of managed disclosure."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Who needs to be able to take action before public disclosure causes chaos?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Authorities enable coordinated response. Customers need time to assess and protect themselves. Public disclosure should come after affected parties can act."
+        }
+      ],
+      "learning_note": "Supply chain compromise notification follows a responsible disclosure model: (1) Authorities (CISA, FBI) for coordinated government response and intelligence sharing; (2) Affected customers in priority order so they can begin protective measures; (3) Public disclosure after affected parties have had opportunity to respond. This sequence minimizes harm while maintaining transparency.",
+      "unlocks_artifact": "artifact_8"
+    },
+    {
+      "id": "decision_8",
+      "sequence": 8,
+      "title": "Customer Remediation Guidance",
+      "narrative": "You're preparing the technical guidance package for affected customers. They need to understand what to look for, how to detect if the backdoor is active, and what remediation steps to take. Some customers have sophisticated security teams; others have minimal security resources.",
+      "question": "What is the MOST important element of customer remediation guidance?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Step-by-step removal instructions to delete the backdoor files",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Removal alone is insufficient",
+            "detailed": "Simply deleting backdoor files doesn't address whether the backdoor was ACTIVE. Customers with active backdoors have potentially compromised credentials, lateral movement, and data exfiltration. They need full incident response, not just file deletion. Remediation must be proportional to whether the backdoor activated.",
+            "consequence": "Customers delete files thinking they're clean. Those with active backdoors still have compromised credentials and potential persistent access."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Detection guidance to determine if the backdoor activated, with different remediation paths based on findings",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Detection first, then proportional remediation",
+            "detailed": "Customers need to first determine: Was the backdoor dormant or active? Detection guidance (IoCs for C2 communication, behavioral indicators of activation) lets customers assess their actual exposure. Dormant backdoor = update software, monitor. Active backdoor = full incident response. One-size remediation doesn't fit both scenarios.",
+            "consequence": "Customers can accurately assess exposure. Those with active backdoors trigger full IR. Those with dormant backdoors update and monitor. Resources appropriately allocated."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Immediate software update to the clean version",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important but not sufficient for active backdoors",
+            "detailed": "Software update removes the backdoor but doesn't address damage from active compromise. Customers with activated backdoors may have: compromised credentials, lateral movement persistence, data exfiltration. Updating software before investigating means destroying evidence and leaving other compromise vectors in place.",
+            "consequence": "Customers update software, thinking they're safe. Active compromise persists through other mechanisms attackers established."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Complete rebuild of all systems that had the software installed",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Overkill for dormant backdoors",
+            "detailed": "Complete rebuild is appropriate for customers with active backdoors where attackers had extensive access. But for customers where the backdoor remained dormant, rebuilding thousands of systems is massive overkill. Proportional response based on actual compromise level is more appropriate.",
+            "consequence": "Customers with dormant backdoors waste resources rebuilding uncompromised systems while customers with active backdoors may not realize they need MORE than rebuild."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "The backdoor had selective activation. What's different about remediation for active vs. dormant backdoors?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Active backdoor = full APT compromise requiring incident response. Dormant backdoor = remove software and monitor. Detection determines which path."
+        }
+      ],
+      "learning_note": "Supply chain compromise remediation must account for varying impact levels. Provide customers with: (1) Detection methods to assess their exposure level, (2) Appropriate remediation for each level. Dormant backdoors need removal and monitoring. Active backdoors require full incident response. One-size remediation either over-remediates dormant cases or under-remediates active ones."
+    },
+    {
+      "id": "decision_9",
+      "sequence": 9,
+      "title": "Code Signing Recovery",
+      "narrative": "Your code signing certificate was used to sign the backdoored software. Customers trust your signature. You need to recover code signing capability to release clean software, but the current certificate is tainted - it signed malicious code.",
+      "question": "What is the correct approach to code signing recovery?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Continue using the existing certificate - it wasn't technically compromised, just misused",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "The certificate signed malicious code - trust is broken",
+            "detailed": "While the private key may not have been stolen, the certificate was used to sign malicious code. It can no longer be trusted to mean 'legitimate NexGen software' because it was also used to sign backdoored versions. Customers and security tools may block it. New certificate needed.",
+            "consequence": "Customers' security tools flag your legitimate software because the certificate signed malware. Trust cannot be rebuilt with tainted certificate."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Revoke current certificate, obtain new certificate with improved security controls (HSM, ceremony)",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Revoke tainted certificate, establish secure signing",
+            "detailed": "The current certificate is tainted by signing malicious code and must be revoked. New certificate should be protected by: HSM (Hardware Security Module) to protect private key, multi-party signing ceremony (no single person can sign), time-limited signing tokens, and audit logging. This rebuilds trust with improved security.",
+            "consequence": "Old certificate revoked. New HSM-protected certificate established. Signing ceremony implemented. Customers can trust new signature indicates clean software."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Release clean software unsigned until a new certificate can be obtained",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Unsigned software creates deployment problems",
+            "detailed": "Unsigned software will be blocked by many enterprise security tools, Windows SmartScreen, and endpoint protection. Customers can't easily deploy it, exactly when they urgently need the clean version. Get emergency certificate from CA or use timestamped signing with expedited new certificate.",
+            "consequence": "Customers can't deploy clean version because their security tools block unsigned software. Extended exposure while certificate issues resolved."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Ask customers to whitelist the current certificate for now, revoke after immediate crisis passes",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Extends life of tainted certificate",
+            "detailed": "Asking customers to whitelist a certificate that signed APT malware is poor security practice. The certificate is tainted and extending its trusted life, even temporarily, is wrong. Additionally, the backdoored versions are also signed with this certificate - whitelisting helps attackers too.",
+            "consequence": "Customers whitelist certificate that also validates the backdoored software. Security weakened rather than improved."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Can a code signing certificate that signed malicious code ever be trusted again?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Revoke the tainted certificate. New certificate with HSM protection and signing ceremony provides secure foundation for rebuilding trust."
+        }
+      ],
+      "learning_note": "Code signing certificate management after supply chain compromise: (1) Revoke any certificate that signed malicious code - trust is broken, (2) New certificate with improved protections - HSM key storage, multi-party ceremony, audit logging, (3) Communicate certificate transition to customers. The goal is rebuilding trust that your signature means legitimate software.",
+      "unlocks_artifact": "artifact_9"
+    },
+    {
+      "id": "decision_10",
+      "sequence": 10,
+      "title": "Preventing Future Supply Chain Attacks",
+      "narrative": "Leadership wants to ensure this never happens again. You're preparing long-term security improvements for the build and release process. Investment is available - the cost of this incident justifies significant security improvement.",
+      "question": "What is the MOST important long-term security improvement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enhanced email security to catch phishing attempts",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Addresses initial access but attackers will adapt",
+            "detailed": "Email security is important, but the attack used personal email, bypassing corporate controls. Additionally, sophisticated attackers have multiple initial access methods - blocking one just shifts them to another. Defense in depth across the entire build pipeline is more impactful than hardening one entry point.",
+            "consequence": "Email security improved. Next attack uses different initial access (social media, phone phishing, watering hole). Same outcome."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Implement SLSA framework with reproducible builds, build provenance, and artifact attestation",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Supply chain security framework addresses the systemic risk",
+            "detailed": "SLSA (Supply-chain Levels for Software Artifacts) provides comprehensive protection: reproducible builds (multiple build systems produce identical output - tampering is detectable), build provenance (cryptographic proof of how artifacts were built), and attestation (signed statements about build process). This makes supply chain attacks detectable even if attackers gain access.",
+            "consequence": "Reproducible builds mean tampering is mathematically detectable. Provenance and attestation provide verification. Supply chain integrity becomes verifiable, not just assumed."
+          }
+        },
+        {
+          "id": "C",
+          "text": "24/7 SOC monitoring of build infrastructure",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Detection is valuable but prevention is better",
+            "detailed": "SOC monitoring helps detect attacks faster, but this attack went undetected for 42 days despite logging being enabled. Detection-only approaches mean you're always responding to breaches rather than preventing them. Architectural improvements (SLSA, reproducible builds) provide prevention and detection.",
+            "consequence": "SOC monitors build infrastructure. Attack still occurs. Detected in 5 days instead of 42. Still results in compromised builds distributed to customers."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Air-gap the build environment from all networks",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Impractical for modern CI/CD pipelines",
+            "detailed": "Modern software development requires network connectivity: pulling dependencies, accessing repositories, deploying builds, CI/CD automation. Air-gapping build infrastructure would cripple development velocity. Security must enable business operations, not prevent them. SLSA provides security without eliminating connectivity.",
+            "consequence": "Development grinds to halt as builds can't access dependencies or repositories. Business impact unacceptable. Air-gap eventually relaxed with exceptions that recreate vulnerabilities."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What framework specifically addresses software supply chain security with verifiable integrity?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "SLSA (Supply-chain Levels for Software Artifacts) provides reproducible builds, provenance, and attestation - making tampering detectable even if attackers access build systems."
+        }
+      ],
+      "learning_note": "Supply chain security requires architectural improvements beyond perimeter defense. SLSA framework provides: reproducible builds (same source produces same artifact across different build systems), build provenance (cryptographic proof of build process), and attestation (signed verification statements). These make supply chain attacks detectable because tampering produces different artifacts or invalid provenance.",
+      "unlocks_artifact": "artifact_10"
+    }
+  ],
+  
+  "summary_teaching_points": [
+    {
+      "topic": "Nation-State Threat Actors",
+      "key_points": [
+        "APT29/COZY SPIDER is Russian SVR targeting government, defense, and their supply chain",
+        "Nation-state actors prioritize stealth and long-term access over quick monetization",
+        "Supply chain attacks allow targeting of otherwise hardened victims through trusted software"
+      ]
+    },
+    {
+      "topic": "Supply Chain Attack Vectors",
+      "key_points": [
+        "Build infrastructure compromise injects malicious code before signing",
+        "Trusted software update channels distribute backdoors to all customers",
+        "Selective activation logic targets high-value victims while remaining dormant elsewhere"
+      ]
+    },
+    {
+      "topic": "APT Indicators and Analysis",
+      "key_points": [
+        "C2 infrastructure often masquerades as legitimate CDN traffic",
+        "DLL side-loading provides stealthy persistence within legitimate processes",
+        "Timeline reconstruction from forensic evidence determines compromise scope"
+      ]
+    },
+    {
+      "topic": "Incident Response for Supply Chain Attacks",
+      "key_points": [
+        "Evidence preservation before containment for sophisticated threats",
+        "Customer notification prioritized by risk level (active vs. dormant backdoor)",
+        "Coordination with government agencies for national security implications"
+      ]
+    },
+    {
+      "topic": "Supply Chain Security",
+      "key_points": [
+        "SLSA framework provides reproducible builds, provenance, and attestation",
+        "Code signing security requires HSM protection and signing ceremonies",
+        "Detection guidance helps customers assess their specific exposure level"
+      ]
+    }
+  ],
+  
+  "weakness_mapping": {
+    "threat_actors_weak": {
+      "threshold": 2,
+      "indicators": ["decision_2", "decision_5"],
+      "remediation": "D2-REM-001",
+      "description": "Difficulty with APT/nation-state threat actor understanding"
+    },
+    "attack_vectors_weak": {
+      "threshold": 2,
+      "indicators": ["decision_3", "decision_6"],
+      "remediation": "D2-REM-001",
+      "description": "Difficulty with supply chain attack vector analysis"
+    },
+    "indicator_analysis_weak": {
+      "threshold": 2,
+      "indicators": ["decision_1", "decision_3", "decision_4"],
+      "remediation": "D2-REM-002",
+      "description": "Difficulty with APT indicator analysis and forensic timeline"
+    }
+  },
+  
+  "prerequisites": ["D2-SIM-001", "D2-SIM-002"],
+  "unlocks": ["D2-SIM-005", "D3-SIM-002"],
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 2: Threats, Vulnerabilities, and Mitigations",
+    "job_role_alignment": ["Security Engineer", "Incident Responder", "Threat Analyst"],
+    "industry_context": "Software vendor - supply chain security"
+  }
+}

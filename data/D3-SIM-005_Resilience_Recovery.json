@@ -1,0 +1,1308 @@
+{
+  "simulation_id": "D3-SIM-005",
+  "title": "Resilience and Recovery",
+  "domain": 3,
+  "category": "primary",
+  "difficulty": "advanced",
+  "time_estimate": "50-65 minutes",
+  "passing_score": 200,
+  "max_score": 250,
+  
+  "exam_objectives": [
+    {
+      "id": "3.4",
+      "description": "Explain the importance of resilience and recovery in security architecture",
+      "coverage": ["high availability", "site considerations", "platform diversity", "backup strategies", "power resilience", "capacity planning"]
+    },
+    {
+      "id": "1.3",
+      "description": "Explain the importance of change management processes and the impact to security",
+      "coverage": ["business continuity", "disaster recovery", "incident response"]
+    }
+  ],
+  
+  "scenario_context": {
+    "organization": "Continental Logistics Corporation",
+    "industry": "Transportation and Logistics",
+    "size": "18,000 employees, 45 distribution centers, 3,200 delivery vehicles",
+    "setting": "Business continuity and disaster recovery program redesign",
+    "your_role": "Business Continuity Architect",
+    "reporting_to": "Chief Risk Officer Patricia Vance",
+    "environment": {
+      "current_state": {
+        "operations": "24/7 logistics operations, real-time tracking, just-in-time delivery for major retailers",
+        "infrastructure": {
+          "primary_dc": "Chicago - main data center, all production workloads",
+          "dr_site": "Dallas - cold DR site, monthly tape backups shipped",
+          "cloud": "Limited Azure usage for non-critical apps"
+        },
+        "critical_systems": [
+          {"system": "Transportation Management System (TMS)", "rto": "Unknown", "rpo": "Unknown", "criticality": "Revenue-generating"},
+          {"system": "Warehouse Management System (WMS)", "rto": "Unknown", "rpo": "Unknown", "criticality": "Operations"},
+          {"system": "Real-time Tracking Platform", "rto": "Unknown", "rpo": "Unknown", "criticality": "Customer-facing"},
+          {"system": "Driver Mobile Apps", "rto": "Unknown", "rpo": "Unknown", "criticality": "Field operations"},
+          {"system": "EDI/Integration Platform", "rto": "Unknown", "rpo": "Unknown", "criticality": "Partner connectivity"}
+        ]
+      },
+      "recent_events": {
+        "incident": "Prolonged power outage at Chicago DC during summer heat wave",
+        "duration": "18 hours",
+        "impact": [
+          "Generator fuel exhausted after 12 hours",
+          "TMS down for 6 hours after power restored (data corruption)",
+          "2,400 shipments delayed or lost tracking",
+          "$4.2M in SLA penalties and customer credits",
+          "Major retailer threatening contract termination"
+        ],
+        "root_causes": [
+          "No tested DR failover capability",
+          "Generator fuel contract only guaranteed 8-hour delivery",
+          "Single data center dependency",
+          "Backups not tested for recoverability"
+        ]
+      },
+      "initiative": {
+        "name": "Operational Resilience Program",
+        "budget": "$8.5M",
+        "timeline": "18 months",
+        "executive_mandate": "Never again lose operations due to single-site failure"
+      }
+    },
+    "opening_narrative": "Continental Logistics' summer outage exposed critical gaps in business continuity planning. The company's 24/7 operations and contractual SLAs with major retailers mean downtime directly translates to revenue loss and customer defection. As the newly appointed Business Continuity Architect, you're tasked with designing a resilient architecture that can withstand site failures, cyber attacks, and natural disasters. Patricia Vance has made it clear: the board expects a fundamental transformation, not incremental improvements."
+  },
+  
+  "artifacts": [
+    {
+      "id": "artifact_1",
+      "title": "Business Impact Analysis Summary",
+      "type": "assessment_document",
+      "unlocks_at": "start",
+      "content": {
+        "critical_process_analysis": {
+          "shipment_processing": {
+            "description": "Order intake, route optimization, dispatch",
+            "mtpd": "4 hours",
+            "revenue_impact": "$125,000/hour",
+            "supporting_systems": ["TMS", "EDI Platform", "Route Optimization"],
+            "dependencies": ["WMS for inventory", "Customer portals", "Carrier systems"]
+          },
+          "warehouse_operations": {
+            "description": "Receiving, put-away, picking, shipping",
+            "mtpd": "8 hours",
+            "revenue_impact": "$85,000/hour",
+            "supporting_systems": ["WMS", "RF scanners", "Conveyor controls"],
+            "dependencies": ["TMS for orders", "Inventory database"]
+          },
+          "fleet_tracking": {
+            "description": "Real-time vehicle location, ETA updates",
+            "mtpd": "2 hours",
+            "revenue_impact": "$45,000/hour (SLA penalties)",
+            "supporting_systems": ["Tracking platform", "Mobile apps", "Customer portal"],
+            "dependencies": ["GPS feeds", "Cellular connectivity", "Map services"]
+          },
+          "customer_integration": {
+            "description": "EDI transactions, API feeds, portal access",
+            "mtpd": "4 hours",
+            "revenue_impact": "$200,000/hour (contract penalties)",
+            "supporting_systems": ["EDI gateway", "API platform", "B2B portal"],
+            "dependencies": ["TMS data", "Tracking data", "Billing systems"]
+          }
+        },
+        "current_recovery_capabilities": {
+          "tms": {"backup": "Daily full, hourly transaction logs", "recovery_tested": "Never", "estimated_rto": "24-48 hours"},
+          "wms": {"backup": "Daily full", "recovery_tested": "2 years ago", "estimated_rto": "12-24 hours"},
+          "tracking": {"backup": "Real-time replication to...nowhere", "recovery_tested": "Never", "estimated_rto": "Unknown"},
+          "edi": {"backup": "Daily", "recovery_tested": "Never", "estimated_rto": "8-12 hours"}
+        },
+        "gap_analysis": [
+          {"gap": "No defined RTO/RPO for critical systems", "risk": "Cannot prioritize recovery efforts"},
+          {"gap": "DR site is cold - no running systems", "risk": "Extended recovery time"},
+          {"gap": "Backups never tested", "risk": "May not be recoverable"},
+          {"gap": "Single data center for all production", "risk": "Complete outage on site failure"},
+          {"gap": "No documented recovery procedures", "risk": "Ad-hoc recovery, extended downtime"}
+        ]
+      }
+    },
+    {
+      "id": "artifact_2",
+      "title": "RTO/RPO Framework",
+      "type": "reference",
+      "unlocks_at": "decision_1",
+      "content": {
+        "definitions": {
+          "rto": {
+            "name": "Recovery Time Objective",
+            "definition": "Maximum acceptable time to restore service after disruption",
+            "business_driver": "How long can the business function without this system?",
+            "cost_relationship": "Lower RTO = higher cost (more redundancy, faster recovery)"
+          },
+          "rpo": {
+            "name": "Recovery Point Objective",
+            "definition": "Maximum acceptable data loss measured in time",
+            "business_driver": "How much data can the business afford to lose?",
+            "cost_relationship": "Lower RPO = higher cost (more frequent backup/replication)"
+          },
+          "mtpd": {
+            "name": "Maximum Tolerable Period of Disruption",
+            "definition": "Point at which business viability is threatened",
+            "relationship": "RTO must be less than MTPD"
+          }
+        },
+        "rto_rpo_tiers": {
+          "tier_1_critical": {
+            "rto": "< 1 hour",
+            "rpo": "< 15 minutes",
+            "solution": "Active-active or hot standby with synchronous replication",
+            "cost": "Highest"
+          },
+          "tier_2_important": {
+            "rto": "1-4 hours",
+            "rpo": "< 1 hour",
+            "solution": "Hot standby with asynchronous replication",
+            "cost": "High"
+          },
+          "tier_3_standard": {
+            "rto": "4-24 hours",
+            "rpo": "< 24 hours",
+            "solution": "Warm standby with periodic backup",
+            "cost": "Medium"
+          },
+          "tier_4_low": {
+            "rto": "24-72 hours",
+            "rpo": "< 24 hours",
+            "solution": "Cold standby with backup restore",
+            "cost": "Low"
+          }
+        },
+        "determining_factors": [
+          "Revenue impact per hour of downtime",
+          "Contractual SLA requirements",
+          "Regulatory requirements",
+          "Customer impact and reputation",
+          "Operational dependencies"
+        ]
+      }
+    },
+    {
+      "id": "artifact_3",
+      "title": "High Availability Architecture Patterns",
+      "type": "architecture_document",
+      "unlocks_at": "decision_2",
+      "content": {
+        "ha_patterns": {
+          "active_active": {
+            "description": "Multiple sites actively processing traffic simultaneously",
+            "traffic": "Load balanced across sites",
+            "data": "Synchronous or near-synchronous replication",
+            "failover": "Automatic, near-instant (seconds)",
+            "rto": "< 1 minute",
+            "use_case": "Mission-critical, zero-downtime requirements",
+            "complexity": "Highest",
+            "cost": "Highest"
+          },
+          "active_passive_hot": {
+            "description": "Standby site running and ready to accept traffic",
+            "traffic": "Primary site only, standby on hot standby",
+            "data": "Asynchronous replication (minutes behind)",
+            "failover": "Minutes (DNS/load balancer switch)",
+            "rto": "15-60 minutes",
+            "use_case": "Critical systems with short RTO",
+            "complexity": "Medium-high",
+            "cost": "High"
+          },
+          "active_passive_warm": {
+            "description": "Standby site has systems but needs startup/data sync",
+            "traffic": "Primary only",
+            "data": "Periodic backup/restore or delayed replication",
+            "failover": "Hours (start systems, restore data)",
+            "rto": "4-24 hours",
+            "use_case": "Important systems with moderate RTO",
+            "complexity": "Medium",
+            "cost": "Medium"
+          },
+          "active_passive_cold": {
+            "description": "Standby site has infrastructure but no running systems",
+            "traffic": "Primary only",
+            "data": "Backup restore required",
+            "failover": "Days (provision, restore, configure)",
+            "rto": "24-72+ hours",
+            "use_case": "Non-critical or cost-constrained",
+            "complexity": "Low",
+            "cost": "Low"
+          }
+        },
+        "cloud_ha_options": {
+          "multi_az": {
+            "description": "Distribute across availability zones in one region",
+            "protects_against": "Single data center failure",
+            "latency": "Low (same region)",
+            "cost": "Moderate increase"
+          },
+          "multi_region": {
+            "description": "Distribute across geographic regions",
+            "protects_against": "Regional disaster, zone failures",
+            "latency": "Higher (geographic distance)",
+            "cost": "Significant increase"
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_4",
+      "title": "Backup Strategy Components",
+      "type": "reference",
+      "unlocks_at": "decision_3",
+      "content": {
+        "backup_types": {
+          "full": {
+            "description": "Complete copy of all data",
+            "pros": "Simple restore, self-contained",
+            "cons": "Time and storage intensive",
+            "frequency": "Weekly or less frequent"
+          },
+          "incremental": {
+            "description": "Only data changed since last backup (any type)",
+            "pros": "Fast, minimal storage",
+            "cons": "Restore requires full + all incrementals",
+            "frequency": "Daily or more frequent"
+          },
+          "differential": {
+            "description": "All data changed since last full backup",
+            "pros": "Faster restore than incremental",
+            "cons": "Grows larger over time",
+            "frequency": "Daily"
+          },
+          "snapshot": {
+            "description": "Point-in-time copy using storage-level features",
+            "pros": "Very fast, space-efficient (copy-on-write)",
+            "cons": "Storage-specific, same media risk",
+            "frequency": "Hourly or more frequent"
+          },
+          "continuous_replication": {
+            "description": "Real-time copy of changes to secondary location",
+            "pros": "Near-zero RPO",
+            "cons": "Cost, complexity, replicates corruption",
+            "frequency": "Continuous"
+          }
+        },
+        "3_2_1_rule": {
+          "description": "Backup best practice",
+          "components": {
+            "3": "Three copies of data (production + 2 backups)",
+            "2": "Two different media types (disk + tape, or disk + cloud)",
+            "1": "One copy offsite (different location)"
+          },
+          "modern_extension": "3-2-1-1-0: Add 1 offline/immutable copy, 0 errors on restore testing"
+        },
+        "immutable_backups": {
+          "importance": "Ransomware often targets backups",
+          "solutions": [
+            "WORM storage (Write Once Read Many)",
+            "Air-gapped tape",
+            "Cloud immutable storage (S3 Object Lock, Azure Immutable Blob)",
+            "Offline copies"
+          ],
+          "retention_lock": "Cannot delete or modify until retention expires"
+        }
+      }
+    },
+    {
+      "id": "artifact_5",
+      "title": "Site Resilience Considerations",
+      "type": "reference",
+      "unlocks_at": "decision_4",
+      "content": {
+        "geographic_considerations": {
+          "distance": {
+            "minimum": "Far enough to avoid shared disasters (100+ miles)",
+            "maximum": "Close enough for acceptable latency if synchronous replication needed",
+            "sweet_spot": "200-500 miles for most scenarios"
+          },
+          "disaster_zones": {
+            "avoid": "Same earthquake fault, hurricane zone, flood plain",
+            "consider": "Power grid regions, network backbone paths"
+          },
+          "regulatory": {
+            "data_residency": "Some data must stay in-country or region",
+            "jurisdiction": "Consider legal jurisdiction of DR site"
+          }
+        },
+        "site_types": {
+          "owned_dc": {
+            "pros": "Full control, customization",
+            "cons": "Capital expense, long lead time, maintenance responsibility",
+            "use_case": "Large enterprises, specific requirements"
+          },
+          "colocation": {
+            "pros": "Shared facilities, faster deployment",
+            "cons": "Less control, ongoing fees",
+            "use_case": "Mid-size enterprises, standard needs"
+          },
+          "cloud_region": {
+            "pros": "Elastic, rapid deployment, no facilities management",
+            "cons": "Ongoing costs at scale, dependency on provider",
+            "use_case": "Variable workloads, rapid recovery needs"
+          },
+          "hybrid": {
+            "pros": "Flexibility, cost optimization",
+            "cons": "Complexity, multiple vendors",
+            "use_case": "Mixed workloads, staged cloud migration"
+          }
+        },
+        "platform_diversity": {
+          "concept": "Reduce single-vendor or single-technology risk",
+          "examples": [
+            "Multi-cloud (AWS + Azure)",
+            "Hybrid (on-prem + cloud)",
+            "Multiple network providers",
+            "Diverse power feeds"
+          ],
+          "tradeoff": "Diversity vs. operational complexity"
+        }
+      }
+    },
+    {
+      "id": "artifact_6",
+      "title": "Power and Environmental Resilience",
+      "type": "reference",
+      "unlocks_at": "decision_5",
+      "content": {
+        "power_infrastructure": {
+          "utility_feeds": {
+            "single_feed": "Single point of failure",
+            "dual_feed": "Redundant utility connections from different substations",
+            "diverse_path": "Different physical routes to building"
+          },
+          "ups": {
+            "purpose": "Bridge power during transfer to generator, protect against sags/surges",
+            "runtime": "Typically 10-30 minutes",
+            "types": ["Online (double-conversion)", "Line-interactive", "Offline"],
+            "n_plus_1": "Redundant UPS modules for maintenance/failure"
+          },
+          "generators": {
+            "purpose": "Extended runtime during utility outage",
+            "fuel_types": ["Diesel (most common)", "Natural gas", "Dual-fuel"],
+            "considerations": [
+              "Fuel storage capacity (hours of runtime)",
+              "Fuel delivery contracts (guaranteed delivery time)",
+              "Testing schedule (monthly recommended)",
+              "Automatic transfer switch (ATS)"
+            ],
+            "n_plus_1": "Multiple generators with redundancy"
+          }
+        },
+        "environmental_controls": {
+          "cooling": {
+            "primary": "CRAC/CRAH units",
+            "redundancy": "N+1 or 2N for critical facilities",
+            "backup": "Emergency procedures if cooling fails"
+          },
+          "fire_suppression": {
+            "detection": "VESDA (early warning), smoke detectors",
+            "suppression": "Clean agent (FM-200, Novec), water (pre-action)"
+          }
+        },
+        "tier_classification": {
+          "tier_1": {"availability": "99.671%", "downtime": "28.8 hours/year", "features": "Non-redundant"},
+          "tier_2": {"availability": "99.741%", "downtime": "22 hours/year", "features": "Partial redundancy"},
+          "tier_3": {"availability": "99.982%", "downtime": "1.6 hours/year", "features": "Concurrently maintainable"},
+          "tier_4": {"availability": "99.995%", "downtime": "0.4 hours/year", "features": "Fault tolerant"}
+        }
+      }
+    },
+    {
+      "id": "artifact_7",
+      "title": "Testing and Validation Framework",
+      "type": "process_document",
+      "unlocks_at": "decision_6",
+      "content": {
+        "test_types": {
+          "tabletop_exercise": {
+            "description": "Discussion-based walkthrough of scenarios",
+            "participants": "Key stakeholders, recovery teams",
+            "disruption": "None",
+            "frequency": "Quarterly",
+            "validates": "Procedures, roles, decision-making"
+          },
+          "walkthrough_test": {
+            "description": "Step-by-step review of recovery procedures",
+            "participants": "Technical teams",
+            "disruption": "None",
+            "frequency": "Semi-annually",
+            "validates": "Procedure accuracy, completeness"
+          },
+          "simulation_test": {
+            "description": "Practice recovery without impacting production",
+            "participants": "Recovery teams",
+            "disruption": "Minimal (test environment)",
+            "frequency": "Annually",
+            "validates": "Technical recovery capability"
+          },
+          "parallel_test": {
+            "description": "Recover systems at DR site while production runs",
+            "participants": "Recovery teams, operations",
+            "disruption": "Low (DR site only)",
+            "frequency": "Annually",
+            "validates": "Full recovery capability"
+          },
+          "full_interruption_test": {
+            "description": "Actually fail over to DR site",
+            "participants": "All teams",
+            "disruption": "High (production impact risk)",
+            "frequency": "Every 1-2 years for critical systems",
+            "validates": "Real-world recovery, true RTO"
+          }
+        },
+        "testing_program": {
+          "backup_restore_testing": {
+            "frequency": "Monthly for critical systems",
+            "scope": "Sample restore to verify recoverability",
+            "document": "Restore time, success/failure, issues"
+          },
+          "failover_testing": {
+            "frequency": "Quarterly for Tier 1, annually for others",
+            "scope": "Actual failover to DR",
+            "considerations": "Maintenance windows, customer notification"
+          },
+          "lessons_learned": {
+            "process": "After each test, document findings",
+            "actions": "Update procedures, fix gaps, improve"
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_8",
+      "title": "Capacity Planning for Resilience",
+      "type": "reference",
+      "unlocks_at": "decision_7",
+      "content": {
+        "dr_capacity_models": {
+          "full_capacity": {
+            "description": "DR site can handle 100% of production load",
+            "pros": "No performance degradation on failover",
+            "cons": "Most expensive, resources often idle",
+            "use_case": "Critical systems requiring full performance"
+          },
+          "reduced_capacity": {
+            "description": "DR site handles subset of load (e.g., 50-75%)",
+            "pros": "Cost savings",
+            "cons": "May need to prioritize/shed load on failover",
+            "use_case": "Systems where degraded performance acceptable"
+          },
+          "elastic_capacity": {
+            "description": "Cloud resources scale up on demand",
+            "pros": "Pay for DR capacity only when needed",
+            "cons": "Scaling takes time, capacity not guaranteed",
+            "use_case": "Variable workloads, cloud-based systems"
+          }
+        },
+        "capacity_considerations": {
+          "compute": "CPU, memory requirements for applications",
+          "storage": "Data volume, IOPS requirements, replication bandwidth",
+          "network": "Bandwidth for replication, failover traffic",
+          "licensing": "Software licenses may be site-specific"
+        },
+        "scalability_for_resilience": {
+          "horizontal_scaling": "Add more instances to handle load",
+          "vertical_scaling": "Increase resources of existing instances",
+          "auto_scaling": "Automatically adjust based on demand",
+          "burst_capacity": "Ability to handle spikes beyond normal capacity"
+        }
+      }
+    },
+    {
+      "id": "artifact_9",
+      "title": "Recovery Procedures Template",
+      "type": "process_document",
+      "unlocks_at": "decision_8",
+      "content": {
+        "recovery_plan_structure": {
+          "section_1_overview": {
+            "purpose": "Plan objectives and scope",
+            "systems_covered": "Systems addressed by this plan",
+            "rto_rpo": "Recovery objectives",
+            "team_contacts": "Recovery team members, escalation"
+          },
+          "section_2_activation": {
+            "criteria": "When to activate the plan",
+            "decision_authority": "Who can declare disaster",
+            "notification": "Who to notify, how"
+          },
+          "section_3_procedures": {
+            "assessment": "Evaluate situation, determine scope",
+            "recovery_sequence": "Order of system recovery",
+            "step_by_step": "Detailed technical procedures",
+            "verification": "How to verify successful recovery"
+          },
+          "section_4_communications": {
+            "internal": "Employee communication",
+            "external": "Customer, partner, media communication",
+            "status_updates": "How often, what information"
+          },
+          "section_5_return": {
+            "failback": "Returning to primary site",
+            "data_sync": "Ensuring data consistency",
+            "validation": "Confirming normal operations"
+          }
+        },
+        "runbook_elements": {
+          "prerequisites": "What must be in place before starting",
+          "dependencies": "Other systems that must be recovered first",
+          "step_details": "Each step with commands, screens, expected results",
+          "decision_points": "Where judgment is needed",
+          "rollback": "How to undo if step fails"
+        }
+      }
+    },
+    {
+      "id": "artifact_10",
+      "title": "Resilience Architecture Final Design",
+      "type": "architecture_document",
+      "unlocks_at": "decision_9",
+      "content": {
+        "target_architecture": {
+          "primary_site": {
+            "location": "Chicago (existing, upgraded)",
+            "role": "Primary production",
+            "improvements": [
+              "Dual utility feeds",
+              "N+1 generator with 72-hour fuel",
+              "Enhanced cooling redundancy"
+            ]
+          },
+          "secondary_site": {
+            "location": "Azure East US 2 (cloud)",
+            "role": "Hot standby for Tier 1, warm for Tier 2",
+            "capabilities": [
+              "TMS and Tracking: active-passive hot standby",
+              "WMS: warm standby with 4-hour RTO",
+              "Full data replication"
+            ]
+          },
+          "backup_architecture": {
+            "primary_backup": "Azure Backup with geo-redundancy",
+            "immutable_copy": "Azure Immutable Blob Storage (30-day retention lock)",
+            "offline_copy": "Monthly tape to Iron Mountain"
+          }
+        },
+        "recovery_objectives_achieved": {
+          "tms": {"rto": "30 minutes", "rpo": "5 minutes", "method": "Hot standby with async replication"},
+          "tracking": {"rto": "15 minutes", "rpo": "1 minute", "method": "Active-passive with near-sync"},
+          "wms": {"rto": "4 hours", "rpo": "1 hour", "method": "Warm standby"},
+          "edi": {"rto": "2 hours", "rpo": "30 minutes", "method": "Hot standby"}
+        },
+        "resilience_metrics": {
+          "availability_target": "99.95% for Tier 1 systems",
+          "rto_compliance": "Tested and validated quarterly",
+          "backup_success": "99.9% successful backups",
+          "test_frequency": "Quarterly failover tests"
+        }
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Defining Recovery Objectives",
+      "narrative": "Continental has never formally defined RTO and RPO for critical systems. During the outage, there was confusion about recovery priorities. Patricia asks you to establish recovery objectives.",
+      "question": "How should RTO and RPO be determined for Continental's systems?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IT should define RTO/RPO based on technical recovery capabilities",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "RTO/RPO are business decisions, not technical",
+            "detailed": "IT knows what's technically achievable, but RTO/RPO must be driven by business impact. A system IT can recover in 24 hours might need 1-hour RTO based on revenue loss and SLAs. Business leaders must define requirements based on impact; IT determines how to meet them.",
+            "consequence": "Technical-driven objectives may not match business needs."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Business impact analysis driving RTO/RPO with cost-benefit for achieving each tier",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Business impact determines requirements, cost informs decisions",
+            "detailed": "BIA identifies: revenue impact per hour, SLA penalties, operational dependencies, and regulatory requirements. This determines WHAT RTO/RPO is needed. Cost analysis shows WHAT IT COSTS to achieve each tier. Business leaders make informed decisions balancing impact against investment. IT then implements to meet objectives.",
+            "consequence": "Recovery objectives aligned with business needs. Investment justified by impact reduction."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Set the same RTO/RPO for all systems to simplify recovery",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "One-size-fits-all wastes money or under-protects",
+            "detailed": "Systems have different business impact. Applying the most stringent RTO/RPO to everything is expensive and unnecessary. Applying the least stringent puts critical systems at risk. Tiered approach matches investment to impact.",
+            "consequence": "Either over-invest in non-critical systems or under-protect critical ones."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Use industry benchmarks for logistics companies",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Benchmarks help but don't replace business analysis",
+            "detailed": "Industry benchmarks provide reference points, but Continental's specific SLAs, customer contracts, and revenue model determine its requirements. A competitor with different contracts may have different needs. BIA captures Continental-specific requirements.",
+            "consequence": "Generic objectives may not match specific business commitments."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Who understands the business impact of downtime - IT or business leaders?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Business impact analysis quantifies downtime cost. RTO/RPO should be set based on impact, with cost-benefit for different recovery tiers."
+        }
+      ],
+      "learning_note": "RTO/RPO determination: Business Impact Analysis (BIA) quantifies downtime impact (revenue, SLA, reputation). Business leaders set requirements based on impact. Cost analysis shows investment for each tier. Informed decision balances impact vs. cost. IT implements to meet objectives. This is a business decision informed by IT capabilities and costs.",
+      "unlocks_artifact": "artifact_2"
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "High Availability Architecture",
+      "narrative": "The TMS system is revenue-critical with $125K/hour impact and strict customer SLAs. Currently it runs only in Chicago with no standby. You need to design the HA architecture for TMS.",
+      "question": "What high availability architecture should be implemented for TMS?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Active-active across Chicago and cloud DR site",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Active-active is complex and may not be necessary",
+            "detailed": "Active-active provides near-zero RTO but requires: application redesign for multi-site operation, synchronous data replication (latency-constrained), complex conflict resolution, and highest cost. For TMS with 4-hour MTPD, active-passive hot standby likely meets needs at lower complexity.",
+            "consequence": "Highest cost and complexity. May be over-engineering for requirements."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Active-passive hot standby with asynchronous replication and automated failover",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Meets RTO requirements with manageable complexity",
+            "detailed": "Hot standby provides: systems running and ready at DR site, asynchronous replication (minutes of data lag, acceptable for most scenarios), automated failover (15-30 minute RTO achievable), and proven architecture pattern. Meets the <1 hour RTO needed for $125K/hour impact without active-active complexity.",
+            "consequence": "RTO achievable within requirements. Balanced complexity and cost."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Warm standby with 4-hour recovery capability",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "4-hour RTO equals MTPD - no margin for error",
+            "detailed": "TMS has 4-hour MTPD (Maximum Tolerable Period of Disruption). A 4-hour RTO leaves no margin - any complication extends beyond tolerable period. RTO should be significantly less than MTPD to account for real-world recovery challenges.",
+            "consequence": "No safety margin. Likely to exceed MTPD during real incident."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Improve Chicago resilience - dual power, better generators - avoid DR site cost",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Single site can't protect against all scenarios",
+            "detailed": "Improved local resilience is valuable but doesn't protect against: major disasters (fire, flood), prolonged regional outages, or incidents affecting the building. Geographic redundancy is essential for critical systems. Defense in depth means both local resilience AND remote DR.",
+            "consequence": "Still single point of failure at site level."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What architecture provides RTO well under MTPD without unnecessary complexity?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Active-passive hot standby: systems running at DR, async replication, automated failover. Achieves 15-60 minute RTO. Active-active is more complex than needed."
+        }
+      ],
+      "learning_note": "HA architecture selection: match to requirements, not maximum. Active-active for near-zero RTO (complex, expensive). Active-passive hot for <1 hour RTO (proven, manageable). Warm standby for 4-24 hour RTO. Cold for 24+ hours. RTO should be significantly less than MTPD to provide margin for real-world complications.",
+      "unlocks_artifact": "artifact_3"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Backup Strategy",
+      "narrative": "The incident revealed that backups had never been tested for recoverability. Additionally, ransomware is a major concern - attackers increasingly target backups. You need to design the backup strategy.",
+      "question": "What backup strategy should Continental implement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Daily full backups to cloud storage with 30-day retention",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Missing key elements - immutability, offsite, and testing",
+            "detailed": "Daily full backups to cloud is a start but: no immutable copy (ransomware can encrypt cloud backups if credentials compromised), cloud-only violates 3-2-1 (two media types), and no mention of testing. Modern backup strategy must address ransomware specifically.",
+            "consequence": "Backups may be encrypted in ransomware attack. Single media type risk."
+          }
+        },
+        {
+          "id": "B",
+          "text": "3-2-1-1-0 strategy: three copies, two media types, one offsite, one immutable/offline, zero errors on restore testing",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Comprehensive strategy addressing ransomware and recoverability",
+            "detailed": "3-2-1-1-0 addresses all concerns: 3 copies (production + 2 backups) for redundancy, 2 media types (disk + tape or cloud) for diversity, 1 offsite for geographic separation, 1 immutable/offline for ransomware protection, 0 errors on restore testing to verify recoverability. This is the modern best practice for backup strategy.",
+            "consequence": "Protected against ransomware, hardware failure, and site loss. Verified recoverability."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Continuous data replication to DR site only - backups are outdated",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Replication alone is not backup",
+            "detailed": "Replication provides availability but not protection against: data corruption (corrupted data replicates), ransomware (encryption replicates), accidental deletion (deletion replicates). Backups provide point-in-time recovery. Both replication and backup are needed.",
+            "consequence": "No point-in-time recovery. Corruption/ransomware affects both sites."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Hourly snapshots with weekly tape rotation to offsite storage",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Good elements but missing immutability and testing",
+            "detailed": "Hourly snapshots provide good RPO, weekly tape provides offsite. But: snapshots alone may be on same storage (not protected from storage failure), no immutable copy mentioned, and no restore testing. These are good components but not complete strategy.",
+            "consequence": "Some protection but gaps in ransomware resilience and verified recovery."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What backup strategy protects against ransomware and ensures backups actually work?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "3-2-1-1-0: three copies, two media, one offsite, one immutable/offline, zero restore errors. Addresses ransomware with immutable copy; addresses recoverability with testing."
+        }
+      ],
+      "learning_note": "Modern backup strategy (3-2-1-1-0): 3 copies of data, 2 different media types, 1 offsite copy, 1 immutable or offline copy (ransomware protection), 0 errors on restore testing. Immutable storage (WORM, S3 Object Lock) cannot be modified or deleted. Regular restore testing verifies recoverability. Replication is not backup - both are needed.",
+      "unlocks_artifact": "artifact_4"
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "DR Site Selection",
+      "narrative": "The Dallas cold site is inadequate. You need to recommend a new DR approach. Options include a new physical site, colocation, or cloud. Geographic and capability factors must be considered.",
+      "question": "What DR site strategy should Continental implement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Build a new company-owned data center in Dallas",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Long lead time and high capital expense",
+            "detailed": "Building a data center takes 18-24 months and significant capital. Continental needs DR capability now, not in two years. The initiative timeline is 18 months - building a DC would consume the entire timeline before providing any DR capability. Faster options available.",
+            "consequence": "No DR improvement during project timeline."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Cloud-based DR in Azure East US region with hybrid architecture",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Fast deployment, elastic capacity, geographic separation",
+            "detailed": "Cloud DR provides: rapid deployment (weeks not years), elastic capacity (pay for what you use, scale for failover), geographic separation (East US from Chicago), and proven platform. Hybrid approach maintains existing Chicago investment while adding cloud DR. Azure's DR services (Site Recovery, Backup) accelerate implementation.",
+            "consequence": "DR capability deployed quickly. Scalable capacity. Geographic resilience."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Colocation in Phoenix with replicated infrastructure",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Valid option but slower and less flexible than cloud",
+            "detailed": "Colocation provides good DR capability but: requires hardware procurement and deployment (months), fixed capacity (over-provision or under-capacity), and ongoing facility costs. Cloud provides faster deployment and elastic capacity. Colocation is a valid choice for steady-state but slower for initial deployment.",
+            "consequence": "Longer time to DR capability. Fixed capacity."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Multi-cloud DR across AWS and Azure for platform diversity",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Adds complexity without proportional benefit",
+            "detailed": "Multi-cloud provides platform diversity but: doubles the complexity (two platforms to learn, integrate, operate), increases skill requirements, and complicates data consistency. For DR (not day-to-day), single cloud with multi-region provides similar geographic resilience with less complexity.",
+            "consequence": "Operational complexity. Skill requirements. Limited benefit for DR use case."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What option provides fastest time-to-DR with geographic separation and scalable capacity?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Cloud DR: rapid deployment, elastic capacity, geographic options. Hybrid maintains existing investment. Multi-cloud adds complexity without proportional benefit for DR."
+        }
+      ],
+      "learning_note": "DR site options: owned DC (control, long lead time, capital), colocation (shared facilities, medium lead time, ongoing cost), cloud (elastic, rapid deployment, OpEx). For rapid DR implementation, cloud often wins. Multi-cloud adds complexity; multi-region in single cloud provides geographic diversity with less operational overhead. Hybrid architectures are common.",
+      "unlocks_artifact": "artifact_5"
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Power Resilience",
+      "narrative": "The Chicago outage was caused by generator fuel exhaustion. The current fuel contract guarantees 8-hour delivery, but the outage lasted 18 hours. You need to improve power resilience at Chicago.",
+      "question": "What is the MOST critical power resilience improvement for Chicago?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Add second generator for N+1 redundancy",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "N+1 generators help but doesn't address fuel issue",
+            "detailed": "N+1 generator redundancy protects against generator failure but doesn't help if fuel runs out - both generators run out of fuel at the same time. The root cause was fuel exhaustion, not generator failure. Address the fuel issue first.",
+            "consequence": "Still run out of fuel during extended outage."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Increase fuel storage capacity and secure priority fuel delivery contract",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Addresses the root cause of the outage",
+            "detailed": "The outage was caused by fuel exhaustion. Solution: increase on-site fuel capacity (48-72 hours minimum), secure priority fuel delivery contract with guaranteed response time regardless of conditions, and maintain minimum fuel levels. This directly addresses what caused the failure.",
+            "consequence": "Extended runtime on generator. Priority fuel delivery ensures replenishment."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Install dual utility feeds from different substations",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Helps but doesn't address generator fuel issue",
+            "detailed": "Dual utility feeds reduce the chance of utility outage (substations can fail independently). However, in a regional grid failure (like the heat wave), both feeds may lose power. Generators with adequate fuel remain essential. Dual feed is valuable but doesn't solve the fuel problem.",
+            "consequence": "Better utility resilience but same generator fuel gap."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Migrate critical systems to cloud to reduce on-premises dependency",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Valid strategy but doesn't address existing site",
+            "detailed": "Cloud migration reduces on-premises dependency long-term. But Continental still needs the Chicago site operational, and cloud migration takes time. Fixing the fuel issue is immediate and addresses the specific root cause. Both are needed - fix fuel now, migrate over time.",
+            "consequence": "Cloud helps long-term but doesn't fix immediate Chicago vulnerability."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What was the root cause of the power failure - generator malfunction or fuel supply?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Fuel exhaustion was the root cause. Increase fuel capacity (48-72 hours), priority fuel delivery contract, minimum fuel levels."
+        }
+      ],
+      "learning_note": "Power resilience components: UPS (minutes of bridge power), generators (extended runtime), fuel management (capacity, delivery contracts, minimum levels). Common failure: generators work but run out of fuel. Address root causes specifically. Fuel capacity should support 48-72 hours minimum with priority delivery to replenish.",
+      "unlocks_artifact": "artifact_6"
+    },
+    {
+      "id": "decision_6",
+      "sequence": 6,
+      "title": "DR Testing Strategy",
+      "narrative": "Continental has never tested DR failover. You need to establish a testing program that validates recoverability without unacceptable risk to production operations.",
+      "question": "What DR testing approach should Continental implement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Annual tabletop exercise with key stakeholders",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Tabletops validate procedures but not technical recovery",
+            "detailed": "Tabletop exercises are valuable for validating procedures, decision-making, and communication - but they don't prove systems actually recover. Technical testing is needed to validate that backups restore, systems start, and failover works. Tabletops complement but don't replace technical tests.",
+            "consequence": "Procedures validated but technical recovery unproven."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Progressive testing: quarterly parallel tests with annual full failover for critical systems",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Validates recovery with appropriate frequency and risk",
+            "detailed": "Progressive testing provides validation at multiple levels: parallel tests (recover at DR while production runs) validate technical capability without production risk, conducted quarterly. Full failover tests (actually switch production to DR) prove true RTO, conducted annually for critical systems with planned maintenance window. This validates recovery without excessive risk.",
+            "consequence": "Recovery capability validated. True RTO measured. Manageable risk."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Monthly full failover tests to ensure readiness",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Too frequent - excessive risk and disruption",
+            "detailed": "Full failover tests carry risk of extended outage if problems occur. Monthly is too frequent - each test risks production impact. Additionally, monthly testing consumes significant operational time and may lead to 'test fatigue' where tests become routine rather than rigorous. Quarterly or annual full tests are more appropriate.",
+            "consequence": "Excessive production risk. Operational burden."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Rely on cloud provider's guaranteed availability - no testing needed",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Cloud availability doesn't guarantee YOUR recovery works",
+            "detailed": "Cloud provider SLAs cover their infrastructure availability, not your application recovery. Failover automation, data synchronization, application startup, and configuration all must be tested. YOUR recovery process must be validated regardless of underlying platform reliability.",
+            "consequence": "Cloud may be available but your systems may not recover correctly."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What testing approach validates technical recovery while managing production risk?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Parallel tests (recover at DR while production runs) quarterly. Full failover tests annually for critical systems. Validates recovery with manageable risk."
+        }
+      ],
+      "learning_note": "DR testing levels: tabletop (procedures, no technical), walkthrough (step-by-step review), simulation (test environment), parallel (recover at DR, production continues), full failover (actual switch to DR). Progressive approach: frequent lower-risk tests, periodic high-validation tests. Full failover tests prove true RTO but carry risk - annual or semi-annual for critical systems.",
+      "unlocks_artifact": "artifact_7"
+    },
+    {
+      "id": "decision_7",
+      "sequence": 7,
+      "title": "DR Capacity Planning",
+      "narrative": "The cloud DR site needs capacity planning. Full production capacity at DR is expensive but provides full performance during failover. Reduced capacity saves money but may impact operations.",
+      "question": "What capacity model should Continental use for DR?",
+      "options": [
+        {
+          "id": "A",
+          "text": "100% capacity at DR matching production exactly",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Expensive - paying for idle capacity",
+            "detailed": "Full capacity at DR means paying for resources that sit idle during normal operations. For cloud DR, this eliminates the cost benefit of elastic resources. Some reduction or elastic scaling is typically appropriate, especially for cloud where capacity can be added quickly.",
+            "consequence": "Highest cost. Paying for unused capacity."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Baseline capacity with elastic scaling to full capacity on failover",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Balances cost with recovery capability",
+            "detailed": "Elastic capacity model: maintain baseline at DR (databases, critical services, reduced compute), scale up automatically on failover trigger. Cloud enables this - you don't pay for peak capacity when not needed. Include warm-up time in RTO calculations. Pre-provision reservations or capacity pools for guaranteed scaling.",
+            "consequence": "Cost-effective. Capacity available when needed. Leverages cloud elasticity."
+          }
+        },
+        {
+          "id": "C",
+          "text": "50% capacity with load shedding of non-critical functions on failover",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "May be acceptable but doesn't leverage cloud elasticity",
+            "detailed": "Fixed reduced capacity requires deciding what to shed during failover - complexity during crisis. With cloud DR, elastic scaling provides full capacity when needed without ongoing cost. Load shedding is appropriate for some scenarios but shouldn't be the primary strategy when elasticity is available.",
+            "consequence": "Added complexity during failover. Degraded experience when full capacity available via scaling."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Minimal capacity - provision only when disaster declared",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Provisioning time extends RTO significantly",
+            "detailed": "Starting from near-zero means: VM provisioning time, database restore time, configuration time, and validation time all add to RTO. For critical systems with hour-level RTO, this approach likely can't meet requirements. Databases and stateful services especially need pre-provisioned resources.",
+            "consequence": "Extended RTO from provisioning time. May not meet recovery objectives."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can cloud elasticity be leveraged to balance DR cost with recovery capability?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Baseline capacity (databases, critical services) with elastic scaling to full capacity on failover. Balances ongoing cost with rapid scale-up."
+        }
+      ],
+      "learning_note": "DR capacity models: full (100%, highest cost, fastest), reduced (fixed %, load shedding needed), elastic (baseline + scale on demand). Cloud enables elastic capacity - pay for full only when needed. Key considerations: scale-up time (include in RTO), capacity guarantees (reserved instances/pools), stateful services (need pre-provisioned databases).",
+      "unlocks_artifact": "artifact_8"
+    },
+    {
+      "id": "decision_8",
+      "sequence": 8,
+      "title": "Recovery Documentation",
+      "narrative": "During the incident, recovery was ad-hoc because there were no documented procedures. Even experienced staff struggled with unfamiliar recovery steps under pressure. You need to establish recovery documentation.",
+      "question": "What is MOST important for effective recovery documentation?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Detailed technical runbooks with step-by-step commands for each system",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Detailed procedures enable consistent recovery",
+            "detailed": "Under crisis pressure, even experienced staff make mistakes or forget steps. Detailed runbooks provide: specific commands and actions (not 'restore the database' but the actual commands), expected results at each step, decision points when judgment needed, and rollback procedures if steps fail. Runbooks enable consistent recovery regardless of who performs it.",
+            "consequence": "Any trained staff can execute recovery. Consistent process. Fewer errors under pressure."
+          }
+        },
+        {
+          "id": "B",
+          "text": "High-level recovery strategy document for management",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Management overview doesn't enable technical recovery",
+            "detailed": "Management needs situational awareness and decision points, but the people actually performing recovery need step-by-step technical guidance. High-level strategy is valuable for communication and decision-making but doesn't help the engineer restoring the database at 3 AM.",
+            "consequence": "Management informed but technical staff improvising."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Vendor documentation and knowledge base articles",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Vendor docs are generic, not environment-specific",
+            "detailed": "Vendor documentation covers how products work generically, not your specific environment: your server names, your configuration, your dependencies. Recovery procedures must be customized to your environment. Vendor docs are reference, not procedures.",
+            "consequence": "Generic guidance but environment-specific steps missing."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Automation scripts that perform recovery without human intervention",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Automation is valuable but still needs documentation",
+            "detailed": "Automated failover is excellent when it works. But automation can fail, scenarios may vary, and manual intervention may be needed. Documentation of what automation does, how to monitor it, and how to manually complete if automation fails is essential. Automation complements, doesn't replace documentation.",
+            "consequence": "Dependent on automation working. No fallback if automation fails."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What documentation enables consistent recovery execution under crisis pressure?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Detailed runbooks with step-by-step commands, expected results, decision points, and rollback procedures. Specific to your environment, not generic."
+        }
+      ],
+      "learning_note": "Recovery documentation hierarchy: strategic plans (what to recover, in what order), recovery procedures (how to recover each system), detailed runbooks (step-by-step technical commands). Under crisis pressure, people make mistakes - detailed runbooks reduce errors. Documentation must be environment-specific, regularly tested, and kept current.",
+      "unlocks_artifact": "artifact_9"
+    },
+    {
+      "id": "decision_9",
+      "sequence": 9,
+      "title": "Resilience Metrics and Governance",
+      "narrative": "Patricia wants ongoing visibility into resilience posture, not just a one-time project. You need to establish metrics and governance for the resilience program.",
+      "question": "What is the MOST important ongoing metric for resilience?",
+      "options": [
+        {
+          "id": "A",
+          "text": "DR site uptime percentage",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "DR uptime doesn't prove recovery works",
+            "detailed": "DR site can be 'up' without actually being able to recover production workloads. Uptime measures availability of infrastructure, not recovery capability. You need to test actual recovery to validate capability.",
+            "consequence": "DR infrastructure running but recovery capability unvalidated."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Validated RTO - measured recovery time from tested failovers",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Tested RTO proves actual recovery capability",
+            "detailed": "Validated RTO from actual tests is the gold standard: it proves you can actually recover in the expected time. Measure and track RTO from each test, compare to objectives, identify gaps. This directly measures what matters - can you recover within requirements? Include backup restore testing to validate RPO as well.",
+            "consequence": "Proven recovery capability. Clear gap identification. Evidence-based confidence."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Backup success rate",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Backup success doesn't prove recoverability",
+            "detailed": "Backups can complete successfully but still not be recoverable (corruption, missing data, wrong configuration). Backup success rate is important but restore testing is what validates recoverability. Track both backup success and restore validation.",
+            "consequence": "Know backups complete but not if they work."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Budget spent on resilience program",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Spending doesn't equal capability",
+            "detailed": "Budget spent measures investment, not outcomes. You can spend millions and still not be resilient if money is spent on wrong things or implementation is poor. Outcome metrics (validated RTO, tested recovery) matter more than input metrics (budget spent).",
+            "consequence": "Know spending but not actual resilience."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What metric directly proves you can recover within requirements?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Validated RTO from actual failover tests proves recovery capability. Tested, not assumed."
+        }
+      ],
+      "learning_note": "Resilience metrics: validated RTO (actual recovery time from tests), validated RPO (actual data loss from tests), backup success rate AND restore success rate, test completion rate, time since last test. Input metrics (budget, uptime) don't prove recovery. Outcome metrics (validated recovery) prove capability. Test and measure.",
+      "unlocks_artifact": "artifact_10"
+    },
+    {
+      "id": "decision_10",
+      "sequence": 10,
+      "title": "Resilience Program Sustainability",
+      "narrative": "You've designed a comprehensive resilience architecture. Patricia asks how to ensure this doesn't become 'shelfware' - documented but not maintained, like the previous DR plan.",
+      "question": "What is MOST important for resilience program sustainability?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Annual third-party audit of DR capabilities",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Annual audit is too infrequent and external",
+            "detailed": "Annual audits provide point-in-time validation but: things change throughout the year, audits don't build internal capability, and findings come months after issues develop. Continuous internal ownership is more effective than periodic external review.",
+            "consequence": "Gaps may exist for months before annual audit finds them."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Integrated change management - every change assessed for resilience impact",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Resilience built into ongoing operations",
+            "detailed": "Integrating resilience into change management ensures: every new system evaluated for DR requirements, every change assessed for recovery impact, DR documentation updated when systems change, and recovery testing included in deployment. Resilience becomes part of how IT operates, not a separate program that atrophies.",
+            "consequence": "Resilience maintained as environment evolves. Not a one-time project."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Dedicated DR team responsible for all recovery planning",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Siloed team doesn't scale and creates single point of knowledge",
+            "detailed": "Dedicated DR team creates: dependency on specific people, disconnect from system owners who understand changes, and 'not my job' mentality from other IT staff. Resilience should be everyone's responsibility, integrated into normal IT operations, not siloed.",
+            "consequence": "Knowledge concentrated in small team. Not integrated with daily operations."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Quarterly executive reporting on resilience metrics",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Reporting creates visibility but not action",
+            "detailed": "Executive reporting is valuable for awareness and accountability, but it's an output, not a driver of sustainability. Without operational integration (change management, testing, continuous improvement), there's nothing meaningful to report. Metrics without integrated process just measure decline.",
+            "consequence": "Reports show status but don't drive ongoing maintenance."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How do you ensure resilience stays current as the environment changes?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Integrate resilience into change management: every change assessed for DR impact, documentation updated, testing included. Resilience becomes part of operations, not separate."
+        }
+      ],
+      "learning_note": "Resilience sustainability: integrate into change management (every change assessed for DR impact), include in deployment processes (new systems include DR from start), continuous testing (not just annual), update documentation with changes, regular review and improvement. Resilience that's separate from daily operations will atrophy. Integration is key."
+    }
+  ],
+  
+  "scoring": {
+    "max_points": 250,
+    "passing_score": 200,
+    "passing_percentage": 80
+  },
+  
+  "outcome_thresholds": {
+    "expert": {"min_score": 238, "title": "Resilience Expert", "description": "Exceptional understanding of business continuity and disaster recovery."},
+    "proficient": {"min_score": 213, "title": "Resilience Professional", "description": "Strong grasp of resilience architecture principles."},
+    "competent": {"min_score": 200, "title": "Resilience Competent", "description": "Solid understanding of BC/DR fundamentals."},
+    "developing": {"min_score": 175, "title": "Resilience Developing", "description": "Gaps in resilience concepts."},
+    "needs_remediation": {"min_score": 0, "title": "Resilience Fundamentals Needed", "description": "Review BC/DR concepts."}
+  },
+  
+  "weakness_mapping": {
+    "rto_rpo_gaps": {"indicators": ["decision_1_incorrect", "decision_2_incorrect"], "remediation": "D3-REM-001", "focus": "Recovery objectives and HA patterns"},
+    "backup_gaps": {"indicators": ["decision_3_incorrect"], "remediation": "D3-REM-003", "focus": "Backup strategies and data protection"}
+  },
+  
+  "prerequisites": ["D3-SIM-003", "D3-SIM-004"],
+  "unlocks": ["Domain 3 Complete"],
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 3: Security Architecture",
+    "job_role_alignment": ["Business Continuity Manager", "DR Architect", "Infrastructure Manager"],
+    "estimated_time": "50-65 minutes",
+    "industry_context": "Transportation and Logistics"
+  }
+}

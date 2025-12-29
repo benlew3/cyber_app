@@ -1,0 +1,1220 @@
+{
+  "simulation_id": "D4-SIM-004",
+  "title": "Identity and Access Management",
+  "domain": 4,
+  "category": "primary",
+  "difficulty": "intermediate",
+  "time_estimate": "45-60 minutes",
+  "passing_score": 200,
+  "max_score": 250,
+  
+  "exam_objectives": [
+    {
+      "id": "4.6",
+      "description": "Given a scenario, implement and maintain identity and access management",
+      "coverage": ["provisioning", "deprovisioning", "permissions", "SSO", "MFA", "federation", "PAM", "access reviews"]
+    },
+    {
+      "id": "4.5",
+      "description": "Explain the purpose of mitigation techniques used to secure the enterprise",
+      "coverage": ["least privilege", "role-based access", "separation of duties"]
+    },
+    {
+      "id": "2.4",
+      "description": "Analyze indicators of malicious activity",
+      "coverage": ["account anomalies", "impossible travel", "privilege escalation"]
+    }
+  ],
+  
+  "scenario_context": {
+    "organization": "Northwind Dynamics",
+    "industry": "Manufacturing",
+    "size": "5,800 employees, 8 manufacturing facilities, corporate HQ, global operations",
+    "setting": "IAM program transformation after security incidents",
+    "your_role": "Identity and Access Management Architect",
+    "reporting_to": "CISO Robert Walsh",
+    "environment": {
+      "current_state": {
+        "identity_infrastructure": {
+          "directory": "Active Directory (on-premises)",
+          "cloud": "Azure AD (hybrid, partial sync)",
+          "applications": "Mix of AD-integrated, LDAP, and local authentication",
+          "privileged_access": "Shared admin accounts, no PAM solution"
+        },
+        "user_population": {
+          "employees": 5800,
+          "contractors": 450,
+          "service_accounts": "Unknown - estimated 800+",
+          "admin_accounts": "Unknown - no inventory"
+        },
+        "challenges": [
+          "Manual provisioning via helpdesk tickets - 5 day average",
+          "No automated deprovisioning - terminated users retain access for weeks",
+          "Shared admin credentials across teams",
+          "No MFA except for VPN",
+          "Access reviews not performed regularly",
+          "Orphaned accounts from acquisitions"
+        ]
+      },
+      "recent_incidents": {
+        "incident_1": "Terminated employee accessed systems 3 weeks after departure, downloaded customer data",
+        "incident_2": "Compromised shared admin credentials led to ransomware deployment across production",
+        "incident_3": "Auditor found 340 orphaned accounts from 2019 acquisition"
+      },
+      "compliance_pressure": {
+        "sox": "IT General Controls findings on access management",
+        "customer_audits": "Major customer requiring security improvements for contract renewal",
+        "cyber_insurance": "Carrier requiring MFA and PAM for policy renewal"
+      },
+      "initiative": {
+        "name": "IAM Modernization Program",
+        "budget": "$1.8M over 18 months",
+        "goals": [
+          "Implement automated provisioning/deprovisioning",
+          "Deploy MFA across all applications",
+          "Implement privileged access management",
+          "Establish regular access reviews",
+          "Achieve SOX compliance for IT controls"
+        ]
+      }
+    },
+    "opening_narrative": "Northwind Dynamics' identity management is a patchwork of manual processes, shared credentials, and good intentions. A terminated employee walking out with customer data was the wake-up call, but the shared admin credentials that enabled a ransomware attack got the board's attention. SOX auditors are citing access control deficiencies, and your largest customer is threatening to pull their contract without security improvements. Robert Walsh has brought you in to architect a modern IAM program. Where do you start?"
+  },
+  
+  "artifacts": [
+    {
+      "id": "artifact_1",
+      "title": "Current IAM Assessment",
+      "type": "assessment_document",
+      "unlocks_at": "start",
+      "content": {
+        "identity_lifecycle_gaps": {
+          "provisioning": {
+            "current_process": "Manual - manager emails HR, HR emails IT, IT creates accounts",
+            "average_time": "5 days from hire to access",
+            "error_rate": "23% of new hires missing required access on day 1",
+            "impact": "Lost productivity, shadow IT workarounds"
+          },
+          "deprovisioning": {
+            "current_process": "HR emails IT upon termination",
+            "average_time": "Unknown - no SLA, often weeks",
+            "compliance_gap": "340 orphaned accounts found in audit",
+            "impact": "Terminated employee incident, audit findings"
+          },
+          "access_changes": {
+            "current_process": "Ad-hoc requests via helpdesk",
+            "review": "None - access accumulates over time",
+            "impact": "Users have more access than needed (privilege creep)"
+          }
+        },
+        "authentication_assessment": {
+          "mfa_coverage": {
+            "vpn": "100% - RSA tokens",
+            "cloud_apps": "0%",
+            "on_prem_apps": "0%",
+            "admin_access": "0%"
+          },
+          "password_policy": {
+            "length": "8 characters",
+            "complexity": "Yes",
+            "expiration": "90 days",
+            "history": "12 passwords",
+            "assessment": "Meets minimum, below modern standards"
+          }
+        },
+        "privileged_access_assessment": {
+          "admin_accounts": {
+            "dedicated_accounts": "No - admins use regular accounts",
+            "shared_accounts": "Yes - multiple shared admin accounts",
+            "service_accounts": "~800 estimated, many with excessive privileges",
+            "password_management": "Spreadsheet tracking, infrequent rotation"
+          },
+          "access_monitoring": "Basic AD logging, no real-time monitoring"
+        },
+        "high_risk_findings": [
+          "Terminated users retain access (deprovisioning gap)",
+          "Shared admin credentials (compromised in ransomware incident)",
+          "No MFA on critical applications",
+          "No access reviews (privilege accumulation)",
+          "No visibility into service accounts"
+        ]
+      }
+    },
+    {
+      "id": "artifact_2",
+      "title": "Identity Lifecycle Management",
+      "type": "reference",
+      "unlocks_at": "decision_1",
+      "content": {
+        "joiner_mover_leaver": {
+          "joiner": {
+            "trigger": "New employee record in HR system",
+            "activities": [
+              "Create identity accounts (AD, email, etc.)",
+              "Assign birthright access based on role",
+              "Provision application access per role",
+              "Issue credentials/authentication factors"
+            ],
+            "goal": "Day-1 productivity with appropriate access"
+          },
+          "mover": {
+            "trigger": "Job change, department transfer, promotion",
+            "activities": [
+              "Review current access",
+              "Remove access no longer needed",
+              "Add access for new role",
+              "Update group memberships"
+            ],
+            "goal": "Access matches current role (prevent accumulation)"
+          },
+          "leaver": {
+            "trigger": "Termination, resignation, contract end",
+            "activities": [
+              "Disable account immediately",
+              "Revoke all application access",
+              "Transfer data ownership",
+              "Archive and delete after retention period"
+            ],
+            "goal": "Zero access within hours of departure"
+          }
+        },
+        "automation_benefits": {
+          "speed": "Minutes vs days for provisioning",
+          "accuracy": "Consistent, role-based access",
+          "compliance": "Documented, auditable process",
+          "security": "Immediate deprovisioning"
+        },
+        "hr_integration": {
+          "purpose": "HR system as authoritative source for identity",
+          "data_flow": "HR change â†’ Identity system â†’ Applications",
+          "benefit": "Automatic provisioning/deprovisioning triggered by HR actions"
+        }
+      }
+    },
+    {
+      "id": "artifact_3",
+      "title": "Multi-Factor Authentication Framework",
+      "type": "reference",
+      "unlocks_at": "decision_2",
+      "content": {
+        "authentication_factors": {
+          "something_you_know": {
+            "examples": ["Password", "PIN", "Security questions"],
+            "strength": "Weak alone - phishable, guessable, stealable",
+            "use": "First factor, combined with others"
+          },
+          "something_you_have": {
+            "examples": ["Hardware token", "Smartphone", "Smart card"],
+            "strength": "Strong - requires physical possession",
+            "use": "Second factor"
+          },
+          "something_you_are": {
+            "examples": ["Fingerprint", "Face recognition", "Voice"],
+            "strength": "Strong - difficult to replicate",
+            "use": "Second factor, often on mobile devices"
+          },
+          "somewhere_you_are": {
+            "examples": ["IP geolocation", "GPS", "Network location"],
+            "strength": "Supplemental - context-based",
+            "use": "Risk adjustment, not primary factor"
+          }
+        },
+        "mfa_methods_comparison": {
+          "sms_otp": {"security": "Low (SIM swap attacks)", "usability": "High", "recommendation": "Avoid if possible"},
+          "authenticator_app": {"security": "Good", "usability": "Good", "recommendation": "Recommended for general use"},
+          "hardware_token": {"security": "Excellent", "usability": "Lower", "recommendation": "Recommended for privileged users"},
+          "fido2_passkeys": {"security": "Excellent", "usability": "Good", "recommendation": "Best option where supported"},
+          "push_notification": {"security": "Good (with number matching)", "usability": "Excellent", "recommendation": "Good for general workforce"}
+        },
+        "deployment_priority": {
+          "immediate": ["Remote access (VPN)", "Cloud applications", "Admin/privileged access"],
+          "near_term": ["Email", "All SaaS applications", "Business applications"],
+          "comprehensive": ["All user authentication"]
+        }
+      }
+    },
+    {
+      "id": "artifact_4",
+      "title": "Privileged Access Management",
+      "type": "reference",
+      "unlocks_at": "decision_3",
+      "content": {
+        "pam_principles": {
+          "least_privilege": "Only the access needed for the task",
+          "just_in_time": "Access granted only when needed, not standing",
+          "separation": "Different accounts for admin and daily tasks",
+          "monitoring": "All privileged actions logged and reviewed"
+        },
+        "pam_capabilities": {
+          "credential_vaulting": {
+            "description": "Secure storage of privileged credentials",
+            "benefit": "No shared passwords, no spreadsheets",
+            "function": "Check-out/check-in of credentials"
+          },
+          "session_management": {
+            "description": "Controlled privileged sessions with recording",
+            "benefit": "Audit trail, forensic capability",
+            "function": "Session initiation, monitoring, recording"
+          },
+          "just_in_time_access": {
+            "description": "Elevate privileges temporarily when needed",
+            "benefit": "Reduces standing privilege exposure",
+            "function": "Request â†’ Approval â†’ Time-limited elevation"
+          },
+          "secret_rotation": {
+            "description": "Automatic password rotation",
+            "benefit": "Credentials changed regularly without manual effort",
+            "function": "Scheduled or on-demand rotation"
+          }
+        },
+        "privileged_account_types": {
+          "domain_admins": "Highest risk - full domain control",
+          "local_admins": "System-level access per machine",
+          "database_admins": "Direct data access",
+          "application_admins": "Application configuration control",
+          "service_accounts": "Non-interactive, often over-privileged",
+          "emergency_accounts": "Break-glass for emergencies"
+        },
+        "tiered_administration": {
+          "tier_0": "Domain controllers, AD, identity infrastructure - most restricted",
+          "tier_1": "Servers, applications - restricted",
+          "tier_2": "Workstations, end-user devices - standard admin",
+          "principle": "Higher tier admins never log into lower tier systems"
+        }
+      }
+    },
+    {
+      "id": "artifact_5",
+      "title": "Access Review Framework",
+      "type": "process_document",
+      "unlocks_at": "decision_4",
+      "content": {
+        "access_review_types": {
+          "user_access_review": {
+            "scope": "All access for a specific user",
+            "frequency": "Annually or on job change",
+            "reviewer": "Manager",
+            "purpose": "Ensure access matches current role"
+          },
+          "application_access_review": {
+            "scope": "All users of a specific application",
+            "frequency": "Quarterly to annually based on sensitivity",
+            "reviewer": "Application owner",
+            "purpose": "Ensure only authorized users have access"
+          },
+          "privileged_access_review": {
+            "scope": "All privileged accounts and permissions",
+            "frequency": "Quarterly or more often",
+            "reviewer": "Security team + system owners",
+            "purpose": "Minimize privileged access, detect anomalies"
+          },
+          "service_account_review": {
+            "scope": "All service accounts and their permissions",
+            "frequency": "Quarterly",
+            "reviewer": "System owners + security",
+            "purpose": "Ensure service accounts follow least privilege"
+          }
+        },
+        "review_process": {
+          "step_1": "Generate access report for review scope",
+          "step_2": "Distribute to reviewers with deadline",
+          "step_3": "Reviewer certifies or revokes each access",
+          "step_4": "Revocations processed automatically",
+          "step_5": "Exceptions documented with justification",
+          "step_6": "Compliance report generated"
+        },
+        "common_pitfalls": {
+          "rubber_stamping": "Reviewers approve everything without review",
+          "mitigation": "Require justification for high-risk access, random audit of approvals",
+          "too_much_data": "Reviewers overwhelmed with access to review",
+          "mitigation": "Focus on changes, exceptions, privileged access"
+        }
+      }
+    },
+    {
+      "id": "artifact_6",
+      "title": "Role-Based Access Control",
+      "type": "reference",
+      "unlocks_at": "decision_5",
+      "content": {
+        "rbac_concepts": {
+          "role": "Collection of permissions for a job function",
+          "permission": "Ability to perform specific action on resource",
+          "user_assignment": "User assigned to role(s)",
+          "inheritance": "Users inherit all permissions from assigned roles"
+        },
+        "role_types": {
+          "organizational_roles": {
+            "description": "Based on position in organization",
+            "examples": ["Manager", "Individual Contributor", "Executive"],
+            "scope": "Broad, organizational"
+          },
+          "functional_roles": {
+            "description": "Based on job function",
+            "examples": ["Accountant", "Engineer", "Sales Rep"],
+            "scope": "Function-specific access"
+          },
+          "application_roles": {
+            "description": "Application-specific permissions",
+            "examples": ["ERP Admin", "CRM Read-Only", "HR Full Access"],
+            "scope": "Single application"
+          }
+        },
+        "role_engineering": {
+          "top_down": "Define roles from job descriptions and requirements",
+          "bottom_up": "Analyze existing access patterns to discover roles",
+          "hybrid": "Combine both approaches",
+          "best_practice": "Start with common roles, refine over time"
+        },
+        "rbac_benefits": {
+          "simplified_management": "Assign role, not individual permissions",
+          "consistency": "Same role = same access",
+          "compliance": "Clear mapping of access to business need",
+          "scalability": "Roles scale better than individual assignments"
+        },
+        "rbac_pitfalls": {
+          "role_explosion": "Too many roles defeats the purpose",
+          "role_creep": "Permissions added to roles over time",
+          "mitigation": "Regular role review, role governance process"
+        }
+      }
+    },
+    {
+      "id": "artifact_7",
+      "title": "SSO and Federation",
+      "type": "reference",
+      "unlocks_at": "decision_6",
+      "content": {
+        "single_sign_on": {
+          "definition": "Authenticate once, access multiple applications",
+          "benefit_security": "Fewer passwords to manage, compromise, or phish",
+          "benefit_usability": "Better user experience, less friction",
+          "benefit_management": "Centralized authentication, easier deprovisioning"
+        },
+        "federation": {
+          "definition": "Trust relationship between identity providers",
+          "use_cases": ["Partner access", "Cloud applications", "Cross-organization"],
+          "protocols": ["SAML 2.0", "OIDC/OAuth 2.0", "WS-Federation"]
+        },
+        "protocols_comparison": {
+          "saml": {
+            "description": "XML-based, enterprise focused",
+            "use": "Enterprise SSO, legacy applications",
+            "strength": "Mature, widely supported"
+          },
+          "oidc_oauth": {
+            "description": "Modern, JSON-based",
+            "use": "Modern applications, APIs, mobile",
+            "strength": "Developer-friendly, mobile support"
+          }
+        },
+        "implementation_considerations": {
+          "idp_selection": "Choose identity provider (Azure AD, Okta, etc.)",
+          "application_integration": "Connect applications via SAML/OIDC",
+          "mfa_integration": "MFA enforced at IdP level",
+          "conditional_access": "Risk-based access policies"
+        },
+        "cloud_identity": {
+          "azure_ad": "Microsoft's cloud identity service",
+          "okta": "Independent identity platform",
+          "hybrid": "On-prem AD synced to cloud IdP"
+        }
+      }
+    },
+    {
+      "id": "artifact_8",
+      "title": "Service Account Management",
+      "type": "reference",
+      "unlocks_at": "decision_7",
+      "content": {
+        "service_account_risks": {
+          "over_privilege": "Often granted excessive permissions 'to make it work'",
+          "no_rotation": "Passwords never changed (might break things)",
+          "no_ownership": "Nobody responsible for the account",
+          "shared_use": "Same account used across multiple systems",
+          "no_monitoring": "Non-interactive, anomalies not noticed"
+        },
+        "service_account_best_practices": {
+          "inventory": {
+            "requirement": "Know all service accounts and their purpose",
+            "approach": "Discovery scan, documentation requirement"
+          },
+          "ownership": {
+            "requirement": "Every service account has an owner",
+            "approach": "Mandatory owner field, regular attestation"
+          },
+          "least_privilege": {
+            "requirement": "Only permissions needed for function",
+            "approach": "Document requirements, review permissions"
+          },
+          "managed_identities": {
+            "description": "Cloud provider manages credentials automatically",
+            "benefit": "No passwords to manage or rotate",
+            "use": "Preferred for cloud workloads"
+          },
+          "password_rotation": {
+            "requirement": "Regular credential rotation",
+            "approach": "PAM-managed rotation or managed identities"
+          },
+          "monitoring": {
+            "requirement": "Detect anomalous service account activity",
+            "approach": "Baseline behavior, alert on deviations"
+          }
+        },
+        "gmsa_msa": {
+          "description": "Group Managed Service Accounts (Windows)",
+          "benefit": "Automatic password management by AD",
+          "use": "Windows services, scheduled tasks"
+        }
+      }
+    },
+    {
+      "id": "artifact_9",
+      "title": "Identity Threat Detection",
+      "type": "reference",
+      "unlocks_at": "decision_8",
+      "content": {
+        "identity_based_threats": {
+          "credential_theft": {
+            "methods": ["Phishing", "Keyloggers", "Credential dumping", "Password spraying"],
+            "indicators": ["Failed logins followed by success", "Logins from unusual locations", "Off-hours access"]
+          },
+          "privilege_escalation": {
+            "methods": ["Exploiting vulnerabilities", "Misconfigurations", "Token manipulation"],
+            "indicators": ["Unexpected group membership changes", "Service account privilege increase", "New admin accounts"]
+          },
+          "lateral_movement": {
+            "methods": ["Pass-the-hash", "Pass-the-ticket", "Remote execution"],
+            "indicators": ["Single account accessing many systems", "Service account interactive login", "Unusual remote access patterns"]
+          }
+        },
+        "detection_capabilities": {
+          "impossible_travel": {
+            "description": "Logins from geographically impossible locations in short time",
+            "example": "Login from New York, then London 30 minutes later",
+            "action": "Flag for review, require step-up authentication"
+          },
+          "anomalous_behavior": {
+            "description": "Activity outside normal pattern for user",
+            "examples": ["Unusual access times", "New applications", "Large data access"],
+            "action": "Risk score adjustment, potential block"
+          },
+          "privilege_anomalies": {
+            "description": "Unexpected changes to privileged access",
+            "examples": ["New admin group member", "Service account privilege change"],
+            "action": "Alert to security team, require verification"
+          }
+        },
+        "identity_protection_tools": {
+          "azure_ad_identity_protection": "Risk-based conditional access",
+          "microsoft_defender_for_identity": "On-prem AD threat detection",
+          "ueba": "User and Entity Behavior Analytics"
+        }
+      }
+    },
+    {
+      "id": "artifact_10",
+      "title": "IAM Governance Framework",
+      "type": "reference",
+      "unlocks_at": "decision_9",
+      "content": {
+        "governance_components": {
+          "policies": {
+            "access_policy": "Who can access what under what conditions",
+            "authentication_policy": "How users prove identity",
+            "privileged_access_policy": "Controls for admin access",
+            "review_policy": "Access review requirements"
+          },
+          "processes": {
+            "access_request": "How to request new access",
+            "approval_workflow": "Who approves and criteria",
+            "exception_process": "How to handle policy exceptions",
+            "review_process": "How and when access is reviewed"
+          },
+          "roles_responsibilities": {
+            "identity_team": "Manage identity infrastructure and tools",
+            "application_owners": "Define access requirements, review users",
+            "managers": "Approve access for direct reports",
+            "security": "Policy, monitoring, incident response",
+            "audit": "Verify compliance with policies"
+          }
+        },
+        "metrics_and_reporting": {
+          "operational": ["Provisioning time", "Deprovisioning time", "Access request volume"],
+          "security": ["Orphaned accounts", "Excessive privileges", "MFA adoption"],
+          "compliance": ["Access review completion", "Policy exceptions", "Audit findings"]
+        },
+        "continuous_improvement": {
+          "quarterly_review": "Review metrics, incidents, and process effectiveness",
+          "annual_assessment": "Comprehensive IAM program assessment",
+          "incident_learning": "Improve based on security incidents"
+        }
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Addressing Deprovisioning Gap",
+      "narrative": "The terminated employee incident has everyone's attention. Currently, deprovisioning takes weeks because it's a manual email from HR to IT. There's no SLA and no tracking.",
+      "question": "What is the MOST critical improvement to prevent terminated user access?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a policy requiring HR to notify IT immediately upon termination",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Policy without automation will still have gaps",
+            "detailed": "Policy is necessary but insufficient. Manual notification is error-prone - HR may forget, email may be missed, IT may have backlog. The terminated employee incident happened despite having a notification process. Automation is required for reliable, immediate deprovisioning."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Automated deprovisioning triggered by HR system termination record",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Automated deprovisioning eliminates human error",
+            "detailed": "Automated deprovisioning: HR marks employee as terminated â†’ Identity system automatically disables accounts across all connected systems within minutes. No manual steps, no delays, no forgotten notifications. HR system becomes the authoritative source. This is the most reliable way to ensure terminated users lose access immediately."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Daily audit of terminated employees against active accounts",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Detective control - catches gaps but doesn't prevent them",
+            "detailed": "Daily reconciliation is a good detective control to catch failures, but: it still allows up to 24 hours of access after termination, requires manual remediation, and doesn't scale well. Better as a backup to automated deprovisioning, not the primary control."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Require managers to report terminations to IT directly",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "More manual steps = more failure points",
+            "detailed": "Adding manager notification creates another manual step that can fail. Managers aren't always available, may forget, or may not know all systems to report. Automation from authoritative HR system is more reliable than adding more human steps."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What approach ensures deprovisioning happens immediately without human intervention?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Automated deprovisioning: HR system (authoritative source) triggers automatic account disabling. No manual steps, no delays, immediate effect."
+        }
+      ],
+      "learning_note": "Deprovisioning automation: HR system as authoritative source triggers immediate account disabling across connected systems. Key elements: real-time or near-real-time integration with HR, automatic disabling (not manual process), comprehensive coverage (all systems), and audit trail. Manual processes will always have failures; automation is required for reliable deprovisioning.",
+      "unlocks_artifact": "artifact_2"
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "MFA Deployment Priority",
+      "narrative": "The cyber insurance carrier requires MFA deployment. Currently only VPN has MFA (RSA tokens). You need to expand coverage but can't do everything at once. Cloud applications, email, and admin access are all unprotected.",
+      "question": "What should be the FIRST priority for MFA expansion?",
+      "options": [
+        {
+          "id": "A",
+          "text": "All cloud applications - most exposed to internet",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Cloud is important but privileged access is highest risk",
+            "detailed": "Cloud applications face internet exposure, but compromised admin credentials caused the ransomware incident - that's the demonstrated highest risk. Admin accounts can access everything; regular user accounts have limited blast radius. Protect the keys to the kingdom first."
+          }
+        },
+        {
+          "id": "B",
+          "text": "All privileged and administrative access",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Protect the accounts with greatest potential damage",
+            "detailed": "Privileged access first: admin accounts can deploy ransomware, access all data, and cause catastrophic damage. The ransomware incident was enabled by compromised shared admin credentials. MFA on admin access: prevents credential stuffing/phishing from gaining admin, highest impact per account protected, and addresses the demonstrated risk."
+          }
+        },
+        {
+          "id": "C",
+          "text": "All employees for email access",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Broad coverage but lower risk per account",
+            "detailed": "Email MFA protects against business email compromise, which is valuable. But: every employee needs email (complex deployment), individual compromise is bad but limited impact vs. admin compromise. Deploy to admins first for highest risk reduction."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Manufacturing floor systems - core business",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Manufacturing systems often have MFA challenges",
+            "detailed": "Manufacturing floor systems may not support standard MFA, and users often work in environments where MFA is difficult (gloves, shared stations). These need different approaches. Address admin access first, then address manufacturing with appropriate controls."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Which accounts caused the ransomware incident and have the greatest potential damage?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Privileged accounts: one compromised admin can deploy ransomware domain-wide. MFA on admin access provides highest risk reduction per account."
+        }
+      ],
+      "learning_note": "MFA deployment priority: privileged/admin access first (highest risk, highest impact), then remote access (internet exposed), then cloud applications, then general workforce. Rationale: admin credentials enable catastrophic damage; protecting 50 admin accounts may reduce more risk than protecting 5,000 regular accounts. Phishing-resistant MFA (FIDO2) is preferred for highest-risk accounts.",
+      "unlocks_artifact": "artifact_3"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Privileged Access Model",
+      "narrative": "The shared admin credentials issue is critical. Currently, 15 people share 3 admin accounts, passwords are in a spreadsheet, and there's no logging of who did what. You need to implement proper privileged access management.",
+      "question": "What is the MOST important PAM capability to implement first?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Session recording for all privileged access",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Valuable for forensics but doesn't prevent shared credentials",
+            "detailed": "Session recording provides audit trail and forensics, but: it doesn't prevent shared credentials, doesn't enable accountability (who logged in as shared admin?), and doesn't reduce standing privilege. Address credential management first."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Individual admin accounts with credential vaulting (no shared passwords)",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Eliminate shared credentials and establish accountability",
+            "detailed": "First priority: eliminate shared credentials. Each admin gets individual account, credentials stored in vault (not spreadsheet), check-out/check-in with audit trail, and automatic password rotation. This enables: accountability (who did what), incident investigation, and credential protection. You can't secure what you share."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Just-in-time privilege elevation",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Advanced capability - build on credential management foundation",
+            "detailed": "JIT access is powerful but requires foundation: first implement individual accounts and vaulting, then layer JIT on top. Implementing JIT with shared credentials still has shared credential problem. Walk before you run."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Privileged access workstations",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Valuable but doesn't address shared credential problem",
+            "detailed": "PAWs provide secure admin environment, but: if admins still share credentials, PAWs don't solve accountability. Address credential management first, then consider PAWs for high-security environments."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What's the fundamental problem with shared admin accounts that needs to be solved?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Shared credentials = no accountability, no audit trail, credential exposure. Individual accounts + vaulting: each person has own account, passwords secured in vault, check-out creates audit trail."
+        }
+      ],
+      "learning_note": "PAM implementation priority: (1) Individual accounts - eliminate shared credentials, enable accountability; (2) Credential vaulting - secure password storage, automated rotation; (3) Session management - audit trail, recording; (4) Just-in-time access - reduce standing privilege. Each layer builds on the previous. You can't implement JIT with shared credentials.",
+      "unlocks_artifact": "artifact_4"
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Access Review Implementation",
+      "narrative": "SOX auditors cited lack of access reviews. Access has accumulated over years - users have permissions from three jobs ago. You need to implement access reviews but face resistance: 'We're too busy to review all this.'",
+      "question": "How should access reviews be implemented to be both effective and manageable?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Comprehensive annual review of all access for all users",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Too much at once leads to rubber-stamping",
+            "detailed": "Annual comprehensive reviews overwhelm reviewers with thousands of access decisions at once. Result: rubber-stamping (approve everything to get it done). Instead, distribute reviews throughout the year and focus on what matters most."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Risk-based approach: quarterly for privileged access, annually for standard, focus on changes",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Prioritize by risk, focus on what's changed",
+            "detailed": "Risk-based review approach: privileged access reviewed quarterly (highest risk), standard access reviewed annually, and focus reviews on changes (new access, job changes) rather than re-certifying unchanged access. This is manageable (reviewers see less), effective (catches drift), and compliant (documented risk-based approach)."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Automated review that revokes access not used in 90 days",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "May revoke needed but infrequently used access",
+            "detailed": "Usage-based revocation sounds good but: some access is needed infrequently (quarterly reports, annual processes), automatic revocation can disrupt business, and some sensitive access is 'just in case' (emergency procedures). Use usage data to inform reviews, not replace them."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Self-certification - users review and certify their own access",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Users will certify everything they have",
+            "detailed": "Users have incentive to keep all access - they certified their own access, which is no control at all. Reviews must be done by someone with authority and incentive to revoke (manager, application owner). Self-certification fails basic separation of duties."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can you make reviews manageable while focusing on highest-risk access?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Risk-based frequency: privileged access quarterly, standard annually. Focus on changes and new access rather than re-certifying everything. Spread reviews throughout year."
+        }
+      ],
+      "learning_note": "Access review best practices: risk-based frequency (privileged more often), spread throughout year (avoid review fatigue), focus on changes (new access, role changes), manager and application owner review, document certifications and revocations. Reviews that are too comprehensive lead to rubber-stamping; reviews that are too light miss drift. Balance is key.",
+      "unlocks_artifact": "artifact_5"
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Role-Based Access Control",
+      "narrative": "Access is currently granted individually - each application, each permission, each user. This creates thousands of individual permissions to manage. You want to implement role-based access control (RBAC).",
+      "question": "What is the BEST approach to implementing RBAC?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a role for every unique combination of access in the organization",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Role explosion - defeats the purpose of RBAC",
+            "detailed": "Creating too many roles (role explosion) eliminates the benefits of RBAC. If you have nearly as many roles as people, you're just renaming individual access. Roles should be based on job functions, not existing access patterns. Start with common roles that cover most users."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Start with common functional roles (HR, Finance, Engineering), refine over time",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Start simple, expand based on need",
+            "detailed": "RBAC implementation: start with clearly defined functional roles that cover the majority of the workforce, accept that some individual exceptions will exist initially, and refine roles based on access request patterns. Better to have 50 well-defined roles covering 80% of users than 500 roles covering 100%. The goal is simplification, not perfection."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Analyze all existing access and build roles from access patterns",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Risk of codifying existing problems into roles",
+            "detailed": "Bottom-up role mining from existing access: may codify excessive access into roles, reflects how access drifted rather than how it should be, and is complex analysis. Use job functions (top-down) as primary approach, with access analysis to validate. Don't build roles from accumulated access problems."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Require application teams to define all possible roles for their applications",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Application-centric roles don't align to job functions",
+            "detailed": "Application-centric roles: each application has its own roles, doesn't align to organizational job functions, and user might need roles in 20 different applications. Organizational roles should map to application permissions, not the other way around. Central identity team defines organizational roles."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Should roles be based on current access patterns or job functions?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Functional roles based on job requirements (top-down) are better than roles built from existing access (bottom-up). Start with common roles covering most users."
+        }
+      ],
+      "learning_note": "RBAC implementation: define roles based on job functions (top-down), not existing access patterns (bottom-up). Start with roles covering majority of workforce, accept exceptions initially, and refine based on access request patterns. Avoid role explosion - 50-100 well-defined roles is better than 1,000 narrow roles. Roles should simplify access management, not replicate complexity.",
+      "unlocks_artifact": "artifact_6"
+    },
+    {
+      "id": "decision_6",
+      "sequence": 6,
+      "title": "SSO Implementation",
+      "narrative": "Users have separate credentials for dozens of applications. This leads to: password fatigue, weak passwords, password reuse, and difficulty deprovisioning (must disable in each application). You want to implement SSO.",
+      "question": "What is the KEY security benefit of SSO implementation?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Users only need to remember one password",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "User convenience benefit, not the key security benefit",
+            "detailed": "One password is a usability benefit, and fewer passwords to manage does improve security somewhat. But the KEY security benefit is centralized authentication control, not reduced passwords. One password could also be seen as a risk (single point of failure) without proper controls."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Centralized authentication enables consistent MFA and immediate deprovisioning",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Centralized control is the key security benefit",
+            "detailed": "SSO security benefits: MFA enforced at IdP (single point to protect all applications), immediate deprovisioning (disable IdP account = locked out of all applications), consistent authentication policies, and reduced attack surface (fewer credential stores). Centralized control enables security that isn't possible with distributed authentication."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Eliminates password-based attacks",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "SSO still uses passwords unless combined with passwordless",
+            "detailed": "SSO typically still has a password at the IdP level - it just centralizes authentication. Password attacks shift to the IdP credential. SSO combined with MFA and ideally passwordless (FIDO2) provides strong protection, but SSO alone doesn't eliminate password attacks."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Reduces IT helpdesk password reset tickets",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Operational benefit, not key security benefit",
+            "detailed": "Fewer password resets is an operational benefit that reduces cost. It's not the key security benefit. Security benefits come from centralized control, not from reduced helpdesk calls."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What does centralizing authentication enable for security controls?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Centralized authentication: MFA enforced once (protects all apps), deprovisioning is immediate (disable IdP = no access anywhere), consistent policies across all applications."
+        }
+      ],
+      "learning_note": "SSO security benefits: centralized MFA enforcement (one MFA implementation protects all connected applications), immediate deprovisioning (disable IdP account = instant lockout from everything), consistent authentication policies, centralized logging, and reduced credential sprawl. These enterprise security benefits outweigh the 'single point of failure' concern when implemented with strong controls.",
+      "unlocks_artifact": "artifact_7"
+    },
+    {
+      "id": "decision_7",
+      "sequence": 7,
+      "title": "Service Account Discovery",
+      "narrative": "The audit found approximately 800 service accounts, but nobody knows what they all do. Some have domain admin privileges 'because it was easier.' Many passwords haven't been changed in years.",
+      "question": "What is the FIRST step in addressing the service account problem?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Force password change on all service accounts immediately",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Will cause widespread application failures",
+            "detailed": "Mass password rotation without knowing what services use which accounts will break applications throughout the organization. You'll have cascading failures and emergency rollbacks. Inventory first, then planned rotation with application team coordination."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Complete inventory: document each account, owner, purpose, and permissions",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! You can't manage what you don't understand",
+            "detailed": "Service account inventory first: identify all service accounts, determine what each account does (which application/service), assign an owner (who's responsible), document current permissions, and assess if permissions are appropriate. This inventory enables: remediation planning, ownership accountability, and informed decision-making about changes."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Revoke domain admin from all service accounts",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "May break critical services without proper analysis",
+            "detailed": "Revoking domain admin is the right goal but doing it blindly will break services that (incorrectly) require it. First, inventory to understand which accounts have domain admin and why, then systematically remediate with application team coordination."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Delete all service accounts over 1 year old",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Will cause catastrophic failures",
+            "detailed": "Many legitimate service accounts are older than one year. Arbitrary deletion based on age will cause widespread service failures. Age isn't the criteria - legitimate use is. Inventory first to determine which accounts are actually orphaned versus actively used."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Before making changes to 800 service accounts, what do you need to know?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Inventory: what does each account do, who owns it, what permissions does it have, is the service still active? This enables safe remediation."
+        }
+      ],
+      "learning_note": "Service account management: inventory is foundational. For each account: purpose/function, owner responsible for it, applications/services that use it, permissions granted (and if they're appropriate), and password age/rotation status. Once inventoried: assign ownership, implement least privilege, enable rotation, and monitor for anomalies. Changes without inventory cause outages.",
+      "unlocks_artifact": "artifact_8"
+    },
+    {
+      "id": "decision_8",
+      "sequence": 8,
+      "title": "Identity Threat Detection",
+      "narrative": "After implementing better controls, you want to detect identity-based attacks. The ransomware attack involved compromised credentials that went undetected. How can you detect credential abuse?",
+      "question": "What capability is MOST important for detecting credential-based attacks?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Failed login alerts",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Catches brute force but misses successful compromise",
+            "detailed": "Failed login alerts detect brute force attempts but: modern attacks use password spraying (few failures per account), compromised credentials log in successfully (no failure), and sophisticated attackers avoid lockouts. Need to detect anomalous successful logins, not just failures."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Behavioral analytics detecting anomalous login patterns and impossible travel",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Detect anomalies in successful authentication",
+            "detailed": "Behavioral analytics detect: impossible travel (login from NY, then London an hour later), unusual access patterns (new applications, unusual times), and privilege anomalies (unexpected admin actions). These catch compromised credentials even when the login succeeds. The ransomware attack involved successful logins from unusual locations - behavioral analytics would have flagged this."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Mandatory password changes every 30 days",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Frequent changes don't detect attacks and may weaken security",
+            "detailed": "Frequent password rotation: doesn't detect attacks, leads to weak passwords (Password1, Password2...), and is no longer recommended by NIST. Detection of credential misuse is more valuable than frequent rotation. Modern guidance: strong passwords, MFA, and anomaly detection."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Alert on any admin login",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "High volume of legitimate alerts",
+            "detailed": "Alerting on every admin login creates alert fatigue - admins log in legitimately many times per day. Better: alert on anomalous admin activity (unusual times, locations, or target systems). Behavioral baseline for admin accounts, alert on deviations."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Compromised credentials result in successful logins. How do you detect successful but unauthorized access?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Behavioral analytics: baseline normal behavior, detect deviations. Impossible travel, unusual access times, new applications, anomalous privilege use."
+        }
+      ],
+      "learning_note": "Identity threat detection: behavioral analytics baseline normal activity and detect deviations. Key detections: impossible travel, unusual access patterns, privilege anomalies, and service account interactive login. Failed login alerts catch brute force but miss credential compromise. Modern identity protection combines MFA (prevent) with behavioral analytics (detect) for defense in depth.",
+      "unlocks_artifact": "artifact_9"
+    },
+    {
+      "id": "decision_9",
+      "sequence": 9,
+      "title": "Acquisition Integration",
+      "narrative": "Northwind is acquiring a company with 400 employees. The acquired company has their own AD domain, no MFA, and different applications. Auditors still cite the 340 orphaned accounts from the previous acquisition.",
+      "question": "What is the MOST important IAM consideration for the acquisition?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Immediately migrate all acquired users to Northwind's AD",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Rushed migration creates more orphaned accounts",
+            "detailed": "Rushed integration: creates duplicate accounts, misses application dependencies, and repeats the orphaned account problem. The previous acquisition left 340 orphaned accounts because integration wasn't properly planned. Take time to do it right."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Comprehensive identity inventory before integration, planned migration with reconciliation",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Inventory first, then planned integration",
+            "detailed": "Acquisition IAM approach: comprehensive inventory of acquired identities before any changes, map acquired accounts to new structure, planned migration with checkpoints, reconciliation to catch orphans, and application access migration. Learn from the previous acquisition - inventory and planning prevent orphaned accounts."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Establish federation between domains and defer integration",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Federation doesn't address underlying IAM gaps",
+            "detailed": "Federation enables cross-domain access but: doesn't address the acquired company's lack of MFA, doesn't clean up their accounts, and creates permanent dual-domain complexity. Federation can be interim approach but integration should be planned, not deferred indefinitely."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Let the acquired company maintain their own identity systems",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Creates ongoing security and management issues",
+            "detailed": "Separate identity systems: inconsistent security controls (they have no MFA), duplicate identities, complex deprovisioning (terminate in both places), and audit complexity. Integration is necessary for security consistency and operational efficiency."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How did the previous acquisition result in 340 orphaned accounts, and how do you prevent that?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Inventory before integration: know all accounts, map to new structure, planned migration, reconciliation checks. Don't rush and repeat previous mistakes."
+        }
+      ],
+      "learning_note": "Acquisition IAM: inventory first (know all identities, accounts, access before changes), assess current state (security gaps like no MFA), plan migration (mapping, timelines, checkpoints), reconciliation (verify old accounts disabled, no orphans), and apply security standards (MFA, access reviews) to acquired population. Rushed integration creates orphaned accounts and security gaps.",
+      "unlocks_artifact": "artifact_10"
+    },
+    {
+      "id": "decision_10",
+      "sequence": 10,
+      "title": "IAM Program Success Metrics",
+      "narrative": "Robert Walsh asks how you'll measure success of the IAM program. The board wants to know their $1.8M investment is paying off. You need metrics that demonstrate security improvement.",
+      "question": "What metric BEST demonstrates IAM program effectiveness?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Number of accounts created",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Activity metric, not effectiveness metric",
+            "detailed": "Account creation volume measures activity, not security effectiveness. More accounts could mean business growth or could mean poor deprovisioning leaving accounts around. Focus on security outcomes, not transaction volumes."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Time to deprovision, access review completion rate, and privileged account count",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! These metrics show security improvement",
+            "detailed": "Effective IAM metrics: time to deprovision (hours instead of weeks - addresses terminated user risk), access review completion (compliance, privilege reduction), privileged account reduction (smaller attack surface), and MFA adoption rate. These demonstrate the program is reducing the specific risks identified at the start."
+          }
+        },
+        {
+          "id": "C",
+          "text": "User satisfaction with login experience",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "User experience metric, not security metric",
+            "detailed": "User satisfaction is important for adoption but doesn't demonstrate security improvement. The board invested for security, not convenience. Include user experience metrics but focus on security outcomes for demonstrating program value."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Number of helpdesk tickets for access requests",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Operational metric, not security metric",
+            "detailed": "Helpdesk volume is an operational efficiency metric. Fewer tickets might mean better self-service or might mean people are working around the system. Security metrics should show risk reduction, not helpdesk efficiency."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What metrics show the specific security issues are being addressed?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Deprovisioning time (terminated user risk), access review completion (privilege creep), privileged accounts (attack surface), MFA adoption (credential protection)."
+        }
+      ],
+      "learning_note": "IAM program metrics: operational (provisioning time, ticket volumes), security (deprovisioning time, orphaned accounts, privileged account count, MFA adoption), and compliance (access review completion, policy exceptions). Security metrics should map to the risks the program addresses. Show improvement trends to demonstrate investment value."
+    }
+  ],
+  
+  "scoring": {
+    "max_points": 250,
+    "passing_score": 200,
+    "passing_percentage": 80
+  },
+  
+  "outcome_thresholds": {
+    "expert": {"min_score": 238, "title": "IAM Expert", "description": "Exceptional identity and access management capabilities."},
+    "proficient": {"min_score": 213, "title": "IAM Professional", "description": "Strong grasp of IAM concepts and implementation."},
+    "competent": {"min_score": 200, "title": "IAM Competent", "description": "Solid understanding of IAM fundamentals."},
+    "developing": {"min_score": 175, "title": "IAM Developing", "description": "Gaps in IAM concepts."},
+    "needs_remediation": {"min_score": 0, "title": "IAM Fundamentals Needed", "description": "Review IAM concepts."}
+  },
+  
+  "weakness_mapping": {
+    "lifecycle_gaps": {"indicators": ["decision_1_incorrect", "decision_4_incorrect"], "remediation": "D4-REM-003", "focus": "Identity lifecycle management"},
+    "authentication_gaps": {"indicators": ["decision_2_incorrect", "decision_6_incorrect"], "remediation": "D4-REM-003", "focus": "Authentication and MFA concepts"},
+    "privileged_access_gaps": {"indicators": ["decision_3_incorrect", "decision_7_incorrect"], "remediation": "D4-REM-003", "focus": "Privileged access management"}
+  },
+  
+  "prerequisites": ["D4-SIM-001"],
+  "unlocks": ["D4-SIM-005"],
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 4: Security Operations",
+    "job_role_alignment": ["IAM Architect", "Security Engineer", "Identity Administrator"],
+    "estimated_time": "45-60 minutes",
+    "industry_context": "Manufacturing"
+  }
+}

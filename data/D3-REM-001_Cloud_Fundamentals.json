@@ -1,0 +1,337 @@
+{
+  "simulation_id": "D3-REM-001",
+  "title": "Cloud Fundamentals Remediation",
+  "domain": 3,
+  "category": "remediation",
+  "difficulty": "foundational",
+  "time_estimate": "20-30 minutes",
+  "passing_score": 40,
+  "max_score": 50,
+  
+  "exam_objectives": [
+    {
+      "id": "3.1",
+      "description": "Compare and contrast security implications of different architecture models",
+      "coverage": ["cloud service models", "shared responsibility", "cloud deployment models"]
+    }
+  ],
+  
+  "remediation_focus": {
+    "target_weaknesses": ["cloud_service_models", "shared_responsibility", "cloud_deployment"],
+    "prerequisite_for": ["D3-SIM-001"],
+    "concepts_covered": [
+      "IaaS vs PaaS vs SaaS security responsibilities",
+      "Shared responsibility model",
+      "Public, private, hybrid, community cloud",
+      "Cloud-native security controls"
+    ]
+  },
+  
+  "scenario_context": {
+    "organization": "Greenfield Startup",
+    "industry": "Technology",
+    "size": "50 employees, cloud-first company",
+    "setting": "Cloud architecture planning",
+    "your_role": "Junior Security Analyst",
+    "opening_narrative": "Greenfield is a cloud-first startup building their entire infrastructure in the cloud. As a junior analyst, you're helping the team understand cloud security fundamentals. Your CTO wants to ensure everyone understands the security implications of different cloud choices."
+  },
+  
+  "teaching_content": {
+    "introduction": {
+      "title": "Cloud Computing Security Fundamentals",
+      "content": "Cloud computing changes how we think about security. Instead of owning and securing physical infrastructure, we share responsibility with cloud providers. Understanding WHO is responsible for WHAT is critical for cloud security."
+    },
+    "concepts": [
+      {
+        "id": "service_models",
+        "title": "Cloud Service Models",
+        "content": "Cloud services come in three main models, each with different security responsibilities:\n\n**IaaS (Infrastructure as a Service)**: Provider gives you virtual machines, storage, and networking. YOU manage everything from the OS up - patching, hardening, applications, data. Example: AWS EC2, Azure VMs.\n\n**PaaS (Platform as a Service)**: Provider manages the OS and runtime. YOU manage applications and data. Less to manage, but less control. Example: AWS Elastic Beanstalk, Azure App Service.\n\n**SaaS (Software as a Service)**: Provider manages everything except your data and user access. YOU configure the application and manage data. Example: Microsoft 365, Salesforce.",
+        "key_point": "As you move from IaaS to SaaS, customer responsibility DECREASES and provider responsibility INCREASES."
+      },
+      {
+        "id": "shared_responsibility",
+        "title": "The Shared Responsibility Model",
+        "content": "Cloud security is a partnership between you and the provider:\n\n**Provider Always Responsible For**: Physical security, hardware, hypervisor, global infrastructure, network backbone.\n\n**Customer Always Responsible For**: Data, access management, application configuration, compliance.\n\n**Varies by Service Model**: OS patching (customer in IaaS, provider in PaaS/SaaS), network configuration, encryption settings.\n\nThe provider secures the cloud infrastructure. You secure what you put IN the cloud.",
+        "key_point": "Security OF the cloud (provider) vs. Security IN the cloud (customer)"
+      },
+      {
+        "id": "deployment_models",
+        "title": "Cloud Deployment Models",
+        "content": "**Public Cloud**: Shared infrastructure, multiple tenants, provider-managed. Cost-effective, scalable. Examples: AWS, Azure, GCP.\n\n**Private Cloud**: Dedicated infrastructure for one organization. More control, higher cost. Can be on-premises or hosted.\n\n**Hybrid Cloud**: Combination of public and private. Keep sensitive workloads private, use public for scale.\n\n**Community Cloud**: Shared by organizations with common concerns (healthcare, government). Shared compliance burden.",
+        "key_point": "Choice depends on control needs, compliance requirements, and cost tolerance."
+      }
+    ]
+  },
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Service Model Understanding",
+      "narrative": "Greenfield is deploying a web application. The development team asks whether to use virtual machines (IaaS) or a managed app service (PaaS). They want to understand the security implications.",
+      "question": "In a PaaS deployment, who is responsible for operating system patching?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The customer is always responsible for all patching",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - this describes IaaS",
+            "detailed": "In PaaS, the provider manages the operating system and runtime environment. The provider handles OS patching. The customer is responsible for application code and data. This is a key benefit of PaaS - reduced operational burden."
+          }
+        },
+        {
+          "id": "B",
+          "text": "The cloud provider handles OS patching in PaaS",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! Provider manages OS in PaaS",
+            "detailed": "In PaaS, the provider manages everything up through the runtime: physical infrastructure, virtualization, OS, and middleware/runtime. The customer manages their application code and data. This is why PaaS reduces operational overhead - no OS patching required."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Neither - patching is automatic in all cloud models",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - depends on service model",
+            "detailed": "Patching responsibility varies by service model. In IaaS, the customer patches the OS. In PaaS, the provider patches. In SaaS, the provider manages everything. It's not automatic for the customer in IaaS."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Patching is shared equally between customer and provider",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - responsibilities are divided, not shared",
+            "detailed": "Shared responsibility doesn't mean sharing each task. It means different tasks are assigned to different parties. OS patching in PaaS is solely the provider's responsibility. The customer focuses on application-level concerns."
+          }
+        }
+      ],
+      "learning_note": "PaaS = Provider manages Platform (OS, runtime). Customer manages Application and Data. IaaS = Customer manages more. SaaS = Customer manages less."
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "Shared Responsibility Application",
+      "narrative": "A data breach occurs at a company using AWS EC2 instances. Investigation reveals the instances were running unpatched operating systems. The company tries to blame AWS for the breach.",
+      "question": "In this IaaS scenario, who is responsible for the unpatched OS vulnerability?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS - they should have patched the instances automatically",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - IaaS customers own OS management",
+            "detailed": "In IaaS, the provider gives you a virtual machine - what you do with it is your responsibility. AWS provides the infrastructure; the customer manages the OS, applications, and data. OS patching is 100% customer responsibility in IaaS."
+          }
+        },
+        {
+          "id": "B",
+          "text": "The customer - they own OS patching responsibility in IaaS",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! Customer manages OS in IaaS",
+            "detailed": "In IaaS (EC2, Azure VMs), the customer is responsible for everything from the operating system up: OS patching, hardening, application security, and data protection. AWS secures the hypervisor and physical infrastructure, but guest OS management is the customer's job."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Shared - both parties should have caught this",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - OS is clearly customer responsibility",
+            "detailed": "While 'shared responsibility' is the model name, specific tasks have clear ownership. OS patching in IaaS is unambiguously the customer's responsibility. AWS has no access to patch your instances - they don't have credentials to your OS."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Neither - patching is an inherent cloud risk",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - patching responsibilities are clearly defined",
+            "detailed": "Patching responsibilities are well-defined in cloud models. It's not an inherent risk - it's a responsibility that needs to be managed. In IaaS, the customer manages OS; in PaaS, the provider manages OS. Clear ownership, not inherent risk."
+          }
+        }
+      ],
+      "learning_note": "IaaS shared responsibility: Provider = physical, hypervisor, network backbone. Customer = OS, applications, data, access control. Think of it as 'you rent a room, you're responsible for what's in it.'"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "SaaS Security Boundaries",
+      "narrative": "Greenfield uses Microsoft 365 for email and collaboration. An employee's account is compromised via phishing, and confidential data is exfiltrated. The CEO asks who is responsible.",
+      "question": "In this SaaS scenario, what is the PRIMARY customer security responsibility?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Securing the Microsoft 365 servers",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - provider manages SaaS infrastructure",
+            "detailed": "In SaaS, the provider manages all infrastructure, including servers, operating systems, and the application itself. Microsoft secures the M365 infrastructure. Customers don't have access to or responsibility for the servers."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Managing user access and data protection",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! SaaS customers manage access and data",
+            "detailed": "In SaaS, customer responsibilities narrow to: user access management (who has accounts, MFA, conditional access), data classification and protection (what data is stored, who can access it), and configuration (security settings within the application). The phishing attack succeeded due to access control gaps - customer responsibility."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Patching the Microsoft 365 application",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - provider manages SaaS application",
+            "detailed": "SaaS applications are managed entirely by the provider. Microsoft patches, updates, and maintains M365. Customers cannot access or modify the application code. Customer responsibility is limited to configuration and data."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Encrypting data in Microsoft 365",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Partially relevant but not primary responsibility",
+            "detailed": "Microsoft provides encryption for M365 data (at rest and in transit). Customers can configure additional protection (sensitivity labels, DLP), but the primary responsibility is access management - controlling who can access the data. The phishing attack was an access control failure."
+          }
+        }
+      ],
+      "learning_note": "SaaS shared responsibility: Provider = everything technical (infrastructure, application, patching). Customer = access management, data, configuration. Most SaaS breaches are access control failures, not technical vulnerabilities."
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Cloud Deployment Models",
+      "narrative": "A healthcare company is moving to the cloud but has HIPAA compliance requirements. They're evaluating public cloud vs. private cloud for storing patient health information.",
+      "question": "Can HIPAA-regulated data be stored in public cloud like AWS or Azure?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No - HIPAA requires private cloud or on-premises only",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - public cloud can be HIPAA compliant",
+            "detailed": "HIPAA doesn't prohibit public cloud. AWS, Azure, and GCP all offer HIPAA-eligible services and will sign Business Associate Agreements (BAAs). Many healthcare organizations use public cloud for PHI. The key is proper configuration and BAA, not avoiding public cloud."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Yes - with proper configuration and Business Associate Agreement",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! Public cloud can be HIPAA compliant with proper controls",
+            "detailed": "Major public cloud providers offer HIPAA-compliant services. Requirements: sign a BAA with the provider, use only HIPAA-eligible services, configure services according to HIPAA requirements (encryption, access control, audit logging). Public cloud can actually enhance security with provider expertise and tools."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Only in government cloud regions",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Incorrect - government cloud is for federal, not HIPAA",
+            "detailed": "Government cloud (GovCloud, Azure Government) is for federal government workloads with FedRAMP requirements. HIPAA compliance is available in standard commercial cloud regions. Government cloud is neither required nor particularly beneficial for HIPAA."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Yes - cloud providers automatically handle all HIPAA requirements",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - shared responsibility applies",
+            "detailed": "Shared responsibility still applies. The provider offers HIPAA-eligible infrastructure, but the customer must: configure services properly, manage access appropriately, encrypt data, implement audit logging, and manage compliance documentation. It's not automatic."
+          }
+        }
+      ],
+      "learning_note": "Cloud deployment and compliance: Public cloud CAN meet most regulatory requirements (HIPAA, PCI, SOX) with proper configuration and contracts (BAA for HIPAA). The provider offers compliant infrastructure; the customer implements compliant configurations."
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Responsibility Summary",
+      "narrative": "Your CTO asks you to create a quick reference showing security responsibilities across cloud models. You need to demonstrate your understanding.",
+      "question": "Which statement BEST describes the shared responsibility model?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cloud providers are responsible for all security in the cloud",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - customers have significant responsibilities",
+            "detailed": "Cloud providers secure the cloud infrastructure, but customers are always responsible for their data, access management, and configuration. Many cloud breaches are due to customer misconfiguration, not provider failures. Security is shared, not delegated."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Provider secures the cloud infrastructure; customer secures what they put in it",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! Security OF the cloud vs. IN the cloud",
+            "detailed": "This is the core concept: Provider handles 'security OF the cloud' (infrastructure, physical, hypervisor). Customer handles 'security IN the cloud' (data, access, configuration). The specific split varies by service model (more customer responsibility in IaaS, less in SaaS), but this principle always applies."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Customers can delegate all security responsibilities to cloud providers",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - customer responsibilities cannot be delegated",
+            "detailed": "Customers ALWAYS retain responsibility for their data and access management. Even in SaaS where the provider manages almost everything technical, the customer must manage user access and data protection. You can't outsource all security."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Security responsibilities are identical across IaaS, PaaS, and SaaS",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - responsibilities shift between models",
+            "detailed": "Responsibilities shift significantly: IaaS = customer manages OS, applications, data. PaaS = customer manages applications, data (provider manages OS). SaaS = customer manages data and access (provider manages everything else). Understanding this shift is key to cloud security."
+          }
+        }
+      ],
+      "learning_note": "The shared responsibility model is the foundation of cloud security. Provider responsibility increases from IaaS â†’ PaaS â†’ SaaS. Customer responsibility decreases. But customers ALWAYS own data and access management. 'Security OF the cloud' (provider) vs. 'Security IN the cloud' (customer)."
+    }
+  ],
+  
+  "scoring": {
+    "max_points": 50,
+    "passing_score": 40,
+    "passing_percentage": 80
+  },
+  
+  "completion_action": {
+    "on_pass": "Ready to attempt D3-SIM-001 Cloud Security Architecture",
+    "on_fail": "Review teaching content and retry"
+  },
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 3: Security Architecture",
+    "remediation_type": "Foundational concepts"
+  }
+}

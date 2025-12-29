@@ -1,0 +1,725 @@
+{
+  "scenario": {
+    "id": "D1-SIM-005",
+    "title": "The Gap Analysis",
+    "type": "primary",
+    "difficulty": "advanced",
+    "role": "grc_analyst",
+    "estimated_duration": "40-50 minutes",
+    "prerequisites": ["D1-SIM-001", "D1-SIM-004"],
+    "unlocks": ["D2-SIM-001", "D5-SIM-001"],
+    
+    "objectives_covered": ["1.1", "1.3"],
+    "topics_covered": ["Gap Analysis", "Control Frameworks", "Baseline Configurations", "Security Assessment", "Risk Management"],
+    
+    "study_links": [
+      {"topic": "Security Frameworks", "path": "domain1/topic1/study-guide"},
+      {"topic": "Gap Analysis", "path": "domain1/topic3/study-guide"},
+      {"topic": "Risk Assessment", "path": "domain5/topic2/study-guide"}
+    ],
+
+    "overview": {
+      "situation": "Pinnacle Manufacturing, a mid-sized industrial equipment manufacturer, has landed a major contract with a defense prime contractor. The contract requires CMMC Level 2 certification within 18 months. Their current security program is informal with no structured framework. You've been engaged to perform a comprehensive gap analysis against NIST 800-171 (which underlies CMMC) and develop a remediation roadmap.",
+      "your_role": "Senior GRC Consultant - Security Assessment Lead",
+      "mission": "Conduct thorough gap analysis identifying control deficiencies, prioritize findings by risk, and develop actionable remediation roadmap to achieve CMMC Level 2 compliance."
+    },
+
+    "company_context": {
+      "name": "Pinnacle Manufacturing",
+      "industry": "Industrial Manufacturing / Defense Supply Chain",
+      "size": "450 employees, 2 manufacturing plants, 1 corporate office",
+      "infrastructure": "Mix of legacy OT systems, modern IT, limited cloud adoption, no dedicated security team",
+      "compliance_requirements": ["CMMC Level 2 (target)", "NIST 800-171", "DFARS 252.204-7012"],
+      "recent_events": "Won defense subcontract, must handle Controlled Unclassified Information (CUI)"
+    },
+
+    "artifacts": [
+      {
+        "id": "D1S5-ART-001",
+        "type": "assessment_scope",
+        "title": "Gap Analysis Scope Document",
+        "available_at_start": true,
+        "content": "PINNACLE MANUFACTURING - GAP ANALYSIS SCOPE\n\nOBJECTIVE: Assess current security posture against NIST SP 800-171 Rev 2 requirements for CMMC Level 2 certification.\n\nSCOPE INCLUSIONS:\n- All systems processing, storing, or transmitting CUI\n- IT infrastructure (servers, network, endpoints)\n- OT systems with IT connectivity\n- Personnel with CUI access\n- Physical security for CUI areas\n- Third-party connections and vendors\n\nCMNC LEVEL 2 REQUIREMENTS:\n- 110 practices derived from NIST 800-171\n- 14 control families\n- Requires implementation + documentation\n- Third-party assessment required\n\nTIMELINE:\n- Gap Analysis: 4 weeks\n- Remediation Planning: 2 weeks\n- Implementation: 12 months\n- Pre-assessment: 2 months before C3PAO\n\nSTAKEHOLDERS:\n- CEO (Executive Sponsor)\n- IT Director (Technical Lead)\n- Operations VP (OT Systems)\n- HR Director (Personnel Security)\n- Facilities Manager (Physical Security)"
+      },
+      {
+        "id": "D1S5-ART-002",
+        "type": "framework_overview",
+        "title": "NIST 800-171 Control Families",
+        "available_at_start": true,
+        "content": "NIST SP 800-171 CONTROL FAMILIES (14 Families, 110 Controls)\n\n1. ACCESS CONTROL (AC) - 22 requirements\n   User access management, least privilege, session controls\n\n2. AWARENESS AND TRAINING (AT) - 3 requirements\n   Security awareness, role-based training\n\n3. AUDIT AND ACCOUNTABILITY (AU) - 9 requirements\n   Logging, audit review, protection of audit info\n\n4. CONFIGURATION MANAGEMENT (CM) - 9 requirements\n   Baseline configs, change control, least functionality\n\n5. IDENTIFICATION AND AUTHENTICATION (IA) - 11 requirements\n   User identification, authenticator management, MFA\n\n6. INCIDENT RESPONSE (IR) - 3 requirements\n   IR capability, reporting, testing\n\n7. MAINTENANCE (MA) - 6 requirements\n   System maintenance, controlled maintenance\n\n8. MEDIA PROTECTION (MP) - 9 requirements\n   Media marking, storage, transport, sanitization\n\n9. PERSONNEL SECURITY (PS) - 7 requirements\n   Screening, termination, transfer\n\n10. PHYSICAL PROTECTION (PE) - 6 requirements\n    Physical access, monitoring, visitor control\n\n11. RISK ASSESSMENT (RA) - 3 requirements\n    Risk assessments, vulnerability scanning\n\n12. SECURITY ASSESSMENT (CA) - 4 requirements\n    Security assessments, POA&M, continuous monitoring\n\n13. SYSTEM AND COMMUNICATIONS PROTECTION (SC) - 16 requirements\n    Boundary protection, encryption, network segmentation\n\n14. SYSTEM AND INFORMATION INTEGRITY (SI) - 7 requirements\n    Malware protection, monitoring, patching"
+      },
+      {
+        "id": "D1S5-ART-003",
+        "type": "current_state_summary",
+        "title": "Initial Assessment Findings Summary",
+        "available_at_start": true,
+        "content": "PINNACLE MANUFACTURING - INITIAL ASSESSMENT SUMMARY\n\nCURRENT STATE OVERVIEW:\nSecurity Maturity: Ad-hoc/Reactive\nDocumentation: Minimal\nFormal Processes: Few\n\nPRELIMINARY FINDINGS BY FAMILY:\n\nACCESS CONTROL: Significant Gaps\n- No formal access control policy\n- Shared accounts on manufacturing floor\n- No privileged access management\n- Remote access via basic VPN (password only)\n\nAUDIT & ACCOUNTABILITY: Major Gaps\n- Windows event logs enabled but not reviewed\n- No centralized logging or SIEM\n- Firewall logs not retained\n- No user activity monitoring\n\nCONFIGURATION MANAGEMENT: Major Gaps\n- No documented baselines\n- Systems configured ad-hoc\n- No change management process\n- Default credentials on some systems\n\nIDENTIFICATION & AUTHENTICATION: Significant Gaps\n- Active Directory in place\n- No MFA anywhere\n- Weak password policy (8 chars, no complexity)\n- Service accounts with non-expiring passwords\n\nINCIDENT RESPONSE: Critical Gap\n- No documented IR plan\n- No designated IR team\n- Never conducted IR exercise\n\nMEDIA PROTECTION: Major Gaps\n- No media labeling for CUI\n- USB ports not restricted\n- No verified sanitization process\n\nPHYSICAL PROTECTION: Partial\n- Badge access to buildings\n- No CUI-specific area controls\n- Visitor logs paper-based, inconsistent\n\nSYSTEM PROTECTION: Significant Gaps\n- Basic firewall at perimeter\n- Flat internal network\n- Antivirus on endpoints (definitions current)\n- No encryption for data at rest"
+      },
+      {
+        "id": "D1S5-ART-004",
+        "type": "evidence_sample",
+        "title": "Technical Assessment Evidence - Network",
+        "available_at_start": false,
+        "unlock_after": "D1S5-DP-003",
+        "content": "NETWORK ASSESSMENT FINDINGS\n\nNETWORK TOPOLOGY:\n- Single flat network (10.0.0.0/8)\n- No VLAN segmentation\n- IT and OT on same network\n- Manufacturing systems directly accessible from corporate\n\nFIREWALL CONFIGURATION:\n- Perimeter firewall: SonicWall TZ400\n- Rules: 47 active, 12 disabled, 8 'ANY-ANY'\n- Last rule review: Unknown\n- Logging: Enabled, 7-day retention\n\nREMOTE ACCESS:\n- OpenVPN server (version 2.4.7 - outdated)\n- Authentication: AD username/password only\n- Split tunneling: Enabled\n- Connected users get full network access\n\nWIRELESS:\n- Corporate WiFi: WPA2-Enterprise (good)\n- Guest WiFi: WPA2-PSK, shared password\n- Manufacturing WiFi: WPA2-PSK, same password 3 years\n- No network isolation between SSIDs\n\nVULNERABILITY SCAN SUMMARY:\n- Critical: 23 (including EternalBlue on 4 systems)\n- High: 67\n- Medium: 234\n- Last patch cycle: 6+ months ago"
+      },
+      {
+        "id": "D1S5-ART-005",
+        "type": "policy_sample",
+        "title": "Current Security Policy (Excerpt)",
+        "available_at_start": false,
+        "unlock_after": "D1S5-DP-002",
+        "content": "PINNACLE MANUFACTURING IT SECURITY POLICY\nVersion 1.0 | Created: 2019 | Last Reviewed: Never\n\n1. PURPOSE\nThis policy establishes guidelines for computer use.\n\n2. PASSWORD REQUIREMENTS\nAll employees must have passwords. Passwords should be kept confidential.\n\n3. INTERNET USE\nInternet access is provided for business purposes. Personal use should be limited.\n\n4. EMAIL\nEmail should be used professionally. Don't open suspicious attachments.\n\n5. REPORTING PROBLEMS\nReport computer problems to the IT helpdesk.\n\n[End of Policy - 1 page total]\n\nASSESSMENT NOTES:\n- Policy is 5 years old, never reviewed\n- Missing: access control, incident response, media handling, physical security, encryption, remote access, training requirements, third-party requirements\n- Does not address CUI\n- Not aligned with any framework\n- No defined roles/responsibilities"
+      }
+    ],
+
+    "decision_points": [
+      {
+        "id": "D1S5-DP-001",
+        "sequence": 1,
+        "title": "Gap Analysis Approach",
+        "context": "You're beginning the gap analysis. The IT Director wants to jump straight to technical scanning, but you need to ensure a comprehensive approach.",
+        "question": "What should be your approach to conducting this gap analysis?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Start with comprehensive vulnerability scanning to identify technical gaps",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Vulnerability scanning identifies technical weaknesses but doesn't assess policy, process, or procedural gaps. CMMC requires both technical controls AND documented policies/procedures. A scan-first approach misses critical governance gaps.",
+            "consequence": "Technical vulnerabilities are identified, but policy and process gaps remain undiscovered.",
+            "next_dp": "D1S5-DP-002"
+          },
+          {
+            "id": "B",
+            "text": "Interview key stakeholders and review documentation first, then validate with technical assessment",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. A comprehensive gap analysis starts with understanding current state through interviews and document review (policies, procedures, configurations). Technical validation confirms what exists and identifies undocumented gaps. This addresses all three CMMC assessment objectives: policy, implementation, and documentation.",
+            "consequence": "You schedule stakeholder interviews, request documentation, and plan technical validation as phase 2.",
+            "next_dp": "D1S5-DP-002"
+          },
+          {
+            "id": "C",
+            "text": "Use an automated compliance assessment tool to check all 110 controls",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Automated tools can help with technical controls but can't assess policy adequacy, procedural effectiveness, or personnel practices. Many NIST 800-171 controls require human judgment to assess. Tools are helpful but insufficient alone.",
+            "consequence": "The tool provides partial technical assessment but can't evaluate policy or process controls.",
+            "next_dp": "D1S5-DP-002"
+          },
+          {
+            "id": "D",
+            "text": "Focus only on the control families where you expect gaps based on the preliminary findings",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "A gap analysis must be comprehensive - all 110 controls must be assessed for CMMC certification. Focusing only on expected gaps may miss unexpected deficiencies. The C3PAO will assess everything, so you must too.",
+            "consequence": "You miss gaps in areas you assumed were compliant. These surface during the actual C3PAO assessment.",
+            "next_dp": "D1S5-DP-002"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "CMMC assesses three objectives: policies exist, controls are implemented, and both are documented.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Start with people and documentation to understand intent and design, then validate with technical testing.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Gap analysis methodology: 1) Define scope and success criteria, 2) Document review (policies, procedures, configurations), 3) Stakeholder interviews (understand intent and practice), 4) Technical validation (confirm implementation), 5) Gap identification and risk assessment, 6) Remediation roadmap development."
+      },
+      {
+        "id": "D1S5-DP-002",
+        "sequence": 2,
+        "title": "Control Framework Selection",
+        "context": "The CEO asks why you're assessing against NIST 800-171 specifically. They've heard of other frameworks like ISO 27001 and want to understand the choice.",
+        "question": "How should you explain the framework selection for this assessment?",
+        "options": [
+          {
+            "id": "A",
+            "text": "NIST 800-171 is the best framework - always use it for any security assessment",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "No framework is universally 'best.' Framework selection depends on requirements: regulatory mandates, industry standards, customer requirements. NIST 800-171 is required here because CMMC is based on it, not because it's inherently superior.",
+            "consequence": "The CEO is confused about why this framework specifically applies to their situation.",
+            "next_dp": "D1S5-DP-003"
+          },
+          {
+            "id": "B",
+            "text": "CMMC Level 2 is based on NIST 800-171 - assessing against it directly maps to your certification requirement",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Exactly right. Framework selection should align with business requirements. CMMC Level 2's 110 practices come directly from NIST 800-171. Assessing against 800-171 provides direct mapping to CMMC requirements. Other frameworks might have overlapping controls but wouldn't directly satisfy the contract requirement.",
+            "consequence": "The CEO understands the direct linkage between the framework and their business requirement.",
+            "next_dp": "D1S5-DP-003"
+          },
+          {
+            "id": "C",
+            "text": "ISO 27001 would be easier - suggest switching to that framework instead",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "ISO 27001 doesn't satisfy CMMC requirements. While there's overlap between frameworks, CMMC certification specifically requires NIST 800-171 controls. ISO 27001 certification wouldn't allow them to handle CUI or fulfill the defense contract.",
+            "consequence": "Pursuing ISO 27001 wouldn't satisfy the contract requirement. Time and money would be wasted.",
+            "next_dp": "D1S5-DP-003"
+          },
+          {
+            "id": "D",
+            "text": "Combine multiple frameworks - assess against NIST, ISO, and CIS Controls simultaneously",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Multi-framework assessments have value but add complexity and cost. For this engagement, the requirement is specifically CMMC/NIST 800-171. Adding frameworks doesn't help achieve the immediate goal and stretches limited resources. Focus on what's required first.",
+            "consequence": "Assessment scope expands significantly, timeline extends, and costs increase without additional benefit for the immediate requirement.",
+            "next_dp": "D1S5-DP-003"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "What is driving this security initiative? What requirement must be satisfied?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "CMMC Level 2 practices are directly derived from NIST 800-171. The mapping is 1:1.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Framework selection criteria: 1) Regulatory requirements (HIPAA, PCI DSS, CMMC), 2) Contractual obligations, 3) Industry standards, 4) Customer expectations, 5) Business objectives. NIST 800-171 protects Controlled Unclassified Information (CUI) and is the foundation of CMMC. Always align framework to requirements."
+      },
+      {
+        "id": "D1S5-DP-003",
+        "sequence": 3,
+        "title": "Gap Severity Classification",
+        "context": "After completing interviews and technical assessment, you have findings across all 14 control families. You need to classify gaps by severity to prioritize remediation. One finding: 'No MFA implemented for remote access.'",
+        "question": "How should this MFA gap be classified?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Low - MFA is a nice-to-have enhancement, basic password authentication exists",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "MFA is not optional for NIST 800-171 compliance. Control 3.5.3 requires multi-factor authentication for network access to privileged and non-privileged accounts. Without MFA, this control fails completely. This is a significant gap.",
+            "consequence": "Underestimating this gap could result in failed certification assessment.",
+            "next_dp": "D1S5-DP-004"
+          },
+          {
+            "id": "B",
+            "text": "Medium - It's a compliance gap but can be addressed during normal IT upgrades",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "While this could be rolled into IT upgrades, classification should reflect compliance impact and risk, not remediation convenience. Remote access without MFA is a high-risk vulnerability and a clear compliance failure for multiple NIST 800-171 requirements.",
+            "consequence": "Medium priority classification may result in delayed remediation and extended risk exposure.",
+            "next_dp": "D1S5-DP-004"
+          },
+          {
+            "id": "C",
+            "text": "High - MFA is explicitly required by NIST 800-171, and remote access without MFA is high-risk for credential theft",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Correct classification. MFA is explicitly required (3.5.3), remote access is a primary attack vector, and credential theft without MFA protection is highly likely given current threat landscape. This gap represents both compliance failure and significant security risk.",
+            "consequence": "MFA is prioritized in remediation planning. The team understands both compliance and risk drivers.",
+            "next_dp": "D1S5-DP-004"
+          },
+          {
+            "id": "D",
+            "text": "Critical - Immediately shut down remote access until MFA is implemented",
+            "is_correct": false,
+            "points": 15,
+            "feedback": "While the gap is serious, 'Critical' typically implies immediate threat or active exploitation. Shutting down remote access would severely impact operations. High severity with prioritized remediation is appropriate - urgent but not emergency shutdown.",
+            "consequence": "Shutting down remote access disrupts business operations significantly. A phased approach would be better.",
+            "next_dp": "D1S5-DP-004"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Consider both compliance requirement (is it explicitly mandated?) and security risk (what's the threat exposure?).",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "NIST 800-171 3.5.3 explicitly requires MFA. Remote access is frequently targeted by attackers.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Gap severity classification considers: 1) Compliance impact - is control explicitly required? Partial implementation possible? 2) Security risk - what's the threat likelihood and impact? 3) Business impact - what happens if exploited? High severity = required control completely missing + significant security risk."
+      },
+      {
+        "id": "D1S5-DP-004",
+        "sequence": 4,
+        "title": "Baseline Configuration Gap",
+        "context": "The assessment finds no documented baseline configurations for systems. Systems are configured inconsistently based on individual IT staff preferences.",
+        "question": "What remediation approach should you recommend for the baseline configuration gap?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Document the current configuration of each system as-is - that becomes the baseline",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Documenting current state isn't creating a secure baseline - it's just recording potentially insecure configurations. Baselines should define the DESIRED secure state, not simply document the existing state which may include vulnerabilities.",
+            "consequence": "Insecure configurations are now 'documented baselines' but the systems remain vulnerable.",
+            "next_dp": "D1S5-DP-005"
+          },
+          {
+            "id": "B",
+            "text": "Adopt industry-standard baselines (CIS Benchmarks, DISA STIGs) customized for business requirements, with documented exceptions",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. Industry baselines provide tested, secure configurations aligned with compliance requirements. CIS Benchmarks and DISA STIGs are widely accepted and map to NIST controls. Customization acknowledges business needs while documented exceptions maintain compliance visibility.",
+            "consequence": "You recommend CIS Benchmarks as the baseline standard with a documented exception process for business requirements.",
+            "next_dp": "D1S5-DP-005"
+          },
+          {
+            "id": "C",
+            "text": "Create proprietary baseline documents from scratch specific to Pinnacle",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Creating baselines from scratch is time-consuming and error-prone. Industry baselines represent collective expertise and are updated for new vulnerabilities. Custom baselines also face scrutiny from assessors who may question their adequacy. Start with industry standards.",
+            "consequence": "Months of effort creating baselines that may still miss important configurations covered by industry standards.",
+            "next_dp": "D1S5-DP-005"
+          },
+          {
+            "id": "D",
+            "text": "Implement the most restrictive possible configuration on all systems for maximum security",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Maximum restriction breaks functionality. Baselines must balance security with usability. Overly restrictive configurations cause workarounds that often create greater security risks. The goal is appropriate security, not maximum restriction.",
+            "consequence": "Overly restrictive settings break business applications. Users find workarounds that bypass security controls.",
+            "next_dp": "D1S5-DP-005"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Why create from scratch when proven, tested baselines exist?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "CIS Benchmarks and DISA STIGs are industry-accepted secure baselines that map to compliance frameworks.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Secure baseline sources: CIS Benchmarks (industry consensus), DISA STIGs (DoD requirements), vendor hardening guides, NIST checklists. Implementation approach: 1) Select appropriate baseline, 2) Test in lab environment, 3) Document required exceptions with risk acceptance, 4) Deploy with configuration management, 5) Monitor for drift."
+      },
+      {
+        "id": "D1S5-DP-005",
+        "sequence": 5,
+        "title": "Technical vs Administrative Control Balance",
+        "context": "Many gaps could be addressed with either technical controls or administrative controls (policies/procedures). Resources are limited. The IT Director prefers technical solutions; the CFO prefers policy solutions as they're cheaper.",
+        "question": "How should you balance technical and administrative controls in the remediation plan?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Prioritize technical controls - they're enforceable and harder to bypass than policies",
+            "is_correct": false,
+            "points": 15,
+            "feedback": "Technical controls are often preferable but not always sufficient alone. NIST 800-171 requires documented policies AND implemented controls. Some requirements are inherently administrative (training, personnel screening). A balanced approach is needed.",
+            "consequence": "Technical controls are implemented but supporting policies are missing. Assessment finds documentation gaps.",
+            "next_dp": "D1S5-DP-006"
+          },
+          {
+            "id": "B",
+            "text": "Prioritize policies and procedures - they satisfy compliance requirements at lower cost",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Policies without enforcement are ineffective. 'We have a policy' doesn't protect systems if it's not implemented. Assessors verify both policy existence AND implementation. Policy-only approaches often fail assessments and certainly fail security tests.",
+            "consequence": "Policies exist but aren't enforced. The C3PAO assessment fails when they verify actual implementation.",
+            "next_dp": "D1S5-DP-006"
+          },
+          {
+            "id": "C",
+            "text": "Defense in depth - technical controls enforcing requirements, policies documenting standards, and monitoring validating both",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Exactly right. Effective security requires: policies defining requirements, technical controls enforcing them where possible, administrative controls (training, procedures) for human-dependent processes, and monitoring to verify effectiveness. This layered approach satisfies compliance and provides actual security.",
+            "consequence": "The remediation plan includes policy development, technical implementation, training programs, and monitoring capabilities.",
+            "next_dp": "D1S5-DP-006"
+          },
+          {
+            "id": "D",
+            "text": "Let each control owner decide - IT implements technical solutions, HR implements administrative solutions",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Decentralized decision-making creates inconsistency and gaps. Some controls require coordinated technical and administrative components. A unified approach ensures coverage and alignment. Security should drive the approach, not organizational convenience.",
+            "consequence": "Inconsistent implementation creates gaps. Some areas are over-controlled, others under-protected.",
+            "next_dp": "D1S5-DP-006"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "NIST 800-171 assessors verify both documentation AND implementation. What approach satisfies both?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Defense in depth: policies set standards, technical controls enforce, administrative controls enable human compliance, monitoring validates all.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Control types work together: Administrative controls (policies, procedures, training) define requirements and enable human compliance. Technical controls (configurations, tools, automation) enforce requirements systematically. Physical controls protect tangible assets. Effective security programs balance all three based on the control objective."
+      },
+      {
+        "id": "D1S5-DP-006",
+        "sequence": 6,
+        "title": "Remediation Prioritization",
+        "context": "You've identified 73 gaps across the 110 controls. Resources allow addressing roughly 25% per quarter. You need to prioritize the remediation roadmap.",
+        "question": "What should be the PRIMARY factor in prioritizing remediation?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Ease of implementation - quick wins first to show progress",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Quick wins provide momentum but shouldn't override risk prioritization. If easy fixes address low-risk gaps while critical vulnerabilities remain, you're optimizing for optics rather than security. Risk should drive priority.",
+            "consequence": "Progress is visible but highest-risk gaps remain. A breach could occur before critical items are addressed.",
+            "next_dp": "D1S5-DP-007"
+          },
+          {
+            "id": "B",
+            "text": "Risk level - address highest risk gaps first regardless of implementation difficulty",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Correct. Risk-based prioritization ensures the most dangerous gaps are addressed first. Factor in both likelihood (how exploitable) and impact (what happens if exploited). While quick wins have value, they should supplement, not replace, risk-driven prioritization.",
+            "consequence": "The roadmap prioritizes high-risk items. Critical gaps are scheduled for immediate attention.",
+            "next_dp": "D1S5-DP-007"
+          },
+          {
+            "id": "C",
+            "text": "Alphabetical by control family - systematic and easy to track",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Alphabetical ordering has no relationship to risk or business need. Access Control (AC) coming before System and Information Integrity (SI) alphabetically doesn't mean it's more important. Prioritization must be meaningful.",
+            "consequence": "Low-risk items are addressed before critical gaps simply due to alphabetical position.",
+            "next_dp": "D1S5-DP-007"
+          },
+          {
+            "id": "D",
+            "text": "Cost - address lowest cost items first to maximize the number of gaps closed",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Closing many low-cost gaps looks good on metrics but may leave critical vulnerabilities unaddressed. A single critical gap can result in breach regardless of how many minor gaps were closed. Risk should drive spending, not the reverse.",
+            "consequence": "Many gaps closed but critical vulnerabilities remain. The assessment may still fail on key controls.",
+            "next_dp": "D1S5-DP-007"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "What's the consequence of leaving a gap unaddressed? That should influence when it's fixed.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Risk = Likelihood Ã— Impact. Prioritize gaps that are both exploitable and high-impact.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Remediation prioritization framework: 1) Critical risk items first (high likelihood + high impact), 2) Quick wins where they align with risk reduction, 3) Compliance-required items with hard deadlines, 4) Foundation items that enable other controls, 5) Lower risk items as resources allow. Document prioritization rationale for assessors."
+      },
+      {
+        "id": "D1S5-DP-007",
+        "sequence": 7,
+        "title": "Plan of Action and Milestones (POA&M)",
+        "context": "For gaps that won't be fully remediated by assessment time, you need to develop Plans of Action and Milestones (POA&Ms). The IT Director asks how detailed these need to be.",
+        "question": "What should POA&Ms include to satisfy compliance requirements?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Simple list of gaps with target completion dates",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Minimal POA&Ms may not satisfy assessors or demonstrate genuine commitment to remediation. POA&Ms should show you understand the gap, have a real plan, and have allocated resources. Simple lists suggest gaps aren't being taken seriously.",
+            "consequence": "The C3PAO questions whether POA&M items are genuine plans or just placeholders.",
+            "next_dp": "D1S5-DP-008"
+          },
+          {
+            "id": "B",
+            "text": "Gap description, risk/impact, specific remediation steps, resource allocation, milestones, responsible parties, and target dates",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. Comprehensive POA&Ms demonstrate: understanding of the gap and its risk, concrete remediation approach, commitment of resources, accountability through assigned owners, and realistic timelines with measurable milestones. This shows genuine intent and enables tracking.",
+            "consequence": "POA&M templates are developed with all required fields. Each gap has a detailed, actionable plan.",
+            "next_dp": "D1S5-DP-008"
+          },
+          {
+            "id": "C",
+            "text": "Just mark gaps as 'planned' - details can be added later when resources are available",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Vague POA&Ms without plans signal that gaps aren't being addressed seriously. Assessors look for evidence of genuine remediation commitment. 'We'll figure it out later' is not a plan and will likely result in assessment findings.",
+            "consequence": "Assessors note POA&Ms lack substance. CMMC certification may be conditional or denied.",
+            "next_dp": "D1S5-DP-008"
+          },
+          {
+            "id": "D",
+            "text": "Include only gaps that will be closed within 90 days - longer items should be marked as accepted risk",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "POA&Ms can and should include items requiring longer remediation. Accepting risk on required controls doesn't satisfy compliance - CMMC requires all 110 practices. Items requiring extended timelines need POA&Ms with appropriate milestones.",
+            "consequence": "Required controls can't simply be 'accepted risk' - they must be implemented for certification.",
+            "next_dp": "D1S5-DP-008"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "POA&Ms should demonstrate genuine commitment and realistic planning, not just acknowledgment of gaps.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Include: what, why (risk), how, who, when, and measurable milestones for tracking progress.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "POA&M best practices: Each item should include: 1) Control reference and gap description, 2) Risk assessment (impact if not addressed), 3) Remediation approach (specific steps), 4) Resources required (budget, personnel), 5) Responsible party (accountable owner), 6) Milestones (measurable checkpoints), 7) Target completion date, 8) Status tracking mechanism."
+      },
+      {
+        "id": "D1S5-DP-008",
+        "sequence": 8,
+        "title": "Third-Party Risk Assessment",
+        "context": "During the assessment, you discover Pinnacle uses a cloud-based ERP system that will process CUI. The vendor claims they're 'SOC 2 compliant.' The IT Director assumes this means the vendor is secure.",
+        "question": "How should you assess and address this third-party risk?",
+        "options": [
+          {
+            "id": "A",
+            "text": "SOC 2 compliance is sufficient - no additional assessment needed for the vendor",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "SOC 2 addresses security controls but doesn't ensure NIST 800-171 compliance or FedRAMP authorization required for CUI processing in cloud systems. SOC 2 is valuable but not sufficient for this specific requirement. Further due diligence is needed.",
+            "consequence": "The vendor may not meet CUI handling requirements despite SOC 2 compliance.",
+            "next_dp": "D1S5-DP-009"
+          },
+          {
+            "id": "B",
+            "text": "Request the vendor's SOC 2 report, verify FedRAMP authorization or NIST 800-171 compliance for CUI processing, include in flow-down requirements",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent due diligence. SOC 2 should be reviewed for relevant controls. For CUI, the vendor must meet FedRAMP or demonstrate NIST 800-171 compliance. DFARS flow-down clauses must be in the contract. This systematic approach addresses the actual requirement.",
+            "consequence": "Vendor assessment reveals they have FedRAMP Moderate authorization. Contract is amended with flow-down requirements.",
+            "next_dp": "D1S5-DP-009"
+          },
+          {
+            "id": "C",
+            "text": "Eliminate the cloud ERP - move everything back on-premise to maintain control",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Cloud services can be compliant if properly selected and managed. Moving everything on-premise has its own challenges and may not be practical. The solution is proper vendor assessment and contract requirements, not avoiding cloud entirely.",
+            "consequence": "Major ERP migration would be costly, time-consuming, and may not improve security posture.",
+            "next_dp": "D1S5-DP-009"
+          },
+          {
+            "id": "D",
+            "text": "Trust the vendor's claims - questioning vendors damages business relationships",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Trust but verify applies to vendor security claims. Security assessors will question third-party risks. 'The vendor said they're secure' without evidence is insufficient. Due diligence is expected and vendors should expect and cooperate with such requests.",
+            "consequence": "Assessor identifies unverified third-party risk as a finding. Vendor claims without evidence don't satisfy requirements.",
+            "next_dp": "D1S5-DP-009"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "CUI processing in cloud systems has specific requirements beyond general security certifications.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "DFARS requires flow-down of security requirements to subcontractors/vendors handling CUI. FedRAMP or equivalent is typically required.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Third-party risk for CUI: Cloud services processing CUI must have FedRAMP authorization or demonstrate equivalent NIST 800-171 compliance. Request and review security documentation (SOC 2, FedRAMP authorization letters, attestations). Include DFARS 252.204-7012 flow-down clauses in contracts. Verify before sharing CUI."
+      },
+      {
+        "id": "D1S5-DP-009",
+        "sequence": 9,
+        "title": "Continuous Monitoring Plan",
+        "context": "Gap analysis is point-in-time, but CMMC requires ongoing compliance. The CEO asks what happens after the initial assessment is complete.",
+        "question": "What should you recommend for ongoing compliance monitoring?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Annual assessments are sufficient - repeat this gap analysis yearly",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Annual assessments alone miss drift between assessments. Configurations change, new systems are deployed, vulnerabilities emerge. NIST 800-171 requires continuous monitoring, not just periodic assessment. Annual reviews should validate continuous monitoring, not replace it.",
+            "consequence": "Between annual assessments, security posture degrades without detection.",
+            "next_dp": "D1S5-DP-010"
+          },
+          {
+            "id": "B",
+            "text": "Implement continuous monitoring: automated compliance scanning, configuration drift detection, vulnerability management, and regular control testing",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. Continuous monitoring maintains compliance between assessments through: automated configuration compliance checking, vulnerability scanning (at least monthly), log monitoring and review, regular control testing, and POA&M tracking. This is explicitly required by NIST 800-171 (CA family).",
+            "consequence": "A continuous monitoring program is designed including automated tools, regular activities, and metrics dashboards.",
+            "next_dp": "D1S5-DP-010"
+          },
+          {
+            "id": "C",
+            "text": "The C3PAO will monitor compliance - that's what the certification process provides",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "C3PAOs assess compliance at certification time and during reassessment - they don't provide ongoing monitoring. The organization is responsible for maintaining compliance between assessments. Relying on external assessors for continuous monitoring is not how CMMC works.",
+            "consequence": "No internal monitoring means compliance drift goes undetected until the next external assessment.",
+            "next_dp": "D1S5-DP-010"
+          },
+          {
+            "id": "D",
+            "text": "Only monitor systems that process CUI - other systems don't need continuous monitoring",
+            "is_correct": false,
+            "points": 15,
+            "feedback": "Systems in scope (processing CUI) require monitoring, but supporting systems (DNS, AD, email) affect CUI system security. Compromised supporting infrastructure compromises CUI systems. Monitor the full scope including supporting systems.",
+            "consequence": "An unmonitored supporting system is compromised and used to access CUI systems.",
+            "next_dp": "D1S5-DP-010"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "NIST 800-171 CA family specifically requires ongoing security assessments and continuous monitoring.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Continuous monitoring = automated scanning + manual reviews + vulnerability management + POA&M tracking + metrics reporting.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Continuous monitoring components: 1) Automated configuration compliance (daily/weekly scans), 2) Vulnerability scanning (at least monthly), 3) Log review and SIEM alerting, 4) User access reviews (quarterly), 5) POA&M status tracking, 6) Control testing (ongoing), 7) Metrics and reporting to leadership. NIST 800-171 3.12.3 explicitly requires this."
+      },
+      {
+        "id": "D1S5-DP-010",
+        "sequence": 10,
+        "title": "Executive Report Development",
+        "context": "You're preparing the gap analysis report for executive leadership. The full technical findings document is 150 pages. The CEO has requested an executive briefing.",
+        "question": "What should the executive summary emphasize?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Detailed technical findings for each of the 110 controls",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Executives need strategic information to make decisions, not technical details. 150 pages of control-by-control analysis loses the key messages. Technical details should be in appendices for those who need them, not the executive summary.",
+            "consequence": "The executive briefing runs long and loses key decision-makers' attention before reaching recommendations.",
+            "next_dp": null
+          },
+          {
+            "id": "B",
+            "text": "Overall compliance status, highest-risk gaps, resource requirements, timeline to compliance, and decision points requiring executive action",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent executive communication. Leadership needs: current state summary (X of 110 controls compliant), risk-prioritized key gaps (the 5-10 most critical), what's needed (budget, personnel, time), when they'll be ready (compliance timeline), and what they need to decide (approve resources, accept risks, prioritize initiatives).",
+            "consequence": "The executive briefing is focused and actionable. Leadership approves the remediation roadmap and resource allocation.",
+            "next_dp": null
+          },
+          {
+            "id": "C",
+            "text": "Comparison to industry peers showing Pinnacle's relative security posture",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Peer comparison might be interesting but isn't the primary purpose. The goal is CMMC certification, not relative comparison. Executives need to know: Are we compliant? What do we need to do? What resources are required? Peer comparison can be supplementary context at best.",
+            "consequence": "Executives debate industry comparisons instead of focusing on the compliance requirement.",
+            "next_dp": null
+          },
+          {
+            "id": "D",
+            "text": "All positive findings first to demonstrate existing security investments are working",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "While acknowledging existing controls is appropriate, the gap analysis purpose is to identify gaps, not celebrate successes. Leading with positives buries the critical findings. A brief positive acknowledgment followed by focus on gaps and remediation is appropriate.",
+            "consequence": "Executives leave feeling good about current state but unclear on what needs to change.",
+            "next_dp": null
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "What do executives need to know to make decisions and allocate resources?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Status, risk, cost, timeline, decisions needed. Everything else is supporting detail.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Executive reporting principles: 1) Lead with current state (% compliant, maturity level), 2) Highlight critical risks (top 5-10 gaps with business impact), 3) Present resource requirements (budget, staff, tools), 4) Show timeline to compliance, 5) Identify decision points (what executives must approve), 6) Keep it visual and concise (dashboards, charts), 7) Detail in appendices."
+      }
+    ],
+
+    "completion_criteria": {
+      "pass_threshold": 80,
+      "points_possible": 250,
+      "minimum_decisions": 10
+    },
+
+    "summary_teaching_points": [
+      "Gap analysis requires interviews, documentation review, AND technical validation - not just scanning",
+      "Framework selection must align with specific compliance requirements (CMMC = NIST 800-171)",
+      "Gap severity classification considers both compliance requirement (is it mandatory?) and security risk",
+      "Secure baselines should start with industry standards (CIS, DISA STIGs) rather than creating from scratch",
+      "Effective security requires balanced technical, administrative, and physical controls working together",
+      "Remediation should be prioritized by risk level, not ease of implementation or cost",
+      "POA&Ms must include detailed remediation plans with milestones, not just lists of gaps",
+      "Third-party vendors handling CUI require specific due diligence (FedRAMP, flow-down requirements)",
+      "Continuous monitoring is required to maintain compliance between assessments",
+      "Executive reporting should focus on status, risk, resources, timeline, and decision points"
+    ],
+
+    "weakness_mapping": [
+      {
+        "if_missed": ["D1S5-DP-001", "D1S5-DP-002"],
+        "weak_topic": "Gap Analysis Methodology and Framework Selection",
+        "objectives": ["1.1"],
+        "suggested_review": "domain1/topic1/study-guide",
+        "suggested_simulation": "D1-REM-001"
+      },
+      {
+        "if_missed": ["D1S5-DP-003", "D1S5-DP-006"],
+        "weak_topic": "Risk Assessment and Prioritization",
+        "objectives": ["1.1", "1.3"],
+        "suggested_review": "domain5/topic2/study-guide",
+        "suggested_simulation": "D1-REM-001"
+      },
+      {
+        "if_missed": ["D1S5-DP-004"],
+        "weak_topic": "Baseline Configurations",
+        "objectives": ["1.1"],
+        "suggested_review": "domain1/topic1/study-guide",
+        "suggested_simulation": "D1-REM-001"
+      },
+      {
+        "if_missed": ["D1S5-DP-005"],
+        "weak_topic": "Control Types and Defense in Depth",
+        "objectives": ["1.1"],
+        "suggested_review": "domain1/topic1/study-guide",
+        "suggested_simulation": "D1-REM-001"
+      },
+      {
+        "if_missed": ["D1S5-DP-007", "D1S5-DP-009"],
+        "weak_topic": "POA&M and Continuous Monitoring",
+        "objectives": ["1.3"],
+        "suggested_review": "domain1/topic3/study-guide",
+        "suggested_simulation": "D1-REM-001"
+      },
+      {
+        "if_missed": ["D1S5-DP-008"],
+        "weak_topic": "Third-Party Risk Management",
+        "objectives": ["1.3"],
+        "suggested_review": "domain5/topic3/study-guide",
+        "suggested_simulation": "D5-SIM-001"
+      }
+    ],
+
+    "next_recommended": "D2-SIM-001"
+  }
+}

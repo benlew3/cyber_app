@@ -1,0 +1,1251 @@
+{
+  "simulation_id": "D3-SIM-003",
+  "title": "Data Protection Program",
+  "domain": 3,
+  "category": "primary",
+  "difficulty": "intermediate",
+  "time_estimate": "45-60 minutes",
+  "passing_score": 200,
+  "max_score": 250,
+  
+  "exam_objectives": [
+    {
+      "id": "3.3",
+      "description": "Compare and contrast concepts and strategies to protect data",
+      "coverage": ["data classification", "encryption", "data loss prevention", "rights management", "data states", "data sovereignty"]
+    },
+    {
+      "id": "3.2",
+      "description": "Given a scenario, apply security principles to secure enterprise infrastructure",
+      "coverage": ["key management", "certificate management", "data masking", "tokenization"]
+    }
+  ],
+  
+  "scenario_context": {
+    "organization": "NovaCare Health Systems",
+    "industry": "Healthcare",
+    "size": "12,000 employees, 45 clinic locations, 3 hospitals",
+    "setting": "Enterprise Data Protection Program implementation",
+    "your_role": "Data Protection Architect",
+    "reporting_to": "Chief Privacy Officer Dr. Amanda Foster",
+    "environment": {
+      "current_state": {
+        "data_landscape": "Electronic Health Records (EHR), billing systems, research databases, HR systems",
+        "storage": "On-premises data centers, Azure cloud, multiple SaaS applications",
+        "challenges": [
+          "No formal data classification",
+          "Inconsistent encryption practices",
+          "Shadow IT and unauthorized cloud storage",
+          "Recent OCR audit findings on PHI handling"
+        ]
+      },
+      "regulatory_requirements": {
+        "hipaa": "Protected Health Information (PHI) requirements",
+        "hitech": "Breach notification, encryption safe harbor",
+        "state_laws": "Multiple state privacy laws including CCPA for CA patients",
+        "research": "HIPAA research provisions, IRB requirements"
+      },
+      "recent_incidents": [
+        "Employee emailed patient list to personal account",
+        "Unencrypted laptop with PHI lost",
+        "Research data found on public cloud storage"
+      ],
+      "budget": "$2.8M for data protection program",
+      "timeline": "18 months to full implementation"
+    },
+    "opening_narrative": "NovaCare Health Systems has grown rapidly through acquisitions, resulting in fragmented data protection practices. A recent OCR audit identified significant gaps in PHI handling, and several incidents have highlighted the lack of data governance. As the newly hired Data Protection Architect, you're tasked with designing and implementing a comprehensive data protection program that meets regulatory requirements while enabling clinical and research operations."
+  },
+  
+  "artifacts": [
+    {
+      "id": "artifact_1",
+      "title": "Current Data Landscape Assessment",
+      "type": "assessment_document",
+      "unlocks_at": "start",
+      "content": {
+        "data_inventory_summary": {
+          "structured_data": {
+            "ehr_system": {"records": "2.4M patients", "data_types": ["Demographics", "Medical history", "Diagnoses", "Medications", "Lab results"], "classification": "PHI - unclassified formally"},
+            "billing_system": {"records": "8M transactions/year", "data_types": ["Insurance info", "Payment data", "Diagnosis codes"], "classification": "PHI + PCI - unclassified"},
+            "hr_system": {"records": "15,000 employees", "data_types": ["SSN", "Salary", "Benefits", "Performance"], "classification": "PII - unclassified"},
+            "research_database": {"records": "500K research subjects", "data_types": ["De-identified health data", "Genetic information", "Study results"], "classification": "Varies by study"}
+          },
+          "unstructured_data": {
+            "file_shares": {"volume": "45TB", "types": ["Clinical documents", "Reports", "Images"], "issues": "No classification, broad access"},
+            "email": {"volume": "2TB", "retention": "Indefinite", "issues": "PHI in email common, no DLP"},
+            "cloud_storage": {"services": ["OneDrive", "Box", "Dropbox (unauthorized)"], "issues": "Shadow IT, no visibility"}
+          }
+        },
+        "current_protection_gaps": [
+          {"gap": "No data classification scheme", "risk": "Cannot apply appropriate controls", "priority": "Critical"},
+          {"gap": "Encryption inconsistent", "risk": "PHI exposure, no HITECH safe harbor", "priority": "Critical"},
+          {"gap": "No DLP solution", "risk": "Data exfiltration undetected", "priority": "High"},
+          {"gap": "Excessive access permissions", "risk": "Insider threat, compliance violation", "priority": "High"},
+          {"gap": "No data retention policy", "risk": "Legal exposure, storage costs", "priority": "Medium"}
+        ],
+        "regulatory_findings": {
+          "ocr_audit": [
+            "Insufficient access controls for PHI",
+            "Lack of encryption for portable devices",
+            "Inadequate audit logging for PHI access",
+            "No formal data classification"
+          ],
+          "remediation_deadline": "12 months"
+        }
+      }
+    },
+    {
+      "id": "artifact_2",
+      "title": "Data Classification Framework",
+      "type": "reference",
+      "unlocks_at": "decision_1",
+      "content": {
+        "classification_levels": {
+          "public": {
+            "definition": "Information approved for public release",
+            "examples": ["Marketing materials", "Public health information", "Published research"],
+            "handling": "No special handling required",
+            "storage": "Any approved system",
+            "sharing": "Unrestricted"
+          },
+          "internal": {
+            "definition": "Business information not intended for public",
+            "examples": ["Internal policies", "Staff directories", "Meeting notes"],
+            "handling": "Basic access controls",
+            "storage": "Approved internal systems",
+            "sharing": "Internal only, NDA for external"
+          },
+          "confidential": {
+            "definition": "Sensitive information requiring protection",
+            "examples": ["Employee PII", "Financial data", "Contracts", "De-identified research data"],
+            "handling": "Encryption required, access logging",
+            "storage": "Approved secure systems only",
+            "sharing": "Business need, approval required"
+          },
+          "restricted": {
+            "definition": "Highly sensitive data with legal/regulatory requirements",
+            "examples": ["PHI", "Payment card data", "SSN", "Genetic information", "Research subject data"],
+            "handling": "Strong encryption, strict access control, full audit",
+            "storage": "Designated secure systems only",
+            "sharing": "Minimum necessary, documented authorization"
+          }
+        },
+        "classification_by_regulation": {
+          "hipaa_phi": "Restricted",
+          "pci_cardholder": "Restricted",
+          "employee_pii": "Confidential or Restricted (SSN)",
+          "research_identifiable": "Restricted",
+          "research_deidentified": "Confidential",
+          "business_financial": "Confidential"
+        }
+      }
+    },
+    {
+      "id": "artifact_3",
+      "title": "Data States and Protection Methods",
+      "type": "reference",
+      "unlocks_at": "decision_2",
+      "content": {
+        "data_states": {
+          "data_at_rest": {
+            "definition": "Data stored on any medium (disk, database, backup)",
+            "locations": ["Databases", "File servers", "Laptops", "Mobile devices", "Backups", "Cloud storage"],
+            "threats": ["Physical theft", "Unauthorized access", "Backup exposure"],
+            "protection_methods": {
+              "encryption": {"types": ["Full disk encryption", "Database TDE", "File-level encryption"], "standards": "AES-256"},
+              "access_controls": {"types": ["RBAC", "DAC", "MAC"], "principle": "Least privilege"},
+              "physical_security": {"types": ["Secure facilities", "Device locks", "Media destruction"]}
+            }
+          },
+          "data_in_transit": {
+            "definition": "Data moving across networks",
+            "paths": ["Internal network", "Internet", "API calls", "Email", "File transfers"],
+            "threats": ["Interception", "Man-in-the-middle", "Eavesdropping"],
+            "protection_methods": {
+              "encryption": {"protocols": ["TLS 1.2/1.3", "IPsec", "SSH"], "certificates": "PKI-managed"},
+              "network_security": {"types": ["VPN", "Private connectivity", "Network segmentation"]}
+            }
+          },
+          "data_in_use": {
+            "definition": "Data being processed/accessed in memory",
+            "contexts": ["Application processing", "User viewing", "Analytics", "Reporting"],
+            "threats": ["Memory scraping", "Screen capture", "Shoulder surfing", "Debug access"],
+            "protection_methods": {
+              "memory_protection": {"types": ["Secure enclaves", "Memory encryption"]},
+              "application_controls": {"types": ["Session management", "Timeout", "Screen masking"]},
+              "physical_controls": {"types": ["Privacy screens", "Clean desk"]}
+            }
+          }
+        },
+        "hitech_safe_harbor": {
+          "description": "Breach notification not required if PHI was encrypted",
+          "requirements": [
+            "Encryption must meet NIST standards",
+            "Encryption keys must not be compromised",
+            "Applies to data at rest and in transit"
+          ],
+          "benefit": "Significant liability reduction for encrypted PHI"
+        }
+      }
+    },
+    {
+      "id": "artifact_4",
+      "title": "Encryption Architecture Options",
+      "type": "architecture_document",
+      "unlocks_at": "decision_3",
+      "content": {
+        "encryption_layers": {
+          "full_disk_encryption": {
+            "scope": "Entire storage device",
+            "protects_against": "Physical theft of device",
+            "does_not_protect": "Authorized user accessing data, running system access",
+            "solutions": ["BitLocker", "FileVault", "LUKS"],
+            "key_management": "TPM, password, or network unlock"
+          },
+          "database_encryption": {
+            "tde": {
+              "name": "Transparent Data Encryption",
+              "scope": "Database files at rest",
+              "protects_against": "Database file theft, backup theft",
+              "does_not_protect": "Authorized queries, SQL injection",
+              "solutions": ["SQL Server TDE", "Oracle TDE", "Azure SQL"]
+            },
+            "column_level": {
+              "name": "Column-level encryption",
+              "scope": "Specific sensitive columns",
+              "protects_against": "Unauthorized column access, some SQL injection",
+              "does_not_protect": "Application-level access",
+              "use_case": "Highly sensitive fields (SSN, CC numbers)"
+            }
+          },
+          "application_encryption": {
+            "scope": "Data encrypted by application before storage",
+            "protects_against": "Database compromise, storage access",
+            "does_not_protect": "Application compromise",
+            "considerations": ["Performance impact", "Search limitations", "Key management complexity"]
+          },
+          "file_encryption": {
+            "scope": "Individual files or folders",
+            "solutions": ["EFS", "Rights Management", "Third-party tools"],
+            "use_case": "Unstructured data protection"
+          }
+        },
+        "key_management_architecture": {
+          "requirements": [
+            "Separation of duties (key admin vs data admin)",
+            "Key rotation capability",
+            "Secure key storage (HSM recommended)",
+            "Key escrow for recovery",
+            "Audit trail for key operations"
+          ],
+          "options": {
+            "cloud_kms": {"examples": ["Azure Key Vault", "AWS KMS"], "pros": "Managed, scalable", "cons": "Cloud dependency"},
+            "on_prem_hsm": {"examples": ["Thales", "Entrust"], "pros": "Full control, compliance", "cons": "Cost, complexity"},
+            "hybrid": {"description": "Cloud KMS with HSM backing", "best_for": "Most enterprise scenarios"}
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_5",
+      "title": "Data Loss Prevention Architecture",
+      "type": "architecture_document",
+      "unlocks_at": "decision_4",
+      "content": {
+        "dlp_components": {
+          "network_dlp": {
+            "deployment": "Inline or tap on network egress",
+            "monitors": ["Email", "Web uploads", "FTP", "Cloud sync"],
+            "actions": ["Alert", "Block", "Quarantine", "Encrypt"],
+            "strengths": "Covers all network traffic",
+            "limitations": "Encrypted traffic challenges, no endpoint visibility"
+          },
+          "endpoint_dlp": {
+            "deployment": "Agent on workstations/laptops",
+            "monitors": ["File copies", "USB", "Print", "Screen capture", "Clipboard"],
+            "actions": ["Alert", "Block", "Justify", "Encrypt"],
+            "strengths": "Visibility into local actions",
+            "limitations": "Agent deployment/management"
+          },
+          "cloud_dlp": {
+            "deployment": "API integration with cloud services",
+            "monitors": ["Cloud storage", "SaaS applications", "Email (cloud)"],
+            "actions": ["Alert", "Block", "Quarantine", "Apply rights"],
+            "strengths": "Native cloud visibility",
+            "limitations": "Per-service integration"
+          },
+          "discovery_dlp": {
+            "deployment": "Scheduled scans of repositories",
+            "monitors": ["File shares", "Databases", "SharePoint", "Cloud storage"],
+            "purpose": "Find sensitive data at rest",
+            "use_case": "Data inventory, policy violations, cleanup"
+          }
+        },
+        "dlp_policy_design": {
+          "content_detection": {
+            "patterns": ["SSN", "Credit card", "Medical record numbers"],
+            "keywords": ["Confidential", "PHI", "Patient"],
+            "document_fingerprinting": "Match against sensitive document templates",
+            "machine_learning": "Trained classifiers for sensitive content"
+          },
+          "context_factors": {
+            "user": "Role, department, behavior history",
+            "destination": "Internal vs external, sanctioned vs unsanctioned",
+            "volume": "Bulk transfer detection",
+            "time": "After-hours activity"
+          },
+          "response_actions": {
+            "low_confidence": "Log and alert",
+            "medium_confidence": "Warn user, require justification",
+            "high_confidence": "Block and alert security"
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_6",
+      "title": "Data Masking and Tokenization Reference",
+      "type": "reference",
+      "unlocks_at": "decision_5",
+      "content": {
+        "data_masking": {
+          "definition": "Replacing sensitive data with realistic but fake data",
+          "types": {
+            "static_masking": {
+              "description": "Permanently replaces data in non-production copies",
+              "use_cases": ["Dev/test environments", "Training systems", "Analytics"],
+              "techniques": ["Substitution", "Shuffling", "Number variance", "Nulling"]
+            },
+            "dynamic_masking": {
+              "description": "Masks data in real-time based on user role",
+              "use_cases": ["Production systems", "Call centers", "Limited-access views"],
+              "techniques": ["Column masking", "Row filtering", "On-the-fly redaction"]
+            }
+          },
+          "healthcare_considerations": {
+            "hipaa_deidentification": {
+              "safe_harbor": "Remove 18 identifiers",
+              "expert_determination": "Statistical analysis showing low re-identification risk"
+            },
+            "research_use": "De-identified data not subject to HIPAA research provisions"
+          }
+        },
+        "tokenization": {
+          "definition": "Replacing sensitive data with non-sensitive placeholder (token)",
+          "how_it_works": "Original value stored in secure token vault, token used in systems",
+          "vs_encryption": {
+            "tokenization": "No mathematical relationship, vault required for detokenization",
+            "encryption": "Mathematical relationship, key required for decryption"
+          },
+          "use_cases": {
+            "payment_processing": "Store token, not card number (PCI scope reduction)",
+            "phi_processing": "Tokenize identifiers for analytics",
+            "data_sharing": "Share tokens, not real values"
+          },
+          "benefits": [
+            "Reduces compliance scope (tokenized data not in scope)",
+            "Maintains format (tokens can match original format)",
+            "Centralizes sensitive data (only vault has real values)"
+          ]
+        }
+      }
+    },
+    {
+      "id": "artifact_7",
+      "title": "Rights Management Architecture",
+      "type": "architecture_document",
+      "unlocks_at": "decision_6",
+      "content": {
+        "information_rights_management": {
+          "definition": "Persistent protection that travels with the document",
+          "capabilities": [
+            "Encrypt content",
+            "Control who can access",
+            "Restrict actions (print, copy, forward, edit)",
+            "Set expiration dates",
+            "Revoke access remotely",
+            "Track document access"
+          ],
+          "solutions": {
+            "microsoft_purview": {
+              "formerly": "Azure Information Protection (AIP)",
+              "features": ["Sensitivity labels", "Automatic classification", "Rights templates"],
+              "integration": "Office apps, SharePoint, Exchange"
+            },
+            "third_party": ["Vera", "Virtru", "Seclore"]
+          }
+        },
+        "sensitivity_labels": {
+          "concept": "Labels applied to content indicating classification and protection",
+          "label_hierarchy": [
+            {"label": "Public", "protection": "None", "marking": "Optional footer"},
+            {"label": "Internal", "protection": "Internal only", "marking": "Header/footer"},
+            {"label": "Confidential", "protection": "Encryption, internal + named external", "marking": "Watermark"},
+            {"label": "Restricted - PHI", "protection": "Encryption, strict access, no print", "marking": "Watermark, header"}
+          ],
+          "application_methods": {
+            "manual": "User selects label",
+            "recommended": "System suggests based on content",
+            "automatic": "System applies based on detected content",
+            "default": "Applied to all new documents in location"
+          }
+        },
+        "use_case_healthcare": {
+          "scenario": "Provider emails patient records to specialist",
+          "without_irm": "Email leaves organization, no control",
+          "with_irm": "Document encrypted, only named recipient can open, no forwarding, expires in 30 days, access logged"
+        }
+      }
+    },
+    {
+      "id": "artifact_8",
+      "title": "Certificate and PKI Architecture",
+      "type": "architecture_document",
+      "unlocks_at": "decision_7",
+      "content": {
+        "pki_components": {
+          "certificate_authority": {
+            "root_ca": {"description": "Trust anchor, offline", "lifespan": "20+ years", "security": "HSM, air-gapped"},
+            "issuing_ca": {"description": "Issues end-entity certificates", "lifespan": "5-10 years", "security": "HSM recommended"},
+            "registration_authority": {"description": "Validates certificate requests", "optional": true}
+          },
+          "certificates": {
+            "types": {
+              "tls_server": "Website/server identity",
+              "tls_client": "Client/device authentication",
+              "code_signing": "Software authenticity",
+              "email_signing": "S/MIME email encryption/signing",
+              "document_signing": "Document authenticity"
+            },
+            "lifecycle": ["Request", "Issuance", "Usage", "Renewal", "Revocation", "Expiration"]
+          }
+        },
+        "certificate_management": {
+          "challenges": [
+            "Certificate sprawl (unknown certificates)",
+            "Expiration (outages from expired certs)",
+            "Private key protection",
+            "Revocation checking"
+          ],
+          "solutions": {
+            "certificate_inventory": "Discover all certificates",
+            "automated_renewal": "Prevent expiration outages",
+            "centralized_management": "Single pane of glass",
+            "key_protection": "HSM for critical keys"
+          },
+          "tools": ["Venafi", "DigiCert", "Keyfactor", "Let's Encrypt (public)"]
+        },
+        "healthcare_use_cases": {
+          "ehr_integration": "Mutual TLS for system-to-system",
+          "provider_identity": "Smart cards with certificates",
+          "prescription_signing": "EPCS requirements",
+          "patient_portal": "TLS for web access"
+        }
+      }
+    },
+    {
+      "id": "artifact_9",
+      "title": "Data Sovereignty and Residency",
+      "type": "reference",
+      "unlocks_at": "decision_8",
+      "content": {
+        "concepts": {
+          "data_residency": {
+            "definition": "Physical location where data is stored",
+            "requirements": "Some regulations require data stored in specific countries/regions",
+            "examples": ["EU data in EU", "Healthcare data in-country"]
+          },
+          "data_sovereignty": {
+            "definition": "Data subject to laws of country where located",
+            "implications": "Government access, privacy laws, breach notification",
+            "examples": ["GDPR in EU", "CLOUD Act in US", "China data localization"]
+          },
+          "data_localization": {
+            "definition": "Requirement to store/process data within borders",
+            "strictest_form": "Data cannot leave country",
+            "examples": ["Russia personal data", "China critical information"]
+          }
+        },
+        "cloud_considerations": {
+          "multi_region": {
+            "approach": "Use cloud regions to control data location",
+            "configuration": "Specify region for storage, disable replication to other regions"
+          },
+          "processing_location": {
+            "concern": "Data may be processed in different location than stored",
+            "solution": "Verify processing stays within required geography"
+          },
+          "subprocessors": {
+            "concern": "Cloud vendor's vendors may access data",
+            "solution": "Review subprocessor list, contractual requirements"
+          }
+        },
+        "healthcare_specific": {
+          "us_hipaa": "No specific data residency requirement, but BAA required",
+          "state_laws": "Some states have specific requirements",
+          "research": "International research may have data sharing restrictions",
+          "recommendation": "Default to US-only storage unless specific need"
+        }
+      }
+    },
+    {
+      "id": "artifact_10",
+      "title": "Data Protection Program Implementation Plan",
+      "type": "project_document",
+      "unlocks_at": "decision_9",
+      "content": {
+        "program_phases": {
+          "phase_1_foundation": {
+            "duration": "Months 1-4",
+            "objectives": ["Data inventory", "Classification scheme", "Policy framework"],
+            "deliverables": [
+              "Complete data inventory",
+              "Approved classification policy",
+              "Data handling procedures",
+              "Stakeholder training plan"
+            ],
+            "success_metrics": ["100% critical systems inventoried", "Classification policy approved"]
+          },
+          "phase_2_protection": {
+            "duration": "Months 5-10",
+            "objectives": ["Encryption implementation", "DLP deployment", "Access controls"],
+            "deliverables": [
+              "Encryption for all PHI at rest",
+              "DLP policies for email and cloud",
+              "Access reviews completed",
+              "Endpoint encryption 100%"
+            ],
+            "success_metrics": ["100% PHI encrypted", "DLP blocking enabled", "OCR findings remediated"]
+          },
+          "phase_3_enhancement": {
+            "duration": "Months 11-18",
+            "objectives": ["Rights management", "Advanced DLP", "Automation"],
+            "deliverables": [
+              "Sensitivity labels deployed",
+              "Automated classification",
+              "Discovery and remediation",
+              "Metrics and reporting"
+            ],
+            "success_metrics": ["50% documents labeled", "Automated classification active", "Quarterly data reviews"]
+          }
+        },
+        "governance_structure": {
+          "data_protection_council": "Cross-functional oversight",
+          "data_stewards": "Business owners for data domains",
+          "data_custodians": "IT owners for systems",
+          "privacy_office": "Compliance and policy"
+        },
+        "success_metrics": {
+          "compliance": "Zero OCR findings on next audit",
+          "incidents": "50% reduction in data incidents",
+          "visibility": "100% sensitive data inventoried",
+          "protection": "100% PHI encrypted at rest and in transit"
+        }
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Data Classification Approach",
+      "narrative": "NovaCare has never had formal data classification. Some staff argue that everything should be treated as PHI for simplicity. Others want granular classification. You need to recommend the classification approach.",
+      "question": "What data classification approach should NovaCare implement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Treat all data as PHI - simplifies handling, maximum protection",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Over-classification creates operational burden",
+            "detailed": "Treating all data as PHI means: every email requires PHI-level protection, public information can't be shared, excessive encryption overhead, user fatigue from constant restrictions. Over-classification leads to workarounds as users find controls too burdensome. Additionally, it doesn't help identify where actual PHI resides.",
+            "consequence": "Users ignore or circumvent controls. Actual PHI gets lost in the noise. Operational inefficiency."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Tiered classification (Public, Internal, Confidential, Restricted) aligned to regulatory requirements",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Risk-appropriate protection for different data types",
+            "detailed": "Tiered classification enables: appropriate controls for each level (PHI gets strongest, public gets minimal), clear guidance for users, regulatory alignment (HIPAA, PCI), efficient resource allocation (focus protection on sensitive data). Four levels provide enough granularity without overwhelming users. Classification should align with existing regulations.",
+            "consequence": "Clear data handling guidelines. Appropriate protection levels. Users understand and follow classification."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Binary classification (Sensitive / Non-sensitive) for simplicity",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Too simple - doesn't distinguish between sensitivity levels",
+            "detailed": "Binary classification lumps PHI with employee PII with financial data - all 'sensitive' but with different regulatory requirements and risk levels. This doesn't enable differentiated handling (PHI has HIPAA requirements, PCI data has different requirements) and may lead to under-protection of highest-risk data.",
+            "consequence": "Different regulatory requirements treated the same. Compliance gaps for specific regulations."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Let each department create their own classification scheme",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Inconsistent classification prevents enterprise protection",
+            "detailed": "Department-specific classification creates: inconsistent protection (IT's 'confidential' vs. HR's 'confidential'), data sharing confusion, impossible enterprise DLP/encryption policies, audit challenges. Data protection requires consistent enterprise-wide classification.",
+            "consequence": "Fragmented protection. Cannot implement enterprise DLP. Audit failures."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can classification balance protection with usability while aligning with regulatory requirements?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Tiered classification (4 levels typically) enables risk-appropriate controls. Too few levels under-protects; too many overwhelms users."
+        }
+      ],
+      "learning_note": "Data classification should: align with regulations (HIPAA, PCI), enable risk-appropriate controls, be understandable by users, and support technical controls (DLP, encryption). Four tiers (Public, Internal, Confidential, Restricted) is common. Over-classification (treating everything as highest level) causes user fatigue and workarounds.",
+      "unlocks_artifact": "artifact_2"
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "PHI Encryption Priority",
+      "narrative": "The OCR audit cited lack of encryption as a major finding. HITECH provides safe harbor from breach notification if PHI was properly encrypted. You need to prioritize encryption implementation.",
+      "question": "What encryption should be the HIGHEST priority for HITECH safe harbor?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Database encryption (TDE) for the EHR system",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important but not the highest-risk gap",
+            "detailed": "Database TDE protects EHR data at rest in the database files. This is important, but databases are typically in secured data centers with physical and logical controls. The highest-risk gap is portable devices - laptops that can be lost or stolen have resulted in the most HIPAA breaches.",
+            "consequence": "Database encrypted but laptop loss still triggers breach notification."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Email encryption for messages containing PHI",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Important for transit but not the highest-risk gap",
+            "detailed": "Email encryption protects PHI in transit - important for compliance. However, email breaches are typically about unauthorized disclosure (sending to wrong person), not interception. Encryption doesn't prevent that. Portable device loss is the highest frequency breach type.",
+            "consequence": "Email encrypted but lost laptops still cause breaches."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Full disk encryption for all laptops and portable devices",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Portable devices are highest breach risk",
+            "detailed": "Laptop and mobile device loss/theft is the most common cause of PHI breaches. Full disk encryption (BitLocker, FileVault) provides HITECH safe harbor - if an encrypted device is lost, it's not a reportable breach. This is the highest-impact encryption implementation for breach prevention and should be prioritized.",
+            "consequence": "Lost/stolen devices no longer trigger breach notification. Highest-risk gap addressed first."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Application-level encryption within the EHR",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Strongest but most complex - not highest priority",
+            "detailed": "Application-level encryption provides defense-in-depth but requires significant development effort, impacts performance and functionality, and doesn't address the immediate highest risk (portable devices). This is valuable for long-term architecture but not the first priority.",
+            "consequence": "Complex implementation delays addressing immediate risks."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What is the most common cause of PHI breaches? What encryption prevents that specific breach type?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Lost/stolen laptops cause most breaches. Full disk encryption provides HITECH safe harbor - lost encrypted device is not a reportable breach."
+        }
+      ],
+      "learning_note": "HITECH safe harbor: properly encrypted PHI breaches don't require notification. Priority should address highest-risk scenarios first. Laptop/portable device loss is the most common breach cause - full disk encryption (FDE) addresses this directly. Encryption layers: FDE for devices, TDE for databases, TLS for transit, application-level for defense-in-depth.",
+      "unlocks_artifact": "artifact_3"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Key Management Architecture",
+      "narrative": "With encryption being implemented across the enterprise, key management becomes critical. If keys are lost, data is unrecoverable. If keys are compromised, encryption is useless. You need to design the key management approach.",
+      "question": "What key management architecture should NovaCare implement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Cloud-native KMS (Azure Key Vault) for all encryption keys",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Good for cloud but doesn't cover all scenarios",
+            "detailed": "Azure Key Vault is excellent for Azure-hosted resources but NovaCare has significant on-premises infrastructure. Relying solely on cloud KMS creates: dependency on internet connectivity, doesn't easily support on-prem systems (BitLocker, on-prem databases), and may have regulatory concerns for some scenarios.",
+            "consequence": "Cloud keys managed well but on-premises key management gaps remain."
+          }
+        },
+        {
+          "id": "B",
+          "text": "On-premises HSM with manual key ceremonies",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Secure but doesn't scale or support cloud",
+            "detailed": "On-premises HSM provides strong key protection but: manual ceremonies don't scale for thousands of keys, doesn't integrate with cloud services, requires specialized expertise to manage, and creates single-site risk. Healthcare environments need automation and cloud integration.",
+            "consequence": "Highly secure but operationally challenging. Cloud key management gaps."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Hybrid: Cloud KMS for cloud resources, on-prem KMS with HSM backing for on-premises",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Hybrid approach addresses all environments",
+            "detailed": "Hybrid key management provides: cloud-native integration for Azure resources (Key Vault), on-premises capability for legacy systems (Active Directory-integrated KMS or enterprise key manager with HSM), centralized policy management, and separation of duties. HSM backing provides hardware-level key protection for highest sensitivity.",
+            "consequence": "Comprehensive key management across all environments. Keys protected appropriately for each context."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Rely on each application's built-in key management",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Fragmented approach creates gaps and complexity",
+            "detailed": "Application-specific key management means: inconsistent key protection, no central visibility, different recovery procedures per system, difficult to audit, and no separation of duties between application admin and key admin. Enterprise key management requires centralization.",
+            "consequence": "Key sprawl. Inconsistent protection. Audit failures."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "NovaCare has both cloud and on-premises resources. What approach covers both effectively?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Hybrid key management: cloud KMS for cloud resources, on-prem KMS for on-prem resources, with HSM backing for highest protection."
+        }
+      ],
+      "learning_note": "Key management architecture should consider: coverage (cloud and on-prem), scale (thousands of keys), integration (with systems using encryption), protection level (HSM for highest sensitivity), recovery (key escrow, backup), and audit (who accessed which keys). Hybrid approaches common in enterprise.",
+      "unlocks_artifact": "artifact_4"
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "DLP Implementation Strategy",
+      "narrative": "Recent incidents showed sensitive data leaving the organization via email and cloud storage. You need to design the DLP implementation to prevent PHI exfiltration while maintaining clinical workflow.",
+      "question": "What DLP implementation approach should be prioritized?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Network DLP at the perimeter to catch all outbound traffic",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Network DLP has blind spots in modern environments",
+            "detailed": "Network DLP monitors traffic at egress points but: encrypted traffic (HTTPS, TLS) is invisible without SSL inspection, cloud-to-cloud traffic never crosses the perimeter, and remote workers may not route through corporate network. Network DLP alone has significant blind spots.",
+            "consequence": "Some exfiltration detected but significant gaps. Cloud and encrypted traffic invisible."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Endpoint DLP on all workstations to control data at the source",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Good source control but misses cloud and mobile",
+            "detailed": "Endpoint DLP controls data at the source (copy, print, USB) but: doesn't cover cloud applications directly, mobile devices may not support agents, and BYOD scenarios are challenging. Endpoint DLP is valuable but not comprehensive alone.",
+            "consequence": "Workstation control improved but cloud and mobile gaps remain."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Integrated DLP across endpoint, cloud, and email with unified policy",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Comprehensive coverage with consistent policy",
+            "detailed": "Integrated DLP provides: endpoint control (USB, print, clipboard), cloud app visibility (sanctioned and unsanctioned), email protection (outbound scanning), and unified policy (same rules everywhere). Modern DLP platforms (Microsoft Purview, Symantec, etc.) offer integrated coverage. Consistent policy prevents attackers from finding the gap.",
+            "consequence": "Comprehensive data visibility. Consistent policy enforcement. Gaps eliminated."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Cloud Access Security Broker (CASB) for SaaS applications only",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "CASB is one component, not complete DLP",
+            "detailed": "CASB provides visibility and control for cloud applications - valuable for the 30% SaaS environment. But CASB alone doesn't cover: endpoint actions (USB, print), email (unless cloud-native), on-premises applications, or network file shares. DLP needs to be comprehensive.",
+            "consequence": "Cloud apps protected but on-prem and endpoint gaps remain."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Data can leave through many channels. What approach ensures no gaps?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Integrated DLP covers endpoint, cloud, and email with unified policy. Fragmented DLP leaves gaps attackers exploit."
+        }
+      ],
+      "learning_note": "DLP coverage should include: endpoint (data at source), network (perimeter monitoring), cloud (SaaS and IaaS), and email. Integrated platforms enable unified policy - same rules apply everywhere. Implementation typically phases: start with monitoring (visibility), then warn users, then block high-confidence violations.",
+      "unlocks_artifact": "artifact_5"
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Non-Production Data Protection",
+      "narrative": "Development and testing teams need realistic data but currently use production copies with real PHI. This creates significant compliance risk. You need to recommend an approach for non-production environments.",
+      "question": "How should PHI be handled in development and test environments?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Apply same security controls to dev/test as production",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Maintains risk and doesn't solve the problem",
+            "detailed": "Applying production controls to dev/test means: PHI still in dev/test (risk remains), developers need PHI access (expanded access), audit logging required for dev work (overhead), and compliance scope includes all environments (more audit surface). The goal should be removing PHI from non-production.",
+            "consequence": "Dev/test still contains PHI. Risk and compliance scope unchanged."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Static data masking to create de-identified copies for dev/test",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! De-identified data removes compliance risk",
+            "detailed": "Static data masking permanently replaces PHI in non-production copies: removes identifiers (names, SSN, MRN), maintains data relationships and realism, de-identified data not subject to HIPAA, developers don't need PHI access, and reduced compliance scope. This is the industry standard approach for healthcare dev/test.",
+            "consequence": "PHI removed from dev/test. Compliance scope reduced. Developer productivity maintained with realistic data."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Use synthetic data generation instead of production copies",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Valid approach but more complex than masking",
+            "detailed": "Synthetic data generation creates entirely artificial data matching production patterns. This provides strong protection (no real data involved) but: may not capture edge cases, requires sophisticated generation, and may not test all scenarios realistically. Masking is typically easier to implement and maintains real data patterns.",
+            "consequence": "Good protection but may miss edge cases. More complex implementation."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Limit dev/test PHI access to senior developers only",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Still exposes PHI and creates workflow issues",
+            "detailed": "Restricting access doesn't remove the PHI or the risk - it just limits who can see it. PHI is still in dev/test (breach risk), junior developers can't do their work (productivity impact), and you still have HIPAA compliance requirements for those environments. This doesn't solve the problem.",
+            "consequence": "PHI still at risk. Developer productivity impacted. Compliance requirements unchanged."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What technique removes PHI from data while maintaining its usefulness for testing?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Static data masking replaces identifiers with fake data. De-identified data is no longer PHI and not subject to HIPAA."
+        }
+      ],
+      "learning_note": "Data masking for non-production: static masking permanently de-identifies copies, dynamic masking masks on-the-fly for production use cases. De-identified data (per HIPAA Safe Harbor) removes the 18 identifiers and is no longer PHI. This reduces compliance scope and risk while enabling realistic testing.",
+      "unlocks_artifact": "artifact_6"
+    },
+    {
+      "id": "decision_6",
+      "sequence": 6,
+      "title": "Protecting Data Shared Externally",
+      "narrative": "NovaCare frequently shares patient information with specialists, insurers, and other providers. Currently, data is shared via email attachments with no protection after leaving NovaCare's systems. You need to address external sharing risks.",
+      "question": "What protection should be applied to PHI shared with external parties?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Encrypt email attachments with password, share password separately",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Basic protection but no control after sharing",
+            "detailed": "Password-protected attachments provide basic encryption but: passwords are often weak or predictable, once recipient has password they can share freely, no revocation capability, no audit of who accessed, and password management is burdensome. This provides minimal protection.",
+            "consequence": "Basic encryption but no ongoing control. Passwords often shared insecurely."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Information Rights Management with persistent protection and access logging",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Persistent protection that travels with the document",
+            "detailed": "IRM/RMS provides: encryption that persists with document, access control (only authorized recipients), usage restrictions (no print, no forward if desired), expiration dates, revocation capability, and access logging. Protection travels with the data regardless of where it goes. This is the appropriate control for sensitive external sharing.",
+            "consequence": "Documents protected wherever they go. Access can be revoked. Usage tracked."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Secure file sharing portal where external parties access but can't download",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Good control but doesn't fit all workflows",
+            "detailed": "Secure portals provide good control (data stays in your system) but: not all workflows fit (specialists need documents in their EHR), adds friction for frequent collaborators, and some recipients may not accept portal-only access. IRM works with email workflows while maintaining protection.",
+            "consequence": "Good for some scenarios but workflow friction for others. May not be adopted."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Rely on receiving organization's security - include BAA requirement in contracts",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "BAA is required but doesn't protect data technically",
+            "detailed": "Business Associate Agreements are legally required for sharing PHI but provide contractual protection, not technical protection. The BAA obligates the recipient to protect data but doesn't prevent breaches at the recipient. Technical controls (IRM) protect data regardless of recipient's security posture.",
+            "consequence": "Legal protection but no technical protection. Recipient breach exposes NovaCare data."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can you maintain control over documents after they leave your organization?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Information Rights Management (IRM) encrypts documents with persistent protection - access control, usage restrictions, and revocation capability that follow the document."
+        }
+      ],
+      "learning_note": "Information Rights Management (IRM) provides persistent protection: documents remain encrypted with access controls regardless of where they're stored or forwarded. Key capabilities: access revocation, usage restrictions (print, forward, edit), expiration, and access logging. This is essential for sensitive data shared externally.",
+      "unlocks_artifact": "artifact_7"
+    },
+    {
+      "id": "decision_7",
+      "sequence": 7,
+      "title": "Certificate Management",
+      "narrative": "NovaCare has certificates for dozens of systems - web servers, EHR interfaces, email signing, and more. Last month, an expired certificate caused an EHR interface outage. You need to establish certificate management.",
+      "question": "What is the most critical certificate management capability to implement first?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy internal Certificate Authority for all certificates",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Internal CA is valuable but doesn't solve immediate problem",
+            "detailed": "Internal CA enables self-issuing certificates and control, but: doesn't address existing certificates already deployed, doesn't prevent expiration of current certs, and requires significant setup before value. The immediate problem is visibility and expiration tracking.",
+            "consequence": "Internal CA deployed but existing certificates still cause outages."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Certificate inventory and automated expiration monitoring",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Know what you have and prevent expiration outages",
+            "detailed": "Certificate discovery and monitoring addresses the immediate risks: inventory all certificates (know what exists), track expiration dates (30/60/90 day warnings), alert before expiration (prevent outages), and establish renewal workflows. This is the foundation for certificate management - you can't manage what you don't know exists.",
+            "consequence": "Certificate visibility achieved. Expiration outages prevented. Foundation for improvement."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Implement automated certificate renewal (ACME/Let's Encrypt)",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Automation is valuable but you need inventory first",
+            "detailed": "Automated renewal (ACME/Let's Encrypt for public certs) prevents expiration, but: only works for new certificates under automation, doesn't address existing certificates, and not all certs can use public CA (internal systems). First establish visibility, then automate.",
+            "consequence": "New certs automated but existing certs still at risk."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Hardware Security Module for certificate private keys",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "HSM protects keys but doesn't solve expiration problem",
+            "detailed": "HSM provides strong private key protection - important for high-security certificates. But HSM doesn't: discover existing certificates, track expiration, or prevent outages. HSM is a security enhancement, not a management solution.",
+            "consequence": "Key security improved but certificate outages continue."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "The recent outage was caused by certificate expiration. What prevents that specific problem?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Certificate lifecycle management starts with inventory (know what you have) and expiration monitoring (alert before problems)."
+        }
+      ],
+      "learning_note": "Certificate management priorities: (1) Discovery - find all certificates across the environment, (2) Monitoring - track expiration dates and alert, (3) Renewal process - workflow for timely renewal, (4) Automation - automated renewal where possible, (5) Key protection - HSM for sensitive keys. Start with visibility before optimization.",
+      "unlocks_artifact": "artifact_8"
+    },
+    {
+      "id": "decision_8",
+      "sequence": 8,
+      "title": "Cloud Data Residency",
+      "narrative": "NovaCare is expanding Azure usage for analytics and some clinical applications. The compliance team asks about data residency - where will PHI be stored and processed? You need to define the cloud data residency approach.",
+      "question": "What cloud data residency approach should NovaCare implement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No residency restrictions - use Azure global infrastructure for best performance",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Uncontrolled residency creates compliance uncertainty",
+            "detailed": "Without residency controls, data may be stored or processed in any Azure region: creates legal uncertainty (which laws apply?), makes compliance audits harder (where is data?), and may violate state laws or patient expectations. Healthcare data should have defined residency.",
+            "consequence": "Data location unknown. Compliance uncertainty. Potential regulatory issues."
+          }
+        },
+        {
+          "id": "B",
+          "text": "US-only data residency with specific region configuration",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Defined residency with appropriate controls",
+            "detailed": "US-only residency provides: clear legal jurisdiction (US law applies), simplified compliance (HIPAA framework), patient expectations met (US healthcare), and audit clarity (data is in these regions). Configure Azure resources for specific US regions, disable geo-replication to other countries, and document residency controls for compliance.",
+            "consequence": "Clear data location. Simplified compliance. Patient privacy expectations met."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Require all PHI to remain on-premises - no cloud for PHI",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Overly restrictive - cloud can be HIPAA compliant",
+            "detailed": "Cloud services can be HIPAA compliant with BAA (Azure offers this). Prohibiting cloud for PHI: limits clinical innovation, prevents beneficial analytics, and isn't required by regulations. The key is proper controls, not avoiding cloud entirely.",
+            "consequence": "Miss benefits of cloud analytics and modern tools. Not required by HIPAA."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Allow any country with adequate privacy laws",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Creates complexity without clear benefit",
+            "detailed": "Defining 'adequate' is complex and changing (is country X adequate?). Different laws apply in each country. For US healthcare, there's no benefit to international storage - US regions provide adequate capacity and performance. Adding international adds complexity without benefit.",
+            "consequence": "Added complexity. Multiple legal frameworks. No clear benefit."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What data residency approach provides clear legal framework and simplified compliance for US healthcare?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "US-only residency keeps data under US law, simplifies HIPAA compliance, and meets patient expectations. Configure cloud services to prevent international storage."
+        }
+      ],
+      "learning_note": "Data residency and sovereignty: residency is WHERE data is stored, sovereignty is WHOSE LAWS apply. For US healthcare: US-only residency is typically appropriate, provides legal clarity, and simplifies compliance. Cloud configuration should specify regions and prevent unintended geo-replication.",
+      "unlocks_artifact": "artifact_9"
+    },
+    {
+      "id": "decision_9",
+      "sequence": 9,
+      "title": "Data Retention and Disposal",
+      "narrative": "NovaCare has no formal data retention policy. Some data goes back 20+ years, storage costs are rising, and there's concern about retaining data longer than necessary. Legal has requirements, but nothing is documented.",
+      "question": "How should NovaCare approach data retention?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep everything forever - storage is cheap and you never know what you'll need",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Infinite retention increases risk and cost",
+            "detailed": "Keeping everything forever means: ever-increasing breach exposure (more data = more breach impact), storage costs grow indefinitely, legal discovery costs increase (must search everything), and data quality degrades (outdated information). Data has a lifecycle and should be managed accordingly.",
+            "consequence": "Massive data stores with unnecessary risk. Rising costs. Discovery nightmare."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Develop retention schedule based on legal, regulatory, and business requirements with secure disposal",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Defined retention with proper disposal",
+            "detailed": "Retention policy should define: minimum retention by data type (legal/regulatory requirements), maximum retention (don't keep longer than needed), defensible disposal process (document why data was deleted), and secure destruction (cryptographic erasure, physical destruction where needed). Healthcare has specific retention requirements (medical records, billing) that must be met.",
+            "consequence": "Appropriate retention. Risk reduced. Costs controlled. Defensible disposal."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Delete all data older than 7 years across the board",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Blanket policy may violate retention requirements",
+            "detailed": "Different data types have different requirements: medical records (varies by state, often 7-10 years after last treatment or longer for minors), billing (PCI 1 year, but legal may require longer), and research (per protocol, may be indefinite). A single policy doesn't fit all data types.",
+            "consequence": "May delete data required by law. May keep data longer than needed for other types."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Let individual departments decide retention for their data",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Inconsistent retention creates compliance risk",
+            "detailed": "Departmental discretion means: inconsistent retention, potential violation of legal requirements (department may not know requirements), no defensible disposal (why was this deleted?), and discovery complications. Retention requires enterprise policy with legal input.",
+            "consequence": "Inconsistent practices. Compliance risk. No defensible position."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What balances legal requirements to retain data with risk reduction from limiting retention?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Retention schedule defines keep periods by data type. Meet minimums (legal), don't exceed maximums (risk), and document disposal (defensible)."
+        }
+      ],
+      "learning_note": "Data retention policy defines: what data, how long, why (legal basis), and disposal method. Healthcare retention varies by data type and state law. Key principles: meet legal minimums, don't exceed business need, document retention decisions, and ensure secure disposal. Defensible disposal means you can explain why data was deleted.",
+      "unlocks_artifact": "artifact_10"
+    },
+    {
+      "id": "decision_10",
+      "sequence": 10,
+      "title": "Program Success Metrics",
+      "narrative": "Dr. Foster asks how you'll measure the data protection program's success. You need to define metrics that demonstrate value and drive continuous improvement.",
+      "question": "What is the MOST important metric for measuring data protection program success?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Number of DLP policies deployed",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Activity metric, not outcome metric",
+            "detailed": "Counting policies measures activity, not effectiveness. 100 policies mean nothing if they're not preventing data loss. Metrics should measure outcomes (incidents prevented, risk reduced) not just activities (policies deployed).",
+            "consequence": "Can show activity but not value. Policies may not be effective."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Percentage of sensitive data identified, classified, and protected",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Coverage metric showing actual protection",
+            "detailed": "This metric shows actual protection status: do you know where sensitive data is (identified)? Is it properly labeled (classified)? Are appropriate controls applied (protected)? This directly measures the program's core mission. Sub-metrics include: % PHI encrypted, % systems with DLP, % data with retention policy applied.",
+            "consequence": "Clear view of protection coverage. Identifies gaps. Demonstrates progress."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Number of data breaches",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important but lagging indicator",
+            "detailed": "Breach count is the ultimate outcome but: it's a lagging indicator (measures failures after they occur), low numbers could mean good protection OR just no attacks yet, and doesn't show proactive improvement. Combine breach metrics with leading indicators like protection coverage.",
+            "consequence": "Know if you've failed but not if you're improving protection."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Training completion rate",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Training is an input, not a protection metric",
+            "detailed": "Training completion measures awareness activities, not protection effectiveness. People can complete training and still mishandle data. Training is necessary but not sufficient - measure whether data is actually protected, not just whether training occurred.",
+            "consequence": "Know about training but not about actual data protection."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What metric directly measures whether sensitive data is actually protected?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Protection coverage (% of sensitive data with appropriate controls) measures the core mission. Combine with incident metrics for complete picture."
+        }
+      ],
+      "learning_note": "Data protection metrics should include: coverage (% sensitive data protected), effectiveness (incidents prevented/detected), compliance (audit findings, regulatory status), and maturity (capability improvement). Leading indicators (coverage, policy compliance) predict success; lagging indicators (breaches) measure failures. Both are needed."
+    }
+  ],
+  
+  "scoring": {
+    "max_points": 250,
+    "passing_score": 200,
+    "passing_percentage": 80
+  },
+  
+  "outcome_thresholds": {
+    "expert": {"min_score": 238, "title": "Data Protection Expert", "description": "Exceptional understanding of data protection strategies."},
+    "proficient": {"min_score": 213, "title": "Data Protection Professional", "description": "Strong grasp of data protection principles and implementation."},
+    "competent": {"min_score": 200, "title": "Data Protection Competent", "description": "Solid understanding of data protection fundamentals."},
+    "developing": {"min_score": 175, "title": "Data Protection Developing", "description": "Gaps in data protection concepts."},
+    "needs_remediation": {"min_score": 0, "title": "Data Protection Fundamentals Needed", "description": "Review data protection concepts."}
+  },
+  
+  "weakness_mapping": {
+    "encryption_gaps": {"indicators": ["decision_2_incorrect", "decision_3_incorrect"], "remediation": "D3-REM-003", "focus": "Encryption and key management"},
+    "classification_gaps": {"indicators": ["decision_1_incorrect"], "remediation": "D3-REM-001", "focus": "Data classification concepts"}
+  },
+  
+  "prerequisites": ["D3-SIM-001"],
+  "unlocks": ["D3-SIM-005"],
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 3: Security Architecture",
+    "job_role_alignment": ["Data Protection Officer", "Security Architect", "Compliance Analyst"],
+    "estimated_time": "45-60 minutes",
+    "industry_context": "Healthcare"
+  }
+}

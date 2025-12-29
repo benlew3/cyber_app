@@ -1,0 +1,419 @@
+{
+  "lesson_id": "D3-LESSON-003",
+  "domain": 3,
+  "title": "Network Security",
+  "objectives_covered": ["3.2"],
+  "estimated_duration": "50-60 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": ["D3-LESSON-001", "D3-LESSON-002"],
+
+  "introduction": {
+    "hook": "In 2017, the Equifax breach exposed 147 million Americans' personal data. The root cause? An unpatched web application. But the scale of the breach was enabled by poor network securityâ€”once attackers gained initial access, they moved freely through the network for 76 days, accessing database after database. Proper network segmentation, monitoring, and access controls could have contained the breach to a single system. Network security isn't just about keeping attackers outâ€”it's about limiting what they can do if they get in.",
+    "learning_goals": [
+      "Implement network security devices including firewalls, IDS/IPS, and proxies",
+      "Apply secure network protocols for various use cases",
+      "Design secure network architectures with appropriate segmentation",
+      "Configure network access control and authentication",
+      "Implement secure remote access solutions"
+    ],
+    "why_it_matters": "Networks are the highways of enterprise ITâ€”all data travels across them. Network security controls who can communicate with what, detects malicious activity, and enables secure connectivity for remote users. Security professionals configure firewalls, design network architectures, and respond to network-based attacks. Expect 6-8 Security+ questions on network security devices, protocols, and architecture."
+  },
+
+  "sections": [
+    {
+      "section_id": "D3-L003-S01",
+      "title": "Network Security Devices",
+      "content": "Network security devices control traffic, detect threats, and enforce security policies at the network level.\n\n**Firewalls**\n\n*Packet Filtering*\n- Layer 3/4 decisions\n- IP addresses, ports, protocols\n- Stateless (each packet independent)\n- Fast but limited visibility\n\n*Stateful Inspection*\n- Tracks connection state\n- Understands session context\n- More intelligent decisions\n- Standard in modern firewalls\n\n*Next-Generation Firewall (NGFW)*\n- Deep packet inspection\n- Application awareness\n- User identity integration\n- IPS capabilities built-in\n- SSL/TLS inspection\n- URL filtering\n\n*Web Application Firewall (WAF)*\n- Layer 7 (application layer)\n- HTTP/HTTPS traffic inspection\n- Protects web applications\n- Blocks SQLi, XSS, etc.\n- Virtual patching capability\n\n**Intrusion Detection/Prevention**\n\n*IDS (Intrusion Detection System)*\n- Passive monitoring\n- Detects and alerts\n- Doesn't block traffic\n- Out-of-band deployment\n\n*IPS (Intrusion Prevention System)*\n- Inline deployment\n- Detects AND blocks\n- Active prevention\n- Can impact latency\n\n*Detection Methods*\n- Signature-based (known threats)\n- Anomaly-based (baseline deviation)\n- Behavioral (pattern recognition)\n- Heuristic (suspicious characteristics)\n\n*Deployment*\n- NIDS/NIPS (Network)\n- HIDS/HIPS (Host)\n- Hybrid approaches\n\n**Proxy Servers**\n\n*Forward Proxy*\n- Client-side intermediary\n- Controls outbound access\n- Caching and filtering\n- User authentication\n- Privacy/anonymization\n\n*Reverse Proxy*\n- Server-side intermediary\n- Protects backend servers\n- Load balancing\n- SSL termination\n- WAF functionality\n\n*Transparent Proxy*\n- Intercepts without configuration\n- No client awareness\n- Often for filtering\n\n**Load Balancers**\n\n*Functions*\n- Distribute traffic across servers\n- High availability\n- SSL offloading\n- Health monitoring\n- DDoS mitigation\n\n*Security Considerations*\n- Single point of entry\n- SSL termination point\n- Access to all traffic\n- Configuration security",
+
+      "key_points": [
+        "NGFW combines firewall, IPS, application awareness, and SSL inspection",
+        "WAF protects web applications at Layer 7 (HTTP/HTTPS)",
+        "IDS detects and alerts; IPS detects AND blocks (inline)",
+        "Forward proxy controls outbound; reverse proxy protects servers",
+        "Load balancers distribute traffic and can terminate SSL"
+      ],
+
+      "real_world_example": {
+        "scenario": "NGFW preventing data exfiltration",
+        "company": "Pinnacle Financial Services",
+        "application": "Pinnacle's NGFW detected and blocked an exfiltration attempt: DETECTION (NGFW flagged unusual HTTPS trafficâ€”large uploads to unknown cloud storage site), APPLICATION AWARENESS (identified traffic as file upload despite HTTPS encryptionâ€”SSL inspection enabled), USER IDENTITY (correlated to specific user through AD integration), POLICY (block file uploads to unapproved cloud storage), ACTION (blocked upload, alerted SOC, logged full details), INVESTIGATION (user's workstation found to be compromised, was unknowingly exfiltrating data), OUTCOME (data exfiltration blocked, incident contained). Traditional firewall would only see 'HTTPS to port 443'â€”wouldn't have detected the threat."
+      },
+
+      "exam_tips": [
+        "NGFW = firewall + IPS + application awareness + SSL inspection",
+        "WAF = web application firewall (Layer 7, HTTP, SQLi/XSS protection)",
+        "IDS = detect/alert only; IPS = detect + block (inline)",
+        "Forward proxy = outbound control; Reverse proxy = server protection",
+        "Stateful firewall tracks connections; stateless treats packets independently"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Next-Generation Firewall (NGFW)",
+          "definition": "A firewall that combines traditional packet filtering with deep packet inspection, application awareness, IPS, and SSL inspection capabilities.",
+          "exam_note": "Beyond port/protocol. Application aware. SSL inspection. Built-in IPS."
+        },
+        {
+          "term": "Web Application Firewall (WAF)",
+          "definition": "A security control that monitors and filters HTTP/HTTPS traffic to web applications, blocking common attacks like SQL injection and XSS.",
+          "exam_note": "Layer 7. HTTP/HTTPS. Blocks SQLi, XSS. Virtual patching. Web apps only."
+        },
+        {
+          "term": "IPS (Intrusion Prevention System)",
+          "definition": "A network security device that monitors traffic and can automatically block detected threats in real-time.",
+          "exam_note": "Inline deployment. Detects AND blocks. Active prevention. May add latency."
+        },
+        {
+          "term": "Forward Proxy",
+          "definition": "A proxy server that sits between internal clients and external resources, controlling and monitoring outbound traffic.",
+          "exam_note": "Client-side. Outbound control. User authentication. URL filtering. Caching."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A security team needs a solution that can inspect encrypted HTTPS traffic, identify applications regardless of port, and integrate with Active Directory to apply user-based policies. Which device provides these capabilities?",
+        "options": [
+          "Stateful firewall because it tracks connection state",
+          "Web Application Firewall because it inspects HTTP",
+          "Next-Generation Firewall because it provides application awareness and SSL inspection",
+          "Intrusion Detection System because it monitors traffic"
+        ],
+        "correct": 2,
+        "explanation": "A Next-Generation Firewall (NGFW) provides all these capabilities: SSL inspection to view encrypted traffic, application awareness regardless of port, and integration with identity sources like Active Directory for user-based policies. Stateful firewalls only track connections. WAF is specific to web applications. IDS monitors but doesn't provide these integrated capabilities."
+      }
+    },
+    {
+      "section_id": "D3-L003-S02",
+      "title": "Secure Network Protocols",
+      "content": "Secure protocols protect data in transit through encryption, authentication, and integrity verification.\n\n**Transport Layer Security (TLS)**\n\n*Current Version*\n- TLS 1.3 (preferred)\n- TLS 1.2 (acceptable minimum)\n- SSL and TLS 1.0/1.1 deprecated\n\n*Functions*\n- Encryption (confidentiality)\n- Authentication (certificates)\n- Integrity (prevent tampering)\n\n*TLS 1.3 Improvements*\n- Faster handshake\n- Perfect forward secrecy required\n- Removed weak algorithms\n- 0-RTT resumption\n\n**Secure Shell (SSH)**\n\n*Uses*\n- Secure remote access\n- File transfer (SFTP, SCP)\n- Tunneling\n- Port forwarding\n\n*Security Best Practices*\n- Use SSH keys, not passwords\n- Disable root login\n- Use SSH v2 only\n- Limit access by IP\n- Change default port (defense in depth)\n\n**IPsec**\n\n*Components*\n- AH (Authentication Header)\n  - Integrity and authentication\n  - No encryption\n- ESP (Encapsulating Security Payload)\n  - Encryption and authentication\n  - Most commonly used\n\n*Modes*\n- Transport mode\n  - Encrypts payload only\n  - Original IP header intact\n  - Host-to-host\n  \n- Tunnel mode\n  - Encrypts entire packet\n  - New IP header added\n  - Gateway-to-gateway (VPN)\n\n**Secure DNS**\n\n*DNSSEC*\n- Signs DNS responses\n- Prevents spoofing/tampering\n- Doesn't encrypt queries\n- Chain of trust\n\n*DNS over HTTPS (DoH)*\n- Encrypts DNS queries\n- Uses HTTPS (port 443)\n- Privacy protection\n- Harder to monitor\n\n*DNS over TLS (DoT)*\n- Encrypts DNS queries\n- Uses TLS (port 853)\n- Privacy protection\n- Easier to identify/block\n\n**Secure Email**\n\n*S/MIME*\n- Certificate-based\n- Encryption and signing\n- Widely supported\n- Requires PKI\n\n*PGP/OpenPGP*\n- Web of trust model\n- Encryption and signing\n- No PKI required\n- Key exchange challenges\n\n**Network Time Protocol Security**\n\n*NTS (Network Time Security)*\n- Authenticated time\n- Prevents time-based attacks\n- TLS-based authentication",
+
+      "key_points": [
+        "TLS 1.3 preferred; TLS 1.2 minimum; SSL and TLS 1.0/1.1 deprecated",
+        "SSH: use keys not passwords, disable root login, v2 only",
+        "IPsec: AH = authentication only; ESP = encryption + authentication",
+        "IPsec modes: Transport = host-to-host; Tunnel = gateway VPN",
+        "DNSSEC signs responses (integrity); DoH/DoT encrypt queries (privacy)"
+      ],
+
+      "real_world_example": {
+        "scenario": "TLS configuration preventing downgrade attack",
+        "company": "MedCare Health Systems",
+        "application": "MedCare hardened their TLS configuration after a security assessment: FINDING (web servers accepted TLS 1.0 and weak cipher suites), RISK (vulnerability to POODLE, BEAST, and downgrade attacks), REMEDIATION (disabled TLS 1.0 and 1.1, removed weak ciphers, configured TLS 1.3 preferred with TLS 1.2 fallback, enabled HSTS), TESTING (verified with SSL Labsâ€”A+ rating achieved), MONITORING (configured alerting for TLS errors to detect compatibility issues), OUTCOME (secure configuration without breaking legitimate client access). Patient data now protected by modern cryptography."
+      },
+
+      "exam_tips": [
+        "TLS 1.3 = current best; TLS 1.2 = minimum acceptable; SSL = deprecated",
+        "SSH keys > passwords; disable root login; v2 only",
+        "IPsec ESP = encryption + auth; AH = auth only (no encryption)",
+        "IPsec Transport mode = host-to-host; Tunnel mode = VPN",
+        "DNSSEC = integrity (signing); DoH/DoT = privacy (encryption)"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "TLS (Transport Layer Security)",
+          "definition": "A cryptographic protocol that provides secure communication over networks through encryption, authentication, and integrity verification.",
+          "exam_note": "Encryption in transit. Version 1.3 preferred. SSL predecessor deprecated."
+        },
+        {
+          "term": "IPsec",
+          "definition": "A protocol suite for securing IP communications through authentication and encryption at the network layer.",
+          "exam_note": "Network layer security. AH (auth) and ESP (encrypt+auth). Transport vs Tunnel modes."
+        },
+        {
+          "term": "DNSSEC",
+          "definition": "DNS Security Extensionsâ€”a suite of specifications for securing DNS by adding cryptographic signatures to DNS data.",
+          "exam_note": "Signs DNS responses. Prevents spoofing. Doesn't encrypt. Chain of trust."
+        },
+        {
+          "term": "Perfect Forward Secrecy (PFS)",
+          "definition": "A property of key exchange protocols where session keys cannot be compromised even if long-term secrets are compromised later.",
+          "exam_note": "Protects past sessions. Required in TLS 1.3. Uses ephemeral keys."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An organization needs to secure site-to-site VPN connections between two offices. The entire IP packet, including headers, should be encrypted. Which IPsec mode should be used?",
+        "options": [
+          "Transport mode because it's more efficient",
+          "Tunnel mode because it encrypts the entire packet",
+          "AH mode because it provides authentication",
+          "ESP mode because it provides encryption"
+        ],
+        "correct": 1,
+        "explanation": "Tunnel mode should be used for site-to-site VPNs because it encrypts the entire original IP packet and adds a new IP header. This is appropriate for gateway-to-gateway connections. Transport mode only encrypts the payload and is used for host-to-host. AH and ESP are protocols, not modesâ€”and ESP would be used within Tunnel mode for encryption."
+      }
+    },
+    {
+      "section_id": "D3-L003-S03",
+      "title": "Network Access Control",
+      "content": "Network Access Control (NAC) ensures only authorized and compliant devices can access the network.\n\n**NAC Concepts**\n\n*Purpose*\n- Verify device identity\n- Check compliance status\n- Control network access\n- Enforce security policies\n- Visibility into connected devices\n\n*Key Functions*\n- Authentication (who/what)\n- Authorization (what access)\n- Posture assessment (compliance)\n- Remediation (fix issues)\n- Continuous monitoring\n\n**802.1X**\n\n*Components*\n- Supplicant (client)\n- Authenticator (switch/AP)\n- Authentication server (RADIUS)\n\n*Process*\n1. Device connects\n2. Authenticator blocks traffic\n3. EAP authentication begins\n4. RADIUS validates credentials\n5. If successful, port opened\n6. If failed, remain blocked or VLAN redirect\n\n*EAP Types*\n- EAP-TLS (certificate-based, strongest)\n- PEAP (password in TLS tunnel)\n- EAP-TTLS (similar to PEAP)\n- EAP-FAST (Cisco, session resumption)\n\n**Posture Assessment**\n\n*Checks*\n- Antivirus installed and updated\n- OS patches current\n- Firewall enabled\n- Required software present\n- Prohibited software absent\n- Encryption enabled\n\n*Responses*\n- Compliant: Full network access\n- Non-compliant: Limited/quarantine VLAN\n- Unknown: Guest network only\n\n**Agent vs. Agentless**\n\n*Agent-Based*\n- Software installed on device\n- Deep compliance checking\n- Better visibility\n- Management overhead\n\n*Agentless*\n- No software required\n- Limited visibility\n- Works with any device\n- Relies on network observation\n\n**MAC Authentication Bypass (MAB)**\n\n*Use Cases*\n- Devices that can't do 802.1X\n- Printers, cameras, IoT\n- Falls back when 802.1X fails\n\n*Limitations*\n- MAC addresses can be spoofed\n- Weaker than 802.1X\n- Should be combined with other controls\n\n**Network Segmentation with NAC**\n\n*Dynamic VLAN Assignment*\n- Based on user/device identity\n- Based on compliance status\n- Automatic placement\n- Policy-driven\n\n*Guest Networks*\n- Separate from corporate\n- Internet access only\n- No internal resources\n- Captive portal registration",
+
+      "key_points": [
+        "802.1X: supplicant (client) â†’ authenticator (switch) â†’ RADIUS (server)",
+        "EAP-TLS uses certificates (strongest); PEAP uses passwords in TLS tunnel",
+        "Posture assessment checks compliance before granting full access",
+        "MAB for devices that can't do 802.1X (printers, IoT)â€”weaker security",
+        "Dynamic VLAN assignment based on identity and compliance"
+      ],
+
+      "real_world_example": {
+        "scenario": "NAC preventing compromised device access",
+        "company": "NexaTech Solutions",
+        "application": "NexaTech's NAC implementation prevented a breach from spreading: SCENARIO (employee laptop compromised at home, brought to office), NAC PROCESS (device connected, 802.1X authentication succeeded, posture check ran), FINDINGS (AV definitions 30+ days out of date, missing critical patches, endpoint protection service disabled), ACTION (device placed in quarantine VLAN with only access to remediation servers), REMEDIATION (automatic patch download initiated, AV updated, user notified), VERIFICATION (posture check re-ran after 30 minutes, device now compliant), ACCESS GRANTED (moved to corporate VLAN after compliance verified). Compromised device never reached production network."
+      },
+
+      "exam_tips": [
+        "802.1X components: Supplicant, Authenticator, Authentication Server (RADIUS)",
+        "EAP-TLS = certificate-based (strongest); PEAP = password in tunnel",
+        "Posture assessment = compliance checking before access",
+        "MAB = MAC Authentication Bypass (for devices without 802.1X)",
+        "Non-compliant devices go to quarantine/remediation VLAN"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "802.1X",
+          "definition": "An IEEE standard for port-based network access control that authenticates devices before allowing network access.",
+          "exam_note": "Port-based NAC. Supplicant, authenticator, RADIUS. Uses EAP. Wired and wireless."
+        },
+        {
+          "term": "RADIUS",
+          "definition": "Remote Authentication Dial-In User Serviceâ€”a protocol providing centralized authentication, authorization, and accounting for network access.",
+          "exam_note": "AAA server. 802.1X backend. Centralized auth. UDP based."
+        },
+        {
+          "term": "Posture Assessment",
+          "definition": "The process of checking a device's security compliance status before granting network access.",
+          "exam_note": "Checks compliance. AV, patches, firewall. Determines access level."
+        },
+        {
+          "term": "EAP-TLS",
+          "definition": "An EAP method that uses TLS with client and server certificates for mutual authentication, considered the strongest EAP type.",
+          "exam_note": "Certificate-based. Strongest EAP. Mutual authentication. Requires PKI."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A device connects to the network and passes 802.1X authentication, but the posture assessment finds that antivirus definitions are outdated. What should happen next?",
+        "options": [
+          "Grant full network access since authentication succeeded",
+          "Block all network access until manually remediated",
+          "Place the device in a quarantine VLAN for remediation",
+          "Disconnect the device from the network"
+        ],
+        "correct": 2,
+        "explanation": "The device should be placed in a quarantine VLAN where it can access remediation resources (like AV update servers) but not the production network. This allows the device to be brought into compliance while limiting risk. Full access shouldn't be granted while non-compliant. Complete blocking is too restrictive when auto-remediation is possible."
+      }
+    },
+    {
+      "section_id": "D3-L003-S04",
+      "title": "Secure Remote Access",
+      "content": "Secure remote access enables users to work from anywhere while protecting organizational resources and data.\n\n**VPN Technologies**\n\n*IPsec VPN*\n- Network layer encryption\n- Site-to-site or client\n- Strong security\n- Can be complex\n- Full network access typical\n\n*SSL/TLS VPN*\n- Application layer\n- Usually client-to-site\n- Web browser based option\n- Easier firewall traversal\n- Granular access control\n\n*Split Tunneling*\n\n*Full Tunnel*\n- All traffic through VPN\n- More secure (all traffic inspected)\n- Higher bandwidth use\n- Slower performance\n\n*Split Tunnel*\n- Only corporate traffic through VPN\n- Better performance\n- Less bandwidth\n- Risk: internet traffic unprotected\n\n**Zero Trust Network Access (ZTNA)**\n\n*Concept*\n- Identity-based access\n- Application-specific access\n- No broad network access\n- Continuous verification\n- Software-defined perimeter\n\n*Benefits over VPN*\n- Granular access (app, not network)\n- No lateral movement\n- Better user experience\n- Reduced attack surface\n\n**Remote Desktop**\n\n*RDP Security*\n- Never expose directly to internet\n- Use VPN or gateway\n- Enable NLA (Network Level Authentication)\n- Strong passwords/MFA\n- Keep patched\n\n*Jump Servers/Bastion Hosts*\n- Single entry point\n- Hardened system\n- Audit all access\n- MFA required\n- Limit direct server access\n\n**Secure Access Service Edge (SASE)**\n\n*Components*\n- SD-WAN\n- Cloud-based security\n- ZTNA\n- SWG (Secure Web Gateway)\n- CASB\n- FWaaS (Firewall as a Service)\n\n*Benefits*\n- Unified security\n- Cloud-native\n- Consistent policy\n- Better performance\n- Reduced complexity\n\n**Remote Access Security Best Practices**\n\n*Authentication*\n- MFA required\n- Certificate-based where possible\n- Strong password policies\n- Session timeouts\n\n*Authorization*\n- Least privilege\n- Role-based access\n- Just-in-time access\n- Regular review\n\n*Monitoring*\n- Log all remote access\n- Detect anomalies\n- Geographic impossible travel\n- Unusual hours",
+
+      "key_points": [
+        "IPsec VPN for site-to-site; SSL/TLS VPN for client access",
+        "Full tunnel = all traffic via VPN (secure); Split tunnel = only corporate (performance)",
+        "ZTNA provides application-specific access without broad network access",
+        "Never expose RDP directly to internet; use VPN or jump server",
+        "SASE combines networking and security in cloud-delivered service"
+      ],
+
+      "real_world_example": {
+        "scenario": "ZTNA replacing traditional VPN",
+        "company": "Coastal Community Bank",
+        "application": "Coastal migrated from VPN to ZTNA after a security incident: PROBLEM (VPN gave broad network access, compromised remote user's credentials led to lateral movement), ZTNA IMPLEMENTATION (replaced VPN with ZTNA solution, users authenticate and access specific applications only, no direct network access), BENEFITS (users access only apps they need, compromised credentials can only access that user's authorized apps, no network-level lateral movement possible, continuous posture checks), SECURITY IMPROVEMENT (attack surface reduced dramatically, even successful credential theft can't pivot through network), USER EXPERIENCE (faster accessâ€”no full VPN tunnel, works better on varied networks). Same functionality, dramatically better security."
+      },
+
+      "exam_tips": [
+        "IPsec VPN = network layer; SSL VPN = application layer",
+        "Full tunnel = all traffic via VPN; Split tunnel = only corporate traffic",
+        "ZTNA = app-specific access (not network access like VPN)",
+        "RDP + internet exposure = major vulnerability; use gateway/VPN",
+        "SASE = SD-WAN + cloud security (ZTNA, SWG, CASB, FWaaS)"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Split Tunneling",
+          "definition": "A VPN configuration where only traffic destined for corporate resources goes through the VPN, while other traffic goes directly to the internet.",
+          "exam_note": "Corporate traffic via VPN, rest direct. Better performance. Security tradeoff."
+        },
+        {
+          "term": "Zero Trust Network Access (ZTNA)",
+          "definition": "A security model that provides application-specific access based on identity and context, without granting broad network access.",
+          "exam_note": "App-specific access. No network access. Identity-based. Replaces VPN."
+        },
+        {
+          "term": "Jump Server (Bastion Host)",
+          "definition": "A hardened server that serves as the single entry point for administrative access to internal systems.",
+          "exam_note": "Single entry point. Hardened. MFA required. Audit all access."
+        },
+        {
+          "term": "SASE",
+          "definition": "Secure Access Service Edgeâ€”a cloud-delivered service combining networking (SD-WAN) and security (ZTNA, SWG, CASB, FWaaS).",
+          "exam_note": "Cloud-delivered. Combines network + security. SD-WAN + ZTNA + SWG + CASB."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An organization wants to provide remote access where users can only access specific applications they're authorized for, without giving them broad network access. Which solution is MOST appropriate?",
+        "options": [
+          "IPsec VPN because it provides strong encryption",
+          "SSL VPN with split tunneling for performance",
+          "Zero Trust Network Access (ZTNA) for application-specific access",
+          "Remote Desktop Protocol for direct access"
+        ],
+        "correct": 2,
+        "explanation": "ZTNA provides application-specific access based on identity without granting broad network access. Unlike VPNs that typically provide network-level access (even with split tunneling), ZTNA limits users to only the specific applications they're authorized to use. This prevents lateral movement even if credentials are compromised."
+      }
+    },
+    {
+      "section_id": "D3-L003-S05",
+      "title": "Network Monitoring and Analysis",
+      "content": "Network monitoring provides visibility into traffic, enables threat detection, and supports incident investigation.\n\n**Traffic Analysis**\n\n*NetFlow/IPFIX*\n- Metadata about network flows\n- Source, destination, ports, bytes\n- Doesn't capture content\n- Useful for traffic analysis\n- Anomaly detection\n\n*Packet Capture*\n- Full packet content\n- Deep inspection possible\n- High storage requirements\n- Privacy considerations\n- Forensic value\n\n*Protocol Analysis*\n- Understand communication patterns\n- Identify protocol anomalies\n- Detect tunneling\n- Application identification\n\n**Network Detection and Response (NDR)**\n\n*Capabilities*\n- Traffic analysis\n- Behavioral detection\n- Machine learning\n- Threat hunting\n- Alert correlation\n- Encrypted traffic analysis\n\n*Detection Methods*\n- Known bad signatures\n- Anomaly detection\n- Behavioral analysis\n- Machine learning models\n\n**SIEM Integration**\n\n*Network Data Sources*\n- Firewall logs\n- IDS/IPS alerts\n- Proxy logs\n- DNS logs\n- NetFlow data\n- Packet captures\n\n*Correlation*\n- Multiple data sources\n- Attack pattern identification\n- Reduce false positives\n- Context enrichment\n\n**DNS Monitoring**\n\n*Why Monitor DNS*\n- Malware uses DNS for C2\n- Data exfiltration via DNS\n- DGA domain detection\n- Phishing domain identification\n\n*What to Look For*\n- High query volume\n- Long domain names\n- High entropy subdomains\n- Newly registered domains\n- Unusual TLDs\n\n**Encrypted Traffic Analysis**\n\n*Challenges*\n- Can't see content without decryption\n- TLS inspection controversial\n- Privacy vs. security\n\n*Approaches*\n\n*TLS Inspection*\n- Decrypt, inspect, re-encrypt\n- Requires certificate management\n- Performance impact\n- Privacy concerns\n\n*Metadata Analysis*\n- Analyze without decryption\n- JA3/JA3S fingerprinting\n- Certificate analysis\n- Connection patterns\n- Timing and volume",
+
+      "key_points": [
+        "NetFlow/IPFIX provides traffic metadata; packet capture provides full content",
+        "NDR uses behavioral detection and ML for network threat detection",
+        "DNS monitoring detects C2, exfiltration, and malicious domains",
+        "TLS inspection decrypts traffic for inspection (privacy tradeoff)",
+        "JA3 fingerprinting analyzes TLS without decryption"
+      ],
+
+      "real_world_example": {
+        "scenario": "DNS monitoring detecting data exfiltration",
+        "company": "GlobalRetail Inc.",
+        "application": "GlobalRetail's DNS monitoring detected a breach in progress: DETECTION (unusual DNS query pattern flaggedâ€”high volume to recently registered domain), ANALYSIS (queries contained base64-encoded data in subdomains, characteristic of DNS tunneling), INVESTIGATION (traced queries to single workstation, confirmed malware using DNS for exfiltration), RESPONSE (blocked domain at DNS level, isolated workstation, captured traffic for forensics), FINDINGS (malware had been exfiltrating customer data for 3 days before detection), IMPROVEMENT (implemented DNS query analysis, added threat intel feeds for known-bad domains, baseline normal DNS behavior). DNS monitoring caught what other controls missed because malware used allowed protocol (DNS)."
+      },
+
+      "exam_tips": [
+        "NetFlow = traffic metadata (no content); Packet capture = full content",
+        "DNS tunneling detection: high volume, long names, high entropy",
+        "JA3/JA3S = TLS fingerprinting without decryption",
+        "SIEM correlates multiple network data sources",
+        "TLS inspection has privacy implications but enables visibility"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "NetFlow",
+          "definition": "A Cisco protocol that collects metadata about network traffic flows, including source, destination, ports, and byte counts.",
+          "exam_note": "Traffic metadata. No content. Anomaly detection. Cisco protocol. IPFIX is standard."
+        },
+        {
+          "term": "Network Detection and Response (NDR)",
+          "definition": "Security technology that uses behavioral analytics and machine learning to detect threats in network traffic.",
+          "exam_note": "Beyond IDS. Behavioral + ML. Encrypted traffic analysis. Threat hunting."
+        },
+        {
+          "term": "TLS Inspection",
+          "definition": "The process of decrypting TLS traffic for inspection and then re-encrypting it, enabling visibility into encrypted communications.",
+          "exam_note": "Decrypt, inspect, re-encrypt. Privacy vs security tradeoff. MITM by design."
+        },
+        {
+          "term": "JA3 Fingerprinting",
+          "definition": "A method of fingerprinting TLS client hello messages to identify applications and detect malware without decrypting traffic.",
+          "exam_note": "TLS fingerprint. No decryption needed. Identifies clients. Detect malware."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A security team notices a workstation making thousands of DNS queries with unusually long subdomain names containing seemingly random characters. This pattern is MOST likely indicative of:",
+        "options": [
+          "Normal browsing behavior",
+          "DNS cache poisoning",
+          "DNS tunneling for data exfiltration or C2",
+          "DNSSEC validation"
+        ],
+        "correct": 2,
+        "explanation": "High volume DNS queries with long, high-entropy subdomains are characteristic of DNS tunnelingâ€”a technique where data is encoded in DNS queries for exfiltration or command-and-control communication. Normal browsing doesn't produce this pattern. DNS cache poisoning involves fake responses. DNSSEC validation doesn't create long random subdomains."
+      }
+    }
+  ],
+
+  "hands_on_activity": {
+    "title": "Network Security Architecture Design",
+    "objective": "Design a comprehensive network security architecture for an organization",
+    "scenario": "You're the network security architect at Apex Consulting Group designing network security for a new office.",
+    "steps": [
+      "Step 1: Design network zones and segmentation:\n   - Define network zones (external, DMZ, internal, restricted)\n   - Determine VLAN structure\n   - Create traffic flow rules between zones\n   - Draw network diagram",
+      "Step 2: Select and position security devices:\n   - Firewalls (perimeter, internal)\n   - IDS/IPS placement\n   - WAF for web applications\n   - Proxy servers\n   - Load balancers",
+      "Step 3: Define secure protocols for:\n   - Web traffic (TLS configuration)\n   - Remote access\n   - Management traffic\n   - Email security",
+      "Step 4: Design NAC implementation:\n   - 802.1X deployment plan\n   - Posture assessment requirements\n   - VLAN assignment logic\n   - Guest network design",
+      "Step 5: Design remote access architecture:\n   - VPN vs ZTNA decision\n   - Authentication requirements\n   - Access policies\n   - Split tunnel considerations",
+      "Step 6: Design monitoring strategy:\n   - What to capture (NetFlow, packets, logs)\n   - Where to monitor\n   - SIEM integration\n   - Alert criteria",
+      "Step 7: Document security policies for network access"
+    ],
+    "expected_outcome": "Complete network security architecture including zone design, device placement, protocol specifications, NAC implementation, remote access design, and monitoring strategy.",
+    "reflection_questions": [
+      "How does Zero Trust change traditional network security architecture?",
+      "What are the tradeoffs between security and performance in network design?",
+      "How do you balance TLS inspection benefits against privacy concerns?"
+    ]
+  },
+
+  "what_would_you_do": {
+    "scenario": "You're the security engineer at MedCare Health Systems. The network team proposes enabling split tunneling for the VPN to improve performance for remote workers. Currently, all traffic goes through the corporate VPN where it's inspected by security tools. Split tunneling would send only corporate traffic through VPN while internet traffic goes direct.",
+    "context": "Remote workers complain about slow VPN performance. They access cloud applications like Office 365 extensively. The corporate network has NGFW, proxy, and DLP inspection. Some users handle PHI (Protected Health Information) remotely.",
+    "question": "How do you evaluate this proposal?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Reject split tunneling entirelyâ€”all traffic must be inspected for security",
+        "is_best": false,
+        "feedback": "While full tunnel provides more security, completely rejecting the proposal doesn't address legitimate performance concerns. There may be ways to improve security while enabling better performance. Rigid rejection of business needs damages security's credibility.",
+        "consequences": "Performance problems continue. Users may find workarounds. Shadow IT risk. Security seen as blocker. Doesn't solve the real problem."
+      },
+      {
+        "id": "b",
+        "text": "Approve split tunneling for all users to improve performance",
+        "is_best": false,
+        "feedback": "Blanket approval ignores the security risks. Split tunneling means internet traffic isn't inspected by corporate security tools. For users handling PHI, this could create compliance issues and data exposure risks. One size doesn't fit all.",
+        "consequences": "Security inspection bypassed. Malware/phishing less likely to be blocked. DLP not applied to direct traffic. HIPAA compliance risk for PHI access."
+      },
+      {
+        "id": "c",
+        "text": "Implement selective split tunneling with additional endpoint controls for users not handling PHI",
+        "is_best": true,
+        "feedback": "This balanced approach provides performance improvements where safe while maintaining full protection for sensitive use cases. Users not handling PHI can have split tunneling with enhanced endpoint protection (EDR, web filtering). Users handling PHI keep full tunnel. Evaluates risk per user role.",
+        "consequences": "Performance improved for most users. Full protection maintained for PHI handlers. Endpoint controls compensate for reduced network inspection. Risk-based approach."
+      },
+      {
+        "id": "d",
+        "text": "Migrate to ZTNA to eliminate VPN entirely",
+        "is_best": false,
+        "feedback": "While ZTNA is a good long-term direction, it's not an immediate solution to the current problem. ZTNA migration takes significant time and planning. This doesn't address the immediate performance concerns, though it should be considered for future architecture.",
+        "consequences": "Doesn't solve immediate problem. Significant project to implement. Right direction but wrong timeline. Still need to address current VPN performance."
+      }
+    ],
+    "key_lesson": "Network security decisions should be risk-based, not one-size-fits-all. Split tunneling can be appropriate for some users when combined with endpoint controls, but users handling sensitive data may need full tunnel protection. Understand the specific risks (PHI handling, compliance requirements) and apply appropriate controls. Consider compensating controls (EDR, endpoint web filtering) when reducing network-level inspection."
+  },
+
+  "summary": {
+    "key_takeaways": [
+      "NGFW combines firewall, IPS, application awareness, and SSL inspection",
+      "IDS detects and alerts; IPS detects AND blocks (inline deployment)",
+      "TLS 1.3 preferred, TLS 1.2 minimum; IPsec tunnel mode for site-to-site VPN",
+      "802.1X provides port-based NAC with RADIUS authentication",
+      "ZTNA provides application-specific access without broad network access",
+      "DNS monitoring detects C2, tunneling, and exfiltration"
+    ],
+    "exam_essentials": [
+      "NGFW = firewall + IPS + application awareness + SSL inspection",
+      "WAF = Layer 7 web application protection (SQLi, XSS)",
+      "IDS = detect/alert; IPS = detect + block (inline)",
+      "802.1X: Supplicant â†’ Authenticator â†’ RADIUS",
+      "ZTNA = app-specific access (no network-level access like VPN)",
+      "TLS 1.3 preferred; IPsec Tunnel mode for VPN"
+    ],
+    "connection_to_next": "Network security controls traffic at the network level. The next lesson explores wireless securityâ€”the protocols, attacks, and defenses specific to wireless networks and mobile connectivity."
+  },
+
+  "related_content": {
+    "simulations": ["D3-SIM-002"],
+    "remediation": ["D3-REM-002"],
+    "next_lesson": "D3-LESSON-004",
+    "previous_lesson": "D3-LESSON-002"
+  }
+}

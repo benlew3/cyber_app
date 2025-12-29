@@ -1,0 +1,418 @@
+{
+  "lesson_id": "D1-LESSON-004",
+  "domain": 1,
+  "title": "Cryptographic Fundamentals",
+  "objectives_covered": ["1.4"],
+  "estimated_duration": "40-50 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": ["D1-LESSON-002"],
+
+  "introduction": {
+    "hook": "When you send a message through WhatsApp, enter your credit card online, or connect to your company's VPN, cryptography is working behind the scenes to keep your information safe. But what happens when cryptography fails? In 2017, researchers discovered a flaw in RSA key generation that affected millions of devices, allowing attackers to factor what should have been unfactorable numbers. Understanding cryptographic principlesâ€”not just using crypto toolsâ€”is essential for recognizing when systems are secure and when they're vulnerable.",
+    "learning_goals": [
+      "Distinguish between symmetric and asymmetric encryption and their appropriate use cases",
+      "Explain how hash functions provide integrity verification and their security properties",
+      "Describe how digital signatures provide authentication, integrity, and non-repudiation",
+      "Understand Public Key Infrastructure (PKI) components and certificate management",
+      "Apply appropriate cryptographic solutions to real-world security scenarios"
+    ],
+    "why_it_matters": "Cryptography is embedded in nearly every security control you'll encounter. As a security professional, you'll configure TLS certificates, evaluate encryption implementations, investigate cryptographic failures, and recommend appropriate algorithms. The Security+ exam heavily tests cryptographic conceptsâ€”expect 8-12 questions covering algorithms, use cases, and implementation considerations."
+  },
+
+  "sections": [
+    {
+      "section_id": "D1-L004-S01",
+      "title": "Symmetric Encryption: Shared Secret Cryptography",
+      "content": "Symmetric encryption uses the same key for both encryption and decryption. The sender and receiver must both possess the identical secret keyâ€”like having the same key for a lock that can both lock and unlock a door.\n\n**How Symmetric Encryption Works**\n\n1. Sender and receiver agree on a shared secret key\n2. Sender encrypts plaintext using the key: Plaintext + Key â†’ Ciphertext\n3. Ciphertext is transmitted (safely sent over insecure channel)\n4. Receiver decrypts using the same key: Ciphertext + Key â†’ Plaintext\n\n**Types of Symmetric Ciphers**\n\n*Block Ciphers*\nEncrypt fixed-size blocks of data (e.g., 128 bits at a time):\n\n**AES (Advanced Encryption Standard)**\n- The current standard for symmetric encryption\n- Key sizes: 128, 192, or 256 bits\n- Block size: 128 bits\n- Selected through open competition to replace DES\n- Used in TLS, disk encryption, VPNs, and countless applications\n\n**DES (Data Encryption Standard)**\n- Legacy standard from 1977\n- 56-bit key (inadequate for modern security)\n- Block size: 64 bits\n- DEPRECATEDâ€”do not use for new applications\n\n**3DES (Triple DES)**\n- Applies DES three times with different keys\n- Effective key strength: 112-168 bits\n- Slower than AES, being phased out\n- DEPRECATEDâ€”transition to AES\n\n**Blowfish / Twofish**\n- Blowfish: 64-bit blocks, up to 448-bit keys\n- Twofish: 128-bit blocks, up to 256-bit keys (AES finalist)\n- Used in some applications but AES is generally preferred\n\n*Stream Ciphers*\nEncrypt one bit or byte at a time:\n\n**ChaCha20**\n- Modern stream cipher, designed by Daniel Bernstein\n- Fast in software, especially on mobile devices\n- Used in TLS 1.3, WireGuard VPN\n- Often paired with Poly1305 for authentication (ChaCha20-Poly1305)\n\n**RC4**\n- Formerly widely used in WEP, early TLS\n- DEPRECATEDâ€”known vulnerabilities\n- Do not use\n\n**Block Cipher Modes of Operation**\n\nBlock ciphers need modes to handle data larger than one block:\n\n**ECB (Electronic Codebook)**\n- Each block encrypted independently\n- INSECUREâ€”identical plaintext blocks produce identical ciphertext\n- Never use for real encryption (patterns are visible)\n\n**CBC (Cipher Block Chaining)**\n- Each block XORed with previous ciphertext block\n- Requires initialization vector (IV)\n- Vulnerable to padding oracle attacks if implemented incorrectly\n\n**CTR (Counter Mode)**\n- Turns block cipher into stream cipher\n- Can be parallelized for speed\n- Nonce must never be reused with same key\n\n**GCM (Galois/Counter Mode)**\n- Provides both encryption AND authentication (AEAD)\n- Most recommended mode for new applications\n- Used in TLS 1.3, AES-GCM is the standard choice\n\n**The Key Distribution Problem**\n\nSymmetric encryption's main challenge: How do you securely share the key?\n- In-person key exchange doesn't scale\n- Sending keys over network risks interception\n- Solution: Use asymmetric encryption to exchange symmetric keys",
+
+      "key_points": [
+        "Symmetric encryption uses the same key for encryption and decryption",
+        "AES is the current standardâ€”use 256-bit keys for high security",
+        "DES, 3DES, and RC4 are deprecatedâ€”don't use for new applications",
+        "GCM mode provides both encryption and authentication (AEAD)",
+        "Key distribution is the main challengeâ€”asymmetric crypto helps solve this"
+      ],
+
+      "real_world_example": {
+        "scenario": "Implementing full-disk encryption for company laptops",
+        "company": "Apex Consulting Group",
+        "application": "Apex deploys BitLocker on all Windows laptops using AES-256 in XTS mode (designed for disk encryption). The encryption key is protected by TPM (Trusted Platform Module) and a user PIN. When a laptop boots, the TPM verifies system integrity before releasing the key. If a laptop is stolen, the disk contents are unreadable without the TPM and PIN. For macOS, FileVault 2 provides equivalent protection using AES-128 in XTS mode. This protects client data even if physical devices are lost."
+      },
+
+      "exam_tips": [
+        "AES is THE answer for symmetric encryption questionsâ€”key sizes 128/192/256",
+        "DES (56-bit) and 3DES are DEPRECATEDâ€”recognize them as weak/legacy",
+        "ECB mode is INSECUREâ€”never the correct answer for 'secure encryption'",
+        "GCM provides encryption + authentication (AEAD)â€”best practice for new implementations",
+        "Symmetric is FAST but has key distribution problem; asymmetric solves key exchange"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Symmetric Encryption",
+          "definition": "A cryptographic method where the same key is used for both encryption and decryption, requiring secure key exchange between parties.",
+          "exam_note": "Also called 'secret key' or 'shared key' cryptography. Fast but key distribution is challenging."
+        },
+        {
+          "term": "AES (Advanced Encryption Standard)",
+          "definition": "The current symmetric encryption standard, supporting 128, 192, and 256-bit keys with 128-bit block size, selected to replace DES.",
+          "exam_note": "THE standard for symmetric encryption. Know the key sizes. Used everywhere: TLS, disk encryption, VPNs."
+        },
+        {
+          "term": "Block Cipher Mode",
+          "definition": "A method for applying a block cipher to data larger than a single block, determining how blocks are processed and linked together.",
+          "exam_note": "ECB is insecure. CBC is common but has vulnerabilities. GCM is best practice (encryption + auth)."
+        },
+        {
+          "term": "AEAD (Authenticated Encryption with Associated Data)",
+          "definition": "A form of encryption that simultaneously provides confidentiality, integrity, and authenticity of data, such as AES-GCM.",
+          "exam_note": "GCM mode provides AEAD. Protects against both eavesdropping AND tampering."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A security administrator needs to encrypt sensitive database fields using symmetric encryption. Which algorithm and mode combination is MOST appropriate?",
+        "options": [
+          "DES in ECB mode because it's been proven over decades",
+          "AES-256 in GCM mode because it provides encryption and authentication",
+          "3DES in CBC mode because it's still approved for use",
+          "RC4 because stream ciphers are faster for database fields"
+        ],
+        "correct": 1,
+        "explanation": "AES-256 in GCM mode is the most appropriate choice. AES is the current standard, 256-bit keys provide strong security, and GCM mode provides both encryption AND authentication (AEAD), protecting against tampering. DES is deprecated. 3DES is being phased out. RC4 has known vulnerabilities. ECB mode is never secure for real data."
+      }
+    },
+    {
+      "section_id": "D1-L004-S02",
+      "title": "Asymmetric Encryption: Public Key Cryptography",
+      "content": "Asymmetric encryption uses a mathematically related key pair: a public key that can be freely shared and a private key that must be kept secret. What one key encrypts, only the other can decryptâ€”enabling secure communication without pre-shared secrets.\n\n**How Asymmetric Encryption Works**\n\n*For Confidentiality (Encrypting Data):*\n1. Sender obtains recipient's PUBLIC key\n2. Sender encrypts message with recipient's PUBLIC key\n3. Only recipient's PRIVATE key can decrypt\n4. Even the sender can't decrypt the message after encryption\n\n*For Digital Signatures (Proving Identity):*\n1. Signer creates hash of message\n2. Signer encrypts hash with their PRIVATE key (creates signature)\n3. Anyone can decrypt with signer's PUBLIC key\n4. If decrypted hash matches message hash, signature is valid\n\n**Common Asymmetric Algorithms**\n\n*RSA (Rivest-Shamir-Adleman)*\n- Most widely used asymmetric algorithm\n- Based on difficulty of factoring large prime numbers\n- Key sizes: 2048 bits minimum, 4096 bits recommended\n- Used for encryption, digital signatures, key exchange\n- Slower than symmetric encryption\n\n*Elliptic Curve Cryptography (ECC)*\n- Based on elliptic curve mathematics\n- Smaller keys with equivalent security (256-bit ECC â‰ˆ 3072-bit RSA)\n- Faster and more efficient, especially for mobile/IoT\n- Growing adoption, especially for signatures (ECDSA) and key exchange (ECDH)\n\n*Diffie-Hellman (DH)*\n- Key EXCHANGE protocol, not encryption\n- Allows two parties to establish shared secret over insecure channel\n- Vulnerable to man-in-the-middle without authentication\n- ECDH = Elliptic Curve Diffie-Hellman (more efficient)\n\n*DSA (Digital Signature Algorithm)*\n- Designed specifically for digital signatures\n- Does NOT provide encryption capability\n- Being superseded by ECDSA\n\n**Key Characteristics**\n\n| Property | RSA | ECC | DH |\n|----------|-----|-----|----|\n| Encryption | Yes | Yes | No (key exchange) |\n| Signatures | Yes | Yes (ECDSA) | No |\n| Key Exchange | Yes | Yes (ECDH) | Yes |\n| Key Size for 128-bit security | 3072 bits | 256 bits | 3072 bits |\n| Performance | Slower | Faster | N/A |\n\n**Why Use Both Symmetric and Asymmetric?**\n\nAsymmetric encryption is too slow for large data. Real-world systems use HYBRID encryption:\n\n1. Generate random symmetric key (session key)\n2. Encrypt the data with fast symmetric encryption (AES)\n3. Encrypt the symmetric key with slow asymmetric encryption (RSA/ECC)\n4. Send encrypted data + encrypted key\n5. Recipient decrypts symmetric key with private key\n6. Recipient decrypts data with symmetric key\n\nThis is exactly how TLS, PGP, and most encrypted communication works.\n\n**Perfect Forward Secrecy (PFS)**\n\nUsing ephemeral (temporary) keys for each session:\n- Each session generates new DH key pair\n- Session key is derived, then ephemeral keys discarded\n- If long-term private key is compromised, past sessions remain secure\n- Enabled by DHE (DH Ephemeral) or ECDHE cipher suites",
+
+      "key_points": [
+        "Asymmetric encryption uses key pairs: public key encrypts, private key decrypts",
+        "For signatures: private key signs, public key verifies",
+        "RSA is widely used but ECC provides equivalent security with smaller keys",
+        "Diffie-Hellman enables key exchange but doesn't encrypt data directly",
+        "Hybrid encryption combines fast symmetric encryption with asymmetric key exchange"
+      ],
+
+      "real_world_example": {
+        "scenario": "Securing web communications with TLS",
+        "company": "GlobalRetail Inc.",
+        "application": "GlobalRetail's e-commerce site uses TLS 1.3 with hybrid encryption: CERTIFICATE (RSA 4096-bit certificate issued by public CA, contains public key), KEY EXCHANGE (ECDHE for Perfect Forward Secrecyâ€”new keys each session), SYMMETRIC ENCRYPTION (AES-256-GCM for actual data). When a customer connects: 1) Browser validates server certificate, 2) ECDHE generates shared secret, 3) Session keys derived from shared secret, 4) All subsequent data encrypted with AES-GCM. Even if GlobalRetail's private key is later compromised, past shopping sessions remain protected due to PFS."
+      },
+
+      "exam_tips": [
+        "Encrypt with PUBLIC key for confidentiality; sign with PRIVATE key for authenticity",
+        "RSA key sizes: 2048 minimum, 4096 recommended (much larger than symmetric keys)",
+        "ECC 256-bit â‰ˆ RSA 3072-bit security (ECC is more efficient)",
+        "Diffie-Hellman is KEY EXCHANGE, not encryptionâ€”can't encrypt data directly",
+        "Perfect Forward Secrecy (PFS) = ephemeral keys; protects past sessions if key compromised"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Asymmetric Encryption",
+          "definition": "A cryptographic method using mathematically related key pairs where the public key encrypts and the private key decrypts (or vice versa for signatures).",
+          "exam_note": "Also called 'public key cryptography.' Slower than symmetric but solves key distribution."
+        },
+        {
+          "term": "RSA",
+          "definition": "A widely used asymmetric algorithm based on the mathematical difficulty of factoring large prime numbers, supporting encryption, signatures, and key exchange.",
+          "exam_note": "Named after inventors Rivest, Shamir, Adleman. Key sizes: 2048+ bits. Most common asymmetric algorithm."
+        },
+        {
+          "term": "Elliptic Curve Cryptography (ECC)",
+          "definition": "An approach to public key cryptography based on elliptic curve mathematics, providing equivalent security to RSA with significantly smaller keys.",
+          "exam_note": "ECC 256-bit â‰ˆ RSA 3072-bit. More efficient, especially for mobile/IoT. Growing adoption."
+        },
+        {
+          "term": "Perfect Forward Secrecy (PFS)",
+          "definition": "A property of key exchange protocols where session keys are not compromised even if the server's long-term private key is later exposed.",
+          "exam_note": "Enabled by DHE/ECDHE. Important for TLS. Protects PAST sessions from FUTURE key compromise."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A security architect wants to ensure that if the company's private key is stolen next year, attackers still cannot decrypt network traffic captured today. Which feature provides this protection?",
+        "options": [
+          "AES-256 encryption",
+          "RSA 4096-bit keys",
+          "Perfect Forward Secrecy using ECDHE",
+          "Certificate pinning"
+        ],
+        "correct": 2,
+        "explanation": "Perfect Forward Secrecy (PFS) using ephemeral Diffie-Hellman (ECDHE) generates unique session keys for each connection. Even if the long-term private key is later compromised, past session keys cannot be recoveredâ€”they were discarded after use. AES strength and RSA key size don't address key compromise. Certificate pinning prevents fake certificates but doesn't protect against key theft."
+      }
+    },
+    {
+      "section_id": "D1-L004-S03",
+      "title": "Hash Functions and Integrity",
+      "content": "Hash functions are one-way mathematical functions that convert input of any size into a fixed-size output (hash value or digest). They're fundamental to ensuring data integrityâ€”verifying that data hasn't been modified.\n\n**Hash Function Properties**\n\n*Deterministic*\nSame input always produces same output\n\n*Fixed Output Size*\nRegardless of input size, output is always the same length (e.g., SHA-256 always produces 256 bits)\n\n*One-Way (Pre-image Resistance)*\nCannot reverse the hash to find the original input\n\n*Collision Resistance*\nExtremely difficult to find two different inputs that produce the same hash\n\n*Avalanche Effect*\nSmall change in input produces dramatically different output\n\n**Common Hash Algorithms**\n\n*MD5 (Message Digest 5)*\n- 128-bit output\n- BROKENâ€”collision attacks demonstrated\n- DO NOT use for security purposes\n- Still used for checksums (non-security verification)\n\n*SHA-1 (Secure Hash Algorithm 1)*\n- 160-bit output\n- DEPRECATEDâ€”collision attacks demonstrated (2017)\n- Being phased out of security applications\n- Legacy systems may still use it\n\n*SHA-2 Family*\n- SHA-256: 256-bit output (most common)\n- SHA-384: 384-bit output\n- SHA-512: 512-bit output\n- Current standard for cryptographic hashing\n- Used in TLS, code signing, blockchain, and more\n\n*SHA-3 Family*\n- Newest SHA standard (2015)\n- Different internal structure than SHA-2 (Keccak algorithm)\n- Provides alternative if SHA-2 weaknesses found\n- SHA3-256, SHA3-384, SHA3-512 variants\n\n**Hash Applications**\n\n*Password Storage*\nStore hash, not plaintext password:\n- User enters password\n- System hashes password with SALT\n- Compares to stored hash\n- Never stores or transmits actual password\n\n*Use password-specific functions*: bcrypt, scrypt, Argon2 (intentionally slow)\n\n*File Integrity Verification*\n- Calculate hash of known-good file\n- Later recalculate and compare\n- Any modification changes the hash\n- Used in file integrity monitoring (FIM)\n\n*Digital Signatures*\n- Hash the message (creates fixed-size digest)\n- Sign the hash with private key\n- Verifier hashes message and compares\n- Efficient: sign small hash instead of large message\n\n*Blockchain*\n- Each block contains hash of previous block\n- Creates immutable chain\n- Modifying any block changes all subsequent hashes\n\n**HMAC (Hash-based Message Authentication Code)**\n\nCombines hash function with secret key:\n- Provides integrity AND authenticity\n- Both parties must know the secret key\n- Can detect modification AND verify sender\n- Format: HMAC-SHA256, HMAC-SHA384, etc.\n\nProcess:\n1. Combine key with message in specific way\n2. Hash the combination\n3. Recipient repeats with shared key\n4. Matching HMAC = integrity + authenticity confirmed",
+
+      "key_points": [
+        "Hash functions are one-wayâ€”you cannot reverse a hash to find the original input",
+        "MD5 and SHA-1 are broken/deprecatedâ€”use SHA-256 or SHA-3",
+        "Collision resistance means two inputs shouldn't produce the same hash",
+        "Password hashing should use slow algorithms (bcrypt, scrypt, Argon2) with salt",
+        "HMAC combines hashing with a key for integrity AND authenticity"
+      ],
+
+      "real_world_example": {
+        "scenario": "Implementing secure password storage",
+        "company": "Coastal Community Bank",
+        "application": "Coastal Community Bank upgraded their password storage: OLD SYSTEM stored passwords using unsalted MD5 (vulnerable to rainbow tables and collisions), NEW SYSTEM uses Argon2id with unique 128-bit salt per password. When a user creates a password: 1) Generate random salt, 2) Hash password with Argon2id (memory-hard, slow), 3) Store salt + hash. During login: 1) Retrieve stored salt, 2) Hash provided password with salt, 3) Compare to stored hash. Even if the database is breached, attackers face years of computation to crack passwords due to Argon2's intentional slowness."
+      },
+
+      "exam_tips": [
+        "MD5 = BROKEN, SHA-1 = DEPRECATED, SHA-256/SHA-3 = CURRENT",
+        "Hashing is ONE-WAY; encryption is TWO-WAY (can decrypt with key)",
+        "Passwords should use bcrypt, scrypt, or Argon2 (slow by design), not plain SHA-256",
+        "SALT is random value added to password before hashingâ€”defeats rainbow tables",
+        "HMAC = hash + key, provides integrity AND authenticity (not just integrity)"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Hash Function",
+          "definition": "A one-way mathematical function that converts input of any size into a fixed-size output (digest), where the input cannot be recovered from the output.",
+          "exam_note": "One-way = can't reverse. Collision resistant = can't find two inputs with same hash."
+        },
+        {
+          "term": "SHA-256",
+          "definition": "A cryptographic hash function from the SHA-2 family that produces a 256-bit (32-byte) hash value, currently the standard for most security applications.",
+          "exam_note": "Current standard. Used in TLS, code signing, blockchain. Part of SHA-2 family."
+        },
+        {
+          "term": "Salt",
+          "definition": "A random value added to data (typically passwords) before hashing, ensuring that identical inputs produce different hashes and defeating rainbow table attacks.",
+          "exam_note": "Must be UNIQUE per password. Stored alongside hash. Defeats precomputation attacks."
+        },
+        {
+          "term": "HMAC",
+          "definition": "A mechanism for message authentication using a cryptographic hash function combined with a secret key, providing both integrity verification and authentication.",
+          "exam_note": "HMAC-SHA256 is common. Provides integrity AND authenticity (hash alone provides only integrity)."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An organization stores user passwords by hashing them with SHA-256. A security auditor identifies this as inadequate. What is the PRIMARY concern?",
+        "options": [
+          "SHA-256 has known collision vulnerabilities that could be exploited",
+          "SHA-256 is too fast, making brute-force attacks more feasible",
+          "SHA-256 produces fixed-length output, making passwords guessable",
+          "SHA-256 is deprecated and should be replaced with SHA-3"
+        ],
+        "correct": 1,
+        "explanation": "SHA-256 is cryptographically sound but TOO FAST for password hashing. Attackers with GPUs can compute billions of SHA-256 hashes per second, making brute-force attacks practical. Password hashing should use intentionally slow algorithms like bcrypt, scrypt, or Argon2 that make brute-force computationally expensive. SHA-256 is NOT deprecated or vulnerableâ€”it's just wrong for this use case."
+      }
+    },
+    {
+      "section_id": "D1-L004-S04",
+      "title": "Digital Signatures and Certificates",
+      "content": "Digital signatures provide authentication (who sent it), integrity (hasn't been modified), and non-repudiation (sender can't deny sending). Combined with certificates, they form the foundation of trust on the internet.\n\n**How Digital Signatures Work**\n\n*Signing Process:*\n1. Create hash of the document/message\n2. Encrypt the hash with sender's PRIVATE key\n3. Attach encrypted hash (signature) to document\n4. Send document + signature\n\n*Verification Process:*\n1. Separate signature from document\n2. Decrypt signature using sender's PUBLIC key â†’ Original hash\n3. Hash the received document â†’ Calculated hash\n4. Compare: If hashes match â†’ Valid signature\n\n**What Digital Signatures Prove**\n\n*Authentication*\nOnly the private key holder could create that signature\n\n*Integrity*\nAny modification changes the hash, invalidating the signature\n\n*Non-Repudiation*\nSigner can't deny signing (assuming private key wasn't compromised)\n\n**Digital Certificates**\n\nCertificates bind public keys to identities, enabling trust:\n\n*Certificate Contents (X.509 Standard):*\n- Subject (identity of certificate holder)\n- Public key of the subject\n- Issuer (Certificate Authority that issued it)\n- Validity period (not before, not after dates)\n- Serial number (unique identifier)\n- Signature algorithm used\n- CA's signature (CA signs the certificate)\n\n*Certificate Types:*\n- **DV (Domain Validation)**: Proves control of domain only\n- **OV (Organization Validation)**: Verifies organization identity\n- **EV (Extended Validation)**: Extensive identity verification\n- **Wildcard**: Valid for domain and all subdomains (*.example.com)\n- **SAN (Subject Alternative Name)**: Multiple domains in one cert\n\n**Public Key Infrastructure (PKI)**\n\nPKI is the framework enabling digital certificates:\n\n*Components:*\n- **Certificate Authority (CA)**: Issues and signs certificates\n- **Registration Authority (RA)**: Verifies identity before CA issues cert\n- **Certificate Repository**: Stores and distributes certificates\n- **Certificate Revocation List (CRL)**: List of revoked certificates\n- **OCSP Responder**: Real-time certificate status checking\n\n*Certificate Lifecycle:*\n1. **Request**: Entity generates key pair, creates CSR (Certificate Signing Request)\n2. **Verification**: RA verifies identity\n3. **Issuance**: CA signs and issues certificate\n4. **Usage**: Certificate used for authentication, encryption, signing\n5. **Renewal**: Before expiration, request new certificate\n6. **Revocation**: If compromised, CA adds to CRL/OCSP\n\n**Certificate Chain of Trust**\n\n*Hierarchy:*\n- **Root CA**: Self-signed, trust anchor (built into browsers/OS)\n- **Intermediate CA**: Signed by root, issues end-entity certs\n- **End-Entity Certificate**: The actual server/user certificate\n\n*Validation Process:*\n1. Receive server certificate\n2. Check signature with intermediate CA's public key\n3. Check intermediate's signature with root CA's public key\n4. Root CA is trusted (in trust store) â†’ Chain valid\n5. Also check expiration and revocation status",
+
+      "key_points": [
+        "Digital signatures: hash message, encrypt hash with PRIVATE key",
+        "Verification: decrypt with PUBLIC key, compare hashes",
+        "Signatures provide authentication, integrity, AND non-repudiation",
+        "Certificates bind public keys to identities via CA signatures",
+        "Certificate chain: End-entity â†’ Intermediate CA â†’ Root CA (trust anchor)"
+      ],
+
+      "real_world_example": {
+        "scenario": "Implementing code signing for software distribution",
+        "company": "NexaTech Solutions",
+        "application": "NexaTech implements code signing to ensure software integrity: CERTIFICATE (obtained EV code signing certificate from DigiCert after extended verification), SIGNING PROCESS (build server hashes completed software, signs hash with private key stored in HSM), DISTRIBUTION (signed software distributed with certificate), VERIFICATION (user's OS verifies signature against trusted CA chain before installation). When a malware author tried to distribute fake 'NexaTech' software, users' systems rejected itâ€”the fake wasn't signed with NexaTech's private key. The signature also proves software wasn't modified after NexaTech signed it."
+      },
+
+      "exam_tips": [
+        "SIGN with private key (only you can sign); VERIFY with public key (anyone can verify)",
+        "This is OPPOSITE of encryption (encrypt with public, decrypt with private)",
+        "Certificate chains: End-entity â†’ Intermediate â†’ Root (root is trust anchor)",
+        "CRL is periodic list; OCSP is real-time check (OCSP is more current)",
+        "EV certificates require extensive validation, DV just proves domain control"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Digital Signature",
+          "definition": "A cryptographic scheme that proves the authenticity and integrity of a message by encrypting a hash of the message with the sender's private key.",
+          "exam_note": "Provides authentication + integrity + non-repudiation. Sign with PRIVATE, verify with PUBLIC."
+        },
+        {
+          "term": "Certificate Authority (CA)",
+          "definition": "A trusted entity that issues digital certificates, binding public keys to identities by digitally signing the certificates.",
+          "exam_note": "CAs form the trust hierarchy. Compromised CA = major security incident. Root CAs are trust anchors."
+        },
+        {
+          "term": "Certificate Revocation List (CRL)",
+          "definition": "A list published by a Certificate Authority containing the serial numbers of certificates that have been revoked before their expiration date.",
+          "exam_note": "CRL is periodic (may be stale). OCSP provides real-time status. Both check revocation."
+        },
+        {
+          "term": "OCSP (Online Certificate Status Protocol)",
+          "definition": "A protocol for obtaining real-time revocation status of digital certificates from the issuing Certificate Authority.",
+          "exam_note": "More current than CRL. OCSP stapling reduces latency by having server include response."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An attacker obtains a company's digital certificate but NOT the private key. What can the attacker do with this certificate?",
+        "options": [
+          "Decrypt all traffic encrypted with the certificate",
+          "Create valid digital signatures impersonating the company",
+          "Verify signatures from the legitimate certificate holder",
+          "Issue new certificates under the company's identity"
+        ],
+        "correct": 2,
+        "explanation": "With only the certificate (which contains the public key), an attacker can only VERIFY signatures made by the legitimate private key holderâ€”this is a public operation. They CANNOT decrypt traffic (need private key), create valid signatures (need private key), or issue certificates (need CA's private key). The certificate and public key are meant to be public."
+      }
+    },
+    {
+      "section_id": "D1-L004-S05",
+      "title": "Cryptographic Applications and Best Practices",
+      "content": "Understanding how cryptographic primitives combine into real-world systems is essential for implementing and evaluating security solutions.\n\n**TLS (Transport Layer Security)**\n\nSecures communication over networks (HTTPS, email, VPN):\n\n*TLS Handshake Process:*\n1. **Client Hello**: Client sends supported cipher suites\n2. **Server Hello**: Server selects cipher suite, sends certificate\n3. **Key Exchange**: ECDHE establishes shared secret\n4. **Finished**: Both derive session keys, verify handshake\n5. **Application Data**: Encrypted with symmetric session keys\n\n*TLS Versions:*\n- TLS 1.0, 1.1: DEPRECATED (vulnerabilities)\n- TLS 1.2: Current minimum (still widely used)\n- TLS 1.3: Current best (faster, more secure)\n\n*TLS 1.3 Improvements:*\n- Removed vulnerable cipher suites\n- Only PFS cipher suites (DHE/ECDHE required)\n- Fewer round trips (faster handshake)\n- Encrypted more of the handshake\n\n**Email Security**\n\n*S/MIME (Secure/Multipurpose Internet Mail Extensions)*\n- Uses certificates for encryption and signing\n- Recipients need sender's public key\n- Widely supported in enterprise email\n- Certificate-basedâ€”requires PKI\n\n*PGP/GPG (Pretty Good Privacy)*\n- Uses web of trust instead of CA hierarchy\n- Users sign each other's keys\n- More common in personal/open source communities\n- Can encrypt and/or sign messages\n\n**Disk Encryption**\n\n*Full Disk Encryption (FDE)*\n- Encrypts entire drive including OS\n- Protects against physical theft\n- BitLocker (Windows), FileVault (macOS), LUKS (Linux)\n- Key protection: TPM, password, USB key\n\n*File/Folder Encryption*\n- Encrypts specific files or containers\n- More granular than FDE\n- EFS (Windows), VeraCrypt (cross-platform)\n\n**Cryptographic Best Practices**\n\n*Algorithm Selection:*\n- Use current standards (AES-256, RSA 4096, SHA-256, ECDHE)\n- Avoid deprecated algorithms (DES, 3DES, MD5, SHA-1, RC4)\n- Plan for crypto agility (ability to change algorithms)\n\n*Key Management:*\n- Generate keys with proper entropy (true random numbers)\n- Protect private keys (HSM, secure storage)\n- Implement key rotation and expiration\n- Have key recovery procedures\n- Destroy keys securely when no longer needed\n\n*Implementation:*\n- Use well-tested libraries (don't roll your own crypto)\n- Keep libraries updated (patch vulnerabilities)\n- Proper random number generation (CSPRNG)\n- Secure key storage (not in code or configs)\n- Handle errors securely (no information leakage)\n\n**Quantum Computing Considerations**\n\nQuantum computers threaten current cryptography:\n\n*Vulnerable to Quantum Attacks:*\n- RSA and ECC (Shor's algorithm breaks them)\n- Diffie-Hellman key exchange\n\n*Resistant to Quantum Attacks:*\n- AES (double key size: 256-bit)\n- SHA-3 (still secure with longer outputs)\n- Post-quantum algorithms being standardized (CRYSTALS-Kyber, CRYSTALS-Dilithium)\n\n*Timeline:* Large-scale quantum computers are years away, but 'harvest now, decrypt later' attacks mean sensitive data needs future-proofing.",
+
+      "key_points": [
+        "TLS 1.2 is minimum; TLS 1.3 is preferred (PFS required, faster)",
+        "S/MIME uses certificates; PGP uses web of trust",
+        "Full disk encryption protects against physical device theft",
+        "Never implement your own cryptoâ€”use tested libraries",
+        "Plan for crypto agility; quantum computing will break RSA/ECC eventually"
+      ],
+
+      "real_world_example": {
+        "scenario": "Implementing cryptographic controls across the enterprise",
+        "company": "Pinnacle Financial Services",
+        "application": "Pinnacle implements defense-in-depth cryptography: DATA IN TRANSIT (TLS 1.3 required for all external connections, internal networks moving to TLS with certificates from internal CA), DATA AT REST (AES-256 full disk encryption on all endpoints, database-level encryption for sensitive fields), EMAIL (S/MIME required for sending PII, certificates issued by internal CA integrated with email client), KEY MANAGEMENT (HSMs store critical private keys, automated certificate renewal before expiration, CRL and OCSP checking enabled). They've also begun planning for post-quantum: inventorying cryptographic dependencies and testing hybrid key exchange mechanisms."
+      },
+
+      "exam_tips": [
+        "TLS 1.3 requires PFS (DHE/ECDHE)â€”TLS 1.2 doesn't require it",
+        "S/MIME = certificates/PKI; PGP = web of trust (peer signing)",
+        "BitLocker (Windows), FileVault (macOS), LUKS (Linux) for FDE",
+        "Never roll your own cryptoâ€”use tested libraries",
+        "Quantum threatens RSA/ECC but not AES (with 256-bit keys)"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "TLS (Transport Layer Security)",
+          "definition": "A cryptographic protocol that provides secure communication over networks by encrypting traffic and authenticating servers (and optionally clients).",
+          "exam_note": "TLS 1.3 is current best. TLS 1.0/1.1 deprecated. Know that TLS replaced SSL."
+        },
+        {
+          "term": "S/MIME",
+          "definition": "A standard for secure email that uses certificates and PKI to provide encryption and digital signatures for email messages.",
+          "exam_note": "Certificate-based (PKI). Contrast with PGP which uses web of trust."
+        },
+        {
+          "term": "Key Escrow",
+          "definition": "An arrangement where cryptographic keys are held by a third party, allowing authorized access to encrypted data if the primary key holder is unavailable.",
+          "exam_note": "Enables recovery but creates security risks. Must protect escrowed keys carefully."
+        },
+        {
+          "term": "Crypto Agility",
+          "definition": "The ability of a system to easily switch between cryptographic algorithms and protocols as security requirements or vulnerabilities evolve.",
+          "exam_note": "Important for long-term security. Systems should not be tied to single algorithms."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A security administrator is configuring a web server and must choose TLS settings. Which configuration represents BEST practice?",
+        "options": [
+          "TLS 1.0 with AES-128-CBC for maximum compatibility",
+          "TLS 1.2 with RSA key exchange and AES-256-CBC",
+          "TLS 1.3 with ECDHE key exchange and AES-256-GCM",
+          "TLS 1.2 with 3DES for legacy system support"
+        ],
+        "correct": 2,
+        "explanation": "TLS 1.3 with ECDHE (Perfect Forward Secrecy) and AES-256-GCM (authenticated encryption) represents best practice. TLS 1.0 is deprecated and vulnerable. TLS 1.2 with RSA lacks PFS. 3DES is deprecated. TLS 1.3 requires PFS-capable key exchange and only includes secure cipher suites."
+      }
+    }
+  ],
+
+  "hands_on_activity": {
+    "title": "Cryptographic Implementation Analysis",
+    "objective": "Evaluate cryptographic implementations and recommend improvements",
+    "scenario": "You're conducting a security assessment of MedCare Health Systems' cryptographic controls. You've gathered the following information about their current implementations.",
+    "steps": [
+      "Step 1: Review these findings and identify vulnerabilities:\n   - Passwords stored using MD5 without salt\n   - Web servers using TLS 1.0 with RC4 cipher\n   - Backup tapes encrypted with 3DES\n   - Email encryption using PGP with 1024-bit RSA keys\n   - VPN using IPsec with SHA-1 for integrity",
+      "Step 2: For each vulnerability, explain WHY it's a problem (specific weakness)",
+      "Step 3: Recommend specific remediation (algorithm, key size, configuration)",
+      "Step 4: Prioritize remediations based on risk (which to fix first)",
+      "Step 5: Consider operational impact of each change",
+      "Step 6: Create a migration plan that maintains availability during upgrades"
+    ],
+    "expected_outcome": "A comprehensive remediation report identifying cryptographic vulnerabilities, explaining risks, and providing prioritized recommendations with implementation considerations.",
+    "reflection_questions": [
+      "Why might an organization still be using deprecated cryptography?",
+      "What challenges exist in upgrading cryptographic implementations?",
+      "How would you handle systems that can't be upgraded?"
+    ]
+  },
+
+  "what_would_you_do": {
+    "scenario": "You're the security architect at Meridian Manufacturing. A critical industrial control system (ICS) uses an outdated protocol that only supports DES encryption. The system vendor is out of business, and replacing the system would cost $2 million and take 18 months. A security audit flagged DES as non-compliant.",
+    "context": "The ICS controls manufacturing processes that generate $50M annually. The system is isolated on its own network segment. Compliance audit is in 3 months. Your security budget is $150,000. The CFO is asking for options.",
+    "question": "How would you address this cryptographic vulnerability?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Immediately shut down the system until it can be replacedâ€”DES is completely broken",
+        "is_best": false,
+        "feedback": "While DES is deprecated, completely shutting down a $50M/year production system for a weakness that requires additional controls to exploit is an overreaction. Security must balance with business operations.",
+        "consequences": "Massive revenue loss. Manufacturing halted. Business-security relationship damaged. This is security theater, not risk management."
+      },
+      {
+        "id": "b",
+        "text": "Implement compensating controls: network encryption overlay (VPN tunnel), enhanced monitoring, and strict network segmentation",
+        "is_best": true,
+        "feedback": "This is pragmatic risk management. Wrapping the weak DES traffic in a modern VPN tunnel (AES-256) provides strong encryption. Enhanced segmentation limits exposure. Monitoring detects attack attempts. Document as compensating controls for audit.",
+        "consequences": "Risk effectively mitigated within budget. Compliance achieved through compensating controls. System continues operating while replacement is planned on normal timeline."
+      },
+      {
+        "id": "c",
+        "text": "Accept the risk and document itâ€”the system is already network-isolated",
+        "is_best": false,
+        "feedback": "Network isolation alone isn't sufficient for compliance or security best practices. 'Accept the risk' for deprecated cryptography, especially for a critical system, won't satisfy auditors and leaves unnecessary exposure.",
+        "consequences": "Audit finding likely. If network is ever misconfigured, data exposed. Risk acceptance for fixable issues isn't good practice."
+      },
+      {
+        "id": "d",
+        "text": "Request emergency budget to fast-track system replacement",
+        "is_best": false,
+        "feedback": "While replacement is the eventual right answer, $2M emergency requests rarely get approved, and the 18-month timeline can't be meaningfully compressed. Meanwhile, you have an audit in 3 months and no solution.",
+        "consequences": "Budget likely denied. No solution in place for audit. If approved, still doesn't help immediate compliance timeline."
+      }
+    ],
+    "key_lesson": "Cryptographic weaknesses often can't be directly fixed in legacy systems, but compensating controls can effectively mitigate risk. Wrapping weak encryption in strong encryption (VPN tunnel), combined with network segmentation and monitoring, addresses the underlying risk while enabling business continuity. Document compensating controls for compliance purposes."
+  },
+
+  "summary": {
+    "key_takeaways": [
+      "Symmetric encryption (same key) is fast; AES-256 is the standard",
+      "Asymmetric encryption (key pair) solves key distribution; RSA and ECC are common",
+      "Hybrid encryption combines both: symmetric for data, asymmetric for key exchange",
+      "Hash functions are one-way; SHA-256/SHA-3 are current standards",
+      "Digital signatures provide authentication, integrity, AND non-repudiation",
+      "Certificates bind public keys to identities via CA signatures in a chain of trust"
+    ],
+    "exam_essentials": [
+      "AES = symmetric standard; DES/3DES/RC4 = deprecated",
+      "RSA/ECC = asymmetric; DH = key exchange only",
+      "Encrypt with PUBLIC, decrypt with PRIVATE; Sign with PRIVATE, verify with PUBLIC",
+      "MD5/SHA-1 = deprecated; SHA-256/SHA-3 = current",
+      "Passwords: use slow hashes (bcrypt/scrypt/Argon2) with unique salt",
+      "TLS 1.3 > TLS 1.2; TLS 1.0/1.1 deprecated"
+    ],
+    "connection_to_next": "With a solid foundation in cryptographic principles, the next lesson explores Zero Trust Architectureâ€”a modern security model that applies cryptographic verification to every access request, treating all networks as potentially hostile."
+  },
+
+  "related_content": {
+    "simulations": ["D1-SIM-003"],
+    "remediation": ["D1-REM-003"],
+    "next_lesson": "D1-LESSON-005",
+    "previous_lesson": "D1-LESSON-003"
+  }
+}

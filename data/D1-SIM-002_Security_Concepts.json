@@ -1,0 +1,1195 @@
+{
+  "scenario_id": "D1-SIM-002",
+  "title": "Security Concepts in Practice",
+  "domain": 1,
+  "objectives_covered": ["1.2", "1.3"],
+  "difficulty": "intermediate",
+  "time_estimate_minutes": 45,
+  "role": "Security Engineer",
+  "organization": {
+    "name": "TechForward Solutions",
+    "industry": "Technology / Software Development",
+    "size": "Software development company with 450 employees, developing enterprise SaaS applications",
+    "environment": "Cloud-native development environment using AWS and Azure. CI/CD pipelines, microservices architecture, containerized deployments. Serves enterprise customers with strict security requirements.",
+    "current_state": "Rapid growth has outpaced security processes. Recent customer audit identified gaps in change management and security architecture. Need to implement foundational security concepts while maintaining development velocity."
+  },
+  "scenario_introduction": "You're a security engineer at TechForward Solutions, a fast-growing SaaS company. A major customer's security audit revealed gaps in fundamental security concepts and change management. The CTO has asked you to help remediate these findings while keeping the development teams productive. You'll need to apply core security concepts including CIA triad, AAA, least privilege, and implement proper change management without creating bottlenecks.",
+  "learning_objectives": [
+    "Apply the CIA triad to real-world security decisions",
+    "Implement AAA (Authentication, Authorization, Accounting) principles",
+    "Apply least privilege and need-to-know principles",
+    "Understand the importance of change management in security",
+    "Balance security controls with operational requirements"
+  ],
+  "decision_points": [
+    {
+      "id": "dp1",
+      "sequence": 1,
+      "title": "CIA Triad Application",
+      "situation": "The customer audit finding states: 'Security decisions lack clear framework for prioritization.'\n\nThe CTO asks: 'When we make security decisions, how do we determine what's most important? Different teams prioritize different things.'\n\nYou need to establish a framework for security decision-making. A current example: the development team wants to give all developers read access to production databases for debugging, which operations opposes.\n\nHow do you frame security priorities?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Security always means preventing unauthorized access - deny the developer access request",
+          "feedback": "Security isn't just about preventing access. The CIA triad provides a balanced framework: Confidentiality (protecting sensitive data), Integrity (ensuring accuracy), and Availability (ensuring access when needed). Blanket denial doesn't address legitimate debugging needs.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Developer access denied",
+            "security_impact": "Confidentiality protected but may create workarounds",
+            "business_impact": "Development team frustrated; may find unsanctioned solutions"
+          },
+          "learning_note": "Security decisions should use the CIA triad framework: Confidentiality, Integrity, Availability. All three matter."
+        },
+        {
+          "id": "b",
+          "text": "Use CIA triad: evaluate how the request impacts Confidentiality, Integrity, and Availability, then find solution that balances all three",
+          "feedback": "Excellent! The CIA triad provides a balanced framework. For this request: Confidentiality risk (developers seeing customer data), Integrity risk (potential accidental changes), Availability benefit (faster debugging). A balanced solution might be read-only access to anonymized/masked data, or access to non-production replica.",
+          "is_optimal": true,
+          "consequences": {
+            "immediate": "Framework established for security decisions",
+            "security_impact": "Balanced approach protecting all security properties",
+            "business_impact": "Development needs addressed securely"
+          },
+          "learning_note": "The CIA triad (Confidentiality, Integrity, Availability) provides framework for balanced security decisions. Consider impact on all three."
+        },
+        {
+          "id": "c",
+          "text": "Availability is most important for a software company - approve access to keep developers productive",
+          "feedback": "Availability matters but so do confidentiality and integrity. Customer data confidentiality is essential for trust and compliance. Data integrity is critical for a software company's reputation. Prioritizing one element of CIA over others creates imbalanced security.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Developer access granted",
+            "security_impact": "Confidentiality and integrity risks accepted without evaluation",
+            "business_impact": "Short-term productivity; potential customer trust issues"
+          },
+          "learning_note": "Each element of the CIA triad matters. Prioritization depends on context, not blanket rules."
+        },
+        {
+          "id": "d",
+          "text": "Let the CTO decide based on business priorities",
+          "feedback": "Security should inform business decisions, not abdicate them. Providing the CIA framework helps the CTO make an informed decision. Simply deferring without guidance doesn't address the underlying need for a decision-making framework.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Decision deferred",
+            "security_impact": "No framework established",
+            "business_impact": "Same issue will recur; no systematic approach"
+          },
+          "learning_note": "Security professionals should provide frameworks and guidance, not just defer decisions."
+        }
+      ],
+      "hints": [
+        "What are the three elements of the CIA triad?",
+        "How might each element apply to the database access question?"
+      ],
+      "artifact": {
+        "id": "artifact-dp1",
+        "type": "security_framework",
+        "title": "CIA Triad Framework",
+        "content": {
+          "cia_triad": {
+            "confidentiality": {
+              "definition": "Ensuring information is accessible only to authorized parties",
+              "threats": ["Data breaches", "Unauthorized access", "Eavesdropping", "Insider threats"],
+              "controls": ["Encryption", "Access controls", "Data masking", "Classification"],
+              "questions": ["Who should see this data?", "What happens if unauthorized access occurs?"]
+            },
+            "integrity": {
+              "definition": "Ensuring information is accurate and unaltered",
+              "threats": ["Unauthorized modification", "Errors", "Malware", "Corruption"],
+              "controls": ["Hashing", "Digital signatures", "Version control", "Input validation"],
+              "questions": ["How do we ensure data hasn't been tampered with?", "Can we trust this data?"]
+            },
+            "availability": {
+              "definition": "Ensuring information and systems are accessible when needed",
+              "threats": ["DoS attacks", "System failures", "Natural disasters", "Ransomware"],
+              "controls": ["Redundancy", "Backups", "Load balancing", "Disaster recovery"],
+              "questions": ["Can users access what they need?", "What's the impact of downtime?"]
+            }
+          },
+          "applying_cia_to_decisions": {
+            "step_1": "Identify what needs protection (data, system, service)",
+            "step_2": "Assess impact to each CIA element",
+            "step_3": "Determine priorities based on context",
+            "step_4": "Select controls that address all three appropriately",
+            "step_5": "Find balance that meets security and business needs"
+          },
+          "database_access_example": {
+            "request": "Developer read access to production database",
+            "confidentiality_impact": "High - customer data exposed to more users",
+            "integrity_impact": "Medium - read-only reduces risk, but broad access increases error potential",
+            "availability_impact": "Positive - faster debugging improves service",
+            "balanced_solution": "Read-only access to anonymized replica with logging"
+          },
+          "context_matters": {
+            "healthcare": "Confidentiality often highest priority (PHI protection)",
+            "financial_trading": "Integrity often highest priority (accurate transactions)",
+            "e_commerce": "Availability often highest priority (sales revenue)",
+            "note": "All three always matter; context determines relative priority"
+          }
+        }
+      }
+    },
+    {
+      "id": "dp2",
+      "sequence": 2,
+      "title": "Authentication Implementation",
+      "situation": "The audit found: 'Authentication mechanisms are inconsistent across applications.'\n\nCurrently:\n- Main SaaS platform: Username/password only\n- Admin portal: Username/password + email OTP\n- Internal tools: Single sign-on (SSO) with company IdP\n- API access: API keys only\n\nYou need to recommend authentication improvements.\n\nWhat approach do you take?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Require MFA everywhere - it's the most secure option",
+          "feedback": "MFA is important but 'everywhere' may include scenarios where it's impractical (API automated calls) or where risk doesn't justify friction (low-sensitivity internal tools). Authentication should be risk-based, with stronger authentication for higher-risk access.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "MFA requirement for all access",
+            "security_impact": "Improved authentication but may create workarounds",
+            "business_impact": "User friction; API integration challenges"
+          },
+          "learning_note": "Authentication strength should be risk-based. MFA everywhere may be impractical; apply it where risk warrants."
+        },
+        {
+          "id": "b",
+          "text": "Implement risk-based authentication: MFA for high-value access (customer data, admin functions), SSO for internal, strong API auth for machine access",
+          "feedback": "Excellent! Authentication should match risk level. Customer-facing and admin access warrant MFA. Internal tools can use SSO (already authenticated to IdP). API access needs appropriate machine authentication (OAuth, certificates) not just static keys. This balances security with usability.",
+          "is_optimal": true,
+          "consequences": {
+            "immediate": "Risk-appropriate authentication framework",
+            "security_impact": "Stronger auth where risk is highest",
+            "business_impact": "Appropriate friction for risk level; maintains usability"
+          },
+          "learning_note": "Authentication strength should be proportional to risk. High-value access needs stronger authentication; routine access needs appropriate but not excessive controls."
+        },
+        {
+          "id": "c",
+          "text": "Standardize on SSO for everything - it's most convenient and already in place",
+          "feedback": "SSO improves convenience and can improve security, but external users (customers) may not be able to use your internal IdP. API access can't practically use interactive SSO. SSO is good for employees but doesn't solve all authentication scenarios.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "SSO expansion attempted",
+            "security_impact": "Inconsistent - works for some scenarios, not others",
+            "business_impact": "Customer and API access problems"
+          },
+          "learning_note": "SSO is excellent for employee access but doesn't address all authentication needs. Different scenarios need appropriate solutions."
+        },
+        {
+          "id": "d",
+          "text": "Keep current setup but add logging - we need visibility before changing authentication",
+          "feedback": "Logging is important (that's Accounting in AAA), but it doesn't address the authentication weaknesses identified. Password-only access to customer data is a significant risk that logging alone doesn't mitigate. Authentication improvements shouldn't wait for logging.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Logging improved; auth unchanged",
+            "security_impact": "Weak authentication persists",
+            "business_impact": "Audit finding not addressed"
+          },
+          "learning_note": "Logging (Accounting) complements Authentication but doesn't replace it. Both need to be addressed."
+        }
+      ],
+      "hints": [
+        "What level of authentication is appropriate for each type of access?",
+        "Consider both human and machine authentication needs"
+      ],
+      "artifact": {
+        "id": "artifact-dp2",
+        "type": "auth_framework",
+        "title": "AAA Framework - Authentication",
+        "content": {
+          "aaa_framework": {
+            "authentication": {
+              "definition": "Verifying the identity of a user or system",
+              "question": "Who are you?",
+              "methods": ["Passwords", "MFA", "Biometrics", "Certificates", "Tokens", "SSO"]
+            },
+            "authorization": {
+              "definition": "Determining what an authenticated entity can access",
+              "question": "What can you do?",
+              "methods": ["RBAC", "ABAC", "ACLs", "Permission systems"]
+            },
+            "accounting": {
+              "definition": "Recording what entities do for audit and tracking",
+              "question": "What did you do?",
+              "methods": ["Audit logs", "Access logs", "Session tracking", "Activity monitoring"]
+            }
+          },
+          "authentication_factors": {
+            "something_you_know": {
+              "examples": ["Password", "PIN", "Security questions"],
+              "strength": "Weakest alone (can be guessed, stolen, shared)"
+            },
+            "something_you_have": {
+              "examples": ["Phone/authenticator", "Hardware token", "Smart card"],
+              "strength": "Stronger (physical possession required)"
+            },
+            "something_you_are": {
+              "examples": ["Fingerprint", "Face recognition", "Iris scan"],
+              "strength": "Strong (difficult to replicate)"
+            },
+            "mfa_definition": "Using two or more different factor types"
+          },
+          "risk_based_authentication": {
+            "high_risk_access": {
+              "examples": ["Customer data", "Admin functions", "Financial transactions"],
+              "recommendation": "MFA required",
+              "rationale": "High-value targets warrant strong authentication"
+            },
+            "medium_risk_access": {
+              "examples": ["Internal applications", "Development tools", "Employee self-service"],
+              "recommendation": "SSO with IdP MFA or contextual MFA",
+              "rationale": "Balance security with daily usability"
+            },
+            "machine_access": {
+              "examples": ["API calls", "Service-to-service", "Automated processes"],
+              "recommendation": "OAuth 2.0, certificates, short-lived tokens",
+              "rationale": "Static API keys are weak; use proper machine auth"
+            }
+          },
+          "implementation_priority": {
+            "immediate": "MFA for customer data access and admin portals",
+            "short_term": "Replace API keys with OAuth/certificates",
+            "ongoing": "SSO expansion for employee access",
+            "continuous": "Logging and monitoring for all authentication events"
+          }
+        }
+      }
+    },
+    {
+      "id": "dp3",
+      "sequence": 3,
+      "title": "Authorization and Least Privilege",
+      "situation": "The audit found: 'Access permissions are overly broad. Many users have administrative access they don't need.'\n\nInvestigation reveals:\n- All developers have admin access to all development environments\n- Most support staff have access to all customer tenants\n- Service accounts run with administrative privileges\n- No regular access reviews conducted\n\nHow do you address the authorization issues?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Immediately revoke all admin access and have users request what they need",
+          "feedback": "Sudden broad revocation will disrupt operations. Users won't know what they need until they try to work. This creates chaos and may lead to emergency re-grants without proper evaluation. Transition to least privilege should be planned, not abrupt.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Mass access revocation",
+            "security_impact": "Permissions reduced but chaotically",
+            "business_impact": "Operations disrupted; emergency access requests flood in"
+          },
+          "learning_note": "Implementing least privilege requires planning. Abrupt changes disrupt operations and create pressure to restore broad access."
+        },
+        {
+          "id": "b",
+          "text": "Implement least privilege: analyze actual access needs, implement RBAC, scope service accounts, and establish regular access reviews",
+          "feedback": "Excellent! Least privilege should be implemented systematically. Analyze what access users actually need. Implement role-based access control (RBAC) based on job functions. Scope service accounts to minimum required permissions. Regular reviews ensure permissions stay appropriate.",
+          "is_optimal": true,
+          "consequences": {
+            "immediate": "Planned transition to least privilege",
+            "security_impact": "Reduced attack surface; limited blast radius",
+            "business_impact": "Minimal disruption with proper planning"
+          },
+          "learning_note": "Least privilege grants minimum access needed for job function. Implementation requires analysis, RBAC, scoped accounts, and regular reviews."
+        },
+        {
+          "id": "c",
+          "text": "Focus on service accounts first since they're the highest risk",
+          "feedback": "Service accounts are high risk due to automation and often excessive privileges, but human admin access also presents significant risk. The audit found issues across all categories. A comprehensive approach addresses all authorization issues, though prioritization is reasonable.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Service account remediation",
+            "security_impact": "One area improved; others remain",
+            "business_impact": "Partial audit remediation"
+          },
+          "learning_note": "Authorization issues should be addressed comprehensively. Prioritization is fine but don't ignore other areas."
+        },
+        {
+          "id": "d",
+          "text": "Implement logging first to understand who's using what access",
+          "feedback": "Understanding current access usage is valuable, but logging alone doesn't fix the authorization issues. Known over-permissioning should be addressed. Use logging to inform the transition, but start reducing unnecessary access in parallel.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Logging implemented",
+            "security_impact": "Visibility improved; permissions unchanged",
+            "business_impact": "Audit finding not directly addressed"
+          },
+          "learning_note": "Logging informs authorization decisions but doesn't replace them. Fix known over-permissioning while gathering data."
+        }
+      ],
+      "hints": [
+        "What does least privilege mean in practice?",
+        "How do you transition from broad access to appropriate access?"
+      ],
+      "artifact": {
+        "id": "artifact-dp3",
+        "type": "authorization_framework",
+        "title": "Least Privilege and Authorization",
+        "content": {
+          "least_privilege_principle": {
+            "definition": "Grant only the minimum access necessary to perform job functions",
+            "rationale": [
+              "Reduces attack surface",
+              "Limits blast radius of compromised accounts",
+              "Supports auditability",
+              "Reduces accidental damage"
+            ],
+            "related_concepts": {
+              "need_to_know": "Access to information limited to those who require it for their role",
+              "separation_of_duties": "Critical functions divided among multiple people to prevent fraud"
+            }
+          },
+          "rbac_implementation": {
+            "role_based_access_control": {
+              "concept": "Access granted based on job role, not individual",
+              "benefits": ["Scalable", "Consistent", "Auditable", "Manageable"],
+              "implementation_steps": [
+                "Identify job functions/roles",
+                "Define access requirements for each role",
+                "Assign users to appropriate roles",
+                "Review and refine role definitions"
+              ]
+            },
+            "example_roles": {
+              "developer": "Read/write to assigned project repos; read dev environment; no production access",
+              "senior_developer": "Developer + code review approval; staging deployment",
+              "support_tier1": "Read customer data for assigned tickets; no admin functions",
+              "support_tier2": "Support_tier1 + broader customer access for escalations"
+            }
+          },
+          "service_account_best_practices": [
+            "Dedicated account per service/function",
+            "Minimum permissions for specific task",
+            "No interactive login capability",
+            "Regular credential rotation",
+            "Monitoring and alerting on usage"
+          ],
+          "access_review_process": {
+            "frequency": "Quarterly for privileged access; semi-annual for standard",
+            "participants": "Managers review their team; security reviews privileged accounts",
+            "actions": ["Confirm continued need", "Adjust for role changes", "Remove for departed users"],
+            "documentation": "Record review completion and decisions"
+          },
+          "transition_approach": {
+            "phase_1": "Inventory current access and identify over-permissioning",
+            "phase_2": "Define RBAC roles based on actual job needs",
+            "phase_3": "Pilot with willing team; refine roles",
+            "phase_4": "Gradual rollout with communication",
+            "phase_5": "Establish ongoing review process"
+          }
+        }
+      }
+    },
+    {
+      "id": "dp4",
+      "sequence": 4,
+      "title": "Change Management Foundation",
+      "situation": "The audit's most significant finding: 'No formal change management process exists. Changes to production are made without documentation, testing requirements, or approval.'\n\nCurrently, developers can push code directly to production through CI/CD. There have been multiple incidents traced to untested changes.\n\nThe development team lead says: 'We move fast. Formal change management will kill our velocity.'\n\nHow do you implement change management without destroying productivity?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Implement full CAB (Change Advisory Board) review for all changes",
+          "feedback": "Full CAB for all changes is overkill for a software company and will indeed kill velocity. CAB review makes sense for significant changes but not routine deployments. Modern change management uses risk-based approaches with different processes for different change types.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "CAB process implemented",
+            "security_impact": "All changes reviewed but process may be circumvented",
+            "business_impact": "Development velocity severely impacted"
+          },
+          "learning_note": "Change management should be risk-based. Not all changes need the same level of review."
+        },
+        {
+          "id": "b",
+          "text": "Risk-based change management: automated testing gates in CI/CD for standard changes, additional review for significant changes, emergency process for urgent fixes",
+          "feedback": "Excellent! Risk-based change management balances control with velocity. Standard changes (routine deployments) go through automated testing and code review. Significant changes (architecture, security) need additional review. Emergency changes have expedited process with post-implementation review. This enables speed with appropriate controls.",
+          "is_optimal": true,
+          "consequences": {
+            "immediate": "Tiered change management process",
+            "security_impact": "Changes tested and tracked appropriately",
+            "business_impact": "Velocity maintained for routine changes; appropriate gates for significant changes"
+          },
+          "learning_note": "Modern change management is risk-based. Different change types need different processes. Automation enables speed with control."
+        },
+        {
+          "id": "c",
+          "text": "Keep current process but add documentation requirements",
+          "feedback": "Documentation without gates doesn't prevent bad changes. If developers can still push untested code to production, documentation just records the damage after the fact. Change management needs controls, not just paperwork.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Documentation requirement added",
+            "security_impact": "Bad changes still possible; now documented",
+            "business_impact": "Administrative burden without protection benefit"
+          },
+          "learning_note": "Documentation is part of change management but doesn't replace testing and approval controls."
+        },
+        {
+          "id": "d",
+          "text": "Separate production access from developers - operations team deploys all changes",
+          "feedback": "Separation of duties is valuable but creating a deployment bottleneck isn't the answer. DevOps and CI/CD exist to enable rapid, safe deployment. The solution is automated controls in the pipeline, not manual handoffs that create delays.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Deployment responsibility shifted to ops",
+            "security_impact": "Separation achieved but at high cost",
+            "business_impact": "Deployment bottleneck; DevOps benefits lost"
+          },
+          "learning_note": "Separation of duties can be achieved through automated gates and approvals, not just organizational boundaries."
+        }
+      ],
+      "hints": [
+        "How can you maintain development velocity while adding appropriate controls?",
+        "What automation can provide controls without manual bottlenecks?"
+      ],
+      "artifact": {
+        "id": "artifact-dp4",
+        "type": "change_management",
+        "title": "Risk-Based Change Management Framework",
+        "content": {
+          "change_categories": {
+            "standard_changes": {
+              "definition": "Pre-approved, routine changes with established procedures",
+              "examples": ["Regular code deployments", "Configuration updates within defined parameters", "Scheduled maintenance"],
+              "process": "Automated CI/CD with testing gates",
+              "approval": "Pre-approved; automated checks sufficient",
+              "documentation": "Automatic via CI/CD pipeline logs"
+            },
+            "normal_changes": {
+              "definition": "Changes requiring evaluation and approval",
+              "examples": ["New features", "Infrastructure changes", "Third-party integrations"],
+              "process": "Request â†’ Review â†’ Approve â†’ Implement â†’ Verify",
+              "approval": "Technical lead and/or change manager",
+              "documentation": "Change request with business justification and technical details"
+            },
+            "significant_changes": {
+              "definition": "High-impact or high-risk changes",
+              "examples": ["Architecture changes", "Security controls", "Database schema changes"],
+              "process": "Extended review including security and architecture review",
+              "approval": "CAB or designated approvers",
+              "documentation": "Detailed change request with risk assessment"
+            },
+            "emergency_changes": {
+              "definition": "Urgent changes to address incidents",
+              "examples": ["Critical security patches", "Production incident fixes"],
+              "process": "Expedited approval â†’ Implement â†’ Post-implementation review",
+              "approval": "Designated emergency approver",
+              "documentation": "Document during/after; full review within 24-48 hours"
+            }
+          },
+          "ci_cd_security_gates": {
+            "code_review": "Peer review required before merge",
+            "automated_testing": "Unit tests, integration tests must pass",
+            "security_scanning": "SAST/DAST scans without critical findings",
+            "approval_gate": "Required approvals before production deployment",
+            "audit_trail": "All pipeline activities logged"
+          },
+          "change_management_principles": {
+            "documentation": "All changes recorded with who, what, when, why",
+            "authorization": "Appropriate approval for change risk level",
+            "testing": "Changes tested before production",
+            "rollback": "Ability to reverse changes if issues occur",
+            "communication": "Stakeholders informed of changes and impacts"
+          },
+          "balancing_speed_and_control": {
+            "automation": "Use automated testing and scanning to enable fast, safe deployments",
+            "pre_approval": "Pre-approve standard change types to eliminate review bottleneck",
+            "risk_based": "Focus manual review on high-risk changes",
+            "feedback_loops": "Monitor deployment success; adjust process based on outcomes"
+          }
+        }
+      }
+    },
+    {
+      "id": "dp5",
+      "sequence": 5,
+      "title": "Non-Repudiation Implementation",
+      "situation": "During a customer dispute, you need to prove that a specific user made a specific change that affected their data. Current logging shows an action occurred but not definitively who did it (shared service account was used).\n\nThe legal team asks: 'How do we prove who did what? This is a significant legal exposure.'\n\nHow do you address non-repudiation?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Implement IP address logging to track who made changes",
+          "feedback": "IP addresses help but don't provide non-repudiation. Multiple users share IPs (NAT, VPN). IPs can be spoofed. Users move between IPs. You need identity-linked authentication that can't be denied - individual accounts with strong authentication.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "IP logging implemented",
+            "security_impact": "Some additional context but not attribution",
+            "business_impact": "Legal exposure remains"
+          },
+          "learning_note": "IP addresses provide context but not non-repudiation. Non-repudiation requires identity attribution that can't be denied."
+        },
+        {
+          "id": "b",
+          "text": "Implement individual accountability: eliminate shared accounts, require individual authentication, log user identity with all actions, consider digital signatures for critical actions",
+          "feedback": "Excellent! Non-repudiation requires individual accountability. Eliminate shared accounts so each action ties to a specific person. Strong authentication makes identity verification reliable. Comprehensive logging records who did what. Digital signatures provide cryptographic proof for critical actions.",
+          "is_optimal": true,
+          "consequences": {
+            "immediate": "Individual accountability framework",
+            "security_impact": "Actions attributable to specific individuals",
+            "business_impact": "Legal defensibility; deterrent effect"
+          },
+          "learning_note": "Non-repudiation requires individual accounts, strong authentication, and comprehensive logging. Users can't deny actions they verifiably performed."
+        },
+        {
+          "id": "c",
+          "text": "Add manager approval to all changes so there's a witness",
+          "feedback": "Approval provides authorization but not attribution for who actually made the change. If a shared account is used, approval doesn't identify the person who clicked the button. Non-repudiation needs individual identity tied to actions.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Approval workflow added",
+            "security_impact": "Authorization improved but attribution still missing",
+            "business_impact": "Can prove authorization but not individual action"
+          },
+          "learning_note": "Approval establishes authorization. Non-repudiation establishes who performed the action. Both are important but different."
+        },
+        {
+          "id": "d",
+          "text": "Implement video monitoring of user workstations",
+          "feedback": "Video monitoring is invasive, creates privacy issues, and doesn't scale for remote workers. Technical controls (individual accounts, logging) provide better non-repudiation without the privacy and practicality concerns.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Privacy concerns raised",
+            "security_impact": "Over-surveillance without solving the problem",
+            "business_impact": "Employee relations issues; likely not implemented"
+          },
+          "learning_note": "Non-repudiation is achieved through technical identity controls, not physical surveillance."
+        }
+      ],
+      "hints": [
+        "What does non-repudiation mean?",
+        "How do you prove a specific individual performed an action?"
+      ],
+      "artifact": {
+        "id": "artifact-dp5",
+        "type": "security_concept",
+        "title": "Non-Repudiation Framework",
+        "content": {
+          "non_repudiation_definition": {
+            "concept": "Assurance that someone cannot deny the validity of their actions",
+            "purpose": "Provides proof of origin and delivery; supports legal and audit requirements",
+            "elements": [
+              "Identity verification (who)",
+              "Action attribution (what)",
+              "Time stamping (when)",
+              "Integrity protection (unchanged)"
+            ]
+          },
+          "achieving_non_repudiation": {
+            "individual_accounts": {
+              "requirement": "Every user has unique account",
+              "rationale": "Shared accounts prevent individual attribution",
+              "implementation": "Eliminate shared accounts; prohibit credential sharing"
+            },
+            "strong_authentication": {
+              "requirement": "Reliable identity verification",
+              "rationale": "Password-only auth can be disputed ('someone stole my password')",
+              "implementation": "MFA makes identity verification stronger and harder to dispute"
+            },
+            "comprehensive_logging": {
+              "requirement": "Record user identity with all significant actions",
+              "rationale": "Creates audit trail linking identity to actions",
+              "implementation": "Application-level logging capturing authenticated user identity"
+            },
+            "digital_signatures": {
+              "requirement": "Cryptographic proof for critical actions",
+              "rationale": "Mathematical proof that specific key holder signed data",
+              "implementation": "Sign critical transactions, documents, or approvals"
+            },
+            "secure_timestamps": {
+              "requirement": "Reliable, tamper-evident time records",
+              "rationale": "Proves when action occurred",
+              "implementation": "Trusted time source; protected logs"
+            }
+          },
+          "shared_account_problems": [
+            "Cannot attribute actions to individuals",
+            "No accountability",
+            "Passwords often shared insecurely",
+            "Cannot enforce MFA effectively",
+            "Audit findings and compliance violations"
+          ],
+          "service_account_alternative": {
+            "problem": "Some automation requires shared credentials",
+            "solution": "Use service accounts with: No interactive login, Minimum privileges, Strong auditing, Credential management (vault), Clear ownership"
+          }
+        }
+      }
+    },
+    {
+      "id": "dp6",
+      "sequence": 6,
+      "title": "Gap Analysis Methodology",
+      "situation": "The CTO asks: 'We have these audit findings, but I want to understand our overall security posture, not just fix point issues. How do we assess where we are versus where we need to be?'\n\nYou need to propose a gap analysis approach.\n\nWhat methodology do you recommend?",
+      "options": [
+        {
+          "id": "a",
+          "text": "List all security tools we have and compare to what competitors have",
+          "feedback": "Tool inventory doesn't measure security posture. Competitors' tools may not match your needs. Security isn't about tool count but about risk management effectiveness. A framework-based assessment provides meaningful gap analysis.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Tool comparison created",
+            "security_impact": "No actual gap analysis performed",
+            "business_impact": "May buy tools without addressing real gaps"
+          },
+          "learning_note": "Security posture is measured against requirements and frameworks, not tool inventories or competitor comparisons."
+        },
+        {
+          "id": "b",
+          "text": "Conduct framework-based assessment: identify applicable requirements, assess current state against framework, document gaps, prioritize remediation by risk",
+          "feedback": "Excellent! Framework-based assessment provides structured gap analysis. Identify requirements (regulatory, contractual, best practices). Assess current controls against framework. Document gaps between current and required state. Prioritize remediation based on risk and business impact.",
+          "is_optimal": true,
+          "consequences": {
+            "immediate": "Structured gap analysis approach",
+            "security_impact": "Comprehensive understanding of security posture",
+            "business_impact": "Prioritized roadmap for improvement"
+          },
+          "learning_note": "Gap analysis compares current state to required state using a recognized framework. Results drive prioritized remediation."
+        },
+        {
+          "id": "c",
+          "text": "Hire a penetration testing firm to find all vulnerabilities",
+          "feedback": "Penetration testing identifies technical vulnerabilities but doesn't assess overall security program. It won't evaluate policies, processes, training, or governance. Pen tests are valuable but don't provide comprehensive gap analysis.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Pen test scheduled",
+            "security_impact": "Technical vulnerabilities identified",
+            "business_impact": "Incomplete picture; program gaps missed"
+          },
+          "learning_note": "Penetration testing finds technical vulnerabilities. Gap analysis assesses the entire security program against requirements."
+        },
+        {
+          "id": "d",
+          "text": "Review the audit findings and use them as our gap analysis",
+          "feedback": "Audit findings are useful inputs but may not be comprehensive. Audits have specific scope and may miss areas not examined. A proactive gap analysis goes beyond audit findings to assess the full security program.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Audit findings become gap list",
+            "security_impact": "Addressed audit scope but may miss other gaps",
+            "business_impact": "Reactive rather than proactive assessment"
+          },
+          "learning_note": "Audit findings inform gap analysis but shouldn't be the only input. Proactive assessment is more comprehensive."
+        }
+      ],
+      "hints": [
+        "What provides a systematic way to assess security?",
+        "How do you know what 'good' looks like?"
+      ],
+      "artifact": {
+        "id": "artifact-dp6",
+        "type": "gap_analysis",
+        "title": "Security Gap Analysis Framework",
+        "content": {
+          "gap_analysis_process": {
+            "step_1_define_requirements": {
+              "action": "Identify what security requirements apply",
+              "sources": [
+                "Regulatory requirements (SOC 2, GDPR, etc.)",
+                "Customer contractual requirements",
+                "Industry frameworks (NIST CSF, ISO 27001)",
+                "Internal policies and standards"
+              ]
+            },
+            "step_2_select_framework": {
+              "action": "Choose assessment framework",
+              "options": {
+                "NIST_CSF": "Flexible framework; good for overall maturity",
+                "CIS_Controls": "Prioritized technical controls",
+                "ISO_27001": "Comprehensive ISMS standard",
+                "SOC_2": "Service organization controls"
+              }
+            },
+            "step_3_assess_current_state": {
+              "action": "Evaluate current controls against framework",
+              "methods": [
+                "Control documentation review",
+                "Technical testing",
+                "Interviews with control owners",
+                "Evidence collection"
+              ]
+            },
+            "step_4_identify_gaps": {
+              "action": "Document differences between current and required state",
+              "documentation": [
+                "Control requirement",
+                "Current state",
+                "Gap description",
+                "Risk if not addressed"
+              ]
+            },
+            "step_5_prioritize_remediation": {
+              "action": "Rank gaps by risk and create roadmap",
+              "factors": [
+                "Risk level if exploited",
+                "Regulatory/compliance impact",
+                "Implementation effort",
+                "Dependencies on other remediations"
+              ]
+            }
+          },
+          "common_frameworks": {
+            "nist_csf": {
+              "structure": "Five functions: Identify, Protect, Detect, Respond, Recover",
+              "best_for": "Overall program maturity assessment",
+              "note": "Flexible; maps to other frameworks"
+            },
+            "cis_controls": {
+              "structure": "18 controls prioritized by implementation group",
+              "best_for": "Technical control implementation priority",
+              "note": "Prescriptive; good for quick wins"
+            },
+            "iso_27001": {
+              "structure": "ISMS requirements with Annex A controls",
+              "best_for": "Formal certification; comprehensive program",
+              "note": "Requires significant documentation"
+            }
+          },
+          "gap_analysis_output": {
+            "executive_summary": "Overall security posture with key findings",
+            "detailed_findings": "Gap-by-gap analysis with risk ratings",
+            "remediation_roadmap": "Prioritized plan with timelines and resources",
+            "quick_wins": "Low-effort improvements for immediate progress"
+          }
+        }
+      }
+    },
+    {
+      "id": "dp7",
+      "sequence": 7,
+      "title": "Separation of Duties",
+      "situation": "You discover that the same developers who write code can also:\n- Approve their own code reviews\n- Deploy directly to production\n- Access production data for 'debugging'\n- Modify production configurations\n\nThis creates significant fraud and error risk.\n\nHow do you implement separation of duties without creating bottlenecks?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Create separate teams for development, review, and deployment",
+          "feedback": "Complete team separation is expensive and creates handoff delays. Modern DevOps doesn't require separate teams - it requires appropriate controls within the process. Separation of duties can be achieved through process controls, not just organizational structure.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Organizational restructuring attempted",
+            "security_impact": "Separation achieved but expensively",
+            "business_impact": "Significant overhead and delays"
+          },
+          "learning_note": "Separation of duties can be achieved through process controls and technical enforcement, not just organizational structure."
+        },
+        {
+          "id": "b",
+          "text": "Implement process separation: peer review required (not self), production deployments require approval, production access limited and audited",
+          "feedback": "Excellent! Separation of duties prevents single individuals from controlling entire processes. Peer review means others check your work. Deployment approval separates writing from releasing. Limited production access separates development from production operations. This prevents both fraud and errors.",
+          "is_optimal": true,
+          "consequences": {
+            "immediate": "Process-based separation implemented",
+            "security_impact": "Fraud and error risk reduced",
+            "business_impact": "Controls added without major organizational change"
+          },
+          "learning_note": "Separation of duties can be implemented through process controls: peer review, approval gates, and access restrictions."
+        },
+        {
+          "id": "c",
+          "text": "Add logging of all developer activities for deterrence",
+          "feedback": "Logging is detective, not preventive. It records what happened but doesn't prevent a single person from committing fraud. Separation of duties prevents inappropriate actions; logging detects them after the fact. Both are needed.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Logging enhanced",
+            "security_impact": "Detection improved but prevention unchanged",
+            "business_impact": "Fraud still possible, just recorded"
+          },
+          "learning_note": "Logging supports separation of duties but doesn't replace it. You need preventive controls, not just detection."
+        },
+        {
+          "id": "d",
+          "text": "Trust the developers - they're professionals who wouldn't abuse access",
+          "feedback": "Trust isn't a security control. Separation of duties protects honest people from suspicion, catches mistakes before they cause damage, and deters potential bad actors. Even trustworthy people make errors; controls prevent those errors from reaching production.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "No changes made",
+            "security_impact": "Fraud and error risk unchanged",
+            "business_impact": "Audit finding remains unaddressed"
+          },
+          "learning_note": "Separation of duties protects the organization and individuals. It's not about distrust - it's about preventing errors and fraud."
+        }
+      ],
+      "hints": [
+        "What critical functions should no single person control?",
+        "How do you separate duties without creating bottlenecks?"
+      ],
+      "artifact": {
+        "id": "artifact-dp7",
+        "type": "security_concept",
+        "title": "Separation of Duties Framework",
+        "content": {
+          "separation_of_duties_concept": {
+            "definition": "Dividing critical functions among different individuals to prevent fraud and error",
+            "purpose": [
+              "Prevent fraud by requiring collusion",
+              "Catch errors through multiple reviews",
+              "Protect individuals from suspicion",
+              "Ensure checks and balances"
+            ],
+            "principle": "No single person should control all phases of a critical process"
+          },
+          "software_development_application": {
+            "code_development": {
+              "separation": "Developer writes code; different person reviews",
+              "implementation": "Pull request requires peer approval; can't approve own code"
+            },
+            "deployment": {
+              "separation": "Developer creates; different person approves deployment",
+              "implementation": "CI/CD requires approval gate; deployer didn't write code"
+            },
+            "production_access": {
+              "separation": "Developers don't have routine production access",
+              "implementation": "Access requires approval; limited duration; fully logged"
+            },
+            "security_exceptions": {
+              "separation": "Requester can't approve their own exception",
+              "implementation": "Approval workflow routes to appropriate authority"
+            }
+          },
+          "implementation_without_bottlenecks": {
+            "automation": "CI/CD enforces gates without manual intervention",
+            "rotation": "Multiple team members can approve (not creating single-person bottleneck)",
+            "risk_based": "Higher-risk actions need more separation",
+            "tooling": "Version control and deployment tools enforce separation automatically"
+          },
+          "related_concepts": {
+            "dual_control": "Two people required simultaneously (e.g., two keys to open vault)",
+            "split_knowledge": "Information divided so no one has complete picture",
+            "rotation_of_duties": "Regularly rotating responsibilities to detect irregularities"
+          }
+        }
+      }
+    },
+    {
+      "id": "dp8",
+      "sequence": 8,
+      "title": "Security Through Obscurity",
+      "situation": "A developer suggests: 'Let's make our API endpoints use random strings instead of predictable names. Hackers won't be able to find them if they don't know the URLs.'\n\nAnother developer argues: 'That's security through obscurity - it doesn't work.'\n\nThe team asks for your input.\n\nHow do you address this?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Agree with the random URLs - making things harder to find adds security",
+          "feedback": "Obscurity alone isn't security. Attackers can discover endpoints through traffic analysis, error messages, documentation leaks, or simply trying combinations. If the only protection is that attackers don't know the URL, you're vulnerable when they find it.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Random URLs implemented",
+            "security_impact": "False sense of security; underlying vulnerabilities remain",
+            "business_impact": "May delay proper security controls"
+          },
+          "learning_note": "Security through obscurity relies on attackers not knowing something. When they discover it (and they will), no protection remains."
+        },
+        {
+          "id": "b",
+          "text": "Obscurity should not be the primary defense. Implement proper authentication and authorization; obscurity can be a minor additional layer but isn't a substitute for real controls",
+          "feedback": "Excellent! Security should not rely on obscurity. APIs need authentication (verify identity), authorization (verify permission), input validation, and rate limiting. Unpredictable URLs might slightly slow reconnaissance but provide no real protection. Real security controls must be in place.",
+          "is_optimal": true,
+          "consequences": {
+            "immediate": "Proper API security prioritized",
+            "security_impact": "APIs protected by real controls",
+            "business_impact": "Sustainable security architecture"
+          },
+          "learning_note": "Security through obscurity is not a valid security strategy. It can complement real controls but never replace them."
+        },
+        {
+          "id": "c",
+          "text": "The second developer is right - any obscurity is bad security",
+          "feedback": "Not quite. Obscurity shouldn't be relied upon, but it's not inherently bad. Hiding version numbers, using non-standard ports, or avoiding information disclosure are minor obscurity measures that can complement real security. The problem is relying on obscurity as primary defense.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "All obscurity measures rejected",
+            "security_impact": "Real security controls implemented (good)",
+            "business_impact": "May expose unnecessary information"
+          },
+          "learning_note": "Obscurity can complement security but shouldn't be the primary defense. Don't rely on it, but don't reject all obscurity either."
+        },
+        {
+          "id": "d",
+          "text": "Let the developers decide - this is a technical implementation detail",
+          "feedback": "This is a security architecture question, not just implementation detail. The approach to API security affects the entire application's security posture. Security should provide guidance on proper controls, not defer to developers on security architecture.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Decision deferred",
+            "security_impact": "May get weak security if obscurity is chosen",
+            "business_impact": "Security not providing appropriate guidance"
+          },
+          "learning_note": "Security should guide architecture decisions. Deferring security questions to developers without guidance may result in weak security."
+        }
+      ],
+      "hints": [
+        "What happens when the 'secret' URLs are discovered?",
+        "What should API security actually rely on?"
+      ],
+      "artifact": {
+        "id": "artifact-dp8",
+        "type": "security_concept",
+        "title": "Security Through Obscurity",
+        "content": {
+          "security_through_obscurity": {
+            "definition": "Relying on secrecy of design or implementation as security measure",
+            "problem": "When the secret is discovered (and it will be), no protection remains",
+            "examples": [
+              "Hidden URLs as access control",
+              "Undocumented parameters for sensitive functions",
+              "Custom encryption algorithms",
+              "Hidden administrative interfaces"
+            ]
+          },
+          "why_obscurity_fails": [
+            "Secrets leak (documentation, errors, traffic analysis)",
+            "Attackers are persistent and will discover secrets",
+            "Gives false confidence in security",
+            "Prevents proper security review (can't audit what's secret)"
+          ],
+          "kerckhoffs_principle": {
+            "statement": "A cryptographic system should be secure even if everything about the system is public knowledge, except the key",
+            "application": "Security should not depend on secrecy of design, only secrecy of keys/credentials"
+          },
+          "proper_api_security": {
+            "authentication": "Verify identity of caller (API keys, OAuth, etc.)",
+            "authorization": "Verify caller has permission for requested action",
+            "input_validation": "Validate and sanitize all inputs",
+            "rate_limiting": "Prevent abuse and brute force",
+            "encryption": "TLS for all API traffic",
+            "logging": "Record all API access for audit"
+          },
+          "acceptable_obscurity": {
+            "as_complementary": [
+              "Don't advertise version numbers unnecessarily",
+              "Remove debug information from production",
+              "Don't expose internal structure in errors"
+            ],
+            "key_point": "These complement real security; they don't provide it"
+          }
+        }
+      }
+    },
+    {
+      "id": "dp9",
+      "sequence": 9,
+      "title": "Version Control for Security",
+      "situation": "You're implementing change management for security configurations (firewall rules, access policies, security tool configs). Currently, changes are made directly in the systems with no version history.\n\nWhen a recent change caused an outage, no one could determine what changed or easily revert.\n\nHow do you address this?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Create a change log spreadsheet where admins record what they changed",
+          "feedback": "Manual change logs are inconsistent and often forgotten. They don't enable easy rollback. Version control systems provide automatic history, diff capability, and rollback. Infrastructure as Code (IaC) extends version control to configurations.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Manual logging implemented",
+            "security_impact": "Inconsistent tracking; no rollback capability",
+            "business_impact": "Still can't easily identify or revert changes"
+          },
+          "learning_note": "Manual change logs are unreliable. Version control provides automatic, complete history with rollback capability."
+        },
+        {
+          "id": "b",
+          "text": "Implement Infrastructure as Code: security configurations in version control, changes through pull requests, automated deployment",
+          "feedback": "Excellent! Infrastructure as Code (IaC) applies software development practices to infrastructure. Configurations stored in Git provide version history. Pull requests enable review before changes. Automated deployment ensures what's in code matches reality. This enables change tracking, review, and rollback.",
+          "is_optimal": true,
+          "consequences": {
+            "immediate": "IaC implemented for security configurations",
+            "security_impact": "Changes tracked, reviewed, and reversible",
+            "business_impact": "Faster incident recovery; better change control"
+          },
+          "learning_note": "Infrastructure as Code provides version control, review process, and rollback capability for configuration changes."
+        },
+        {
+          "id": "c",
+          "text": "Require manager approval before any security configuration change",
+          "feedback": "Approval adds authorization but doesn't provide version history or rollback. The issue is not knowing what changed and being unable to revert. Approval without version control means you have authorized changes you still can't track or reverse.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Approval process added",
+            "security_impact": "Authorization improved; tracking unchanged",
+            "business_impact": "Still can't identify or revert changes"
+          },
+          "learning_note": "Approval authorizes changes but doesn't track them. Version control is needed for history and rollback."
+        },
+        {
+          "id": "d",
+          "text": "Enable audit logging in all security systems",
+          "feedback": "Audit logging helps identify what changed but may not capture the full configuration state or enable easy rollback. Version control provides complete configuration history and the ability to return to any previous state. Logging complements but doesn't replace version control.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Audit logging enabled",
+            "security_impact": "Can see what changed; rollback still difficult",
+            "business_impact": "Better visibility but recovery still challenging"
+          },
+          "learning_note": "Audit logs show what changed. Version control stores complete configurations and enables rollback."
+        }
+      ],
+      "hints": [
+        "What do you need to know what changed and revert if needed?",
+        "How can software development practices help with infrastructure?"
+      ],
+      "artifact": {
+        "id": "artifact-dp9",
+        "type": "change_management",
+        "title": "Infrastructure as Code for Security",
+        "content": {
+          "infrastructure_as_code": {
+            "definition": "Managing infrastructure through code and software development practices",
+            "benefits": [
+              "Version history of all changes",
+              "Code review before changes",
+              "Automated, consistent deployment",
+              "Easy rollback to previous state",
+              "Documentation through code"
+            ]
+          },
+          "security_configurations_in_iac": {
+            "firewall_rules": "Define rules in code; deploy through automation",
+            "access_policies": "IAM policies as code; version controlled",
+            "security_tool_configs": "Security group settings, WAF rules, etc. in code",
+            "compliance_policies": "Policy as Code for compliance verification"
+          },
+          "gitops_workflow": {
+            "step_1": "Configuration change proposed in pull request",
+            "step_2": "Peer review of proposed change",
+            "step_3": "Automated validation/testing",
+            "step_4": "Approval and merge",
+            "step_5": "Automated deployment applies change",
+            "step_6": "Verification that deployed state matches code"
+          },
+          "rollback_capability": {
+            "with_iac": "Revert to previous commit; redeploy known-good state",
+            "without_iac": "Manual investigation; manual reconfiguration; hope you remember previous settings"
+          },
+          "implementation_approach": {
+            "start_small": "Begin with one system type (e.g., firewall rules)",
+            "extract_current": "Document current configurations as code",
+            "establish_workflow": "Set up repository, review process, deployment",
+            "expand": "Gradually add more configuration types",
+            "policy": "New changes must go through IaC workflow"
+          }
+        }
+      }
+    },
+    {
+      "id": "dp10",
+      "sequence": 10,
+      "title": "Secure Defaults",
+      "situation": "A new microservice is being deployed. The developer asks: 'Should I enable all features by default so users have full functionality, or start with minimal features enabled?'\n\nThis relates to secure defaults and the principle of fail-secure.\n\nHow do you advise?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Enable all features - users expect full functionality and will complain if things are disabled",
+          "feedback": "Default-open is insecure. Users may not realize features are enabled. Attack surface is maximized. If a vulnerability exists in an enabled feature, all instances are vulnerable even if they don't use that feature. Secure defaults minimize exposure.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "All features enabled by default",
+            "security_impact": "Maximum attack surface; unused features may be vulnerable",
+            "business_impact": "User convenience but security risk"
+          },
+          "learning_note": "Secure defaults means minimal functionality enabled by default. Users enable what they need, reducing attack surface."
+        },
+        {
+          "id": "b",
+          "text": "Secure defaults: minimal features enabled by default, users explicitly enable what they need, fail-secure when errors occur",
+          "feedback": "Excellent! Secure defaults minimize attack surface. Only necessary features enabled; additional features require explicit action. Fail-secure means when something goes wrong, the system fails to a secure state (deny access) rather than insecure (allow access). This reduces risk from unused features and failure scenarios.",
+          "is_optimal": true,
+          "consequences": {
+            "immediate": "Minimal default configuration",
+            "security_impact": "Reduced attack surface; fail-secure behavior",
+            "business_impact": "Users enable what they need; unused features aren't exposed"
+          },
+          "learning_note": "Secure defaults = minimal features enabled. Fail-secure = system fails to secure state, not open state."
+        },
+        {
+          "id": "c",
+          "text": "Let the developer decide based on their understanding of user needs",
+          "feedback": "Security defaults should be a security decision, not left to individual developer judgment. Developers may prioritize functionality over security. Security should establish guidelines for secure defaults that all services follow.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Decision deferred to developer",
+            "security_impact": "Inconsistent security posture across services",
+            "business_impact": "No standard approach"
+          },
+          "learning_note": "Security should establish default configuration standards, not leave it to individual developers."
+        },
+        {
+          "id": "d",
+          "text": "It depends on the specific feature - evaluate each one individually",
+          "feedback": "While individual evaluation is valuable, the principle should be secure defaults. Start from minimal and justify additions, not start from maximal and justify removals. The default mindset should be 'off unless needed' not 'on unless problematic'.",
+          "is_optimal": false,
+          "consequences": {
+            "immediate": "Case-by-case evaluation",
+            "security_impact": "May end up enabling more than needed",
+            "business_impact": "Inconsistent approach; more effort"
+          },
+          "learning_note": "Secure defaults as a principle means starting minimal. Individual evaluation determines what to enable, starting from off."
+        }
+      ],
+      "hints": [
+        "What's the secure starting point - everything on or everything off?",
+        "What should happen when something fails - open or closed?"
+      ],
+      "artifact": {
+        "id": "artifact-dp10",
+        "type": "security_concept",
+        "title": "Secure Defaults and Fail-Secure Principles",
+        "content": {
+          "secure_defaults": {
+            "principle": "Systems should be secure out of the box with minimal configuration",
+            "implementation": [
+              "Minimal features enabled by default",
+              "Strong security settings as default",
+              "Users explicitly enable additional functionality",
+              "Unused features aren't exposed"
+            ],
+            "examples": {
+              "good": "Firewall blocks all by default; rules open specific ports",
+              "bad": "Firewall allows all by default; rules block specific threats"
+            }
+          },
+          "fail_secure": {
+            "principle": "When failure occurs, system should fail to secure state",
+            "also_called": "Fail-closed",
+            "implementation": [
+              "Access denied when auth system unavailable",
+              "Encryption required when certificate validation fails",
+              "Default deny when rules can't be loaded"
+            ],
+            "contrast_with_fail_open": {
+              "fail_open": "Allow access when error occurs (insecure)",
+              "example": "Firewall allows all traffic when it crashes"
+            }
+          },
+          "related_principles": {
+            "least_functionality": "Install only necessary components",
+            "defense_in_depth": "Multiple security layers",
+            "least_privilege": "Minimal access granted",
+            "complete_mediation": "Every access checked"
+          },
+          "implementation_checklist": {
+            "new_services": [
+              "Default to minimal features enabled",
+              "Require explicit configuration to enable additional features",
+              "Default to strongest security settings",
+              "Implement fail-secure behavior for error conditions",
+              "Document what's enabled by default and why"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "scenario_outcomes": {
+    "optimal_path_summary": "You helped TechForward Solutions implement foundational security concepts across their development environment. By applying the CIA triad for decision-making, implementing risk-based authentication and least privilege authorization, establishing change management without sacrificing velocity, and embedding security principles like non-repudiation and secure defaults, you addressed audit findings while maintaining development productivity.",
+    "key_achievements": [
+      "CIA triad framework for security decision-making",
+      "Risk-based authentication across systems",
+      "Least privilege with RBAC implementation",
+      "Risk-based change management with CI/CD integration",
+      "Non-repudiation through individual accountability",
+      "Separation of duties without bottlenecks",
+      "Infrastructure as Code for security configurations",
+      "Secure defaults principle embedded in development"
+    ],
+    "lessons_learned": [
+      "CIA triad provides framework for balanced security decisions",
+      "AAA (Authentication, Authorization, Accounting) are foundational security functions",
+      "Least privilege minimizes access to what's needed",
+      "Change management can be risk-based to maintain velocity",
+      "Non-repudiation requires individual accountability",
+      "Separation of duties prevents fraud and errors",
+      "Security through obscurity is not a valid security strategy",
+      "Secure defaults minimize attack surface"
+    ]
+  },
+  "glossary": {
+    "CIA_triad": "Confidentiality, Integrity, Availability - core security objectives",
+    "AAA": "Authentication, Authorization, Accounting - security framework",
+    "least_privilege": "Granting minimum access needed for job function",
+    "separation_of_duties": "Dividing critical functions among different people",
+    "non_repudiation": "Assurance that actions cannot be denied",
+    "change_management": "Process for controlling modifications to systems",
+    "secure_defaults": "Systems configured securely out of the box",
+    "fail_secure": "Failing to secure state when errors occur",
+    "infrastructure_as_code": "Managing infrastructure through version-controlled code"
+  }
+}

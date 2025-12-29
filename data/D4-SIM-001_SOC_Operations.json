@@ -1,0 +1,1111 @@
+{
+  "simulation_id": "D4-SIM-001",
+  "title": "SOC Operations and Monitoring",
+  "domain": 4,
+  "category": "primary",
+  "difficulty": "intermediate",
+  "time_estimate": "45-60 minutes",
+  "passing_score": 200,
+  "max_score": 250,
+  
+  "exam_objectives": [
+    {
+      "id": "4.4",
+      "description": "Explain security alerting and monitoring concepts and tools",
+      "coverage": ["SIEM", "log aggregation", "alerting", "dashboards", "sensors", "threat intelligence"]
+    },
+    {
+      "id": "4.9",
+      "description": "Given a scenario, use data sources to support an investigation",
+      "coverage": ["log files", "network traffic", "endpoint data", "metadata", "vulnerability scans"]
+    },
+    {
+      "id": "4.1",
+      "description": "Apply common security techniques to computing resources",
+      "coverage": ["hardening", "monitoring", "logging configuration"]
+    }
+  ],
+  
+  "scenario_context": {
+    "organization": "Trident Financial Group",
+    "industry": "Financial Services",
+    "size": "3,500 employees, headquarters plus 12 regional offices",
+    "setting": "SOC maturation and optimization project",
+    "your_role": "SOC Manager",
+    "reporting_to": "CISO David Chen",
+    "environment": {
+      "current_state": {
+        "soc_team": "8 analysts (4 Tier 1, 3 Tier 2, 1 Tier 3), 24/5 coverage",
+        "technology": {
+          "siem": "Splunk Enterprise (deployed 2 years ago)",
+          "edr": "CrowdStrike Falcon",
+          "network": "Palo Alto firewalls, Zeek for network monitoring",
+          "email": "Proofpoint email security",
+          "vulnerability": "Tenable.io"
+        },
+        "challenges": [
+          "Alert fatigue - 15,000+ alerts/day, 94% false positive rate",
+          "Mean time to detect (MTTD): 18 hours",
+          "Mean time to respond (MTTR): 72 hours",
+          "Limited threat intelligence integration",
+          "Inconsistent logging across systems",
+          "No formal alert tuning process"
+        ]
+      },
+      "recent_incidents": {
+        "incident_1": "Phishing campaign detected by user report, not security tools",
+        "incident_2": "Cryptominer ran for 3 weeks before detection",
+        "incident_3": "Data exfiltration detected by external party notification"
+      },
+      "initiative": {
+        "name": "SOC Excellence Program",
+        "budget": "$1.2M",
+        "timeline": "12 months",
+        "goals": [
+          "Reduce false positive rate to <20%",
+          "Achieve MTTD < 4 hours",
+          "Achieve MTTR < 24 hours",
+          "Implement 24/7 coverage"
+        ]
+      }
+    },
+    "opening_narrative": "Trident Financial Group's SOC is drowning in alerts. Despite significant technology investments, critical incidents are being missed while analysts chase false positives. The board is concerned after learning that a data exfiltration was discovered by an external party rather than internal monitoring. As the new SOC Manager, you've been brought in to transform operations. David Chen has given you authority to restructure processes, tune systems, and implement best practices - but the clock is ticking on demonstrating improvement."
+  },
+  
+  "artifacts": [
+    {
+      "id": "artifact_1",
+      "title": "Current SOC Metrics Dashboard",
+      "type": "assessment_document",
+      "unlocks_at": "start",
+      "content": {
+        "alert_metrics": {
+          "daily_volume": {
+            "total_alerts": 15247,
+            "by_source": {
+              "siem_correlation": 3420,
+              "edr": 5891,
+              "firewall": 4102,
+              "email_security": 1834
+            }
+          },
+          "disposition": {
+            "true_positive": "6% (915 alerts)",
+            "false_positive": "94% (14,332 alerts)",
+            "investigated": "12% (1,830 alerts)",
+            "auto_closed": "88% (13,417 alerts)"
+          },
+          "by_severity": {
+            "critical": 127,
+            "high": 892,
+            "medium": 4521,
+            "low": 9707
+          }
+        },
+        "response_metrics": {
+          "mttd": "18.4 hours average",
+          "mttr": "71.6 hours average",
+          "escalation_rate": "8% of investigated alerts",
+          "incidents_per_month": 23
+        },
+        "analyst_metrics": {
+          "alerts_per_analyst_per_day": 1906,
+          "average_investigation_time": "12 minutes",
+          "burnout_indicators": "34% turnover in past year"
+        },
+        "coverage_gaps": {
+          "weekends": "On-call only, 2-hour response SLA",
+          "holidays": "On-call only",
+          "overnight": "Tier 1 only, limited escalation"
+        }
+      }
+    },
+    {
+      "id": "artifact_2",
+      "title": "Log Source Inventory",
+      "type": "reference",
+      "unlocks_at": "decision_1",
+      "content": {
+        "current_log_sources": {
+          "fully_integrated": [
+            {"source": "Windows Event Logs (DCs)", "volume": "2.1GB/day", "parsing": "Complete"},
+            {"source": "Palo Alto Firewalls", "volume": "8.4GB/day", "parsing": "Complete"},
+            {"source": "CrowdStrike EDR", "volume": "4.2GB/day", "parsing": "Complete"},
+            {"source": "Proofpoint Email", "volume": "1.8GB/day", "parsing": "Complete"}
+          ],
+          "partially_integrated": [
+            {"source": "Windows Event Logs (Servers)", "volume": "Unknown", "parsing": "Basic only", "gap": "Not all servers sending logs"},
+            {"source": "Linux Syslogs", "volume": "0.3GB/day", "parsing": "Raw only", "gap": "No field extraction"},
+            {"source": "Application Logs", "volume": "Varies", "parsing": "None", "gap": "Critical apps not logging to SIEM"}
+          ],
+          "not_integrated": [
+            {"source": "Cloud (Azure/AWS)", "risk": "No visibility into cloud workloads"},
+            {"source": "Database Audit Logs", "risk": "No visibility into data access"},
+            {"source": "DNS Logs", "risk": "Missing C2 detection capability"},
+            {"source": "DHCP Logs", "risk": "Cannot correlate IP to host"},
+            {"source": "VPN Logs", "risk": "Limited remote access visibility"}
+          ]
+        },
+        "logging_gaps_impact": {
+          "attack_chain_visibility": "Can see endpoint and perimeter, blind to lateral movement, cloud, and data layer",
+          "investigation_impact": "Analysts spend 40% of time manually gathering logs from non-integrated sources"
+        }
+      }
+    },
+    {
+      "id": "artifact_3",
+      "title": "SIEM Use Case Framework",
+      "type": "reference",
+      "unlocks_at": "decision_2",
+      "content": {
+        "use_case_categories": {
+          "authentication": {
+            "examples": ["Brute force detection", "Impossible travel", "After-hours login", "Privilege escalation"],
+            "log_sources": ["AD logs", "VPN", "Application auth logs"],
+            "priority": "High - identity is primary attack vector"
+          },
+          "malware_indicators": {
+            "examples": ["Known bad hashes", "Suspicious processes", "Persistence mechanisms", "C2 beaconing"],
+            "log_sources": ["EDR", "Proxy", "DNS", "Endpoint logs"],
+            "priority": "High - detect active compromise"
+          },
+          "data_exfiltration": {
+            "examples": ["Large outbound transfers", "Unusual destinations", "Cloud upload anomalies", "Email DLP alerts"],
+            "log_sources": ["Proxy", "Firewall", "DLP", "Cloud logs"],
+            "priority": "High - protect sensitive data"
+          },
+          "network_anomalies": {
+            "examples": ["Port scanning", "Lateral movement", "Protocol anomalies", "Beaconing patterns"],
+            "log_sources": ["Firewall", "IDS", "NetFlow", "Zeek"],
+            "priority": "Medium - detect reconnaissance and movement"
+          },
+          "compliance": {
+            "examples": ["Privileged access monitoring", "Configuration changes", "Policy violations"],
+            "log_sources": ["System logs", "Change management", "PAM"],
+            "priority": "Medium - regulatory requirements"
+          }
+        },
+        "use_case_development": {
+          "process": ["Define objective", "Identify data sources", "Build detection logic", "Test with known samples", "Tune thresholds", "Document runbook", "Deploy and monitor"],
+          "tuning_lifecycle": "Initial deploy â†’ 2-week tuning â†’ Monthly review â†’ Quarterly optimization"
+        }
+      }
+    },
+    {
+      "id": "artifact_4",
+      "title": "Alert Triage Process",
+      "type": "process_document",
+      "unlocks_at": "decision_3",
+      "content": {
+        "triage_workflow": {
+          "tier_1": {
+            "responsibilities": ["Initial alert review", "Basic enrichment", "Known false positive closure", "Escalation to Tier 2"],
+            "time_target": "15 minutes per alert",
+            "decision_points": ["Is this a known false positive?", "Does context indicate true threat?", "Is escalation needed?"]
+          },
+          "tier_2": {
+            "responsibilities": ["Deep investigation", "Threat hunting queries", "Incident declaration", "Containment recommendations"],
+            "time_target": "2 hours per investigation",
+            "decision_points": ["What is the full scope?", "Is containment needed?", "What is the root cause?"]
+          },
+          "tier_3": {
+            "responsibilities": ["Advanced analysis", "Malware reverse engineering", "Threat intelligence correlation", "Process improvement"],
+            "focus": "Quality over quantity, mentor other tiers"
+          }
+        },
+        "enrichment_sources": {
+          "automatic": ["Asset inventory lookup", "User context", "Threat intelligence", "Historical alerts"],
+          "manual": ["Endpoint investigation", "User contact", "Network forensics"]
+        },
+        "escalation_criteria": {
+          "immediate": ["Confirmed malware execution", "Active data exfiltration", "Ransomware indicators", "Compromised privileged account"],
+          "standard": ["Suspicious but unconfirmed activity", "Policy violations", "Anomalous behavior patterns"]
+        }
+      }
+    },
+    {
+      "id": "artifact_5",
+      "title": "Threat Intelligence Integration",
+      "type": "reference",
+      "unlocks_at": "decision_4",
+      "content": {
+        "intelligence_types": {
+          "tactical": {
+            "description": "IOCs - IPs, domains, hashes, URLs",
+            "use": "Direct detection, alert enrichment",
+            "sources": ["Commercial feeds", "ISAC", "OSINT"],
+            "integration": "SIEM watchlists, EDR blocklists, firewall rules"
+          },
+          "operational": {
+            "description": "TTPs - how adversaries operate",
+            "use": "Detection engineering, hunting hypotheses",
+            "sources": ["MITRE ATT&CK", "Threat reports", "Incident learnings"],
+            "integration": "Use case development, analyst training"
+          },
+          "strategic": {
+            "description": "Trends, threat landscape, adversary motivation",
+            "use": "Security strategy, risk prioritization",
+            "sources": ["Industry reports", "Government advisories", "Peer sharing"],
+            "integration": "Leadership briefings, program planning"
+          }
+        },
+        "intelligence_lifecycle": {
+          "collection": "Gather from multiple sources",
+          "processing": "Normalize, deduplicate, validate",
+          "analysis": "Determine relevance to organization",
+          "dissemination": "Distribute to appropriate consumers",
+          "feedback": "Track effectiveness, refine sources"
+        },
+        "fs_isac": {
+          "description": "Financial Services Information Sharing and Analysis Center",
+          "value": "Industry-specific threat intelligence, peer collaboration",
+          "recommendation": "Essential for financial services organizations"
+        }
+      }
+    },
+    {
+      "id": "artifact_6",
+      "title": "Detection Engineering Principles",
+      "type": "reference",
+      "unlocks_at": "decision_5",
+      "content": {
+        "detection_types": {
+          "signature_based": {
+            "description": "Match known bad indicators",
+            "pros": "Low false positives for known threats",
+            "cons": "Cannot detect unknown threats, easily evaded",
+            "examples": ["Hash matching", "Known bad IPs", "Regex patterns"]
+          },
+          "behavior_based": {
+            "description": "Detect suspicious patterns regardless of specific indicators",
+            "pros": "Can detect unknown threats, harder to evade",
+            "cons": "Higher false positives, requires tuning",
+            "examples": ["Process lineage anomalies", "Unusual network patterns", "Time-based anomalies"]
+          },
+          "anomaly_based": {
+            "description": "Statistical deviation from baseline",
+            "pros": "Detect novel attacks, insider threats",
+            "cons": "Requires good baseline, high false positives initially",
+            "examples": ["UEBA", "Network traffic baselines", "User behavior analysis"]
+          }
+        },
+        "mitre_attack_coverage": {
+          "purpose": "Map detections to adversary techniques",
+          "benefit": "Identify coverage gaps, prioritize development",
+          "approach": "Track which techniques have detections, measure effectiveness"
+        },
+        "detection_quality_metrics": {
+          "true_positive_rate": "Percentage of actual threats detected",
+          "false_positive_rate": "Percentage of alerts that are benign",
+          "time_to_detect": "How quickly threats are identified",
+          "coverage": "Which attack techniques are detectable"
+        }
+      }
+    },
+    {
+      "id": "artifact_7",
+      "title": "SOC Metrics Framework",
+      "type": "reference",
+      "unlocks_at": "decision_6",
+      "content": {
+        "operational_metrics": {
+          "volume_metrics": {
+            "alerts_per_day": "Total alert volume by source and severity",
+            "events_per_second": "SIEM ingestion rate",
+            "incidents_per_period": "Declared incidents over time"
+          },
+          "efficiency_metrics": {
+            "mttd": "Mean Time to Detect - time from compromise to detection",
+            "mttr": "Mean Time to Respond - time from detection to containment",
+            "mtta": "Mean Time to Acknowledge - time from alert to analyst review",
+            "false_positive_rate": "Percentage of alerts that are not true threats"
+          },
+          "quality_metrics": {
+            "escalation_accuracy": "Percentage of escalations that were appropriate",
+            "detection_rate": "Percentage of threats detected internally vs externally reported",
+            "coverage_score": "MITRE ATT&CK technique coverage percentage"
+          }
+        },
+        "analyst_metrics": {
+          "alerts_per_analyst": "Workload distribution",
+          "time_per_alert": "Investigation efficiency",
+          "escalation_rate": "Tier 1 to Tier 2 ratio"
+        },
+        "business_metrics": {
+          "security_incidents": "Count and severity of confirmed incidents",
+          "business_impact": "Downtime, data loss, financial impact",
+          "risk_reduction": "Vulnerabilities addressed, threats blocked"
+        }
+      }
+    },
+    {
+      "id": "artifact_8",
+      "title": "Log Retention and Compliance",
+      "type": "reference",
+      "unlocks_at": "decision_7",
+      "content": {
+        "retention_requirements": {
+          "regulatory": {
+            "pci_dss": "1 year minimum, 3 months immediately available",
+            "sox": "7 years for audit-relevant logs",
+            "glba": "Varies, typically 5-7 years",
+            "sec_regulations": "Various requirements for financial services"
+          },
+          "operational": {
+            "investigation": "Need sufficient history for incident investigation",
+            "trending": "Long-term data for baseline and anomaly detection",
+            "forensics": "Detailed logs for legal proceedings"
+          }
+        },
+        "tiered_storage": {
+          "hot": {"duration": "30-90 days", "storage": "Fast SSD", "use": "Active searching, real-time analysis"},
+          "warm": {"duration": "90 days - 1 year", "storage": "Standard disk", "use": "Investigation, compliance queries"},
+          "cold": {"duration": "1-7 years", "storage": "Archive/S3 Glacier", "use": "Compliance, legal hold"}
+        },
+        "log_integrity": {
+          "requirements": ["Tamper-evident storage", "Chain of custody", "Time synchronization"],
+          "methods": ["Write-once storage", "Hash verification", "Centralized NTP"]
+        }
+      }
+    },
+    {
+      "id": "artifact_9",
+      "title": "24/7 Coverage Models",
+      "type": "reference",
+      "unlocks_at": "decision_8",
+      "content": {
+        "coverage_models": {
+          "follow_the_sun": {
+            "description": "Distribute SOC across time zones",
+            "pros": "Staff work normal hours, no overnight shifts",
+            "cons": "Coordination overhead, consistent process critical",
+            "requirements": "Multiple locations, mature processes"
+          },
+          "shift_model": {
+            "description": "Single location with rotating shifts",
+            "pros": "Centralized team, easier coordination",
+            "cons": "Night shift challenges, burnout risk",
+            "requirements": "Shift differential, adequate staffing"
+          },
+          "hybrid_mssp": {
+            "description": "Internal team augmented by MSSP for off-hours",
+            "pros": "Core team handles business hours, external coverage for nights/weekends",
+            "cons": "Handoff overhead, MSSP may lack context",
+            "requirements": "Strong processes, clear escalation paths"
+          },
+          "full_mssp": {
+            "description": "Outsource 24/7 monitoring entirely",
+            "pros": "Immediate coverage, predictable cost",
+            "cons": "Less organizational context, dependency",
+            "requirements": "Mature incident response, good MSSP selection"
+          }
+        },
+        "staffing_calculator": {
+          "per_shift": "Minimum 2 analysts for redundancy",
+          "24_7_coverage": "5-6 FTEs per seat for full coverage with PTO",
+          "tier_ratio": "Typical 4:2:1 ratio (Tier 1:Tier 2:Tier 3)"
+        }
+      }
+    },
+    {
+      "id": "artifact_10",
+      "title": "SOC Maturity Roadmap",
+      "type": "project_document",
+      "unlocks_at": "decision_9",
+      "content": {
+        "maturity_levels": {
+          "level_1_initial": {
+            "characteristics": ["Reactive", "Ad-hoc processes", "Basic tools", "Limited visibility"],
+            "focus": "Get basic monitoring in place"
+          },
+          "level_2_managed": {
+            "characteristics": ["Documented processes", "Consistent triage", "Core log sources integrated", "Basic metrics"],
+            "focus": "Standardize operations"
+          },
+          "level_3_defined": {
+            "characteristics": ["Optimized detection", "Threat intelligence integration", "Proactive hunting", "Advanced metrics"],
+            "focus": "Improve detection quality"
+          },
+          "level_4_measured": {
+            "characteristics": ["Metrics-driven decisions", "Continuous improvement", "Automation", "Business alignment"],
+            "focus": "Optimize and automate"
+          },
+          "level_5_optimizing": {
+            "characteristics": ["Industry-leading", "Predictive capabilities", "Threat anticipation", "Security innovation"],
+            "focus": "Lead and innovate"
+          }
+        },
+        "trident_roadmap": {
+          "current_state": "Level 1-2: Basic tools in place but drowning in alerts",
+          "phase_1": {"months": "1-3", "focus": "Alert tuning, process standardization", "target": "Level 2"},
+          "phase_2": {"months": "4-6", "focus": "Log integration, threat intel, detection engineering", "target": "Level 2-3"},
+          "phase_3": {"months": "7-12", "focus": "Hunting program, automation, 24/7 coverage", "target": "Level 3"}
+        }
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Addressing Alert Fatigue",
+      "narrative": "Your analysts are overwhelmed - 15,000 alerts per day with a 94% false positive rate. Morale is low, and critical alerts are being missed in the noise. You need to take immediate action.",
+      "question": "What is the MOST effective first step to address alert fatigue?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Hire more analysts to handle the alert volume",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "More analysts won't fix a 94% false positive rate",
+            "detailed": "Adding analysts to investigate false positives doesn't solve the problem - it just adds more people wasting time. At 94% false positive rate, you're asking analysts to find needles in a haystack. Fix the signal-to-noise ratio first, then right-size the team."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Implement systematic alert tuning starting with highest-volume false positive sources",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Reduce noise by tuning high-volume false positives",
+            "detailed": "Alert tuning is the highest-impact first step. Analyze the top false positive generators, understand why they're firing incorrectly, and tune thresholds, add exclusions, or disable ineffective rules. Focus on high-volume sources first for maximum impact. A few weeks of focused tuning can dramatically improve signal-to-noise."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Replace the SIEM with a newer solution",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "New tools won't fix process problems",
+            "detailed": "The SIEM (Splunk) is a capable tool - the problem is how it's configured and tuned. A new SIEM will have the same problems without proper tuning and processes. Fix the process first; consider tool changes later if needed."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Disable all medium and low severity alerts",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "May eliminate valid detections along with noise",
+            "detailed": "Blanket severity filtering is too blunt - some medium/low alerts may indicate real threats in context. Instead, tune individual rules based on their false positive rate and value. A well-tuned medium alert is better than a noisy critical alert."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "With 94% false positives, what action directly addresses the signal-to-noise ratio?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Alert tuning: analyze false positive sources, adjust thresholds/exclusions, disable low-value rules. Start with highest-volume false positives for maximum impact."
+        }
+      ],
+      "learning_note": "Alert fatigue solution: systematic tuning, not more staff or new tools. Analyze alert disposition data to identify highest false positive generators. Tune thresholds, add context-based exclusions, disable or rewrite poor detections. Measure false positive rate and track improvement. Good SOCs continuously tune.",
+      "unlocks_artifact": "artifact_2"
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "Critical Log Source Gap",
+      "narrative": "Your log inventory reveals critical gaps - no DNS logging, no cloud visibility, and no database audit logs. These gaps explain why the cryptominer ran for 3 weeks undetected (DNS beaconing) and the data exfiltration was missed (database access).",
+      "question": "Which log source should be prioritized FIRST for integration?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Database audit logs - protect the crown jewels",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important but not the highest-impact first choice",
+            "detailed": "Database audit logs are valuable for detecting data access anomalies. However, DNS logging provides broader visibility across the entire attack chain - C2 communication, data exfiltration, and malware callbacks. DNS catches threats that database logs would miss."
+          }
+        },
+        {
+          "id": "B",
+          "text": "DNS logs - visibility into C2, exfiltration, and malware communication",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! DNS provides broad visibility across the attack chain",
+            "detailed": "DNS logging is often called the 'gold mine' of security monitoring. Almost all malware uses DNS for C2, exfiltration often uses DNS tunneling, and DNS queries reveal attacker infrastructure. The cryptominer used DNS beaconing - DNS logs would have detected it. High value, relatively easy to integrate."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Cloud logs - modern infrastructure requires cloud visibility",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important if cloud usage is significant",
+            "detailed": "Cloud logging is essential for organizations with significant cloud workloads. However, the immediate incidents (cryptominer, data exfiltration) occurred on-premises. DNS logging would have detected both. Prioritize based on where threats are manifesting."
+          }
+        },
+        {
+          "id": "D",
+          "text": "VPN logs - critical for remote access visibility",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Useful but more limited detection value",
+            "detailed": "VPN logs show remote access patterns - useful for access anomaly detection. But VPN logs wouldn't have detected the cryptominer or data exfiltration, which occurred from internal systems. DNS has broader detection applicability."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What log source would have detected the cryptominer's C2 beaconing?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "DNS logging detects: C2 communication (beaconing to malicious domains), DNS tunneling (data exfiltration), DGA domains (malware), threat intelligence matches."
+        }
+      ],
+      "learning_note": "DNS logging value: virtually all malware uses DNS (C2, exfiltration, DGA). DNS is difficult for attackers to avoid and provides insight into the entire environment. Key detections: known bad domains, beaconing patterns, DNS tunneling, newly registered domains. Often highest-value log source to add.",
+      "unlocks_artifact": "artifact_3"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Triage Process Optimization",
+      "narrative": "Current process: Tier 1 analysts investigate every alert from scratch. Average investigation time is 12 minutes, but most of that time is spent gathering basic context that should be automated. Analysts report that 80% of their time is repetitive lookups.",
+      "question": "What improvement will most significantly improve triage efficiency?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create detailed playbooks for every alert type",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Playbooks help but don't solve the repetitive lookup problem",
+            "detailed": "Playbooks standardize response but don't eliminate the manual lookups consuming 80% of analyst time. Playbooks tell analysts WHAT to look up; automation DOES the lookups. Combine playbooks with automation for maximum effect."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Automatic alert enrichment - add asset, user, and threat intel context to alerts",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Automate repetitive context gathering",
+            "detailed": "Alert enrichment automatically adds context: asset information (criticality, owner, OS), user context (role, department, behavior baseline), threat intelligence (is IP/domain malicious?), and historical alerts. When an analyst opens an alert, context is already present. This eliminates 80% of repetitive lookups and lets analysts focus on analysis, not data gathering."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Train Tier 1 analysts to investigate faster",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Training helps but doesn't eliminate waste",
+            "detailed": "Better-trained analysts still have to do the same manual lookups. Training improves quality and may marginally improve speed, but the fundamental inefficiency of manual context gathering remains. Automate the repetitive work."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Skip Tier 1 - send all alerts directly to Tier 2",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Moves the problem without solving it",
+            "detailed": "Tier 2 would face the same inefficiency issues. The tiered model exists for good reason - Tier 1 handles volume, Tier 2 handles complexity. Improve Tier 1 efficiency rather than eliminating the tier."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "If 80% of time is repetitive lookups, what would eliminate that repetitive work?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Alert enrichment automatically gathers context (asset info, user details, threat intel) so analysts can analyze instead of lookup."
+        }
+      ],
+      "learning_note": "Alert enrichment transforms SOC efficiency: every alert arrives with asset context (what system, how critical), user context (who, what role, normal behavior), threat intelligence (known bad indicators), and history (related alerts). Analysts make better decisions faster with context at their fingertips rather than spending time gathering it.",
+      "unlocks_artifact": "artifact_4"
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Threat Intelligence Integration",
+      "narrative": "Trident has purchased threat intelligence feeds but they're not well integrated. Analysts manually check indicators against external sources. The FS-ISAC membership provides valuable financial sector intelligence that's currently ignored.",
+      "question": "How should threat intelligence be integrated into SOC operations?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create a separate threat intelligence team to analyze reports",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Separate team creates silos",
+            "detailed": "A separate threat intel team without integration into operations means intelligence doesn't reach analysts when needed. Intelligence must be operationalized - integrated into detection, enrichment, and investigation workflows. Embed intelligence into SOC processes, not a separate team."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Automated IOC matching in SIEM plus analyst-accessible TIP for investigation",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Operationalize intelligence through automation and accessibility",
+            "detailed": "Effective threat intel integration: automated matching (IOCs imported to SIEM watchlists for automatic detection and enrichment), accessible platform (Threat Intelligence Platform where analysts can search indicators during investigation), and contextual intelligence (FS-ISAC reports integrated into analyst briefings and detection engineering). Intelligence should be both automated AND accessible."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Send threat intelligence reports to all analysts daily",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Information overload without operationalization",
+            "detailed": "Emailing reports doesn't operationalize intelligence. Analysts need intelligence integrated into their workflows - matched against alerts, available during investigation, informing detection rules. Reading reports doesn't scale; automation does."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Block all IOCs at the firewall automatically",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Blocking without analysis can cause problems",
+            "detailed": "Automatic blocking without validation can block legitimate traffic (false positives in feeds) or alert adversaries (they notice blocks). Intelligence should inform detection and investigation first. Blocking is appropriate for high-confidence indicators after validation."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can intelligence be automatically applied while also being available for manual investigation?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Integrate at multiple levels: IOC watchlists in SIEM (automatic detection), enrichment (add intel to alerts), TIP (analyst investigation), and detection engineering (TTPs inform rules)."
+        }
+      ],
+      "learning_note": "Threat intelligence integration levels: tactical (IOCs â†’ watchlists/blocklists for automatic detection), operational (TTPs â†’ detection engineering, hunting hypotheses), strategic (trends â†’ security strategy). Use a TIP (Threat Intelligence Platform) to aggregate, correlate, and make intelligence accessible. FS-ISAC is essential for financial services.",
+      "unlocks_artifact": "artifact_5"
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Detection Engineering Strategy",
+      "narrative": "Most of Trident's SIEM rules are vendor-provided defaults that haven't been customized. You notice there's heavy reliance on signature-based detection (known bad IPs, hashes) with few behavior-based detections.",
+      "question": "How should detection engineering be approached to improve detection capabilities?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Focus on adding more threat intelligence feeds for better signature coverage",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Signatures alone can't detect unknown threats",
+            "detailed": "More IOC feeds improve signature coverage but signatures only detect KNOWN threats. The cryptominer wasn't detected because it didn't match known signatures. Behavior-based detection catches threats regardless of specific indicators. Balance is needed."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Balance signature and behavior-based detection, map to MITRE ATT&CK for coverage",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Multiple detection types with coverage visibility",
+            "detailed": "Effective detection engineering: signature-based for known threats (quick wins, low false positives), behavior-based for technique detection (catches unknown variants), and MITRE ATT&CK mapping to identify gaps. MITRE ATT&CK shows which adversary techniques you can detect and which are blind spots. This systematic approach ensures comprehensive coverage."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Replace all rules with machine learning-based anomaly detection",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "ML alone has high false positives and misses context",
+            "detailed": "Pure anomaly detection generates many false positives - unusual doesn't always mean malicious. ML is valuable as one detection type but shouldn't replace rule-based detection. Layered approach: signatures, behaviors, AND anomaly detection each catch different threats."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Only create custom rules after specific incidents",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Reactive approach leaves gaps until exploitation",
+            "detailed": "Waiting for incidents means threats succeed before detection exists. Proactive detection engineering uses threat intelligence and MITRE ATT&CK to build detections for likely attack techniques BEFORE they're used against you. Balance reactive (learn from incidents) with proactive (anticipate threats)."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What framework helps identify detection gaps across adversary techniques?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "MITRE ATT&CK maps adversary techniques. Map your detections to ATT&CK to see coverage and gaps. Balance signature (known) and behavior (technique) detection."
+        }
+      ],
+      "learning_note": "Detection engineering approach: signature-based (known bad - IOCs, hashes), behavior-based (technique detection - suspicious process trees, lateral movement patterns), and anomaly-based (deviation from baseline). Map to MITRE ATT&CK to identify coverage gaps. Continuously develop, tune, and retire detections. Detection is a discipline, not a one-time setup.",
+      "unlocks_artifact": "artifact_6"
+    },
+    {
+      "id": "decision_6",
+      "sequence": 6,
+      "title": "Key SOC Metrics",
+      "narrative": "David Chen asks for a monthly metrics report for leadership. Currently, the SOC reports 'alerts handled' which doesn't convey security effectiveness. You need to establish meaningful metrics.",
+      "question": "What is the MOST important metric for demonstrating SOC effectiveness to leadership?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Total alerts processed per month",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Volume metric doesn't indicate security outcomes",
+            "detailed": "Processing 15,000 alerts/day means nothing if they're mostly false positives and real threats are missed. Volume metrics (alerts processed, tickets closed) measure activity, not effectiveness. Leadership needs outcome metrics."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Mean Time to Detect (MTTD) and Mean Time to Respond (MTTR)",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Time-based metrics directly measure security effectiveness",
+            "detailed": "MTTD and MTTR directly measure security outcomes: MTTD = how quickly threats are identified (shorter = less dwell time for attackers), MTTR = how quickly threats are contained (shorter = less damage). These metrics are meaningful to leadership, comparable to industry benchmarks, and drive the right behaviors."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Number of security tools deployed",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Tool count doesn't indicate effectiveness",
+            "detailed": "More tools doesn't mean better security - Trident has significant tooling but poor outcomes. Tool metrics measure investment, not results. Focus on what the tools achieve, not how many exist."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Analyst utilization rate",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Analyst utilization is an internal efficiency metric",
+            "detailed": "100% analyst utilization might mean they're drowning in false positives. Analyst metrics are important for SOC management but don't convey security effectiveness to leadership. MTTD/MTTR show whether the SOC is achieving its mission."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What metrics directly measure how quickly threats are detected and contained?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "MTTD (Mean Time to Detect) and MTTR (Mean Time to Respond) measure security outcomes. Lower times = less attacker dwell time = less damage."
+        }
+      ],
+      "learning_note": "SOC metrics hierarchy: operational (alert volume, false positive rate - for SOC management), effectiveness (MTTD, MTTR, detection rate - for leadership), and business (incidents, impact, risk - for board). MTTD and MTTR are industry-standard effectiveness metrics. Track trends over time, compare to benchmarks, use to prioritize improvements.",
+      "unlocks_artifact": "artifact_7"
+    },
+    {
+      "id": "decision_7",
+      "sequence": 7,
+      "title": "Log Retention Strategy",
+      "narrative": "The SIEM is running low on storage. Current retention is 90 days for all logs. Finance asks why logs need to be kept so long, while compliance wants 7-year retention for certain data.",
+      "question": "What log retention approach balances operational, compliance, and cost needs?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep all logs for 7 years to meet the strictest requirement",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Unnecessarily expensive - not all logs need 7-year retention",
+            "detailed": "Keeping all logs for 7 years is extremely expensive and unnecessary. Compliance requires specific logs (authentication, financial transactions) be retained, not all logs. Operational logs may only need 90 days. Tiered approach optimizes cost."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Tiered retention: hot (searchable, 90 days), warm (1 year), cold archive (7 years for compliance-required logs)",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Tiered retention balances needs and costs",
+            "detailed": "Tiered retention: Hot storage (SIEM, fast search) for 90 days of operational investigation. Warm storage (indexed archive) for 1 year covering incident investigation and annual audit. Cold archive for 7 years of compliance-required logs only. This meets compliance, enables operations, and optimizes cost."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Reduce retention to 30 days to save costs",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Violates compliance and limits investigation capability",
+            "detailed": "30-day retention likely violates PCI-DSS (1 year minimum) and SOX requirements. It also limits investigation - the cryptominer ran for 3 weeks, and investigation needed historical logs. Short retention saves money but creates compliance and operational risk."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Only retain security-relevant logs, delete operational logs immediately",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Determining 'security-relevant' is difficult",
+            "detailed": "It's hard to know in advance which logs will be needed for investigation. Operational logs (application logs, performance data) often provide crucial context. Better to retain broadly for operational period and archive selectively for compliance."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can different retention periods be applied to different needs (operational vs. compliance)?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Tiered retention: hot (fast search, short-term), warm (indexed, medium-term), cold (archive, long-term compliance). Different data has different retention requirements."
+        }
+      ],
+      "learning_note": "Log retention strategy: identify retention requirements (regulatory, operational, legal), implement tiered storage (hot for active search, warm for investigation, cold for compliance), automate lifecycle (move data between tiers automatically), and document rationale (for auditors). PCI requires 1 year; SOX may require 7 years for certain records.",
+      "unlocks_artifact": "artifact_8"
+    },
+    {
+      "id": "decision_8",
+      "sequence": 8,
+      "title": "24/7 Coverage Model",
+      "narrative": "The board wants 24/7 SOC coverage after the incidents that occurred on nights and weekends. Current 24/5 coverage with on-call for off-hours isn't meeting needs. You have budget for expanded coverage but not unlimited resources.",
+      "question": "What coverage model best fits Trident's needs and constraints?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Build full internal 24/7 SOC with three shifts",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Very expensive and may not be necessary",
+            "detailed": "Full 24/7 internal SOC requires 5-6 FTEs per seat for coverage (vacations, sick time, turnover). For a mid-size company like Trident, this is expensive and may have analysts sitting idle during quiet night shifts. Consider hybrid approaches."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Hybrid model: internal team for business hours, MSSP for nights/weekends with defined escalation",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Hybrid balances coverage, cost, and context",
+            "detailed": "Hybrid model provides: core internal team during business hours (organizational context, relationships, complex investigations), MSSP coverage for nights/weekends/holidays (monitoring and initial triage), defined escalation procedures (when to wake up internal team), and cost efficiency. Internal team handles most incidents during business hours; MSSP provides eyes on glass during off-hours."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Outsource entire SOC to MSSP for 24/7 coverage",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Full outsource loses organizational context",
+            "detailed": "Full MSSP loses the internal team's organizational knowledge, relationships, and context. MSSPs handle monitoring well but may struggle with complex investigations requiring business context. Hybrid preserves internal expertise while gaining coverage."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Implement automated response to handle off-hours without staff",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Automation helps but can't replace human judgment",
+            "detailed": "Automation can handle routine responses but critical incidents need human judgment. Automated containment might cause business disruption, or attackers might evade automated responses. Automation augments human analysts, doesn't replace them for 24/7 coverage."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What model provides coverage while preserving internal expertise and managing costs?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Hybrid: internal team (business context, complex work) during business hours + MSSP (monitoring, triage) for nights/weekends. Define clear escalation criteria."
+        }
+      ],
+      "learning_note": "24/7 coverage options: full internal (expensive, best context), follow-the-sun (distributed team), hybrid MSSP (cost-effective for mid-size), full MSSP (least context). Hybrid is common: internal team handles business hours and complex incidents, MSSP provides off-hours monitoring with escalation. Define clear handoff procedures and escalation criteria.",
+      "unlocks_artifact": "artifact_9"
+    },
+    {
+      "id": "decision_9",
+      "sequence": 9,
+      "title": "Detection Gap Analysis",
+      "narrative": "You've mapped current SIEM rules to MITRE ATT&CK. Results show strong coverage for Initial Access and Execution but major gaps in Defense Evasion, Lateral Movement, and Exfiltration.",
+      "question": "How should detection development be prioritized based on this gap analysis?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Strengthen Initial Access detections further since that's where attacks start",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Already strong coverage - prioritize gaps",
+            "detailed": "Initial Access detection is already strong. Attackers who bypass initial defenses can then move laterally and exfiltrate without detection (as demonstrated by recent incidents). Prioritize the gaps that allow attackers to succeed after initial compromise."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Prioritize Lateral Movement and Exfiltration - these gaps explain missed incidents",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Address gaps that explain actual missed detections",
+            "detailed": "The gap analysis explains why incidents were missed: cryptominer (Defense Evasion, no lateral movement detection), data exfiltration (no exfiltration detection). Prioritize detections for techniques actually used against you. Lateral movement detection catches attackers after initial compromise; exfiltration detection catches data theft - both are critical gaps."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Equal investment across all MITRE ATT&CK tactics",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Not all gaps are equally critical",
+            "detailed": "Some tactics are more critical than others for Trident's risk profile. Exfiltration detection is higher priority than, say, Resource Development detection (which often happens outside your visibility). Prioritize based on risk and achievability."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Focus only on techniques used in recent incidents",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Too narrow - adversaries will use different techniques",
+            "detailed": "Recent incidents inform priorities, but attackers adapt. Build detection for technique categories (lateral movement, exfiltration) that will catch variants, not just the exact TTPs from past incidents. Use incidents to prioritize areas, not to define complete scope."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Which detection gaps explain the recent missed incidents?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Lateral movement and exfiltration gaps explain missed cryptominer (no C2 detection) and data theft. Prioritize gaps that caused actual misses."
+        }
+      ],
+      "learning_note": "MITRE ATT&CK coverage prioritization: map current detections to ATT&CK, identify gaps, prioritize based on risk (what would hurt most if undetected), threat intelligence (what are adversaries using), and achievability (what can you detect with current logs). Don't try to cover everything - focus on high-value techniques for your environment.",
+      "unlocks_artifact": "artifact_10"
+    },
+    {
+      "id": "decision_10",
+      "sequence": 10,
+      "title": "SOC Maturity Measurement",
+      "narrative": "After six months of improvements, David Chen asks how to demonstrate progress to the board. You need to show the SOC has matured from its initial struggling state.",
+      "question": "What is the BEST way to demonstrate SOC maturity improvement to the board?",
+      "options": [
+        {
+          "id": "A",
+          "text": "List all the new tools and technologies implemented",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Tools don't demonstrate outcomes",
+            "detailed": "The board cares about security outcomes, not technology inventory. Trident already had good tools - the problem was processes and configuration. Show what the tools ACHIEVED, not what tools exist."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Trend analysis showing MTTD/MTTR improvement, false positive reduction, and detection rate increase",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Outcome metrics showing trend improvement",
+            "detailed": "Board-level reporting should show: MTTD reduction (18 hours â†’ 4 hours = faster threat detection), MTTR reduction (72 hours â†’ 24 hours = faster containment), false positive rate reduction (94% â†’ 20% = efficient operations), and internal detection rate (100% internally detected vs. external notification). Trends demonstrate sustainable improvement."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Third-party maturity assessment score",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Assessments help but internal metrics are more meaningful",
+            "detailed": "Third-party assessments provide external validation but: they're point-in-time snapshots, expensive, and may not capture recent improvements. Internal metrics showing trends are more current and directly tied to security outcomes. Consider assessments as supplement, not primary measure."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Number of incidents handled",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Incident count doesn't show improvement",
+            "detailed": "More incidents might mean better detection OR worse security. Fewer incidents might mean less attacks OR worse detection. Incident count is ambiguous. MTTD/MTTR show capability regardless of attack volume."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What metrics show improvement in security outcomes over time?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Trend analysis: MTTD/MTTR trending down, false positive rate trending down, detection rate trending up. Show before/after and trajectory."
+        }
+      ],
+      "learning_note": "SOC maturity demonstration: outcome metrics with trends (MTTD, MTTR, detection rate), capability metrics (ATT&CK coverage, log source integration), and efficiency metrics (false positive rate, analyst productivity). Board presentations should show: where we started, where we are now, trajectory, comparison to goals/benchmarks. Avoid tool lists and activity metrics."
+    }
+  ],
+  
+  "scoring": {
+    "max_points": 250,
+    "passing_score": 200,
+    "passing_percentage": 80
+  },
+  
+  "outcome_thresholds": {
+    "expert": {"min_score": 238, "title": "SOC Excellence Expert", "description": "Exceptional understanding of security operations."},
+    "proficient": {"min_score": 213, "title": "SOC Operations Professional", "description": "Strong grasp of SOC management and optimization."},
+    "competent": {"min_score": 200, "title": "SOC Operations Competent", "description": "Solid understanding of security monitoring concepts."},
+    "developing": {"min_score": 175, "title": "SOC Operations Developing", "description": "Gaps in security operations concepts."},
+    "needs_remediation": {"min_score": 0, "title": "SOC Fundamentals Needed", "description": "Review security monitoring concepts."}
+  },
+  
+  "weakness_mapping": {
+    "log_analysis_gaps": {"indicators": ["decision_1_incorrect", "decision_2_incorrect"], "remediation": "D4-REM-001", "focus": "Log analysis and SIEM fundamentals"},
+    "detection_gaps": {"indicators": ["decision_5_incorrect", "decision_9_incorrect"], "remediation": "D4-REM-001", "focus": "Detection engineering concepts"}
+  },
+  
+  "prerequisites": [],
+  "unlocks": ["D4-SIM-002", "D4-SIM-003"],
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 4: Security Operations",
+    "job_role_alignment": ["SOC Manager", "SOC Analyst", "Security Engineer"],
+    "estimated_time": "45-60 minutes",
+    "industry_context": "Financial Services"
+  }
+}

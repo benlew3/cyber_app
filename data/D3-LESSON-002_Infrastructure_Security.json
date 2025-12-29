@@ -1,0 +1,419 @@
+{
+  "lesson_id": "D3-LESSON-002",
+  "domain": 3,
+  "title": "Infrastructure Security",
+  "objectives_covered": ["3.1"],
+  "estimated_duration": "45-55 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": ["D3-LESSON-001"],
+
+  "introduction": {
+    "hook": "In 2021, attackers compromised a water treatment facility in Oldsmar, Florida, and attempted to increase sodium hydroxide (lye) levels to dangerous concentrations. They gained access through TeamViewer software that was shared among employees and hadn't been updated. The attack was stopped only because an operator noticed the mouse moving on screen. This incident highlights that infrastructure security isn't just about protecting dataâ€”it can literally be life or death. From servers to industrial control systems, infrastructure is the foundation that everything else depends on.",
+    "learning_goals": [
+      "Implement server hardening and secure baseline configurations",
+      "Secure endpoint devices including workstations and mobile devices",
+      "Understand embedded and specialized system security challenges",
+      "Apply virtualization security controls and considerations",
+      "Implement physical security measures for infrastructure protection"
+    ],
+    "why_it_matters": "Infrastructure is the foundation of all technology operations. Compromised infrastructure affects everything built on top of itâ€”applications, data, and business processes. Security professionals configure secure systems, harden devices, and protect the physical and virtual infrastructure. Whether you're managing servers, securing endpoints, or assessing infrastructure security, this knowledge is essential. Expect 5-7 Security+ questions on infrastructure hardening, endpoint protection, and specialized systems."
+  },
+
+  "sections": [
+    {
+      "section_id": "D3-L002-S01",
+      "title": "Server Hardening",
+      "content": "Server hardening reduces attack surface by removing unnecessary components, applying secure configurations, and implementing protective controls.\n\n**Hardening Principles**\n\n*Minimal Installation*\n- Install only required components\n- Remove unnecessary packages\n- Disable unneeded features\n- Smallest footprint possible\n\n*Service Minimization*\n- Run only required services\n- Disable default services\n- Document required services\n- Regular review of running services\n\n**Operating System Hardening**\n\n*Windows Server*\n- Remove unnecessary roles/features\n- Disable SMBv1 (WannaCry vulnerable)\n- Enable Windows Firewall\n- Configure audit policies\n- Apply Group Policy baselines\n- Enable Credential Guard\n- Implement LAPS\n\n*Linux Server*\n- Minimal installation (no GUI)\n- Remove unnecessary packages\n- Disable root SSH\n- Configure iptables/nftables\n- Enable SELinux/AppArmor\n- Configure auditd\n- Use SSH keys only\n\n**Service Account Security**\n\n*Best Practices*\n- Dedicated accounts per service\n- Least privilege permissions\n- Never use domain admin\n- Managed Service Accounts (gMSA)\n- No interactive login\n- Regular credential rotation\n\n**File System Security**\n\n*Permissions*\n- Principle of least privilege\n- Remove default permissions\n- Audit sensitive directories\n- No world-writable directories\n\n*Integrity*\n- File integrity monitoring\n- Detect unauthorized changes\n- Baseline known-good state\n- Alert on modifications\n\n**Patch Management**\n\n*Process*\n- Regular patch assessment\n- Testing before production\n- Staged rollout\n- Rollback capability\n- Emergency patching process\n\n*Timing*\n- Critical: 24-72 hours\n- High: 7-14 days\n- Medium: 30-60 days\n- Low: Next maintenance window\n\n**Secure Baselines**\n\n*Sources*\n- CIS Benchmarks\n- DISA STIGs\n- Vendor security guides\n- Industry standards\n\n*Implementation*\n- Document baseline\n- Create golden images\n- Deploy consistently\n- Monitor for drift\n- Regular updates",
+
+      "key_points": [
+        "Minimal installation reduces attack surface; install only what's needed",
+        "Disable SMBv1 on Windows (WannaCry vulnerability)",
+        "Linux: disable root SSH, use keys only, enable SELinux/AppArmor",
+        "Service accounts: dedicated per service, least privilege, use gMSA",
+        "Use CIS Benchmarks or DISA STIGs for secure baseline configurations"
+      ],
+
+      "real_world_example": {
+        "scenario": "Server hardening preventing exploitation",
+        "company": "Pinnacle Financial Services",
+        "application": "Pinnacle's hardened servers prevented a widespread attack: VULNERABILITY (new critical Windows vulnerability announced affecting Print Spooler service), HARDENED SERVERS (Print Spooler disabled on all servers where not neededâ€”95% of fleet, only 12 print servers had it enabled), ATTACK ATTEMPT (attackers scanned network, found Print Spooler on limited systems), IMPACT (12 servers potentially vulnerable vs. 400 if service enabled everywhere, those 12 prioritized for emergency patching), OUTCOME (attack surface reduced by 97%, emergency patching completed in 4 hours for limited scope). Server hardening made critical vulnerability much more manageable."
+      },
+
+      "exam_tips": [
+        "Minimal installation = smallest footprint, only required components",
+        "Disable SMBv1 on Windows (vulnerable to EternalBlue/WannaCry)",
+        "gMSA = Group Managed Service Account (AD manages passwords)",
+        "CIS Benchmarks and DISA STIGs provide secure baseline configurations",
+        "File integrity monitoring detects unauthorized changes"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Server Hardening",
+          "definition": "The process of securing a server by reducing its attack surface through removing unnecessary components, applying secure configurations, and implementing protective controls.",
+          "exam_note": "Reduce attack surface. Remove unnecessary. Secure configs. Ongoing process."
+        },
+        {
+          "term": "Golden Image",
+          "definition": "A pre-configured, hardened system image used as a template for deploying new servers with consistent, secure configurations.",
+          "exam_note": "Hardened template. Consistent deployment. Baseline configuration. Version controlled."
+        },
+        {
+          "term": "File Integrity Monitoring (FIM)",
+          "definition": "A security control that monitors and alerts on changes to critical system files, detecting unauthorized modifications.",
+          "exam_note": "Detects file changes. Critical file monitoring. Baseline comparison. Required by PCI DSS."
+        },
+        {
+          "term": "Configuration Drift",
+          "definition": "When system configurations deviate from the established baseline over time due to manual changes or updates.",
+          "exam_note": "Deviation from baseline. Needs monitoring. Compliance risk. Re-baseline periodically."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A security administrator is hardening Windows servers and wants to prevent the type of vulnerability exploited by WannaCry. Which action is MOST important?",
+        "options": [
+          "Enable Windows Firewall on all profiles",
+          "Disable SMBv1 protocol",
+          "Implement BitLocker encryption",
+          "Enable audit logging"
+        ],
+        "correct": 1,
+        "explanation": "Disabling SMBv1 is most important for preventing WannaCry-type attacks. WannaCry exploited the EternalBlue vulnerability in SMBv1. While all the other options are good security practices, they don't specifically address the SMBv1 vulnerability that WannaCry exploited. SMBv1 is deprecated and should be disabled on all modern systems."
+      }
+    },
+    {
+      "section_id": "D3-L002-S02",
+      "title": "Endpoint Security",
+      "content": "Endpointsâ€”workstations, laptops, mobile devicesâ€”are primary targets for attacks and require comprehensive protection.\n\n**Endpoint Protection Platforms (EPP)**\n\n*Core Capabilities*\n- Antivirus/anti-malware\n- Host-based firewall\n- Device control\n- Application control\n- Encryption management\n\n*Detection Methods*\n- Signature-based (known malware)\n- Heuristic (behavior patterns)\n- Machine learning (anomaly detection)\n- Cloud-based reputation\n\n**Endpoint Detection and Response (EDR)**\n\n*Capabilities*\n- Continuous monitoring\n- Behavioral analysis\n- Threat hunting support\n- Forensic data collection\n- Automated response\n- Incident investigation\n\n*Key Features*\n- Process monitoring\n- Network connection tracking\n- File activity logging\n- Memory analysis\n- Lateral movement detection\n\n**Workstation Hardening**\n\n*Configuration*\n- Remove local admin rights\n- Enable host firewall\n- Implement full disk encryption\n- Enable secure boot\n- Configure automatic updates\n\n*Application Control*\n- Whitelist approved applications\n- Block unauthorized executables\n- Software restriction policies\n- WDAC/AppLocker\n\n**Mobile Device Security**\n\n*Mobile Device Management (MDM)*\n- Policy enforcement\n- Configuration deployment\n- Application management\n- Remote wipe\n- Compliance checking\n\n*Security Requirements*\n- Device encryption\n- Screen lock/passcode\n- Jailbreak/root detection\n- App vetting\n- Containerization (BYOD)\n\n**Device Control**\n\n*USB Security*\n- Block unauthorized devices\n- Allow only approved types\n- Log all connections\n- Autorun disabled\n\n*Removable Media*\n- Encryption required\n- DLP scanning\n- Audit trail\n- Business justification\n\n**Browser Security**\n\n*Configuration*\n- Keep updated\n- Disable unnecessary plugins\n- Configure secure settings\n- Block dangerous downloads\n- Certificate validation\n\n*Extensions*\n- Whitelist approach\n- Security extensions (ad blockers)\n- Regular review\n- Enterprise management",
+
+      "key_points": [
+        "EPP provides basic protection (AV, firewall); EDR adds detection and response",
+        "EDR enables continuous monitoring, threat hunting, and forensics",
+        "Remove local admin rights from workstations to limit malware impact",
+        "MDM enforces mobile policies: encryption, passcode, remote wipe",
+        "Device control blocks unauthorized USB devices and removable media"
+      ],
+
+      "real_world_example": {
+        "scenario": "EDR detecting fileless malware",
+        "company": "MedCare Health Systems",
+        "application": "MedCare's EDR detected an attack that traditional AV missed: ATTACK (phishing email with macro-enabled document, executed PowerShell downloading fileless malware), TRADITIONAL AV (no file to scanâ€”malware only in memory, AV didn't detect), EDR DETECTION (behavioral detection triggered: Office spawning PowerShell with encoded command, PowerShell making unusual network connections, Process injection into legitimate process), AUTOMATED RESPONSE (EDR isolated endpoint from network, killed malicious processes, collected forensic data), INVESTIGATION (SOC used EDR timeline to trace attack, identified other affected systems, determined no data exfiltration), OUTCOME (attack stopped in 3 minutes, zero data loss). EDR caught what signature-based AV couldn't."
+      },
+
+      "exam_tips": [
+        "EPP = endpoint protection platform (AV, firewall, basic protection)",
+        "EDR = endpoint detection and response (behavioral, forensics, response)",
+        "Remove local admin rightsâ€”limits malware capability",
+        "MDM = mobile device management (policies, remote wipe)",
+        "Application whitelisting stronger than blacklisting"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Endpoint Protection Platform (EPP)",
+          "definition": "An integrated security solution for endpoints providing antivirus, firewall, device control, and basic threat prevention capabilities.",
+          "exam_note": "Basic endpoint security. AV, firewall, device control. Prevention focused."
+        },
+        {
+          "term": "Endpoint Detection and Response (EDR)",
+          "definition": "Advanced endpoint security providing continuous monitoring, behavioral detection, threat hunting, and automated response capabilities.",
+          "exam_note": "Beyond AV. Behavioral detection. Forensics. Response. Threat hunting."
+        },
+        {
+          "term": "Mobile Device Management (MDM)",
+          "definition": "Software that enables organizations to manage, secure, and enforce policies on mobile devices.",
+          "exam_note": "Manages mobile devices. Policy enforcement. Remote wipe. BYOD support."
+        },
+        {
+          "term": "Application Whitelisting",
+          "definition": "A security control that only allows pre-approved applications to execute, blocking all other software.",
+          "exam_note": "Only approved apps run. Default deny. Stronger than blacklisting. WDAC/AppLocker."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A security team needs advanced endpoint capabilities including behavioral detection, forensic data collection, and automated response to threats. Which solution provides these capabilities?",
+        "options": [
+          "Traditional antivirus because it detects malware",
+          "Host-based firewall because it controls network traffic",
+          "Endpoint Detection and Response (EDR) because it provides behavioral analysis and response",
+          "Mobile Device Management (MDM) because it manages endpoints"
+        ],
+        "correct": 2,
+        "explanation": "EDR (Endpoint Detection and Response) provides advanced capabilities including behavioral detection (not just signatures), forensic data collection for investigations, threat hunting support, and automated response to threats. Traditional AV is signature-based. Host-based firewalls control network traffic. MDM manages mobile devices but doesn't provide these detection and response capabilities."
+      }
+    },
+    {
+      "section_id": "D3-L002-S03",
+      "title": "Embedded and Specialized Systems",
+      "content": "Embedded systems, IoT devices, and specialized systems present unique security challenges due to their constraints and deployment environments.\n\n**Embedded Systems**\n\n*Characteristics*\n- Dedicated function\n- Limited resources (CPU, memory)\n- Often no update mechanism\n- Long operational life\n- Real-time requirements\n\n*Security Challenges*\n- Can't run traditional security software\n- Updates difficult or impossible\n- Default credentials common\n- Limited logging capability\n- Physical accessibility\n\n**SCADA/ICS Systems**\n\n*Definition*\n- Supervisory Control and Data Acquisition\n- Industrial Control Systems\n- Control physical processes\n- Manufacturing, utilities, infrastructure\n\n*Security Concerns*\n- Legacy protocols (no authentication)\n- Designed for reliability, not security\n- Safety-critical operations\n- Long update cycles\n- IT/OT convergence challenges\n\n*Protection Approaches*\n- Network segmentation (air gap where possible)\n- Unidirectional gateways\n- Protocol-aware firewalls\n- Intrusion detection (OT-specific)\n- Change management\n\n**IoT Security**\n\n*Common Issues*\n- Default credentials\n- No encryption\n- No update capability\n- Invisible on network\n- Weak authentication\n- Cloud dependencies\n\n*Security Measures*\n- Change default credentials\n- Network segmentation\n- Monitor traffic patterns\n- Firmware updates when available\n- Asset inventory\n- Procurement security requirements\n\n**Real-Time Operating Systems (RTOS)**\n\n*Characteristics*\n- Deterministic timing\n- Used in embedded systems\n- Medical devices, automotive, industrial\n- Security often secondary to function\n\n*Considerations*\n- Can't easily patch\n- Limited security features\n- Network isolation critical\n- Physical security important\n\n**Medical Devices**\n\n*Challenges*\n- FDA approval constraints\n- Patient safety critical\n- Long replacement cycles\n- Connectivity increasing\n- Legacy systems common\n\n*Security Approaches*\n- Network segmentation\n- Compensating controls\n- Vendor engagement\n- Risk assessment\n- Incident response planning\n\n**Vehicle Systems**\n\n*Connected Vehicles*\n- CAN bus vulnerabilities\n- Telematics systems\n- OTA updates\n- Infotainment systems\n- Safety-critical separation",
+
+      "key_points": [
+        "Embedded systems have limited resources; can't run traditional security software",
+        "SCADA/ICS controls physical processes; prioritize safety and availability",
+        "IoT: change defaults, segment network, monitor traffic, update firmware",
+        "Medical devices have FDA constraints; use compensating controls",
+        "Network isolation is critical for systems that can't be patched"
+      ],
+
+      "real_world_example": {
+        "scenario": "SCADA security preventing infrastructure attack",
+        "company": "Regional Power Utility",
+        "application": "A regional power utility implemented SCADA security after threat intelligence warned of attacks on energy sector: ARCHITECTURE (SCADA network physically separated from corporate, unidirectional gateway allowing data out for monitoring but no commands in from IT network), SEGMENTATION (control systems on isolated VLAN, engineering workstations on separate segment with strict access control), MONITORING (OT-specific intrusion detection, baseline normal communication patterns, alert on anomalies), ACCESS (MFA required for any SCADA access, no remote access without VPN + jump server), INCIDENT (reconnaissance detected against corporate network, attackers unable to reach SCADA systems due to air gap). Segmentation prevented corporate compromise from becoming infrastructure attack."
+      },
+
+      "exam_tips": [
+        "SCADA/ICS = industrial control, safety-critical, legacy protocols",
+        "IoT: change defaults, segment network, monitor (can't often patch)",
+        "Embedded systems can't run traditional security toolsâ€”network isolation",
+        "Medical devices: FDA constraints, use compensating controls",
+        "Unidirectional gateway allows data out but not commands in"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "SCADA",
+          "definition": "Supervisory Control and Data Acquisitionâ€”systems that monitor and control industrial processes in sectors like manufacturing, utilities, and critical infrastructure.",
+          "exam_note": "Industrial control. Physical processes. Safety-critical. Legacy protocols. Segment network."
+        },
+        {
+          "term": "ICS",
+          "definition": "Industrial Control Systemsâ€”the broader category of systems that monitor and control industrial equipment and processes.",
+          "exam_note": "Industrial systems. Includes SCADA, DCS, PLC. OT environment. Safety priority."
+        },
+        {
+          "term": "Embedded System",
+          "definition": "A computer system with a dedicated function within a larger mechanical or electrical system, often with real-time computing constraints.",
+          "exam_note": "Dedicated function. Limited resources. Can't patch easily. Network isolation needed."
+        },
+        {
+          "term": "Unidirectional Gateway",
+          "definition": "A security device that physically allows data to flow in only one direction, preventing commands from entering a protected network.",
+          "exam_note": "One-way data flow. Protects SCADA/ICS. Data out, no commands in. Hardware enforced."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An organization has industrial control systems that cannot be patched due to vendor constraints and uptime requirements. Which approach provides the BEST protection?",
+        "options": [
+          "Install endpoint protection software on the systems",
+          "Implement network segmentation and isolation",
+          "Conduct regular penetration testing",
+          "Enable automatic updates"
+        ],
+        "correct": 1,
+        "explanation": "Network segmentation and isolation is the best protection for ICS that can't be patched. By isolating these systems from other networks, you prevent attackers from reaching them even if they compromise other parts of the network. ICS often can't run endpoint protection software due to resource constraints. Penetration testing doesn't provide ongoing protection. Automatic updates aren't possible if patching is constrained."
+      }
+    },
+    {
+      "section_id": "D3-L002-S04",
+      "title": "Virtualization Security",
+      "content": "Virtualization introduces new security considerations including hypervisor security, VM isolation, and virtual network security.\n\n**Hypervisor Security**\n\n*Type 1 (Bare Metal)*\n- Runs directly on hardware\n- VMware ESXi, Microsoft Hyper-V\n- Smaller attack surface\n- More secure than Type 2\n\n*Type 2 (Hosted)*\n- Runs on host OS\n- VMware Workstation, VirtualBox\n- Larger attack surface\n- Host OS vulnerabilities affect all VMs\n\n*Hypervisor Hardening*\n- Keep hypervisor patched\n- Minimal management access\n- Disable unnecessary features\n- Secure management network\n- Monitor for attacks\n\n**VM Isolation**\n\n*Importance*\n- VMs should be isolated from each other\n- Prevent escape to hypervisor\n- Prevent cross-VM attacks\n- Each VM treated as separate system\n\n*Threats*\n\n*VM Escape*\n- Breaking out of VM to hypervisor\n- Critical vulnerability\n- Affects all VMs on host\n- Rare but severe\n\n*Side-Channel Attacks*\n- Spectre/Meltdown type\n- Extract data from shared resources\n- Cache timing attacks\n- Require patching and mitigations\n\n**Virtual Network Security**\n\n*Virtual Switches*\n- Software-defined networking\n- Connect VMs to networks\n- Require configuration security\n- Default settings may be insecure\n\n*Segmentation*\n- Separate VMs by function/sensitivity\n- VLANs in virtual environment\n- Micro-segmentation possible\n- East-west traffic control\n\n**VM Security Best Practices**\n\n*VM Hardening*\n- Same hardening as physical\n- Disable unnecessary hardware\n- Remove unused devices\n- Secure VM tools\n\n*Template Security*\n- Harden templates\n- Update before deployment\n- Remove sensitive data\n- Reset identifiers\n\n*Sprawl Management*\n- Inventory all VMs\n- Lifecycle management\n- Delete unused VMs\n- Regular audits\n\n**Container Security**\n\n*Characteristics*\n- Lightweight isolation\n- Share host OS kernel\n- Faster than VMs\n- Different security model\n\n*Security Considerations*\n- Image security (trusted sources)\n- Runtime protection\n- Network policies\n- Secrets management\n- Registry security",
+
+      "key_points": [
+        "Type 1 hypervisor (bare metal) more secure than Type 2 (hosted)",
+        "VM escape allows breaking out to hypervisorâ€”critical vulnerability",
+        "Virtual networks need segmentation just like physical networks",
+        "VM sprawl creates security riskâ€”inventory and lifecycle management essential",
+        "Containers share host kernelâ€”different security model than VMs"
+      ],
+
+      "real_world_example": {
+        "scenario": "Virtualization security preventing lateral movement",
+        "company": "NexaTech Solutions",
+        "application": "NexaTech implemented comprehensive virtualization security: HYPERVISOR (Type 1 ESXi, hardened following VMware security guide, management network isolated), VM ISOLATION (VMs grouped by security classification, firewall rules between VM segments, micro-segmentation for sensitive workloads), NETWORK SECURITY (distributed firewall enforcing policies at vNIC level, no direct communication between web tier and database tier VMs), MONITORING (virtual IDS inspecting east-west traffic, logging all inter-VM communication), INCIDENT (compromised web server VM attempted lateral movement to database VMâ€”blocked by virtual firewall, detected by IDS, contained before damage), OUTCOME (attacker limited to single VM despite being inside virtual infrastructure)."
+      },
+
+      "exam_tips": [
+        "Type 1 hypervisor = bare metal (more secure); Type 2 = hosted on OS",
+        "VM escape = breaking out to hypervisor (critical severity)",
+        "VM sprawl = proliferation of unused VMs (security and management risk)",
+        "Containers share host kernel (less isolation than VMs)",
+        "Virtual networks need same segmentation as physical"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Type 1 Hypervisor",
+          "definition": "A hypervisor that runs directly on hardware without a host operating system, providing better isolation and security.",
+          "exam_note": "Bare metal. Runs on hardware. More secure. VMware ESXi, Hyper-V."
+        },
+        {
+          "term": "Type 2 Hypervisor",
+          "definition": "A hypervisor that runs on top of a host operating system, with VMs sharing the host OS resources.",
+          "exam_note": "Hosted. Runs on OS. Less secure (host OS attack surface). VMware Workstation."
+        },
+        {
+          "term": "VM Escape",
+          "definition": "A vulnerability that allows an attacker to break out of a virtual machine and access the hypervisor or other VMs.",
+          "exam_note": "Break out of VM. Critical vulnerability. Affects all VMs on host. Rare but severe."
+        },
+        {
+          "term": "VM Sprawl",
+          "definition": "The uncontrolled proliferation of virtual machines, often including unused or forgotten VMs that create security and management risks.",
+          "exam_note": "Too many VMs. Unused VMs. Security risk. Need inventory and lifecycle management."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An organization is concerned about a vulnerability that could allow an attacker to break out of a virtual machine and access the hypervisor. This type of vulnerability is called:",
+        "options": [
+          "Side-channel attack because it uses shared resources",
+          "VM escape because it allows breaking out of the VM",
+          "Container breakout because containers are involved",
+          "Privilege escalation because higher access is gained"
+        ],
+        "correct": 1,
+        "explanation": "VM escape is the term for vulnerabilities that allow breaking out of a virtual machine to access the hypervisor or other VMs. This is a critical vulnerability because it can affect all VMs on the host. Side-channel attacks extract data from shared resources. Container breakout is specific to containers. While VM escape is a form of escalation, the specific term is VM escape."
+      }
+    },
+    {
+      "section_id": "D3-L002-S05",
+      "title": "Physical Security",
+      "content": "Physical security protects infrastructure from unauthorized physical access, environmental threats, and tampering.\n\n**Access Control**\n\n*Perimeter Security*\n- Fencing and barriers\n- Gates and access points\n- Security lighting\n- Clear zones\n\n*Building Access*\n- Reception and screening\n- Access cards/badges\n- Biometrics\n- Mantraps/airlocks\n- Visitor management\n\n*Secure Areas*\n- Data center access\n- Server rooms\n- Wiring closets\n- Limited access lists\n\n**Authentication Methods**\n\n*Something You Have*\n- Access cards\n- Key fobs\n- Smart cards\n- Mobile credentials\n\n*Something You Are*\n- Fingerprint\n- Facial recognition\n- Iris/retina scan\n- Palm vein\n\n*Something You Know*\n- PIN codes\n- Passwords\n- Passphrases\n\n*Multi-Factor*\n- Card + PIN\n- Biometric + card\n- Multiple factors together\n\n**Surveillance**\n\n*CCTV*\n- Camera placement\n- Recording retention\n- Motion detection\n- Monitored vs. recorded\n\n*Monitoring*\n- Security personnel\n- 24/7 coverage\n- Response procedures\n- Integration with access control\n\n**Environmental Controls**\n\n*Temperature*\n- HVAC systems\n- Hot/cold aisle design\n- Monitoring and alerts\n- Redundancy\n\n*Fire Protection*\n- Detection systems\n- Suppression (FM-200, etc.)\n- Not water in data centers\n- Regular testing\n\n*Power*\n- UPS (Uninterruptible Power Supply)\n- Generators\n- Redundant feeds\n- PDU monitoring\n\n*Water*\n- Leak detection\n- Location sensors\n- Automatic shutoff\n- Above-floor equipment\n\n**Physical Attack Vectors**\n\n*Tailgating/Piggybacking*\n- Following authorized person\n- Training awareness\n- Mantraps prevent\n\n*Dumpster Diving*\n- Searching trash for info\n- Shred sensitive documents\n- Secure disposal\n\n*Shoulder Surfing*\n- Observing credentials/screens\n- Privacy screens\n- Awareness training",
+
+      "key_points": [
+        "Layered physical security: perimeter â†’ building â†’ room â†’ rack",
+        "Mantraps prevent tailgating by allowing only one person at a time",
+        "Data centers use clean agent fire suppression (FM-200), not water",
+        "UPS provides short-term power; generators provide extended power",
+        "Physical access controls should use multi-factor authentication"
+      ],
+
+      "real_world_example": {
+        "scenario": "Physical security preventing social engineering attack",
+        "company": "Coastal Community Bank",
+        "application": "Coastal's physical security prevented a social engineering attack: ATTEMPT (individual in technician clothing approached building claiming HVAC service call), CONTROLS (reception verified against expected visitor listâ€”no HVAC visit scheduled, called facilities who confirmed no work order, visitor insisted and became aggressive), RESPONSE (security contacted, individual escorted off property, attempted to access side doorâ€”badge required and door alarmed), INVESTIGATION (no legitimate work order found, similar attempts reported at other financial institutions), OUTCOME (physical controls and procedures prevented unauthorized access that could have led to network device tampering). Physical security is the first line of defense."
+      },
+
+      "exam_tips": [
+        "Mantrap/airlock prevents tailgating (one person at a time)",
+        "Biometrics = something you are (fingerprint, facial, iris)",
+        "FM-200 = clean agent fire suppression (safe for electronics)",
+        "UPS = short-term power bridge; Generator = extended power",
+        "Tailgating = following authorized person through door"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Mantrap",
+          "definition": "A physical access control with two doors where only one can be open at a time, preventing unauthorized people from following authorized personnel.",
+          "exam_note": "Prevents tailgating. Two doors, one open at a time. Also called airlock."
+        },
+        {
+          "term": "Tailgating",
+          "definition": "Following an authorized person through a secured door without presenting your own credentials.",
+          "exam_note": "Social engineering physical attack. Mantraps prevent. Training helps."
+        },
+        {
+          "term": "UPS",
+          "definition": "Uninterruptible Power Supplyâ€”a device that provides short-term battery power during outages, bridging until generators start.",
+          "exam_note": "Short-term power. Battery backup. Bridges to generator. Minutes of runtime."
+        },
+        {
+          "term": "Clean Agent Fire Suppression",
+          "definition": "Fire suppression systems using agents like FM-200 that don't damage electronic equipment, unlike water-based systems.",
+          "exam_note": "For data centers. FM-200, Novec. Safe for electronics. Not water."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A data center needs a fire suppression system that won't damage servers and electronic equipment. Which type of system is MOST appropriate?",
+        "options": [
+          "Water sprinkler system because it's effective",
+          "Clean agent suppression (FM-200) because it's safe for electronics",
+          "Foam suppression because it covers equipment",
+          "Carbon dioxide because it displaces oxygen"
+        ],
+        "correct": 1,
+        "explanation": "Clean agent suppression systems like FM-200 are designed for data centers because they suppress fires without damaging electronic equipment. Water would destroy servers. Foam also damages electronics. While CO2 works, it's dangerous to personnel and FM-200 is preferred for occupied spaces."
+      }
+    }
+  ],
+
+  "hands_on_activity": {
+    "title": "Infrastructure Security Assessment",
+    "objective": "Assess infrastructure security across servers, endpoints, and physical controls",
+    "scenario": "You're conducting an infrastructure security assessment at Apex Consulting Group.",
+    "steps": [
+      "Step 1: Create a server hardening checklist for Windows Server:\n   - Services to disable\n   - Features to remove\n   - Security settings to configure\n   - Baseline standard to reference",
+      "Step 2: Create endpoint security requirements:\n   - EPP capabilities required\n   - EDR requirements\n   - Workstation hardening items\n   - Mobile device policies",
+      "Step 3: Assess embedded/IoT systems:\n   - Identify types of embedded systems in a typical office\n   - Document security risks for each\n   - Recommend mitigations",
+      "Step 4: Evaluate virtualization security:\n   - Hypervisor security checklist\n   - VM isolation verification\n   - Virtual network security\n   - VM lifecycle management",
+      "Step 5: Assess physical security:\n   - Access control evaluation\n   - Environmental controls review\n   - Surveillance assessment\n   - Social engineering defenses",
+      "Step 6: Identify gaps and prioritize remediation:\n   - Critical findings\n   - High-priority items\n   - Medium-priority items\n   - Document recommendations",
+      "Step 7: Create executive summary of infrastructure security posture"
+    ],
+    "expected_outcome": "Complete infrastructure security assessment with checklists for server hardening, endpoint security, embedded systems, virtualization, and physical security, plus prioritized remediation recommendations.",
+    "reflection_questions": [
+      "How do embedded systems change your approach to infrastructure security?",
+      "What's the relationship between physical and logical security controls?",
+      "How does virtualization both help and complicate security?"
+    ]
+  },
+
+  "what_would_you_do": {
+    "scenario": "You're the security manager at GlobalRetail. An urgent request comes from the CEO's office to install a personal smart speaker (Amazon Echo) in the executive conference room for convenience during meetings. The conference room is used for confidential board meetings, M&A discussions, and strategic planning.",
+    "context": "The CEO is influential and expects the request to be fulfilled. The device would be always-listening. Board meetings discuss non-public financial information. The conference room is on the corporate network.",
+    "question": "How do you handle this request?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Install it since it's a personal request from the CEO",
+        "is_best": false,
+        "feedback": "Installing an always-listening device in a room where confidential information is discussed creates significant security and compliance risks. The CEO's position doesn't change the technical risk. This could expose M&A discussions, board decisions, and financial information to a third-party cloud service.",
+        "consequences": "Always-listening device in confidential setting. Data sent to Amazon cloud. Potential SEC violation if non-public info captured. Compliance risks. Audit findings."
+      },
+      {
+        "id": "b",
+        "text": "Deny the request outright and explain IoT devices are not allowed",
+        "is_best": false,
+        "feedback": "While the security concern is valid, simply denying without discussion damages the relationship with leadership and doesn't help them understand the risk. A more collaborative approach finds a solution while managing risk.",
+        "consequences": "CEO frustrated. May install anyway. Missed opportunity to educate. Relationship with leadership damaged. Security seen as obstacle."
+      },
+      {
+        "id": "c",
+        "text": "Explain the risks, propose alternatives like a conference room system with a physical mute button",
+        "is_best": true,
+        "feedback": "This approach addresses the CEO's need while managing risk. Explain that always-listening devices in rooms with confidential discussions create data exposure risks. Propose alternatives like a proper conference system with physical mute controls that can be verified as off during sensitive meetings.",
+        "consequences": "CEO understands risk. Appropriate solution found. Security demonstrates value. Risk managed. Business need met safely."
+      },
+      {
+        "id": "d",
+        "text": "Install it on an isolated IoT network segment away from corporate systems",
+        "is_best": false,
+        "feedback": "Network segmentation doesn't address the core riskâ€”the device is still always-listening in a room with confidential discussions. The data going to Amazon's cloud is the concern, not the network connection. Segmentation is irrelevant to this threat.",
+        "consequences": "Still listening in confidential meetings. Data still sent to cloud. Network segmentation doesn't help. False sense of security."
+      }
+    ],
+    "key_lesson": "IoT devices with always-listening capabilities should not be placed in areas where confidential information is discussed. The risk isn't network-basedâ€”it's the device's function of sending audio to cloud services. Work with stakeholders to understand their needs and find secure alternatives. Executive requests don't override security requirements, but they do require respectful communication and solution-finding."
+  },
+
+  "summary": {
+    "key_takeaways": [
+      "Server hardening: minimal installation, disable unnecessary services, secure baselines",
+      "EDR provides behavioral detection and response beyond traditional antivirus",
+      "SCADA/ICS and embedded systems need network isolation when they can't be patched",
+      "Type 1 hypervisors (bare metal) are more secure than Type 2 (hosted)",
+      "Physical security uses layers: perimeter, building, room, rack",
+      "Mantraps prevent tailgating; clean agents protect data center equipment"
+    ],
+    "exam_essentials": [
+      "Disable SMBv1 on Windows (WannaCry vulnerability)",
+      "EDR = behavioral detection + forensics + response (beyond AV)",
+      "SCADA/ICS: safety-critical, legacy protocols, network isolation",
+      "Type 1 = bare metal hypervisor; Type 2 = hosted (less secure)",
+      "VM escape = breaking out of VM to hypervisor (critical)",
+      "FM-200 = clean agent fire suppression (safe for electronics)"
+    ],
+    "connection_to_next": "Infrastructure security protects our physical and virtual systems. The next lesson explores network security in depthâ€”the protocols, devices, and architectures that protect data as it moves across networks."
+  },
+
+  "related_content": {
+    "simulations": ["D3-SIM-004"],
+    "remediation": ["D3-REM-002"],
+    "next_lesson": "D3-LESSON-003",
+    "previous_lesson": "D3-LESSON-001"
+  }
+}

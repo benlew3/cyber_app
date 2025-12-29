@@ -1,0 +1,350 @@
+{
+  "simulation_id": "D3-REM-003",
+  "title": "Cryptography Essentials Remediation",
+  "domain": 3,
+  "category": "remediation",
+  "difficulty": "foundational",
+  "time_estimate": "20-30 minutes",
+  "passing_score": 40,
+  "max_score": 50,
+  
+  "exam_objectives": [
+    {
+      "id": "3.3",
+      "description": "Compare and contrast concepts and strategies to protect data",
+      "coverage": ["encryption", "hashing", "key management", "certificates", "data states"]
+    }
+  ],
+  
+  "remediation_focus": {
+    "target_weaknesses": ["encryption_concepts", "hashing_vs_encryption", "key_management", "certificate_basics"],
+    "prerequisite_for": ["D3-SIM-003"],
+    "concepts_covered": [
+      "Symmetric vs. asymmetric encryption",
+      "Hashing vs. encryption",
+      "Data states (at rest, in transit, in use)",
+      "Key management basics",
+      "Digital certificates and PKI"
+    ]
+  },
+  
+  "scenario_context": {
+    "organization": "Riverside Credit Union",
+    "industry": "Financial Services",
+    "size": "120 employees, 5 branches",
+    "setting": "Security awareness training",
+    "your_role": "Security Analyst Trainee",
+    "opening_narrative": "Riverside Credit Union is conducting security training for IT staff. As a new security analyst trainee, you're participating in the cryptography fundamentals module. Understanding encryption and data protection is essential for protecting member financial information."
+  },
+  
+  "teaching_content": {
+    "introduction": {
+      "title": "Cryptography Fundamentals",
+      "content": "Cryptography protects data by transforming it into unreadable form (encryption) or creating unique fingerprints (hashing). Understanding when and how to use these technologies is essential for data protection."
+    },
+    "concepts": [
+      {
+        "id": "symmetric_encryption",
+        "title": "Symmetric Encryption",
+        "content": "Symmetric encryption uses the SAME key to encrypt and decrypt:\n\n**How it works**: Plain text + Key â†’ Cipher text. Cipher text + Same Key â†’ Plain text.\n\n**Algorithms**: AES (current standard), 3DES (legacy).\n\n**Pros**: Fast, efficient for large amounts of data.\n\n**Cons**: Key distribution problem - how do you securely share the key?\n\n**Use cases**: Encrypting stored data, bulk data encryption, VPN tunnels.",
+        "key_point": "One key for both operations. Fast but requires secure key exchange."
+      },
+      {
+        "id": "asymmetric_encryption",
+        "title": "Asymmetric Encryption",
+        "content": "Asymmetric encryption uses a KEY PAIR - public key and private key:\n\n**How it works**: Encrypt with public key â†’ Only private key can decrypt. Encrypt with private key â†’ Only public key can decrypt (digital signatures).\n\n**Algorithms**: RSA, ECC (Elliptic Curve).\n\n**Pros**: Solves key distribution - public key can be shared openly.\n\n**Cons**: Much slower than symmetric, not practical for bulk data.\n\n**Use cases**: Key exchange, digital signatures, certificates, secure email.",
+        "key_point": "Key pair - public for sharing, private kept secret. Solves key distribution."
+      },
+      {
+        "id": "hashing",
+        "title": "Hashing vs. Encryption",
+        "content": "Hashing is NOT encryption - it's a one-way function:\n\n**Encryption**: Two-way. Can decrypt back to original with key.\n\n**Hashing**: One-way. Cannot reverse to get original data.\n\n**Hash properties**: Fixed output size, deterministic (same input = same output), small input change = completely different output.\n\n**Algorithms**: SHA-256, SHA-3 (secure). MD5, SHA-1 (deprecated for security use).\n\n**Use cases**: Password storage (hash passwords, not encrypt), integrity verification, digital signatures.",
+        "key_point": "Hashing is one-way. Use for passwords and integrity. Encryption is two-way for confidentiality."
+      },
+      {
+        "id": "data_states",
+        "title": "Protecting Data States",
+        "content": "Data exists in three states, each requiring protection:\n\n**At Rest**: Stored on disk, database, backup. Protection: Full disk encryption, database encryption (TDE), encrypted backups.\n\n**In Transit**: Moving across networks. Protection: TLS/HTTPS, VPN, encrypted protocols.\n\n**In Use**: Being processed in memory. Protection: Harder - secure enclaves, memory encryption, application controls.\n\nComplete data protection addresses all three states.",
+        "key_point": "Encrypt data at rest AND in transit. Data in use is the hardest to protect."
+      },
+      {
+        "id": "key_management",
+        "title": "Key Management Basics",
+        "content": "Encryption is only as secure as key management:\n\n**Key Storage**: Never store keys with encrypted data. Use key management systems, HSMs (Hardware Security Modules).\n\n**Key Rotation**: Regular key changes limit exposure if key is compromised.\n\n**Key Backup**: Keys must be recoverable or encrypted data is lost forever.\n\n**Separation of Duties**: Key administrators shouldn't be data administrators.\n\nCompromised key = compromised data, regardless of encryption strength.",
+        "key_point": "Encryption strength means nothing if keys are poorly managed. Protect keys more than data."
+      }
+    ]
+  },
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Encryption Type Selection",
+      "narrative": "Riverside needs to encrypt a large database of member account information at rest. The data is several terabytes and performance is a concern.",
+      "question": "What type of encryption is best for encrypting a large database at rest?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Asymmetric encryption (RSA) for maximum security",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Asymmetric encryption is too slow for bulk data",
+            "detailed": "Asymmetric encryption (RSA, ECC) is hundreds of times slower than symmetric encryption. Using asymmetric for terabytes of data would be impractical - operations would be extremely slow. Asymmetric is used for key exchange, not bulk data encryption."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Symmetric encryption (AES) for performance with large data",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! AES is designed for bulk data encryption",
+            "detailed": "Symmetric encryption (AES-256 is the current standard) is designed for bulk data encryption. It's fast and efficient even for large datasets. The key is protected using key management practices (possibly including asymmetric encryption for key exchange/protection)."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Hashing (SHA-256) to protect the data",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Hashing doesn't protect data confidentiality",
+            "detailed": "Hashing is one-way - you can't recover the original data from a hash. Hashing a database would destroy the data! Hashing is for integrity verification and password storage, not data protection. Encryption (two-way) is needed for confidentiality."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Combination of both asymmetric and symmetric for every record",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Hybrid is used, but not per-record",
+            "detailed": "Hybrid encryption (asymmetric for key exchange, symmetric for data) is common, but asymmetric isn't applied to every record. Asymmetric protects the symmetric key; symmetric encrypts the data. The combination provides security and performance."
+          }
+        }
+      ],
+      "learning_note": "Symmetric encryption (AES) for bulk data - fast and efficient. Asymmetric encryption for key exchange and digital signatures - solves key distribution but slow. Real systems often use hybrid: asymmetric to exchange/protect symmetric keys, symmetric for data."
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "Password Storage",
+      "narrative": "Riverside is reviewing how member passwords are stored in their online banking system. Currently, passwords are encrypted using AES and stored in the database.",
+      "question": "Is encrypting passwords with AES the correct approach?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Yes - AES provides strong protection for passwords",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Encryption allows recovery - passwords shouldn't be recoverable",
+            "detailed": "If passwords are encrypted, they can be decrypted. This means: the encryption key becomes a high-value target, and anyone with the key can access all passwords. Passwords should never be recoverable - even by administrators."
+          }
+        },
+        {
+          "id": "B",
+          "text": "No - passwords should be hashed, not encrypted",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! Hashing is one-way - passwords cannot be recovered",
+            "detailed": "Passwords should be hashed (with salt) using algorithms like bcrypt, Argon2, or PBKDF2. Hashing is one-way - the original password cannot be recovered. To verify login, hash the entered password and compare hashes. Even if the database is stolen, attackers get hashes, not passwords."
+          }
+        },
+        {
+          "id": "C",
+          "text": "No - passwords should be stored in plaintext for easier reset",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Never store passwords in plaintext!",
+            "detailed": "Plaintext passwords are the worst option - any breach exposes all credentials immediately. Password resets should generate new passwords, not retrieve old ones. Always hash passwords."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Either hashing or encryption is equally acceptable",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "They serve different purposes - hashing is correct for passwords",
+            "detailed": "Encryption and hashing are not interchangeable. Encryption is for data you need to retrieve. Hashing is for data you only need to verify (like passwords). The principle of password storage is: never store recoverable passwords."
+          }
+        }
+      ],
+      "learning_note": "Passwords should NEVER be encrypted or stored in plaintext. Hash passwords with salt using bcrypt, Argon2, or PBKDF2. Hashing is one-way - even administrators can't recover passwords. Verify by comparing hashes, not decrypting."
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Data States Protection",
+      "narrative": "A security consultant asks about Riverside's data protection strategy. They want to know if data is protected at rest and in transit.",
+      "question": "Why must data be protected BOTH at rest AND in transit?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Regulatory compliance requires both",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Compliance is one reason, but not the fundamental reason",
+            "detailed": "While regulations often require both, the underlying reason is that data faces different threats in different states. Understanding the threats is more important than just compliance."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Each state faces different threats - storage theft vs. interception",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! Different states, different threats",
+            "detailed": "Data at rest faces threats like storage theft, unauthorized database access, and backup exposure. Data in transit faces interception, man-in-the-middle attacks, and eavesdropping. Encrypting only one leaves the other exposed. Complete protection requires addressing both."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Encrypting one automatically protects the other",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - they require separate controls",
+            "detailed": "Encrypting data at rest (disk encryption) doesn't protect data when it's transmitted over a network. Encrypting in transit (TLS) doesn't protect stored data. Each requires separate controls designed for that specific threat."
+          }
+        },
+        {
+          "id": "D",
+          "text": "It's only necessary for highly sensitive data",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Good practice applies broadly",
+            "detailed": "While prioritization by sensitivity makes sense, protecting data in both states is a fundamental security practice. The ease of implementing TLS and disk encryption means most data should be protected in both states."
+          }
+        }
+      ],
+      "learning_note": "Data states: At rest (storage) - protect with disk/database encryption. In transit (network) - protect with TLS/encrypted protocols. In use (memory) - hardest to protect, use secure enclaves and application controls. Each state faces different threats requiring different protections."
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Key Management",
+      "narrative": "The credit union encrypts backup tapes before sending them to offsite storage. The encryption key is stored in a file on the backup server.",
+      "question": "What is the BIGGEST problem with this key management approach?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The key file might get corrupted",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Corruption is a concern but not the biggest problem",
+            "detailed": "Key backup and protection against corruption is important, but the bigger issue is security. A corrupted key means lost data, but a compromised key means breached data."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Key stored with/near encrypted data - compromise exposes both",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! Key and data should be separated",
+            "detailed": "Storing the encryption key on the backup server means anyone who compromises that server gets both the encrypted backups AND the key to decrypt them. Keys should be stored separately - in a key management system, HSM, or at minimum, a separate secured system. Never store keys with the data they protect."
+          }
+        },
+        {
+          "id": "C",
+          "text": "The key should be stored in the cloud instead",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Location matters less than separation",
+            "detailed": "Cloud key management (Azure Key Vault, AWS KMS) can be excellent, but the key point is separation from the encrypted data, not cloud vs. on-premises. A cloud key for on-premises backups achieves separation."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Multiple people need access to the key",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Access control matters but isn't the primary issue here",
+            "detailed": "Key access should be limited, but the fundamental problem is storing the key with the protected data. Even with restricted access, anyone who compromises the backup server gets everything."
+          }
+        }
+      ],
+      "learning_note": "Key management principle: NEVER store encryption keys with encrypted data. If attackers get the storage containing encrypted data, they shouldn't also get the key. Use separate key management systems, HSMs, or at minimum physically/logically separate storage for keys."
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Certificate Understanding",
+      "narrative": "Riverside's website certificate is expiring. The IT team asks why certificates expire and what happens if they don't renew it.",
+      "question": "What is the PRIMARY purpose of digital certificates in HTTPS?",
+      "options": [
+        {
+          "id": "A",
+          "text": "To encrypt all web traffic",
+          "is_correct": false,
+          "points": 2,
+          "feedback": {
+            "short": "Encryption uses the key, but certificate's role is different",
+            "detailed": "The certificate contains a public key used in the encryption process, but the certificate's primary purpose is to PROVE the server's identity. Without identity verification, you might establish an encrypted connection to an attacker."
+          }
+        },
+        {
+          "id": "B",
+          "text": "To verify the server's identity - prove you're connecting to the real site",
+          "is_correct": true,
+          "points": 10,
+          "feedback": {
+            "short": "Correct! Certificates provide identity verification",
+            "detailed": "Certificates bind a public key to an identity (the website's domain). A trusted Certificate Authority verifies the domain owner. When you connect to https://riverside-cu.com, the certificate proves you're actually connecting to Riverside Credit Union, not an attacker. Then encryption protects the session."
+          }
+        },
+        {
+          "id": "C",
+          "text": "To make the website load faster",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Certificates are for security, not performance",
+            "detailed": "HTTPS (with certificates) actually adds a small overhead compared to HTTP. The purpose is security - identity verification and encryption - not performance. Modern protocols (HTTP/2, QUIC) can improve HTTPS performance."
+          }
+        },
+        {
+          "id": "D",
+          "text": "To comply with PCI-DSS requirements",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Compliance is a result, not the purpose",
+            "detailed": "PCI-DSS requires HTTPS for payment pages (due to the security it provides), but compliance isn't the certificate's purpose. The purpose is security through identity verification and enabling encrypted communications."
+          }
+        }
+      ],
+      "learning_note": "Digital certificates provide IDENTITY VERIFICATION - they prove the server is who it claims to be. A Certificate Authority vouches for the identity. Without verification, you could establish an encrypted session with an attacker (encrypted doesn't mean safe if you don't know who you're talking to). Certificates expire to force periodic re-verification and key rotation."
+    }
+  ],
+  
+  "scoring": {
+    "max_points": 50,
+    "passing_score": 40,
+    "passing_percentage": 80
+  },
+  
+  "completion_action": {
+    "on_pass": "Ready to attempt D3-SIM-003 Data Protection Program",
+    "on_fail": "Review teaching content and retry"
+  },
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 3: Security Architecture",
+    "remediation_type": "Foundational concepts"
+  }
+}

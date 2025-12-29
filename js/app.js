@@ -2545,12 +2545,12 @@ function showAllSimulations() {
                                         <div style="font-weight: bold;">${sim.title}</div>
                                         <div style="color: #71717a; font-size: 0.9rem; margin-top: 5px;">
                                             ${sim.organization ? `Organization: ${sim.organization}` : ''}
-                                            ${sim.difficulty ? `• <span class="difficulty-badge difficulty-${sim.difficulty}">${sim.difficulty}</span>` : ''}
-                                            ${sim.duration ? `• ${sim.duration}` : ''}
+                                            ${sim.difficulty ? `• <span class="difficulty-badge difficulty-${sim.difficulty}">${escapeHtml(sim.difficulty)}</span>` : ''}
+                                            ${sim.duration ? `• ${escapeHtml(sim.duration)}` : ''}
                                         </div>
                                         ${sim.scenario ? `
                                             <div style="color: #a1a1aa; font-size: 0.9rem; margin-top: 10px;">
-                                                ${sim.scenario.substring(0, 100)}...
+                                                ${escapeHtml(sim.scenario.substring(0, 100))}...
                                             </div>
                                         ` : ''}
                                     </div>
@@ -3282,17 +3282,38 @@ function showQuizQuestion() {
     
     const totalQuestions = APP.state.currentQuizQuestions.length;
     const currentNum = APP.state.currentQuestionIndex + 1;
+    const isExam = APP.state.isFullExam;
+    
+    // Calculate timer display
+    let timerDisplay = '';
+    if (isExam && APP.state.examTimeRemaining > 0) {
+        const mins = Math.floor(APP.state.examTimeRemaining / 60);
+        const secs = APP.state.examTimeRemaining % 60;
+        const timerColor = APP.state.examTimeRemaining <= 300 ? '#ef4444' : 
+                          APP.state.examTimeRemaining <= 600 ? '#f59e0b' : '#10b981';
+        timerDisplay = `
+            <div style="background: #18181b; padding: 10px 20px; border-radius: 8px; 
+                        display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                <span style="color: #71717a;">⏱️ Time Remaining:</span>
+                <span id="exam-timer" style="font-size: 1.5rem; font-weight: bold; color: ${timerColor}; font-family: monospace;">
+                    ${mins}:${secs.toString().padStart(2, '0')}
+                </span>
+            </div>
+        `;
+    }
     
     content.innerHTML = `
         <div class="container">
             <div class="quiz-container">
+                ${timerDisplay}
+                
                 <div class="quiz-header">
-                    <span>Question ${currentNum} of ${totalQuestions}</span>
+                    <span>${isExam ? '📋 Practice Exam - ' : ''}Question ${currentNum} of ${totalQuestions}</span>
                     <span>Score: ${APP.state.score}/${APP.state.currentQuestionIndex}</span>
                 </div>
                 
-                <div class="quiz-progress">
-                    ${Array.from({length: totalQuestions}, (_, i) => {
+                <div class="quiz-progress" style="${totalQuestions > 50 ? 'display: none;' : ''}">
+                    ${Array.from({length: Math.min(totalQuestions, 50)}, (_, i) => {
                         let className = 'progress-dot';
                         if (i < APP.state.currentQuestionIndex) {
                             // Check if question was answered correctly
@@ -3304,7 +3325,16 @@ function showQuizQuestion() {
                     }).join('')}
                 </div>
                 
-                <div class="quiz-question">${question.question}</div>
+                ${totalQuestions > 50 ? `
+                    <div style="background: #27272a; border-radius: 8px; padding: 4px; margin-bottom: 20px;">
+                        <div style="background: linear-gradient(to right, #6366f1, #8b5cf6); 
+                                    width: ${(currentNum / totalQuestions) * 100}%; 
+                                    height: 8px; border-radius: 4px; transition: width 0.3s;">
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div class="quiz-question">${escapeHtml(question.question)}</div>
                 
                 <div class="quiz-options" id="quiz-options">
                     ${question.options.map((opt, i) => `
@@ -3312,7 +3342,7 @@ function showQuizQuestion() {
                             <span style="margin-right: 15px; font-weight: bold;">
                                 ${String.fromCharCode(65 + i)}.
                             </span>
-                            ${opt}
+                            ${escapeHtml(opt)}
                         </div>
                     `).join('')}
                 </div>
@@ -3381,7 +3411,7 @@ function submitQuizAnswer() {
     document.getElementById('quiz-feedback').innerHTML = `
         <div class="quiz-feedback ${correct ? 'feedback-correct' : 'feedback-incorrect'}">
             <strong>${correct ? '✅ Correct!' : '❌ Incorrect'}</strong><br>
-            ${question.explanation}
+            ${escapeHtml(question.explanation)}
         </div>
     `;
     
@@ -3397,22 +3427,49 @@ function nextQuizQuestion() {
 }
 
 function showQuizResults() {
+    // Stop exam timer if running
+    stopExamTimer();
+    
     const content = document.getElementById('content');
     const totalQuestions = APP.state.currentQuizQuestions.length;
     const percentage = Math.round((APP.state.score / totalQuestions) * 100);
     const passed = percentage >= 75;
+    const needsRemediation = percentage < 85;
+    const isExam = APP.state.isFullExam;
+    
+    // Get domain for remediation suggestion
+    const domainId = APP.state.currentQuizQuestions[0]?.domain;
+    const domainRemediation = domainId ? ALL_REMEDIATION.filter(r => r.domain === domainId) : [];
+    
+    // Calculate exam score (for practice exam mode)
+    const examScore = isExam ? Math.round((percentage / 100) * 900) : null;
+    const examPassed = examScore >= 750;
     
     content.innerHTML = `
         <div class="container">
             <div class="quiz-container" style="text-align: center;">
                 <h1>${passed ? '🎉 Congratulations!' : '📚 Keep Studying!'}</h1>
                 
-                <div style="font-size: 4rem; margin: 30px 0; color: ${passed ? '#10b981' : '#f59e0b'};">
-                    ${percentage}%
-                </div>
+                ${isExam ? `
+                    <div style="background: ${examPassed ? '#064e3b' : '#7f1d1d'}; 
+                                border: 2px solid ${examPassed ? '#10b981' : '#ef4444'};
+                                border-radius: 12px; padding: 20px; margin: 20px 0;">
+                        <div style="font-size: 3rem; font-weight: bold; color: ${examPassed ? '#10b981' : '#ef4444'};">
+                            ${examScore}/900
+                        </div>
+                        <div style="color: #a1a1aa; margin-top: 10px;">
+                            ${examPassed ? '✅ PASSED - Passing score is 750' : '❌ NOT PASSED - You need 750 to pass'}
+                        </div>
+                    </div>
+                ` : `
+                    <div style="font-size: 4rem; margin: 30px 0; color: ${passed ? '#10b981' : '#f59e0b'};">
+                        ${percentage}%
+                    </div>
+                `}
                 
                 <p style="font-size: 1.2rem; margin-bottom: 20px;">
                     You scored ${APP.state.score} out of ${totalQuestions}
+                    ${isExam ? ` (${percentage}%)` : ''}
                 </p>
                 
                 <p style="color: #a1a1aa; margin-bottom: 30px;">
@@ -3421,7 +3478,29 @@ function showQuizResults() {
                         : 'You need 75% to pass. Review the material and try again!'}
                 </p>
                 
-                ${!passed ? `
+                ${needsRemediation && domainRemediation.length > 0 ? `
+                    <div style="background: linear-gradient(135deg, #1e1e2e, #27272a); 
+                                border: 2px solid #f59e0b; border-radius: 12px; 
+                                padding: 25px; margin: 20px 0; text-align: left;">
+                        <h3 style="color: #f59e0b; margin-bottom: 15px;">
+                            🔧 Recommended Remediation (Score below 85%)
+                        </h3>
+                        <p style="color: #a1a1aa; margin-bottom: 15px;">
+                            Based on your results, we recommend completing these targeted practice scenarios:
+                        </p>
+                        <div style="display: grid; gap: 10px;">
+                            ${domainRemediation.map(rem => `
+                                <button class="btn" onclick="startRemediation('${rem.id}')" 
+                                        style="text-align: left; padding: 15px; justify-content: flex-start;">
+                                    <span style="margin-right: 10px;">📝</span>
+                                    ${escapeHtml(rem.title)}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${!passed && !needsRemediation ? `
                     <div style="background: #27272a; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: left;">
                         <h3>Recommended Study Areas:</h3>
                         <ul style="margin-left: 20px; margin-top: 10px; color: #a1a1aa;">
@@ -3433,7 +3512,13 @@ function showQuizResults() {
                     </div>
                 ` : ''}
                 
-                <div style="display: flex; gap: 10px; justify-content: center;">
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    ${needsRemediation && domainRemediation.length > 0 ? `
+                        <button class="btn btn-warning" onclick="startRemediation('${domainRemediation[0].id}')" 
+                                style="background: #f59e0b; color: #000;">
+                            Start Remediation →
+                        </button>
+                    ` : ''}
                     <button class="btn btn-primary" onclick="showQuizMenu()">
                         Back to Quiz Menu
                     </button>
@@ -3446,14 +3531,34 @@ function showQuizResults() {
     `;
     
     APP.state.quizActive = false;
+    APP.state.isFullExam = false;
     
     // Save score to progress
-    const domainId = APP.state.currentQuizQuestions[0]?.domain;
     if (domainId && APP.progress.domainScores[domainId]) {
         APP.progress.domainScores[domainId].push({
             score: APP.state.score,
             total: totalQuestions,
             percentage: percentage,
+            date: new Date().toISOString()
+        });
+        
+        // Track weak areas
+        if (needsRemediation && !APP.progress.weakAreas.includes(domainId)) {
+            APP.progress.weakAreas.push(domainId);
+        } else if (percentage >= 90 && APP.progress.weakAreas.includes(domainId)) {
+            // Remove from weak areas if scoring well
+            APP.progress.weakAreas = APP.progress.weakAreas.filter(d => d !== domainId);
+        }
+        
+        saveProgress();
+    }
+    
+    // Save practice exam scores
+    if (isExam) {
+        APP.progress.practiceExamScores.push({
+            score: examScore,
+            percentage: percentage,
+            passed: examPassed,
             date: new Date().toISOString()
         });
         saveProgress();
@@ -3480,8 +3585,8 @@ function showGlossary() {
             <div class="glossary-grid" id="glossary-terms">
                 ${terms.map(([term, def]) => `
                     <div class="glossary-term">
-                        <div class="glossary-term-title">${term}</div>
-                        <div class="glossary-term-definition">${def}</div>
+                        <div class="glossary-term-title">${escapeHtml(term)}</div>
+                        <div class="glossary-term-definition">${escapeHtml(def)}</div>
                     </div>
                 `).join('')}
             </div>
@@ -3504,8 +3609,8 @@ function filterGlossary(searchTerm) {
     if (glossaryContainer) {
         glossaryContainer.innerHTML = terms.map(([term, def]) => `
             <div class="glossary-term">
-                <div class="glossary-term-title">${term}</div>
-                <div class="glossary-term-definition">${def}</div>
+                <div class="glossary-term-title">${escapeHtml(term)}</div>
+                <div class="glossary-term-definition">${escapeHtml(def)}</div>
             </div>
         `).join('') || '<p style="text-align: center; color: #71717a;">No terms found matching your search.</p>';
     }
@@ -3600,8 +3705,67 @@ function startFullExam() {
     APP.state.currentQuestionIndex = 0;
     APP.state.score = 0;
     APP.state.quizActive = true;
+    APP.state.isFullExam = true;
+    APP.state.examTimeRemaining = 90 * 60; // 90 minutes in seconds
+    APP.state.examStartTime = Date.now();
+    
+    // Start exam timer
+    startExamTimer();
     
     showQuizQuestion();
+}
+
+// Exam timer functions
+function startExamTimer() {
+    // Clear any existing timer
+    if (APP.state.examTimerInterval) {
+        clearInterval(APP.state.examTimerInterval);
+    }
+    
+    APP.state.examTimerInterval = setInterval(() => {
+        APP.state.examTimeRemaining--;
+        updateExamTimerDisplay();
+        
+        if (APP.state.examTimeRemaining <= 0) {
+            clearInterval(APP.state.examTimerInterval);
+            endExamTimeUp();
+        }
+    }, 1000);
+}
+
+function updateExamTimerDisplay() {
+    const timerEl = document.getElementById('exam-timer');
+    if (timerEl && APP.state.examTimeRemaining >= 0) {
+        const mins = Math.floor(APP.state.examTimeRemaining / 60);
+        const secs = APP.state.examTimeRemaining % 60;
+        timerEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+        
+        // Warning colors
+        if (APP.state.examTimeRemaining <= 300) { // 5 minutes
+            timerEl.style.color = '#ef4444';
+            timerEl.style.animation = 'pulse 1s infinite';
+        } else if (APP.state.examTimeRemaining <= 600) { // 10 minutes
+            timerEl.style.color = '#f59e0b';
+        }
+    }
+}
+
+function endExamTimeUp() {
+    APP.state.quizActive = false;
+    APP.state.isFullExam = false;
+    
+    if (window.notify) {
+        window.notify.warning('Time is up! Your exam has been submitted.', 5000);
+    }
+    
+    showQuizResults();
+}
+
+function stopExamTimer() {
+    if (APP.state.examTimerInterval) {
+        clearInterval(APP.state.examTimerInterval);
+        APP.state.examTimerInterval = null;
+    }
 }
 
 // Helper functions for domain-specific views
@@ -3684,7 +3848,7 @@ function markLessonComplete(lessonId) {
 
 function saveProgress() {
     try {
-        localStorage.setItem('securityPlusProgress_v27', JSON.stringify(APP.progress));
+        localStorage.setItem('securityPlusProgress_v29', JSON.stringify(APP.progress));
         console.log('Progress saved');
     } catch (e) {
         console.error('Failed to save progress:', e);
@@ -3693,7 +3857,7 @@ function saveProgress() {
 
 function loadProgress() {
     try {
-        const saved = localStorage.getItem('securityPlusProgress_v27');
+        const saved = localStorage.getItem('securityPlusProgress_v29');
         if (saved) {
             const parsed = JSON.parse(saved);
             // Merge saved progress with default
@@ -3741,7 +3905,7 @@ function updateNavigation() {
 function initApp() {
     console.log('════════════════════════════════════════');
     console.log('🚀 INITIALIZING SECURITY+ v29 COMPLETE');
-    console.log('   All 26 Simulations Interactive');
+    console.log('   Full External JSON Integration');
     console.log('   All Content Fully Functional');
     console.log('════════════════════════════════════════');
 
@@ -3755,19 +3919,20 @@ function initApp() {
         console.log('Step 3: Loading progress from localStorage...');
         loadProgress();
         
-        console.log('Step 4: Loading simulation data...');
-        loadSimulationsFromDataFolder();  // Load from data/simulations.json (async, non-blocking)
-        
-        console.log('Step 5: Loading all content...');
+        console.log('Step 4: Loading embedded content...');
         loadData();
         
-        console.log('Step 6: Creating navigation header...');
+        console.log('Step 5: Creating navigation header...');
         createHeader();
         
-        console.log('Step 7: Showing dashboard...');
+        console.log('Step 6: Showing dashboard...');
         showDashboard();
         
         APP.initialized = true;
+        
+        // Step 7: Try to load external JSON data (async, non-blocking)
+        console.log('Step 7: Attempting to load external JSON files...');
+        loadExternalContent();
         
         console.log('════════════════════════════════════════');
         console.log('✅ INITIALIZATION COMPLETE');
@@ -3810,6 +3975,110 @@ ${escapeHtml(error.stack)}
                 </button>
             </div>
         `;
+    }
+}
+
+// Load external JSON content (async, enhances embedded content)
+async function loadExternalContent() {
+    // Check if DataLoader is available
+    if (typeof DataLoader === 'undefined') {
+        console.log('⚠️ DataLoader not available, using embedded content only');
+        return;
+    }
+    
+    const loader = new DataLoader();
+    
+    try {
+        const data = await loader.loadAll((percent, status) => {
+            console.log(`Loading external content: ${percent}%`);
+        });
+        
+        // Merge loaded data with embedded content
+        if (data.questions.length > 0) {
+            // Replace placeholder questions with real ones
+            ACTUAL_QUESTIONS.length = 0;
+            data.questions.forEach(q => ACTUAL_QUESTIONS.push(q));
+            console.log(`✅ Loaded ${data.questions.length} real exam questions`);
+        }
+        
+        if (data.lessons.length > 0) {
+            // Enhance ALL_LESSONS with full content
+            data.lessons.forEach(loadedLesson => {
+                const existingIndex = ALL_LESSONS.findIndex(l => l.id === loadedLesson.id);
+                if (existingIndex >= 0) {
+                    // Merge content
+                    ALL_LESSONS[existingIndex] = {
+                        ...ALL_LESSONS[existingIndex],
+                        ...loadedLesson
+                    };
+                } else {
+                    ALL_LESSONS.push(loadedLesson);
+                }
+            });
+            // Re-sort by domain and ID
+            ALL_LESSONS.sort((a, b) => {
+                if (a.domain !== b.domain) return a.domain - b.domain;
+                return a.id.localeCompare(b.id);
+            });
+            console.log(`✅ Enhanced ${data.lessons.length} lessons with full content`);
+        }
+        
+        if (data.simulations.length > 0) {
+            // Store simulation data for use by enhanced-simulations.js
+            data.simulations.forEach(sim => {
+                SIMULATION_DATA[sim.id] = sim;
+                APP.content.simulationData[sim.id] = sim;
+                
+                // Update ALL_SIMULATIONS entry
+                const existingIndex = ALL_SIMULATIONS.findIndex(s => s.id === sim.id);
+                if (existingIndex >= 0) {
+                    ALL_SIMULATIONS[existingIndex] = {
+                        ...ALL_SIMULATIONS[existingIndex],
+                        ...sim,
+                        decisionPoints: sim.decisionPoints
+                    };
+                }
+            });
+            console.log(`✅ Loaded ${data.simulations.length} full simulations`);
+        }
+        
+        if (data.remediation.length > 0) {
+            // Enhance ALL_REMEDIATION with full content
+            data.remediation.forEach(loadedRem => {
+                const existingIndex = ALL_REMEDIATION.findIndex(r => r.id === loadedRem.id);
+                if (existingIndex >= 0) {
+                    ALL_REMEDIATION[existingIndex] = {
+                        ...ALL_REMEDIATION[existingIndex],
+                        ...loadedRem
+                    };
+                } else {
+                    ALL_REMEDIATION.push(loadedRem);
+                }
+            });
+            console.log(`✅ Enhanced ${data.remediation.length} remediation scenarios`);
+        }
+        
+        if (Object.keys(data.glossary).length > 0) {
+            // Merge glossary terms
+            Object.assign(GLOSSARY, data.glossary);
+            APP.content.glossary = { ...APP.content.glossary, ...data.glossary };
+            console.log(`✅ Added ${Object.keys(data.glossary).length} glossary terms from lessons`);
+        }
+        
+        // Update APP.content
+        APP.content.questions = ACTUAL_QUESTIONS;
+        APP.content.lessons = ALL_LESSONS;
+        APP.content.simulations = ALL_SIMULATIONS;
+        APP.content.remediation = ALL_REMEDIATION;
+        
+        // Notify user if external content loaded
+        if (loader.hasExternalData() && window.notify) {
+            window.notify.info('External content loaded!', 2000);
+        }
+        
+    } catch (error) {
+        console.warn('⚠️ Error loading external content:', error);
+        console.log('Continuing with embedded content');
     }
 }
 

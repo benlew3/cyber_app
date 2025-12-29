@@ -1,0 +1,698 @@
+{
+  "scenario": {
+    "id": "D1-REM-002",
+    "title": "Authentication & Access Foundations",
+    "type": "remediation",
+    "targets_weakness": ["AAA Concepts", "Access Control Models", "Authentication Factors", "Identity Management"],
+    "difficulty": "beginner",
+    "role": "security_engineer",
+    "estimated_duration": "30-40 minutes",
+    "prerequisites": [],
+    "unlocks": [],
+    
+    "objectives_covered": ["1.2", "4.6"],
+    "topics_covered": ["Authentication", "Authorization", "Accounting", "Access Control Models", "MFA", "Identity Management"],
+    
+    "study_links": [
+      {"topic": "Authentication Concepts", "path": "domain1/topic2/study-guide"},
+      {"topic": "Access Control", "path": "domain4/topic6/study-guide"}
+    ],
+
+    "remediation_focus": "This scenario reinforces authentication, authorization, and access control fundamentals. Complete this if you struggled with identity-related questions in D1-SIM-002 or D1-SIM-004.",
+
+    "overview": {
+      "situation": "You've joined SecureStart Solutions, a growing SaaS company, as a junior security engineer. The company is implementing a proper identity and access management system after operating informally during startup phase. Your manager is using this as a teaching opportunity to ensure you understand the fundamentals.",
+      "your_role": "Junior Security Engineer - Identity & Access Team",
+      "mission": "Learn and apply authentication, authorization, and access control fundamentals while helping implement the company's new IAM system."
+    },
+
+    "company_context": {
+      "name": "SecureStart Solutions",
+      "industry": "Technology - SaaS Provider",
+      "size": "180 employees, fully remote, cloud-native",
+      "infrastructure": "AWS cloud, Google Workspace, Okta (new), various SaaS tools",
+      "compliance_requirements": ["SOC 2 Type II (pursuing)", "Customer contracts"],
+      "recent_events": "Growing from startup to enterprise, formalizing security practices"
+    },
+
+    "artifacts": [
+      {
+        "id": "D1R2-ART-001",
+        "type": "reference_guide",
+        "title": "AAA Framework Reference",
+        "available_at_start": true,
+        "content": "AAA FRAMEWORK - AUTHENTICATION, AUTHORIZATION, ACCOUNTING\n\n1. AUTHENTICATION (AuthN) - WHO ARE YOU?\n   Verifying claimed identity\n   'Prove you are who you say you are'\n   Examples: Password, biometric, smart card, MFA\n   Question answered: Is this really Alice?\n\n2. AUTHORIZATION (AuthZ) - WHAT CAN YOU DO?\n   Determining permitted actions after authentication\n   'What are you allowed to access?'\n   Examples: File permissions, role assignments, ACLs\n   Question answered: Can Alice read this file?\n\n3. ACCOUNTING (Auditing) - WHAT DID YOU DO?\n   Recording actions for audit trail\n   'Track and log activities'\n   Examples: Login logs, access logs, change records\n   Question answered: What did Alice do at 3pm?\n\nSEQUENCE: Authentication â†’ Authorization â†’ Action â†’ Accounting\n(Identify â†’ Permit â†’ Perform â†’ Record)"
+      },
+      {
+        "id": "D1R2-ART-002",
+        "type": "reference_guide",
+        "title": "Authentication Factors Reference",
+        "available_at_start": true,
+        "content": "AUTHENTICATION FACTORS\n\n1. SOMETHING YOU KNOW (Knowledge)\n   - Passwords, PINs, security questions\n   - Weakness: Can be guessed, stolen, shared, phished\n\n2. SOMETHING YOU HAVE (Possession)\n   - Smart card, security token, phone (for OTP)\n   - Weakness: Can be lost, stolen, cloned\n\n3. SOMETHING YOU ARE (Inherence/Biometric)\n   - Fingerprint, facial recognition, iris scan\n   - Weakness: Can't be changed if compromised, privacy concerns\n\n4. SOMEWHERE YOU ARE (Location)\n   - GPS location, IP address geolocation\n   - Weakness: Can be spoofed, limits mobility\n\n5. SOMETHING YOU DO (Behavior)\n   - Typing pattern, gait, signature dynamics\n   - Weakness: Can vary, requires training period\n\nMULTI-FACTOR AUTHENTICATION (MFA):\nRequires factors from DIFFERENT categories\n- Password + SMS code = MFA (know + have)\n- Password + security question = NOT MFA (both 'know')\n- Fingerprint + facial scan = MFA (two biometrics from 'are')\n\nMFA strength: Compromising one factor doesn't compromise all"
+      },
+      {
+        "id": "D1R2-ART-003",
+        "type": "reference_guide",
+        "title": "Access Control Models Reference",
+        "available_at_start": true,
+        "content": "ACCESS CONTROL MODELS\n\n1. DISCRETIONARY ACCESS CONTROL (DAC)\n   - Owner controls access to their resources\n   - Flexible but inconsistent\n   - Example: File owner sets permissions\n   - Risk: Owner might grant excessive access\n\n2. MANDATORY ACCESS CONTROL (MAC)\n   - System enforces access based on labels/clearances\n   - Rigid, policy-driven\n   - Example: Top Secret clearance required for TS documents\n   - Used in: Military, government classified systems\n\n3. ROLE-BASED ACCESS CONTROL (RBAC)\n   - Access based on job role/function\n   - Users assigned to roles; roles have permissions\n   - Example: 'Accountant' role can access financial systems\n   - Most common in enterprises\n\n4. ATTRIBUTE-BASED ACCESS CONTROL (ABAC)\n   - Access based on attributes (user, resource, environment)\n   - Highly flexible, policy-driven\n   - Example: 'Managers in Finance during business hours can approve expenses'\n   - Enables complex, contextual decisions\n\n5. RULE-BASED ACCESS CONTROL\n   - Access based on predefined rules\n   - Example: Firewall rules (allow port 443 from any)\n   - Often combined with other models"
+      }
+    ],
+
+    "decision_points": [
+      {
+        "id": "D1R2-DP-001",
+        "sequence": 1,
+        "title": "AAA Fundamentals",
+        "context": "Your manager asks you to explain what happens when an employee logs into the company's HR system and views their pay stub. Walk through the AAA process.",
+        "question": "What is the correct sequence of AAA operations for this scenario?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Authorization (check if they can access HR) â†’ Authentication (verify identity) â†’ Accounting (log the access)",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "The order is wrong. You can't authorize someone before you know who they are. Authentication must come first - you need to verify identity before checking permissions.",
+            "consequence": "Your manager asks: 'How can we check permissions if we don't know who the user is?'",
+            "next_dp": "D1R2-DP-002"
+          },
+          {
+            "id": "B",
+            "text": "Authentication (verify identity) â†’ Authorization (check permissions) â†’ Accounting (log the access)",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Correct! First, authentication verifies the employee is who they claim (login). Then authorization checks if they can view pay stubs (permission check). Finally, accounting logs that they accessed the system and viewed their stub.",
+            "consequence": "Your manager confirms: 'Identify, permit, record - that's the AAA sequence.'",
+            "next_dp": "D1R2-DP-002"
+          },
+          {
+            "id": "C",
+            "text": "Accounting (log the attempt) â†’ Authentication (verify identity) â†’ Authorization (grant access)",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "While logging the attempt early has value, the functional sequence is AuthN â†’ AuthZ. Accounting primarily records what happened after access decisions, though login attempts may be logged regardless of success.",
+            "consequence": "The primary accounting value is recording successful actions, not just attempts.",
+            "next_dp": "D1R2-DP-002"
+          },
+          {
+            "id": "D",
+            "text": "Authentication and Authorization happen simultaneously, then Accounting",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "They're sequential, not simultaneous. The system must know WHO before it can determine WHAT they can do. Authorization decisions depend on the authenticated identity.",
+            "consequence": "Authorization requires knowing the identity first - they can't be simultaneous.",
+            "next_dp": "D1R2-DP-002"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Think about the logical dependency: Can you check someone's permissions before you know who they are?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "AuthN (who?) â†’ AuthZ (what can they do?) â†’ Accounting (what did they do?)",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "AAA sequence is logically dependent: Authentication establishes identity, Authorization uses that identity to determine permissions, Accounting records the authenticated user's actions. Without AuthN, AuthZ has no subject to evaluate."
+      },
+      {
+        "id": "D1R2-DP-002",
+        "sequence": 2,
+        "title": "Authentication vs Authorization",
+        "context": "A help desk ticket reads: 'I can log in fine, but I get Access Denied when trying to open the Q4 financial report.'",
+        "question": "Is this an authentication problem or an authorization problem?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Authentication - they need to prove their identity differently",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "They can log in successfully - that means authentication is working. The identity verification step passed. The problem occurs after login when trying to access a specific resource.",
+            "consequence": "Your manager points out: 'They logged in fine - authentication worked.'",
+            "next_dp": "D1R2-DP-003"
+          },
+          {
+            "id": "B",
+            "text": "Authorization - they're authenticated but lack permission for that resource",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Correct! Successful login means authentication passed - the system verified their identity. 'Access Denied' on a specific resource means authorization failed - they don't have permission to access the Q4 financial report.",
+            "consequence": "You correctly identify this as a permissions issue, not an identity issue.",
+            "next_dp": "D1R2-DP-003"
+          },
+          {
+            "id": "C",
+            "text": "Accounting - the system isn't logging their access properly",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Accounting problems would be about missing logs or audit trails, not 'Access Denied' errors. The user is being actively blocked from a resource - that's an authorization decision.",
+            "consequence": "Accounting issues wouldn't cause Access Denied - that's access control.",
+            "next_dp": "D1R2-DP-003"
+          },
+          {
+            "id": "D",
+            "text": "Both - they need to re-authenticate for financial data",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Step-up authentication for sensitive data is a valid concept, but the ticket describes 'Access Denied,' not a re-authentication prompt. The current issue is permissions. If step-up auth was needed, they'd see an authentication challenge.",
+            "consequence": "If step-up auth was the issue, they'd see a login prompt, not Access Denied.",
+            "next_dp": "D1R2-DP-003"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Did they prove who they are? (login worked = yes). Do they have permission for that resource? (Access Denied = no)",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Authentication = identity verification (login). Authorization = permission check (access to specific resources).",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Troubleshooting tip: 'Can't log in' = authentication problem. 'Logged in but can't access X' = authorization problem. The distinction helps you know where to look: credentials/identity system vs. permissions/access control."
+      },
+      {
+        "id": "D1R2-DP-003",
+        "sequence": 3,
+        "title": "Authentication Factors",
+        "context": "The company is implementing MFA. A colleague suggests requiring both a password and a security question for all users.",
+        "question": "Is this true multi-factor authentication?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Yes - two pieces of information are required",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Multi-factor isn't about the number of inputs - it's about different TYPES of factors. Password and security question are both 'something you know.' Two knowledge factors don't provide MFA's security benefits.",
+            "consequence": "Your manager explains: 'Both can be phished or stolen the same way.'",
+            "next_dp": "D1R2-DP-004"
+          },
+          {
+            "id": "B",
+            "text": "No - both are 'something you know' factors; true MFA requires different factor types",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Exactly right. MFA requires factors from different categories (know, have, are). Password + security question = two knowledge factors = single-factor authentication with extra steps. True MFA example: password (know) + authenticator app code (have).",
+            "consequence": "You correctly identify this as multi-step authentication, not multi-factor.",
+            "next_dp": "D1R2-DP-004"
+          },
+          {
+            "id": "C",
+            "text": "Yes - the more questions, the more secure",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "More of the same factor type doesn't significantly improve security. An attacker who phishes a password can phish security questions too. The strength of MFA comes from requiring different attack methods to compromise different factor types.",
+            "consequence": "Security questions are often easier to discover than passwords (social media, public records).",
+            "next_dp": "D1R2-DP-004"
+          },
+          {
+            "id": "D",
+            "text": "It depends on how complex the security question is",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Complexity doesn't change the factor type. A complex security question is still 'something you know.' The vulnerability is the factor category, not the complexity. Both can be stolen via phishing regardless of complexity.",
+            "consequence": "Factor type matters more than complexity for MFA classification.",
+            "next_dp": "D1R2-DP-004"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "What factor type is a password? What factor type is a security question? Are they the same?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "MFA = different factor TYPES. Password = know. Security question = know. Same type = not MFA.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "MFA requires different factor categories because each has different vulnerabilities. Knowledge factors can be phished/guessed. Possession factors must be stolen. Biometrics must be spoofed. Compromising one type doesn't compromise others."
+      },
+      {
+        "id": "D1R2-DP-004",
+        "sequence": 4,
+        "title": "MFA Implementation",
+        "context": "You're recommending MFA methods for the company. The CISO asks which MFA option provides the strongest protection against phishing attacks.",
+        "question": "Which MFA method is MOST resistant to phishing?",
+        "options": [
+          {
+            "id": "A",
+            "text": "SMS-based one-time passwords",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "SMS OTP is vulnerable to several attacks: SIM swapping, SS7 protocol attacks, and real-time phishing (attacker proxies victim's SMS code). Better than no MFA, but not phishing-resistant.",
+            "consequence": "Your manager notes recent breaches that bypassed SMS MFA through SIM swapping.",
+            "next_dp": "D1R2-DP-005"
+          },
+          {
+            "id": "B",
+            "text": "Email-based one-time passwords",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Email OTP has a circular dependency problem - if attackers phish your email password, they get your MFA codes too. Also vulnerable to real-time phishing proxy attacks. Generally considered weak MFA.",
+            "consequence": "Email compromise would defeat both the password and the MFA - circular dependency.",
+            "next_dp": "D1R2-DP-005"
+          },
+          {
+            "id": "C",
+            "text": "TOTP authenticator app (Google Authenticator, Authy)",
+            "is_correct": false,
+            "points": 15,
+            "feedback": "TOTP apps are much better than SMS/email - codes are generated locally, not transmitted. However, they're still phishable via real-time proxy attacks where attackers capture and replay codes. Good but not phishing-resistant.",
+            "consequence": "TOTP is solid but sophisticated phishing attacks can still capture and replay codes in real-time.",
+            "next_dp": "D1R2-DP-005"
+          },
+          {
+            "id": "D",
+            "text": "FIDO2/WebAuthn security keys",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent! FIDO2 security keys are phishing-resistant by design. They cryptographically verify the legitimate site's domain - they won't authenticate to a phishing site even if the user is tricked. The key literally cannot be fooled by a fake website.",
+            "consequence": "You recommend hardware security keys for high-risk users with TOTP as fallback.",
+            "next_dp": "D1R2-DP-005"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Real-time phishing proxies can capture and replay codes. What can't be replayed?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "FIDO2/WebAuthn keys verify the website's domain cryptographically - they won't authenticate to a fake site.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "MFA strength hierarchy against phishing: Weakest - Email OTP (circular dependency), Weak - SMS OTP (interceptable), Good - TOTP apps (local but replayable), Best - FIDO2 keys (cryptographically phishing-resistant). For high-risk accounts, prioritize phishing-resistant methods."
+      },
+      {
+        "id": "D1R2-DP-005",
+        "sequence": 5,
+        "title": "Access Control Models - DAC",
+        "context": "In Google Drive, employees can share their files with anyone they choose - coworkers, external partners, even personal accounts. An employee shared a sensitive client proposal with their personal email.",
+        "question": "What access control model does this represent, and what's the weakness demonstrated?",
+        "options": [
+          {
+            "id": "A",
+            "text": "RBAC - the employee's role allowed them to share files",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "RBAC assigns permissions based on roles, but the scenario shows the owner deciding who to share with, not role-based automatic permissions. The employee chose to share - that's owner discretion, not role assignment.",
+            "consequence": "In RBAC, the system would control sharing based on roles, not owner choice.",
+            "next_dp": "D1R2-DP-006"
+          },
+          {
+            "id": "B",
+            "text": "DAC - owner controls access, weakness is users may share inappropriately",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Correct! Discretionary Access Control lets resource owners control sharing. Google Drive's sharing model is DAC. The weakness: owners might share carelessly or maliciously. There's no system enforcement of data classification or need-to-know.",
+            "consequence": "You identify the need for DLP or sharing restrictions to augment DAC's flexibility.",
+            "next_dp": "D1R2-DP-006"
+          },
+          {
+            "id": "C",
+            "text": "MAC - the system should have blocked the share based on classification",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "MAC would have blocked this - that's why it SHOULD have been MAC but wasn't. MAC uses labels (like classification levels) enforced by the system. Google Drive without additional controls is DAC, not MAC. The incident shows DAC's weakness.",
+            "consequence": "MAC would prevent this, but standard Google Drive is DAC. Understanding the current model helps identify the gap.",
+            "next_dp": "D1R2-DP-006"
+          },
+          {
+            "id": "D",
+            "text": "ABAC - attributes should have prevented external sharing",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "ABAC could prevent this if configured, but standard file sharing without attribute-based policies is DAC. ABAC would evaluate conditions (is recipient external? is file classified?) - but that wasn't in place here.",
+            "consequence": "ABAC could be a solution, but the current model is DAC with its inherent weaknesses.",
+            "next_dp": "D1R2-DP-006"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Who made the sharing decision? The owner. What model gives owners control?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "DAC = Discretionary = owner decides. The 'D' in DAC means owner discretion.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "DAC advantages: Flexible, user-friendly, minimal administration. DAC weaknesses: Inconsistent enforcement, reliance on user judgment, difficult to audit, no systematic data protection. Most consumer and basic enterprise file sharing is DAC."
+      },
+      {
+        "id": "D1R2-DP-006",
+        "sequence": 6,
+        "title": "Access Control Models - RBAC",
+        "context": "The company is implementing Okta for access management. The team proposes creating roles like 'Engineer,' 'Sales,' 'HR,' and 'Finance' with predefined application access for each role.",
+        "question": "What access control model is being implemented, and what's a key benefit?",
+        "options": [
+          {
+            "id": "A",
+            "text": "DAC - users will control their own access",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "This isn't DAC - the proposal describes predefined roles with assigned permissions, not owner discretion. Users are assigned to roles; they don't choose their own permissions.",
+            "consequence": "Roles are assigned by administrators, not chosen by users.",
+            "next_dp": "D1R2-DP-007"
+          },
+          {
+            "id": "B",
+            "text": "MAC - access is mandatory based on job function",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "MAC uses classification labels (Secret, Top Secret) enforced by the system, typically in government contexts. Job-based roles without classification labels is RBAC, not MAC. 'Mandatory' in MAC refers to label-based enforcement.",
+            "consequence": "MAC is label-based (clearance levels). This is role-based (job functions).",
+            "next_dp": "D1R2-DP-007"
+          },
+          {
+            "id": "C",
+            "text": "RBAC - roles simplify administration and ensure consistent access by job function",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Correct! Role-Based Access Control assigns users to roles (Engineer, Sales) and roles to permissions (app access). Key benefits: simplified administration (manage roles not individual users), consistency (everyone in a role gets same access), easier onboarding/offboarding.",
+            "consequence": "You help define the role-to-permission mappings that will standardize access across the company.",
+            "next_dp": "D1R2-DP-007"
+          },
+          {
+            "id": "D",
+            "text": "ABAC - attributes define access",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "ABAC uses multiple attributes (department + location + time + resource type) for dynamic decisions. Simple role assignment without additional contextual attributes is RBAC. ABAC would be: 'Engineers in US during business hours can access production.'",
+            "consequence": "Pure role assignment without contextual attributes is RBAC. ABAC adds more dimensions.",
+            "next_dp": "D1R2-DP-007"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Users are assigned to roles, roles have permissions. What model does this describe?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "RBAC = Role-Based. Roles (job functions) â†’ Permissions. Users â†’ Roles. Simplifies administration.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "RBAC advantages: Simplified administration (manage roles, not individuals), consistent access (same role = same access), easier compliance (audit roles), efficient onboarding (assign role, get all permissions). RBAC is the most common enterprise access model."
+      },
+      {
+        "id": "D1R2-DP-007",
+        "sequence": 7,
+        "title": "Least Privilege Principle",
+        "context": "A developer requests admin access to the production database 'to debug occasional issues.' Currently they have read-only access.",
+        "question": "How should you apply the principle of least privilege to this request?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Grant permanent admin access - they're a trusted employee and need to do their job",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Permanent elevated access violates least privilege. 'Occasional issues' doesn't justify permanent admin access. Trust isn't a substitute for access controls - even trusted employees should have minimal necessary permissions.",
+            "consequence": "If this account is compromised, the attacker now has permanent production admin access.",
+            "next_dp": "D1R2-DP-008"
+          },
+          {
+            "id": "B",
+            "text": "Deny the request - developers shouldn't have any production access",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Complete denial might not support business needs. They have a legitimate use case (debugging). Least privilege means minimum necessary access, not zero access. The question is how to provide necessary access minimally.",
+            "consequence": "Blocking legitimate work creates shadow IT and workarounds that may be less secure.",
+            "next_dp": "D1R2-DP-008"
+          },
+          {
+            "id": "C",
+            "text": "Provide time-limited, just-in-time admin access that must be requested and approved for each debugging session",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent application of least privilege! Just-in-time (JIT) access provides admin rights only when needed, for limited duration, with approval workflow. This meets the business need while minimizing standing privileges. If credentials are compromised during non-debugging time, no admin access exists.",
+            "consequence": "You implement JIT access with 4-hour windows, manager approval, and full logging.",
+            "next_dp": "D1R2-DP-008"
+          },
+          {
+            "id": "D",
+            "text": "Grant admin access but monitor their activity closely",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Monitoring detects misuse but doesn't prevent it. A compromised account with permanent admin access can cause significant damage before monitoring alerts trigger. Least privilege prevents the standing access; monitoring is complementary but not a substitute.",
+            "consequence": "By the time monitoring alerts on suspicious activity, damage may already be done.",
+            "next_dp": "D1R2-DP-008"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Least privilege = minimum necessary access for minimum necessary time. How do you provide 'occasional' access?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Just-in-time (JIT) access provides elevated permissions only when needed, with time limits and approval.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Least Privilege implementation: 1) Default to minimal access, 2) Require justification for elevated access, 3) Time-limit elevated permissions (JIT), 4) Log and review elevated access, 5) Regular access reviews to remove unnecessary permissions. Standing privileges are standing risks."
+      },
+      {
+        "id": "D1R2-DP-008",
+        "sequence": 8,
+        "title": "Account Types",
+        "context": "During an access review, you find an account called 'backup-service' with admin privileges across multiple systems. It was created two years ago and the password has never been rotated.",
+        "question": "What type of account is this, and what's the security concern?",
+        "options": [
+          {
+            "id": "A",
+            "text": "User account - someone named their account 'backup-service' as a nickname",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "The naming convention and use case (backup service) clearly indicate this is a service account, not a personal user account. Service accounts run automated processes, not human sessions.",
+            "consequence": "Service accounts are named for their function, not a person's nickname.",
+            "next_dp": "D1R2-DP-009"
+          },
+          {
+            "id": "B",
+            "text": "Service account - concern is excessive privileges and no password rotation",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Correct! Service accounts run automated processes and often accumulate excess privileges over time ('privilege creep'). Two years without password rotation, plus admin across multiple systems, creates major risk. If compromised, the attacker has persistent, privileged access.",
+            "consequence": "You flag this for immediate remediation: scope privileges to actual needs and implement credential rotation.",
+            "next_dp": "D1R2-DP-009"
+          },
+          {
+            "id": "C",
+            "text": "Guest account - external partner access for backup vendor",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Guest accounts are for temporary external access, typically with limited privileges. An account with admin access across multiple systems created two years ago isn't a guest account profile - it's a service account that's been neglected.",
+            "consequence": "Guest accounts shouldn't have admin privileges across multiple systems.",
+            "next_dp": "D1R2-DP-009"
+          },
+          {
+            "id": "D",
+            "text": "Shared account - multiple people use it for backups",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Shared accounts are used by multiple humans, creating accountability problems. Service accounts run automated processes, not human sessions. The concern here is service account management, though shared accounts have their own issues.",
+            "consequence": "Service accounts run automated tasks; shared accounts are used by multiple humans.",
+            "next_dp": "D1R2-DP-009"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Accounts named for functions (backup, monitoring, sync) are typically service accounts running automated processes.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Service account risks: often over-privileged, rarely reviewed, non-expiring passwords, no MFA.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Service account security: 1) Apply least privilege (only permissions needed for function), 2) Rotate credentials regularly, 3) Use secrets management (no hardcoded passwords), 4) Monitor for anomalous behavior, 5) Document purpose and owner, 6) Include in access reviews. Service accounts are frequent attack targets."
+      },
+      {
+        "id": "D1R2-DP-009",
+        "sequence": 9,
+        "title": "Identity Federation",
+        "context": "The company wants employees to use their company credentials to access third-party SaaS applications (Salesforce, Slack, Zoom) instead of creating separate accounts for each.",
+        "question": "What identity concept enables this, and what protocol is commonly used?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Password synchronization - same password works everywhere",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Password sync copies passwords across systems - risky because compromise in one place means compromise everywhere, and you're trusting all systems with the actual password. Federation doesn't share passwords - it shares assertions.",
+            "consequence": "Password sync has security drawbacks. Federation is more secure.",
+            "next_dp": "D1R2-DP-010"
+          },
+          {
+            "id": "B",
+            "text": "Single Sign-On (SSO) using SAML or OIDC federation - one login, trusted across services",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Correct! Federation allows your identity provider (Okta, Azure AD) to assert your identity to service providers (Salesforce, Slack) without sharing passwords. SAML and OIDC/OAuth are common protocols. User authenticates once; assertions grant access to federated services.",
+            "consequence": "You help configure SAML federation with the company's major SaaS vendors.",
+            "next_dp": "D1R2-DP-010"
+          },
+          {
+            "id": "C",
+            "text": "VPN - all traffic goes through company network to access applications",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "VPN provides network access, not identity federation. Users would still need separate credentials for each SaaS app through VPN. Federation solves the identity problem - one set of credentials accepted by multiple services.",
+            "consequence": "VPN doesn't solve the multiple-credential problem for SaaS applications.",
+            "next_dp": "D1R2-DP-010"
+          },
+          {
+            "id": "D",
+            "text": "Password manager - stores all the different passwords",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Password managers help users manage multiple credentials but don't eliminate them. Users still have separate accounts in each service. Federation provides true single identity across services without multiple account creation.",
+            "consequence": "Password managers manage complexity but don't provide true SSO or federation.",
+            "next_dp": "D1R2-DP-010"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Federation allows one identity provider to assert identity to multiple service providers. What protocols enable this?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "SAML (Security Assertion Markup Language) and OIDC (OpenID Connect) are federation protocols for SSO.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Federation concepts: Identity Provider (IdP) - authenticates users and issues assertions. Service Provider (SP) - accepts assertions and grants access. Protocols - SAML (XML-based, enterprise), OIDC (JSON-based, modern apps), OAuth (authorization). Benefits: SSO convenience, centralized control, easier offboarding."
+      },
+      {
+        "id": "D1R2-DP-010",
+        "sequence": 10,
+        "title": "Access Review Process",
+        "context": "The security team wants to implement regular access reviews. You need to recommend an approach for reviewing user access rights.",
+        "question": "What is the BEST approach for conducting access reviews?",
+        "options": [
+          {
+            "id": "A",
+            "text": "IT reviews all access annually and removes anything that looks unnecessary",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "IT often doesn't know business context - they can't determine if access is necessary for job function. Access reviews need manager input since managers understand their team's job requirements. IT can facilitate but shouldn't make business decisions.",
+            "consequence": "IT removes access that turns out to be necessary, causing business disruption.",
+            "next_dp": null
+          },
+          {
+            "id": "B",
+            "text": "Managers review and certify their team members' access quarterly, with privileged access reviewed more frequently",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent! Manager certification ensures business context is considered - managers know what their team needs. Quarterly reviews catch changes promptly. More frequent review of privileged access reflects higher risk. This is the industry standard approach.",
+            "consequence": "You implement quarterly access certification with monthly privileged access reviews.",
+            "next_dp": null
+          },
+          {
+            "id": "C",
+            "text": "Users self-certify their own access - they know best what they need",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Self-certification has obvious conflict of interest - users won't voluntarily give up access. Independent review (manager or access owner) is required for meaningful certification. Users might know what they use, but shouldn't certify what they need.",
+            "consequence": "Self-certification provides no actual review - users always certify they need everything.",
+            "next_dp": null
+          },
+          {
+            "id": "D",
+            "text": "Only review access when employees change roles or leave",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Event-triggered reviews miss 'privilege creep' - gradual accumulation of access over time without role changes. Regular periodic reviews catch access that's no longer needed even when roles haven't changed. Both periodic and event-triggered reviews are needed.",
+            "consequence": "Employees accumulate unnecessary access over time between role changes.",
+            "next_dp": null
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Who understands what access their team needs for their jobs? Not IT - they know systems, not business functions.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Manager certification ensures business relevance. Quarterly catches drift. Privileged access needs more scrutiny.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Access review best practices: 1) Manager certification (business context), 2) Quarterly for standard access, monthly/weekly for privileged, 3) Document certifications and removals, 4) Automated tools to facilitate at scale, 5) Exception handling for disagreements, 6) Escalation for overdue reviews."
+      }
+    ],
+
+    "completion_criteria": {
+      "pass_threshold": 80,
+      "points_possible": 250,
+      "minimum_decisions": 10
+    },
+
+    "summary_teaching_points": [
+      "AAA sequence: Authentication (who?) â†’ Authorization (what can they do?) â†’ Accounting (what did they do?)",
+      "Authentication verifies identity; Authorization grants permissions; they solve different problems",
+      "MFA requires different factor TYPES (know/have/are), not just multiple pieces of information",
+      "FIDO2/WebAuthn security keys are phishing-resistant; SMS and TOTP can be intercepted or replayed",
+      "DAC = owner discretion (flexible but inconsistent); RBAC = role-based (scalable for enterprises); MAC = label-based (government/classified)",
+      "Least privilege means minimum necessary access for minimum necessary time - consider JIT for elevated access",
+      "Service accounts need special attention: least privilege, credential rotation, monitoring, documentation",
+      "Federation (SAML, OIDC) enables SSO by allowing IdPs to assert identity to SPs without sharing passwords",
+      "Access reviews should be manager-certified with frequency based on privilege level"
+    ],
+
+    "weakness_mapping": [
+      {
+        "if_missed": ["D1R2-DP-001", "D1R2-DP-002"],
+        "weak_topic": "AAA Fundamentals",
+        "objectives": ["1.2"],
+        "suggested_review": "domain1/topic2/study-guide"
+      },
+      {
+        "if_missed": ["D1R2-DP-003", "D1R2-DP-004"],
+        "weak_topic": "Authentication and MFA",
+        "objectives": ["1.2"],
+        "suggested_review": "domain1/topic2/study-guide"
+      },
+      {
+        "if_missed": ["D1R2-DP-005", "D1R2-DP-006"],
+        "weak_topic": "Access Control Models",
+        "objectives": ["1.2"],
+        "suggested_review": "domain1/topic2/study-guide"
+      },
+      {
+        "if_missed": ["D1R2-DP-007", "D1R2-DP-008"],
+        "weak_topic": "Least Privilege and Account Management",
+        "objectives": ["1.2"],
+        "suggested_review": "domain4/topic6/study-guide"
+      },
+      {
+        "if_missed": ["D1R2-DP-009"],
+        "weak_topic": "Identity Federation",
+        "objectives": ["1.2"],
+        "suggested_review": "domain1/topic2/study-guide"
+      }
+    ],
+
+    "next_recommended": "D1-SIM-002"
+  }
+}

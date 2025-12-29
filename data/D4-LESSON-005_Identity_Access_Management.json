@@ -1,0 +1,419 @@
+{
+  "lesson_id": "D4-LESSON-005",
+  "domain": 4,
+  "title": "Identity and Access Management",
+  "objectives_covered": ["4.6"],
+  "estimated_duration": "55-65 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": ["D1-LESSON-003"],
+
+  "introduction": {
+    "hook": "In 2020, a teenager hacked Twitter and compromised accounts of Barack Obama, Elon Musk, Bill Gates, and Appleâ€”not through sophisticated malware, but by calling Twitter employees and convincing them to reset credentials. The attackers then used legitimate access to tweet cryptocurrency scams. Identity is the new perimeter. When attackers can become anyone, traditional network security is meaningless. IAM isn't just about passwordsâ€”it's about ensuring that every access request, every authentication, every authorization decision is legitimate.",
+    "learning_goals": [
+      "Implement identity lifecycle management from provisioning to deprovisioning",
+      "Configure authentication mechanisms including MFA and passwordless",
+      "Apply authorization models including RBAC, ABAC, and least privilege",
+      "Manage privileged access and implement PAM controls",
+      "Integrate identity across cloud and on-premises environments"
+    ],
+    "why_it_matters": "Identity is the foundation of modern security. Every action in a system is tied to an identity. Compromised credentials are the leading cause of breaches. Security professionals must understand how to manage identities throughout their lifecycle, implement strong authentication, and ensure proper authorization. Expect 6-8 Security+ questions on IAM concepts, authentication methods, authorization models, and privileged access management."
+  },
+
+  "sections": [
+    {
+      "section_id": "D4-L005-S01",
+      "title": "Identity Lifecycle Management",
+      "content": "Identity lifecycle management governs identities from creation through deletion, ensuring appropriate access at each stage.\n\n**Identity Types**\n\n*User Identities*\n- Employees\n- Contractors\n- Partners\n- Customers\n\n*Non-Human Identities*\n- Service accounts\n- Application identities\n- API keys\n- Machine identities\n- Managed identities\n\n**Lifecycle Stages**\n\n*Provisioning (Onboarding)*\n- Identity creation\n- Initial access assignment\n- Account configuration\n- Credential issuance\n\n*Maintenance*\n- Access modifications\n- Role changes\n- Periodic review\n- Credential rotation\n\n*Deprovisioning (Offboarding)*\n- Access revocation\n- Account disabling/deletion\n- Credential invalidation\n- Audit trail preservation\n\n**Provisioning Methods**\n\n*Manual Provisioning*\n- IT creates accounts\n- Request-based\n- Approval workflow\n- Slower but controlled\n\n*Automated Provisioning*\n- HR system triggers creation\n- SCIM protocol\n- Directory synchronization\n- Faster, consistent\n\n*Self-Service*\n- User-initiated requests\n- Approval workflow\n- Automated fulfillment\n- Reduces IT burden\n\n**Access Reviews**\n\n*Purpose*\n- Verify appropriate access\n- Remove unnecessary permissions\n- Compliance requirement\n- Detect privilege creep\n\n*Types*\n- Manager certification\n- Application owner review\n- Peer review\n- Automated analysis\n\n*Frequency*\n- Quarterly (typical)\n- Annual (minimum)\n- Continuous (mature)\n- Event-triggered\n\n**Joiner-Mover-Leaver Process**\n\n*Joiner*\n- New employee onboarding\n- Role-based initial access\n- Training requirements\n- Credential issuance\n\n*Mover*\n- Department/role change\n- Access adjustment\n- Remove old, add new\n- Avoid accumulation\n\n*Leaver*\n- Immediate access revocation\n- Account disable\n- Credential invalidation\n- Asset return",
+
+      "key_points": [
+        "Identity types: users (employees, contractors) and non-human (service accounts, APIs)",
+        "Lifecycle: provisioning â†’ maintenance â†’ deprovisioning",
+        "Joiner-Mover-Leaver process manages access through employment changes",
+        "Access reviews detect privilege creep and verify appropriate access",
+        "Automated provisioning (SCIM) faster and more consistent than manual"
+      ],
+
+      "real_world_example": {
+        "scenario": "Failed offboarding leading to breach",
+        "company": "Meridian Manufacturing",
+        "application": "Meridian suffered a breach due to incomplete offboarding: INCIDENT (terminated IT administrator accessed systems 3 weeks after termination), ROOT CAUSE (HR notified IT of termination via email, email was missed, account remained active, VPN credentials still valid), IMPACT (former employee deleted critical manufacturing data, caused $2M in damages), REMEDIATION (implemented automated provisioning/deprovisioning tied to HR system, termination triggers immediate disable across all systems, mandatory offboarding checklist with verification, separation of sensitive access from standard accounts), OUTCOME (zero access incidents post-implementation). Manual processes failed; automation solved it."
+      },
+
+      "exam_tips": [
+        "Provisioning = onboarding; Deprovisioning = offboarding",
+        "Joiner-Mover-Leaver covers employment lifecycle",
+        "Access reviews detect privilege creep (accumulating unnecessary access)",
+        "SCIM = System for Cross-domain Identity Management (automated provisioning)",
+        "Service accounts = non-human identities for applications"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Identity Lifecycle",
+          "definition": "The stages an identity goes through from creation (provisioning) through maintenance to deletion (deprovisioning).",
+          "exam_note": "Create â†’ maintain â†’ delete. Joiner-Mover-Leaver. Automate for consistency."
+        },
+        {
+          "term": "Provisioning",
+          "definition": "The process of creating user accounts and assigning initial access rights based on job role.",
+          "exam_note": "Account creation. Initial access. Automated or manual. Part of onboarding."
+        },
+        {
+          "term": "Deprovisioning",
+          "definition": "The process of revoking access and disabling or deleting accounts when no longer needed.",
+          "exam_note": "Access removal. Offboarding. Must be timely. Audit trail preserved."
+        },
+        {
+          "term": "Access Review",
+          "definition": "A periodic evaluation of user access rights to verify they remain appropriate and remove unnecessary permissions.",
+          "exam_note": "Recertification. Quarterly typical. Detects privilege creep. Compliance requirement."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An employee transfers from the accounting department to marketing. According to the Joiner-Mover-Leaver process, what should happen to their access?",
+        "options": [
+          "Keep all existing access and add marketing access",
+          "Remove accounting access and assign marketing access",
+          "Delete the account and create a new one",
+          "Wait for the next access review to make changes"
+        ],
+        "correct": 1,
+        "explanation": "The 'Mover' process requires removing old access (accounting) and assigning new access (marketing). Simply adding access leads to privilege creep. Deleting and recreating is unnecessary and disruptive. Waiting for access review leaves inappropriate access active too long. The Mover process ensures access matches current role."
+      }
+    },
+    {
+      "section_id": "D4-L005-S02",
+      "title": "Authentication Methods",
+      "content": "Authentication verifies identity through various factors and methods, with stronger authentication using multiple factors.\n\n**Authentication Factors**\n\n*Something You Know*\n- Passwords\n- PINs\n- Security questions\n- Passphrases\n\n*Something You Have*\n- Smart cards\n- Hardware tokens\n- Mobile devices (SMS, app)\n- Security keys (FIDO2)\n\n*Something You Are*\n- Fingerprint\n- Facial recognition\n- Iris scan\n- Voice recognition\n\n*Somewhere You Are*\n- Geolocation\n- IP address\n- Network location\n\n*Something You Do*\n- Typing patterns\n- Mouse movements\n- Behavioral biometrics\n\n**Multi-Factor Authentication (MFA)**\n\n*Definition*\n- Two or more different factors\n- From different categories\n- Password + PIN is NOT MFA (both 'know')\n- Password + token IS MFA\n\n*MFA Strength Hierarchy*\n1. Hardware security keys (FIDO2) - Strongest\n2. Authenticator apps (TOTP)\n3. Push notifications\n4. SMS codes - Weakest (SIM swapping risk)\n\n**Passwordless Authentication**\n\n*Methods*\n- FIDO2/WebAuthn\n- Windows Hello\n- Biometrics\n- Magic links\n- Certificate-based\n\n*Benefits*\n- No password to steal/guess\n- Better user experience\n- Phishing resistant (FIDO2)\n- Reduced help desk calls\n\n**Single Sign-On (SSO)**\n\n*Concept*\n- One authentication for multiple systems\n- Reduces password fatigue\n- Centralized authentication\n- Improves user experience\n\n*Protocols*\n- SAML (web applications)\n- OAuth 2.0 (authorization)\n- OpenID Connect (authentication)\n- Kerberos (on-premises)\n\n*Security Considerations*\n- Single point of failure\n- High-value target\n- Must secure SSO strongly\n- If compromised, all access lost\n\n**Federation**\n\n*Concept*\n- Trust between organizations\n- Use home credentials elsewhere\n- Identity provider (IdP)\n- Service provider (SP)\n\n*Use Cases*\n- Partner access\n- Cloud service authentication\n- B2B collaboration\n- Social login",
+
+      "key_points": [
+        "MFA requires different factor categories (know + have, not know + know)",
+        "FIDO2 hardware keys strongest MFA; SMS weakest (SIM swapping)",
+        "Passwordless eliminates passwords using FIDO2, biometrics, certificates",
+        "SSO: one authentication for multiple systems (convenience + risk)",
+        "Federation enables cross-organization authentication via trust"
+      ],
+
+      "real_world_example": {
+        "scenario": "MFA preventing credential theft attack",
+        "company": "Pinnacle Financial Services",
+        "application": "Pinnacle's MFA implementation stopped a credential stuffing attack: ATTACK (attackers obtained credentials from data breach of unrelated service, attempted login to Pinnacle's systems), WITHOUT MFA (previous year: 47 accounts compromised via reused passwords), WITH MFA (current: 0 accounts compromised despite 15,000 credential stuffing attempts), HOW IT WORKED (passwords worked for 312 accountsâ€”employees who reused passwordsâ€”but MFA challenge stopped all unauthorized access, alerts triggered investigation), ADDITIONAL ACTIONS (affected employees required to change passwords, education on password reuse), OUTCOME (MFA provided complete protection against credential stuffing). MFA is the single most effective control against credential attacks."
+      },
+
+      "exam_tips": [
+        "MFA = different factor categories (password + token, not password + PIN)",
+        "FIDO2/hardware keys = phishing resistant, strongest MFA",
+        "SMS MFA vulnerable to SIM swapping attacks",
+        "SSO = one login for multiple systems; Federation = cross-organization",
+        "SAML for web SSO; Kerberos for on-premises; OAuth for authorization"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Multi-Factor Authentication (MFA)",
+          "definition": "Authentication requiring two or more factors from different categories (something you know, have, are).",
+          "exam_note": "Different categories required. Password+token=MFA. Password+PINâ‰ MFA."
+        },
+        {
+          "term": "FIDO2",
+          "definition": "A passwordless authentication standard using hardware security keys or platform authenticators, resistant to phishing attacks.",
+          "exam_note": "Hardware keys. Phishing resistant. Strongest MFA. WebAuthn standard."
+        },
+        {
+          "term": "Single Sign-On (SSO)",
+          "definition": "An authentication method allowing users to access multiple applications with one set of credentials.",
+          "exam_note": "One login, multiple systems. Convenience. Must secure strongly. High-value target."
+        },
+        {
+          "term": "Federation",
+          "definition": "A trust relationship between organizations allowing users to authenticate with their home organization's credentials.",
+          "exam_note": "Cross-organization trust. IdP and SP. Partner access. SAML common."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An organization requires MFA for all remote access. Which combination provides TRUE multi-factor authentication?",
+        "options": [
+          "Password plus a security question",
+          "PIN plus a passphrase",
+          "Password plus a hardware token",
+          "Fingerprint plus facial recognition"
+        ],
+        "correct": 2,
+        "explanation": "Password (something you know) plus hardware token (something you have) is true MFA because it uses different factor categories. Password + security question are both 'something you know.' PIN + passphrase are both 'something you know.' Fingerprint + facial recognition are both 'something you are.' MFA requires different categories."
+      }
+    },
+    {
+      "section_id": "D4-L005-S03",
+      "title": "Authorization Models",
+      "content": "Authorization determines what authenticated users can access, using various models to make access decisions.\n\n**Authorization Concepts**\n\n*Authentication vs. Authorization*\n- Authentication: Who are you?\n- Authorization: What can you do?\n- Must authenticate before authorize\n- Different processes\n\n*Least Privilege*\n- Minimum necessary access\n- No more than needed\n- Reduces risk\n- Foundation of authorization\n\n**Role-Based Access Control (RBAC)**\n\n*Concept*\n- Access based on job role\n- Permissions assigned to roles\n- Users assigned to roles\n- Simplifies management\n\n*Benefits*\n- Scalable\n- Easy to understand\n- Audit-friendly\n- Consistent access\n\n*Challenges*\n- Role explosion\n- Doesn't handle exceptions well\n- Static permissions\n- Can lead to privilege creep\n\n**Attribute-Based Access Control (ABAC)**\n\n*Concept*\n- Access based on attributes\n- User, resource, environment attributes\n- Dynamic decisions\n- Policy-based\n\n*Attributes Examples*\n- User: department, clearance, location\n- Resource: classification, owner, type\n- Environment: time, device, network\n\n*Benefits*\n- Fine-grained control\n- Dynamic decisions\n- Handles exceptions\n- Context-aware\n\n**Rule-Based Access Control**\n\n*Concept*\n- Access based on rules\n- If-then logic\n- Time-based rules\n- Condition-based\n\n*Examples*\n- Access only during business hours\n- Access only from corporate network\n- Access based on request approval\n\n**Mandatory Access Control (MAC)**\n\n*Concept*\n- System-enforced access\n- Based on labels/classifications\n- Users cannot change permissions\n- Government/military use\n\n*Labels*\n- Top Secret, Secret, Confidential\n- Compartmentalization\n- Bell-LaPadula (no read up, no write down)\n\n**Discretionary Access Control (DAC)**\n\n*Concept*\n- Owner controls access\n- User discretion\n- Flexible but risky\n- File permissions example\n\n*Characteristics*\n- Resource owner decides\n- Can delegate access\n- Common in general-purpose OS\n- Less secure than MAC",
+
+      "key_points": [
+        "RBAC: access based on job role (most common enterprise model)",
+        "ABAC: access based on attributes (user, resource, environment)â€”more flexible",
+        "MAC: system-enforced labels (government/military)â€”most restrictive",
+        "DAC: owner controls access (flexible but risky)",
+        "Least privilege: minimum necessary access (fundamental principle)"
+      ],
+
+      "real_world_example": {
+        "scenario": "RBAC to ABAC migration for flexibility",
+        "company": "MedCare Health Systems",
+        "application": "MedCare evolved from RBAC to ABAC for better access control: RBAC LIMITATION (had 500+ roles due to role explosion, hard to maintain, couldn't handle context like location or time), ABAC IMPLEMENTATION (policies based on attributes: user department + patient care relationship + time of access + device type), EXAMPLE POLICY ('Nurses can access patient records only for patients they're assigned to, only during their shift, only from clinical workstations'), RESULT (reduced roles from 500+ to 20 base roles, dynamic access based on context, blocked after-hours access that was previously difficult to control), COMPLIANCE BENEFIT (HIPAA minimum necessary easier to implement). ABAC provided context-aware access RBAC couldn't match."
+      },
+
+      "exam_tips": [
+        "RBAC = roles; ABAC = attributes (user, resource, environment)",
+        "MAC = labels, system-enforced (military); DAC = owner discretion",
+        "Least privilege = minimum necessary access (applies to all models)",
+        "RBAC can have 'role explosion' problem with too many roles",
+        "ABAC is more flexible but more complex to implement"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Role-Based Access Control (RBAC)",
+          "definition": "An authorization model where permissions are assigned to roles, and users are assigned to roles based on their job function.",
+          "exam_note": "Access via roles. Most common. Scalable. Can have role explosion."
+        },
+        {
+          "term": "Attribute-Based Access Control (ABAC)",
+          "definition": "An authorization model where access decisions are based on attributes of users, resources, and environment conditions.",
+          "exam_note": "Attributes = user + resource + environment. Dynamic. Policy-based. Flexible."
+        },
+        {
+          "term": "Mandatory Access Control (MAC)",
+          "definition": "An authorization model where the system enforces access based on security labels, and users cannot change permissions.",
+          "exam_note": "System-enforced labels. Government/military. Most restrictive. Bell-LaPadula."
+        },
+        {
+          "term": "Least Privilege",
+          "definition": "The principle that users should have only the minimum access necessary to perform their job functions.",
+          "exam_note": "Minimum necessary. Reduces risk. Foundation of authorization. Apply everywhere."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A healthcare organization needs to allow nurses to access patient records only for patients they're currently treating, only during their shift, and only from hospital workstations. Which access control model is BEST suited for this requirement?",
+        "options": [
+          "RBAC because all nurses have the same role",
+          "ABAC because it considers multiple dynamic attributes",
+          "MAC because it uses security labels",
+          "DAC because nurses own their patient relationships"
+        ],
+        "correct": 1,
+        "explanation": "ABAC is best suited because it can make access decisions based on multiple attributes: user (nurse), resource (specific patient they're treating), environment (during shift, from hospital workstation). RBAC can't handle the dynamic patient relationship or time/location context. MAC uses labels, not relationships. DAC would let nurses control access, which isn't appropriate."
+      }
+    },
+    {
+      "section_id": "D4-L005-S04",
+      "title": "Privileged Access Management",
+      "content": "Privileged Access Management (PAM) controls and monitors high-risk accounts that can cause significant damage if compromised.\n\n**Privileged Accounts**\n\n*Types*\n- Administrator accounts\n- Root accounts\n- Service accounts\n- Emergency accounts\n- Application admin accounts\n\n*Why Critical*\n- Full system control\n- Can bypass security\n- High-value targets\n- Insider threat vector\n- Audit requirements\n\n**PAM Components**\n\n*Privileged Account Vault*\n- Secure credential storage\n- Automated rotation\n- Check-out/check-in\n- No standing access\n\n*Session Management*\n- Session recording\n- Real-time monitoring\n- Command filtering\n- Suspicious activity alerts\n\n*Just-in-Time (JIT) Access*\n- Access granted when needed\n- Time-limited\n- Automatic expiration\n- Approval workflow\n\n**Key Principles**\n\n*No Standing Privileges*\n- Remove persistent admin access\n- Request access when needed\n- Access expires automatically\n- Reduces attack surface\n\n*Separation of Duties*\n- Split critical functions\n- No single person can complete\n- Requires collusion to abuse\n- Financial transactions example\n\n*Dual Control*\n- Two people required\n- Both must act\n- Nuclear launch codes example\n- High-security operations\n\n**Service Account Security**\n\n*Risks*\n- Often over-privileged\n- Rarely rotated\n- Shared credentials\n- Difficult to track\n\n*Best Practices*\n- Unique per application\n- Least privilege\n- Regular rotation\n- No interactive login\n- Managed service accounts (gMSA)\n\n**Break-Glass Procedures**\n\n*Purpose*\n- Emergency access\n- When normal process fails\n- Disaster recovery\n- Critical incidents\n\n*Controls*\n- Documented procedure\n- Approval requirements\n- Audit logging\n- Post-use review\n- Credential change after use",
+
+      "key_points": [
+        "PAM controls privileged accounts (admin, root, service accounts)",
+        "Just-in-Time (JIT) access: granted when needed, expires automatically",
+        "No standing privileges = remove persistent admin access",
+        "Service accounts: unique per app, least privilege, no interactive login",
+        "Break-glass = emergency access with controls and audit"
+      ],
+
+      "real_world_example": {
+        "scenario": "PAM preventing privileged account abuse",
+        "company": "NexaTech Solutions",
+        "application": "NexaTech implemented PAM after detecting suspicious admin activity: BEFORE PAM (12 IT staff had domain admin credentials, credentials rarely changed, no session monitoring, one admin was found accessing HR data inappropriately), PAM IMPLEMENTATION (deployed privileged vault, implemented JIT access with approval workflow, enabled session recording, automated credential rotation), AFTER PAM (admin access requires approval and business justification, all sessions recorded, credentials rotate every 24 hours, suspicious commands blocked and alerted), DETECTION EXAMPLE (admin attempted to access finance server without approvalâ€”blocked and alerted, investigation revealed compromised admin account from phishing), OUTCOME (privileged access reduced from always-on to just-in-time, complete audit trail, blocked credential abuse). PAM transformed privileged access from risk to controlled resource."
+      },
+
+      "exam_tips": [
+        "PAM = Privileged Access Management (controls admin/root/service accounts)",
+        "JIT = Just-in-Time (access granted when needed, expires automatically)",
+        "No standing privileges = no persistent admin access",
+        "Service accounts: unique per app, no interactive login, rotate credentials",
+        "Break-glass = emergency access procedures (documented, audited)"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Privileged Access Management (PAM)",
+          "definition": "Security controls specifically for managing and monitoring high-privilege accounts that can cause significant damage if compromised.",
+          "exam_note": "Admin, root, service accounts. Vault, JIT, session recording. High-value targets."
+        },
+        {
+          "term": "Just-in-Time (JIT) Access",
+          "definition": "A PAM approach where privileged access is granted only when needed and automatically expires after a defined period.",
+          "exam_note": "Access on demand. Time-limited. Auto-expires. Reduces standing access."
+        },
+        {
+          "term": "Separation of Duties",
+          "definition": "A control that splits critical functions so no single person can complete a sensitive transaction alone.",
+          "exam_note": "Split functions. Requires collusion to abuse. Fraud prevention."
+        },
+        {
+          "term": "Break-Glass",
+          "definition": "Emergency access procedures that provide privileged access when normal processes are unavailable, with enhanced audit controls.",
+          "exam_note": "Emergency access. Documented procedure. Heavy audit. Change credentials after."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An organization wants to ensure IT administrators only have privileged access when actively performing administrative tasks, not continuously. Which PAM concept addresses this?",
+        "options": [
+          "Password vault because it stores credentials securely",
+          "Just-in-Time access because it grants access only when needed",
+          "Session recording because it captures admin activity",
+          "Break-glass because it provides emergency access"
+        ],
+        "correct": 1,
+        "explanation": "Just-in-Time (JIT) access addresses this by granting privileged access only when needed and for a limited time. Administrators request access, it's approved, granted for a specific duration, then automatically revoked. Password vaults store credentials but don't control when they're used. Session recording monitors but doesn't control access timing. Break-glass is for emergencies."
+      }
+    },
+    {
+      "section_id": "D4-L005-S05",
+      "title": "Identity Security and Governance",
+      "content": "Identity security protects identities from attack, while governance ensures proper policies and compliance.\n\n**Identity Threats**\n\n*Credential Attacks*\n- Phishing\n- Credential stuffing\n- Password spraying\n- Brute force\n- Keylogging\n\n*Account Takeover*\n- Compromised credentials\n- Session hijacking\n- MFA bypass attempts\n- Social engineering\n\n*Insider Threats*\n- Privilege abuse\n- Account sharing\n- Unauthorized access\n- Data theft\n\n**Identity Protection**\n\n*Technical Controls*\n- MFA everywhere\n- Passwordless where possible\n- Conditional access policies\n- Impossible travel detection\n- Anomaly detection\n\n*Process Controls*\n- Access reviews\n- Separation of duties\n- Least privilege\n- Offboarding procedures\n\n**Conditional Access**\n\n*Concept*\n- Access decisions based on conditions\n- Risk-based authentication\n- Context-aware\n- Zero Trust implementation\n\n*Conditions*\n- User/group membership\n- Device compliance\n- Location\n- Application\n- Risk level\n\n*Actions*\n- Allow access\n- Require MFA\n- Block access\n- Limit access\n- Force password change\n\n**Identity Governance**\n\n*Components*\n- Policy management\n- Access certification\n- Segregation of duties\n- Role management\n- Audit and reporting\n\n*Compliance Requirements*\n- SOX (financial controls)\n- HIPAA (healthcare)\n- PCI DSS (payment cards)\n- GDPR (privacy)\n\n**Identity Analytics**\n\n*User Behavior Analytics*\n- Baseline normal behavior\n- Detect anomalies\n- Risk scoring\n- Compromise detection\n\n*Identity Risk Signals*\n- Impossible travel\n- Unusual access patterns\n- Privilege escalation\n- Mass downloads\n- Off-hours access\n\n**Directory Services**\n\n*Active Directory*\n- On-premises identity\n- Kerberos authentication\n- Group Policy\n- Domain structure\n\n*Azure AD/Entra ID*\n- Cloud identity\n- SSO for cloud apps\n- Conditional access\n- B2B/B2C scenarios\n\n*LDAP*\n- Directory protocol\n- Standard interface\n- Cross-platform\n- Identity queries",
+
+      "key_points": [
+        "Identity threats: phishing, credential stuffing, password spraying, account takeover",
+        "Conditional access makes decisions based on user, device, location, risk",
+        "Identity governance includes access reviews, SoD, role management, audit",
+        "Identity analytics detects anomalies: impossible travel, unusual patterns",
+        "Active Directory (on-prem) and Azure AD/Entra ID (cloud) are primary directories"
+      ],
+
+      "real_world_example": {
+        "scenario": "Conditional access blocking compromised account",
+        "company": "Coastal Community Bank",
+        "application": "Coastal's conditional access policies blocked a sophisticated attack: ATTACK (employee credentials stolen via phishing site), ATTACKER ACTION (attempted login from overseas IP address), CONDITIONAL ACCESS RESPONSE (login from high-risk country triggered additional verification, device was not enrolled in MDMâ€”blocked, impossible travel detectedâ€”account locked), WHAT WOULD HAVE HAPPENED WITHOUT (attacker would have accessed email, found VPN credentials, potentially accessed core banking), ALERT TRIGGERED (security team notified of blocked suspicious access, confirmed phishing, reset employee credentials, found 3 other employees clicked same linkâ€”accounts secured), OUTCOME (zero compromise despite valid credentials). Conditional access provided multiple layers of protection."
+      },
+
+      "exam_tips": [
+        "Conditional access = risk-based decisions (user, device, location, risk level)",
+        "Impossible travel = user in two distant locations in impossible time",
+        "Identity governance = policies, access reviews, SoD, compliance",
+        "Active Directory = on-premises; Azure AD/Entra ID = cloud identity",
+        "LDAP = directory protocol; Kerberos = authentication protocol"
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Conditional Access",
+          "definition": "Access control that makes authorization decisions based on conditions such as user, device, location, and risk level.",
+          "exam_note": "Risk-based access. Multiple conditions. Zero Trust implementation. Block or require MFA."
+        },
+        {
+          "term": "Identity Governance",
+          "definition": "The policies, processes, and controls that ensure identities and access are managed properly and meet compliance requirements.",
+          "exam_note": "Policies, access reviews, SoD, audit. Compliance. SOX, HIPAA requirements."
+        },
+        {
+          "term": "Credential Stuffing",
+          "definition": "An attack using stolen username/password pairs from breaches to attempt login on other services, exploiting password reuse.",
+          "exam_note": "Uses breached credentials. Exploits password reuse. MFA prevents."
+        },
+        {
+          "term": "Password Spraying",
+          "definition": "An attack trying common passwords against many accounts simultaneously, avoiding lockouts by limiting attempts per account.",
+          "exam_note": "Few passwords, many accounts. Avoids lockout. Detectable by volume."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A user successfully authenticates with correct credentials, but the login is from a country where the company has no operations, using an unmanaged device, at 3 AM local time. What should conditional access do?",
+        "options": [
+          "Allow access because credentials are correct",
+          "Block access because multiple risk factors are present",
+          "Allow access but log the anomaly",
+          "Allow access because the user is authenticated"
+        ],
+        "correct": 1,
+        "explanation": "Conditional access should block access because multiple risk factors are present: unusual location (country with no operations), unmanaged device (not enrolled), unusual time (3 AM). Even though credentials are correct, these conditions indicate high risk of compromised credentials. Conditional access evaluates context, not just authentication success."
+      }
+    }
+  ],
+
+  "hands_on_activity": {
+    "title": "IAM Policy Development",
+    "objective": "Design comprehensive IAM policies for an organization",
+    "scenario": "You're the IAM architect at Apex Consulting Group. Develop IAM policies covering authentication, authorization, and privileged access.",
+    "steps": [
+      "Step 1: Authentication policy:\n   - Password requirements (length, complexity, history)\n   - MFA requirements (when required, acceptable methods)\n   - Passwordless strategy (where applicable)\n   - Session management (timeout, re-authentication)",
+      "Step 2: Authorization policy:\n   - Access control model (RBAC, ABAC, or hybrid)\n   - Least privilege implementation\n   - Role definitions for key job functions\n   - Access request and approval workflow",
+      "Step 3: Privileged access policy:\n   - PAM requirements\n   - JIT access rules\n   - Service account standards\n   - Break-glass procedures\n   - Session recording requirements",
+      "Step 4: Identity lifecycle policy:\n   - Provisioning process (manual vs. automated)\n   - Joiner-Mover-Leaver procedures\n   - Access review frequency and process\n   - Deprovisioning timeline (immediate for termination)",
+      "Step 5: Conditional access rules:\n   - Define conditions (location, device, time, risk)\n   - Define actions for each condition combination\n   - Exception handling process",
+      "Step 6: Governance and compliance:\n   - Access review requirements\n   - Audit logging requirements\n   - Reporting requirements\n   - Compliance mapping (SOX, HIPAA, etc.)",
+      "Step 7: Document exception process:\n   - When exceptions are allowed\n   - Approval requirements\n   - Documentation requirements\n   - Review and expiration"
+    ],
+    "expected_outcome": "Complete IAM policy framework including authentication standards, authorization model, privileged access controls, lifecycle management, conditional access rules, and governance requirements.",
+    "reflection_questions": [
+      "How would you balance security with user experience?",
+      "What challenges might you face implementing passwordless?",
+      "How would you handle a VIP who resists MFA?"
+    ]
+  },
+
+  "what_would_you_do": {
+    "scenario": "You're the IAM manager at Pinnacle Financial Services. The CEO's executive assistant requests permanent domain admin access 'to help the CEO when IT is unavailable.' The CEO has verbally approved this request. The assistant currently has standard user access.",
+    "context": "The CEO travels frequently and sometimes needs IT help outside business hours. The executive assistant is trusted and has been with the company for 10 years. Your IAM policy requires business justification and manager approval for elevated access. Granting domain admin would violate least privilege.",
+    "question": "How do you handle this request?",
+    "options": [
+      {
+        "id": "a",
+        "text": "Grant the access since the CEO approved",
+        "is_best": false,
+        "feedback": "Verbal approval doesn't satisfy policy requirements. Domain admin for an executive assistant violates least privilege massivelyâ€”they would have more access than they need for any legitimate task. CEO approval doesn't override security policy, and this creates significant risk.",
+        "consequences": "Massive privilege creep. Policy violation. If assistant account compromised, total domain compromise. Audit finding. Sets bad precedent."
+      },
+      {
+        "id": "b",
+        "text": "Deny the request and explain why domain admin is inappropriate",
+        "is_best": false,
+        "feedback": "While denying domain admin is correct, simply saying 'no' without addressing the underlying need creates friction and doesn't solve the CEO's problem. Security should enable business, not just block requests.",
+        "consequences": "CEO frustrated. Business need unmet. Potential workarounds that are worse. Security seen as obstacle."
+      },
+      {
+        "id": "c",
+        "text": "Understand the actual need and propose a least-privilege alternative with proper controls",
+        "is_best": true,
+        "feedback": "This is correct. First, understand what the assistant actually needs to do for the CEO. Then propose least-privilege alternatives: specific delegated permissions for common tasks, JIT access for emergency situations with approval workflow, or after-hours IT support arrangements. Get proper written approval for whatever is implemented.",
+        "consequences": "Business need addressed. Security maintained. Least privilege applied. Proper documentation. Audit-ready."
+      },
+      {
+        "id": "d",
+        "text": "Grant temporary domain admin access for one month to evaluate",
+        "is_best": false,
+        "feedback": "Temporary domain admin is still domain admin. One month of full domain control is excessive risk. Temporary access should be just-in-time (hours, not months) and should be appropriate to the task, not full admin.",
+        "consequences": "Full admin exposure for month. Violates least privilege. If compromised, full domain access. 'Temporary' often becomes permanent."
+      }
+    ],
+    "key_lesson": "Security should enable business, not just say 'no.' When requests violate policy or least privilege, understand the actual need and propose secure alternatives. Domain admin for an executive assistant is never appropriateâ€”but there are usually least-privilege solutions: delegated permissions for specific tasks, JIT access for emergencies, or improved IT support coverage. Always get proper written approval and document the business justification."
+  },
+
+  "summary": {
+    "key_takeaways": [
+      "Identity lifecycle: provisioning â†’ maintenance â†’ deprovisioning (automate where possible)",
+      "MFA requires different factor categories; FIDO2 is strongest, SMS weakest",
+      "RBAC uses roles; ABAC uses attributes (user, resource, environment)",
+      "PAM controls privileged accounts with JIT access, no standing privileges",
+      "Conditional access makes risk-based decisions on user, device, location, risk",
+      "Identity governance includes access reviews, SoD, and compliance"
+    ],
+    "exam_essentials": [
+      "Joiner-Mover-Leaver covers employment lifecycle identity management",
+      "MFA = different factors (know + have); password + PIN is NOT MFA",
+      "RBAC = roles; ABAC = attributes; MAC = labels; DAC = owner discretion",
+      "JIT = Just-in-Time access (granted when needed, expires automatically)",
+      "Credential stuffing uses breached passwords; Password spraying uses common passwords",
+      "Conditional access evaluates: user, device, location, application, risk"
+    ],
+    "connection_to_next": "Identity and access management controls who can access systems. The next lesson covers data protectionâ€”ensuring that data is properly classified, encrypted, and protected throughout its lifecycle."
+  },
+
+  "related_content": {
+    "simulations": ["D4-SIM-004"],
+    "remediation": ["D4-REM-003"],
+    "next_lesson": "D4-LESSON-006",
+    "previous_lesson": "D4-LESSON-004"
+  }
+}

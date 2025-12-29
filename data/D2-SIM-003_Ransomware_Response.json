@@ -1,0 +1,1235 @@
+{
+  "simulation_id": "D2-SIM-003",
+  "title": "The Ransomware Response",
+  "domain": 2,
+  "category": "primary",
+  "difficulty": "advanced",
+  "time_estimate": "50-65 minutes",
+  "passing_score": 200,
+  "max_score": 250,
+  
+  "exam_objectives": [
+    {
+      "id": "2.4",
+      "description": "Given a scenario, analyze indicators of malicious activity",
+      "coverage": ["malware indicators", "ransomware behavior", "lateral movement", "C2 communication", "data exfiltration"]
+    },
+    {
+      "id": "2.5",
+      "description": "Explain the purpose of mitigation techniques used to secure the enterprise",
+      "coverage": ["containment", "eradication", "recovery", "segmentation", "backup strategies"]
+    }
+  ],
+  
+  "scenario_context": {
+    "organization": "Precision Manufacturing Corp",
+    "industry": "Industrial Manufacturing",
+    "size": "2,200 employees across 4 facilities",
+    "your_role": "Senior Incident Responder",
+    "environment": {
+      "infrastructure": "On-premises datacenter + Azure hybrid",
+      "endpoints": "3,400 Windows endpoints, 180 Linux servers",
+      "security_tools": ["Microsoft Defender for Endpoint", "Splunk SIEM", "Palo Alto NGFW", "Veeam Backup"],
+      "ot_environment": "Isolated OT network for manufacturing floor (PLCs, SCADA)",
+      "active_directory": "Single forest, 4 domains (1 per facility)",
+      "backup_strategy": "Daily incrementals, weekly fulls, offsite replication"
+    },
+    "opening_narrative": "It's 3:47 AM on Saturday when your phone explodes with alerts. The overnight NOC technician reports 'something weird' - multiple servers displaying ransom notes, file shares inaccessible, and the helpdesk voicemail filling up with panicked messages from the skeleton crew. By the time you remote in, your SIEM is showing a cascade of alerts: mass file encryption events, suspicious PowerShell execution, and lateral movement detections across multiple network segments. The attack is still active. You have critical decisions to make in the next few minutes that will determine whether this becomes a contained incident or a company-ending catastrophe."
+  },
+  
+  "artifacts": [
+    {
+      "id": "artifact_1",
+      "title": "Initial Alert Cascade",
+      "type": "evidence",
+      "unlocks_at": "start",
+      "content": {
+        "alert_timeline": [
+          {
+            "time": "03:31:15",
+            "source": "Defender for Endpoint",
+            "alert": "Suspicious PowerShell execution",
+            "host": "YOURK-PC-042",
+            "details": "Encoded PowerShell command with network download"
+          },
+          {
+            "time": "03:32:44",
+            "source": "Splunk",
+            "alert": "Multiple failed authentication attempts",
+            "target": "DC-EAST-01",
+            "source_ip": "10.50.12.42",
+            "details": "47 failed logons in 60 seconds - possible credential stuffing"
+          },
+          {
+            "time": "03:34:02",
+            "source": "Defender for Endpoint",
+            "alert": "Credential dumping tool detected",
+            "host": "YOURK-PC-042",
+            "details": "Mimikatz variant detected and blocked"
+          },
+          {
+            "time": "03:35:18",
+            "source": "Palo Alto",
+            "alert": "Suspicious outbound connection",
+            "source": "10.50.12.42",
+            "destination": "185.220.101.XX:443",
+            "details": "Known Tor exit node communication"
+          },
+          {
+            "time": "03:37:55",
+            "source": "Defender for Endpoint",
+            "alert": "Ransomware behavior detected",
+            "host": "FS-EAST-02",
+            "details": "Mass file modification with encryption patterns"
+          },
+          {
+            "time": "03:38:12",
+            "source": "Splunk",
+            "alert": "Mass file encryption event",
+            "hosts": "Multiple (14 hosts)",
+            "details": "File extension changes: .docx â†’ .docx.locked"
+          },
+          {
+            "time": "03:39:45",
+            "source": "Defender for Endpoint",
+            "alert": "Ransomware note file created",
+            "host": "FS-EAST-02",
+            "file": "README_RESTORE.txt"
+          }
+        ],
+        "current_status": {
+          "known_affected_hosts": 14,
+          "encryption_spreading": true,
+          "c2_communication": "Active",
+          "user_reports": 7
+        }
+      }
+    },
+    {
+      "id": "artifact_2",
+      "title": "Ransom Note Content",
+      "type": "evidence",
+      "unlocks_at": "decision_1",
+      "content": {
+        "ransom_note": {
+          "filename": "README_RESTORE.txt",
+          "content": "YOUR NETWORK HAS BEEN COMPROMISED BY BLACKMATTER\n\n*** DO NOT ATTEMPT TO RECOVER FILES YOURSELF ***\n*** DO NOT CONTACT LAW ENFORCEMENT ***\n*** DO NOT HIRE RECOVERY COMPANIES ***\n\nWe have encrypted your critical business files AND exfiltrated sensitive data.\n\nExfiltrated data includes:\n- Financial records (2019-2024)\n- Customer contracts and PII\n- Engineering designs and specifications\n- Employee HR records\n\nIf you do not pay within 72 hours:\n1. Decryption price doubles\n2. Stolen data published on our leak site\n\nTo negotiate:\n1. Access our Tor portal: http://blackmxxxxxx.onion\n2. Enter your Company ID: PMC-2024-1847\n3. Chat with our support team\n\nWe are professional. Pay and your business continues.\nDon't pay and face the consequences.\n\n- BlackMatter Team",
+          "threat_actor_profile": {
+            "name": "BlackMatter",
+            "type": "Ransomware-as-a-Service (RaaS)",
+            "known_tactics": ["Double extortion", "Data exfiltration before encryption", "Targeting critical infrastructure"],
+            "typical_ransom": "$500K - $15M depending on victim size",
+            "reputation": "Generally provides working decryptors if paid"
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_3",
+      "title": "Network Topology",
+      "type": "reference",
+      "unlocks_at": "decision_2",
+      "content": {
+        "network_segments": {
+          "corporate_east": {
+            "subnet": "10.50.0.0/16",
+            "hosts": "~1,200 endpoints",
+            "critical_systems": ["DC-EAST-01", "DC-EAST-02", "FS-EAST-01", "FS-EAST-02", "EXCH-01"],
+            "status": "COMPROMISED - Active encryption"
+          },
+          "corporate_west": {
+            "subnet": "10.60.0.0/16",
+            "hosts": "~800 endpoints",
+            "critical_systems": ["DC-WEST-01", "FS-WEST-01"],
+            "status": "Unknown - No alerts yet"
+          },
+          "datacenter": {
+            "subnet": "10.100.0.0/16",
+            "hosts": "180 servers",
+            "critical_systems": ["SQL-PROD-01", "ERP-01", "BACKUP-01"],
+            "status": "Unknown - Checking"
+          },
+          "ot_network": {
+            "subnet": "10.200.0.0/16",
+            "hosts": "PLCs, HMIs, SCADA systems",
+            "isolation": "Air-gapped with data diode for monitoring",
+            "status": "ISOLATED - No connectivity to corporate"
+          },
+          "dmz": {
+            "subnet": "172.16.0.0/24",
+            "hosts": "Web servers, email gateway",
+            "status": "Checking"
+          }
+        },
+        "trust_relationships": {
+          "ad_trusts": "Bidirectional trust between all 4 facility domains",
+          "admin_access": "Enterprise Admins have access across all domains",
+          "concern": "Compromise of one domain can spread to all"
+        }
+      }
+    },
+    {
+      "id": "artifact_4",
+      "title": "Patient Zero Analysis",
+      "type": "evidence",
+      "unlocks_at": "decision_3",
+      "content": {
+        "initial_access": {
+          "host": "YOURK-PC-042",
+          "user": "jyork",
+          "role": "Accounts Payable Specialist",
+          "department": "Finance - East Facility",
+          "timeline": [
+            {
+              "time": "Friday 16:42:33",
+              "event": "Email received",
+              "details": "Subject: 'Invoice #INV-2024-8847 - Payment Overdue'. Attachment: Invoice_8847.xlsm"
+            },
+            {
+              "time": "Friday 16:43:15",
+              "event": "File opened",
+              "details": "Excel file opened, macros enabled by user"
+            },
+            {
+              "time": "Friday 16:43:22",
+              "event": "Initial payload",
+              "details": "Macro executed PowerShell download cradle"
+            },
+            {
+              "time": "Friday 16:43:45",
+              "event": "Cobalt Strike beacon",
+              "details": "C2 implant established to 185.220.101.XX"
+            },
+            {
+              "time": "Friday 16:45 - Saturday 03:30",
+              "event": "Dwell time",
+              "details": "~11 hours of attacker activity before ransomware deployment"
+            }
+          ]
+        },
+        "attacker_activities_during_dwell": [
+          "Credential harvesting (Mimikatz)",
+          "Active Directory reconnaissance (BloodHound)",
+          "Lateral movement to file servers",
+          "Data staging and exfiltration (7zip + rclone to cloud storage)",
+          "Privilege escalation to Domain Admin",
+          "Ransomware staging on multiple hosts",
+          "Deployment via PsExec at 03:31"
+        ]
+      }
+    },
+    {
+      "id": "artifact_5",
+      "title": "Credential Compromise Assessment",
+      "type": "evidence",
+      "unlocks_at": "decision_4",
+      "content": {
+        "compromised_accounts": {
+          "confirmed": [
+            {
+              "account": "jyork",
+              "type": "Standard user",
+              "compromised_via": "Initial phishing - session token theft"
+            },
+            {
+              "account": "svc_backup",
+              "type": "Service account",
+              "privileges": "Backup Operators, local admin on backup servers",
+              "compromised_via": "Credential dump from YOURK-PC-042"
+            },
+            {
+              "account": "t1_admin_jsmith",
+              "type": "Tier 1 Admin",
+              "privileges": "Server Admins, elevated AD permissions",
+              "compromised_via": "Pass-the-hash from FS-EAST-02"
+            }
+          ],
+          "suspected": [
+            {
+              "account": "enterprise_admin",
+              "type": "Enterprise Admin",
+              "status": "Possibly compromised - investigating",
+              "evidence": "Suspicious logon to DC-EAST-01 from unusual source"
+            }
+          ]
+        },
+        "krbtgt_status": {
+          "concern": "If attacker obtained krbtgt hash, Golden Ticket attacks possible",
+          "indicator": "Unusual Kerberos ticket requests observed",
+          "recommendation": "Assume krbtgt compromised until proven otherwise"
+        }
+      }
+    },
+    {
+      "id": "artifact_6",
+      "title": "Data Exfiltration Evidence",
+      "type": "evidence",
+      "unlocks_at": "decision_5",
+      "content": {
+        "exfiltration_analysis": {
+          "method": "rclone to cloud storage provider",
+          "destination": "Mega.nz cloud storage (privacy-focused, no cooperation with law enforcement)",
+          "timeline": "Friday 22:15 - Saturday 02:45",
+          "volume": "Approximately 847 GB transferred",
+          "source_directories": [
+            "\\\\FS-EAST-01\\Finance$ (~180 GB)",
+            "\\\\FS-EAST-02\\Engineering$ (~420 GB)",
+            "\\\\FS-EAST-01\\HR_Confidential$ (~95 GB)",
+            "\\\\FS-EAST-02\\Contracts$ (~152 GB)"
+          ]
+        },
+        "data_classification": {
+          "pii_exposure": "Yes - HR records contain SSN, addresses, salary data",
+          "customer_data": "Yes - Contracts contain customer PII and financials",
+          "trade_secrets": "Yes - Engineering designs and manufacturing specs",
+          "regulatory_implications": ["State breach notification", "Potential ITAR concerns for defense contracts"]
+        },
+        "network_evidence": {
+          "firewall_logs": "Large outbound HTTPS transfers to known Mega.nz IPs",
+          "dlp_alerts": "DLP was in monitor-only mode - alerts generated but not blocked",
+          "total_sessions": "14 concurrent upload sessions observed"
+        }
+      }
+    },
+    {
+      "id": "artifact_7",
+      "title": "Backup Status Assessment",
+      "type": "operational",
+      "unlocks_at": "decision_6",
+      "content": {
+        "backup_infrastructure": {
+          "primary_system": "Veeam Backup & Replication",
+          "backup_server": "BACKUP-01 (10.100.50.10)",
+          "storage": {
+            "primary": "Dell EMC Data Domain (on-site)",
+            "secondary": "Azure Blob Storage (offsite replication)"
+          }
+        },
+        "backup_status": {
+          "veeam_server": {
+            "status": "COMPROMISED",
+            "evidence": "Ransomware note found, backup catalog encrypted",
+            "attacker_action": "Attackers targeted backup infrastructure deliberately"
+          },
+          "data_domain": {
+            "status": "PARTIALLY AFFECTED",
+            "details": "Recent backups corrupted, retention lock prevented deletion of older backups",
+            "recoverable": "Backups older than 7 days intact due to immutability"
+          },
+          "azure_replication": {
+            "status": "INTACT",
+            "details": "Offsite replicas not affected - separate credentials, immutable storage",
+            "last_successful": "Friday 23:00 - before ransomware but after some exfiltration",
+            "rpo": "~5 hours of data loss if restored from this point"
+          }
+        },
+        "recovery_options": {
+          "option_a": {
+            "source": "Azure immutable backups",
+            "rpo": "Friday 23:00 (~5 hours data loss)",
+            "rto": "24-48 hours for critical systems",
+            "integrity": "High confidence - isolated from attack"
+          },
+          "option_b": {
+            "source": "Data Domain older backups",
+            "rpo": "Previous week",
+            "rto": "12-24 hours for critical systems",
+            "integrity": "Medium confidence - need verification"
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_8",
+      "title": "Malware Analysis Report",
+      "type": "technical",
+      "unlocks_at": "decision_7",
+      "content": {
+        "ransomware_analysis": {
+          "family": "BlackMatter",
+          "variant": "BlackMatter 2.0",
+          "file_analyzed": "update.exe (SHA256: 8f3a7b...)",
+          "characteristics": {
+            "encryption": "ChaCha20 + RSA-4096 hybrid",
+            "extension": ".locked",
+            "shadow_copies": "Deleted via vssadmin",
+            "safe_mode": "Can reboot to Safe Mode to evade security tools",
+            "process_termination": "Kills database, backup, and security processes"
+          }
+        },
+        "kill_chain_tools": {
+          "initial_access": "Macro-enabled Excel document",
+          "execution": "PowerShell download cradle",
+          "persistence": "Scheduled task + Registry run key",
+          "privilege_escalation": "Mimikatz for credential theft",
+          "defense_evasion": "Process injection, timestomping",
+          "discovery": "BloodHound, ADFind",
+          "lateral_movement": "PsExec, WMI, RDP with stolen creds",
+          "collection": "7zip for staging",
+          "exfiltration": "rclone to Mega.nz",
+          "impact": "BlackMatter ransomware"
+        },
+        "indicators_of_compromise": {
+          "file_hashes": [
+            "8f3a7b2c9d1e... (update.exe - ransomware)",
+            "a4b5c6d7e8f9... (beacon.dll - Cobalt Strike)"
+          ],
+          "c2_infrastructure": [
+            "185.220.101.XX (Cobalt Strike C2)",
+            "blackmxxxxxx.onion (Payment portal)"
+          ],
+          "scheduled_tasks": [
+            "\\Microsoft\\Windows\\Maintenance\\SystemUpdate"
+          ],
+          "registry_keys": [
+            "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\SystemUpdate"
+          ]
+        }
+      }
+    },
+    {
+      "id": "artifact_9",
+      "title": "Business Impact Assessment",
+      "type": "operational",
+      "unlocks_at": "decision_8",
+      "content": {
+        "operational_impact": {
+          "manufacturing": {
+            "status": "OPERATIONAL",
+            "details": "OT network isolated, production continues",
+            "risk": "Cannot process new orders or ship finished goods without ERP"
+          },
+          "erp_system": {
+            "status": "DOWN",
+            "impact": "Order processing, inventory management, shipping all stopped",
+            "workaround": "Manual processes possible but extremely slow"
+          },
+          "email": {
+            "status": "DOWN",
+            "impact": "No internal or external email communication",
+            "workaround": "Personal email, phone, Teams (cloud) partially working"
+          },
+          "file_shares": {
+            "status": "ENCRYPTED",
+            "impact": "No access to shared documents, engineering files",
+            "workaround": "Local copies on some laptops"
+          }
+        },
+        "financial_impact": {
+          "estimated_downtime_cost": "$1.8M per day",
+          "customer_contracts_at_risk": "$12M in pending orders",
+          "potential_penalties": "Late delivery penalties in contracts",
+          "ransom_demand": "Unknown until portal accessed (typically $2-5M for this size)"
+        },
+        "stakeholder_pressure": {
+          "ceo": "Demanding fastest path to recovery regardless of method",
+          "cfo": "Wants cost-benefit analysis of paying vs. not paying",
+          "legal": "Concerned about regulatory notification requirements",
+          "customers": "Major customers demanding status updates"
+        }
+      }
+    },
+    {
+      "id": "artifact_10",
+      "title": "Recovery Status Dashboard",
+      "type": "operational",
+      "unlocks_at": "decision_10",
+      "content": {
+        "containment_status": {
+          "network_isolation": "COMPLETE - East subnet isolated",
+          "c2_blocking": "COMPLETE - All known C2 IPs/domains blocked",
+          "credential_reset": "IN PROGRESS - 67% complete",
+          "malware_eradication": "IN PROGRESS - 45 of 78 affected systems rebuilt"
+        },
+        "recovery_progress": {
+          "active_directory": {
+            "status": "RESTORED",
+            "method": "Rebuilt DCs, restored from known-good backup",
+            "krbtgt": "Reset twice per Microsoft guidance"
+          },
+          "critical_servers": {
+            "erp": "RESTORING - ETA 4 hours",
+            "email": "RESTORED - Limited functionality",
+            "file_servers": "RESTORING - ETA 8 hours"
+          },
+          "endpoints": {
+            "status": "REBUILDING",
+            "approach": "Wipe and reimage",
+            "progress": "120 of 1,200 complete",
+            "eta": "5-7 days for full endpoint recovery"
+          }
+        },
+        "security_improvements": {
+          "immediate": [
+            "MFA enforced for all remote access",
+            "Privileged access workstations deployed for admins",
+            "Network segmentation enhanced",
+            "DLP moved from monitor to block mode"
+          ],
+          "planned": [
+            "EDR coverage expanded to all endpoints",
+            "Immutable backup strategy implemented",
+            "Tabletop exercises scheduled",
+            "Third-party IR retainer established"
+          ]
+        },
+        "regulatory_notifications": {
+          "status": "IN PROGRESS",
+          "notifications_required": [
+            "State AG (PII breach) - 72 hour deadline",
+            "Affected individuals - 30 day deadline",
+            "Defense contract customers (ITAR) - Assessing"
+          ]
+        }
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Initial Response Priority",
+      "narrative": "Alerts are cascading across your SIEM. You can see ransomware actively encrypting files on multiple hosts, C2 communication ongoing, and the attack spreading. Your SOC has limited overnight staff. What's your immediate priority?",
+      "question": "What should be your FIRST action in the next 60 seconds?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Begin forensic imaging of affected systems to preserve evidence",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Evidence is important but containment comes first",
+            "detailed": "Forensic preservation is important for investigation and potential law enforcement involvement, but during an ACTIVE attack with spreading encryption, containment must come first. Every minute spent on forensics while the attack continues means more systems encrypted and more data exfiltrated. Contain first, then investigate.",
+            "consequence": "While imaging one system, ransomware encrypts 40 more. Attack spreads to additional network segments."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Isolate affected network segments to stop lateral movement",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Containment is the immediate priority",
+            "detailed": "During an active ransomware attack, containment is paramount. Network isolation stops lateral movement and prevents the attack from spreading to unaffected segments. This is a 'stop the bleeding' action that must happen before investigation, evidence collection, or recovery planning. You can't investigate what you haven't contained.",
+            "consequence": "East subnet isolated within 3 minutes. Attack contained to 78 systems instead of spreading to entire enterprise."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Access the ransom portal to understand the attacker's demands",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Dangerous distraction during active attack",
+            "detailed": "Accessing the ransom portal provides no immediate operational value and could have negative implications: it confirms to attackers you're aware and may start their clock, it could expose your IP, and it distracts from containment. Ransom negotiation decisions come much later, after containment and assessment.",
+            "consequence": "Time spent on portal while ransomware continues spreading. Attackers know you're engaged and may accelerate pressure."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Shut down all systems enterprise-wide to prevent further damage",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Too broad - impacts unaffected systems unnecessarily",
+            "detailed": "Enterprise-wide shutdown is a scorched earth approach that impacts systems that aren't compromised, destroys volatile forensic evidence, and causes massive business disruption. Targeted network isolation of affected segments achieves containment without destroying unaffected operations. Surgical precision over nuclear options.",
+            "consequence": "Manufacturing operations halt (OT was isolated and safe). West facility goes down unnecessarily. Evidence lost from powered-off systems."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "During an active attack, what action immediately limits the blast radius?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Network segmentation and isolation can stop lateral movement in minutes. Contain the attack to what's already affected."
+        }
+      ],
+      "learning_note": "Incident response priority during active attacks: Containment first, then eradication, then recovery. Containment actions (network isolation, account disabling, system isolation) stop the attack from spreading. Investigation and evidence collection happen after the attack is contained. Don't let perfect evidence preservation prevent timely containment.",
+      "unlocks_artifact": "artifact_2"
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "Network Isolation Strategy",
+      "narrative": "You've decided to isolate affected segments. Looking at your network topology, the East corporate network (10.50.0.0/16) is clearly compromised with active encryption. The West corporate network (10.60.0.0/16) has no alerts yet. The OT network is air-gapped. The datacenter hosts critical servers.",
+      "question": "What is the optimal network isolation strategy?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Isolate only the specific hosts showing ransomware alerts",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Too narrow - attackers likely have broader access",
+            "detailed": "By the time ransomware deploys, attackers typically have access to far more systems than are actively encrypting. Isolating only alerting hosts leaves other compromised (but not yet encrypting) systems connected, allowing the attack to continue from those footholds. The attacker's C2 access extends beyond visible ransomware activity.",
+            "consequence": "Isolated 14 hosts but attacker pivots from 23 other compromised systems. Encryption resumes from new locations."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Isolate the entire East subnet, protect West-to-Datacenter, verify OT isolation",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Segment-level isolation with protection of critical assets",
+            "detailed": "Isolating the entire compromised segment (East) stops all lateral movement from that zone. Protecting the path between unaffected West and the datacenter prevents spread if there are undetected footholds. Verifying OT isolation confirms manufacturing can continue. This balances containment with business continuity.",
+            "consequence": "East contained completely. West and datacenter protected. Manufacturing continues. Attack limited to initial blast radius."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Disconnect all networks from the internet to stop C2 communication",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Incomplete - internal spread continues without internet",
+            "detailed": "While blocking C2 is valuable, modern ransomware operates autonomously once deployed. Disconnecting from internet stops exfiltration and C2 but doesn't stop internal lateral movement or encryption. The ransomware is already inside and will continue spreading internally. Internal segmentation is more critical.",
+            "consequence": "C2 blocked but ransomware continues encrypting internally. Attack spreads to datacenter via internal routes."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Focus isolation on protecting the OT network - manufacturing is the priority",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "OT is already protected by air-gap",
+            "detailed": "The scenario states OT is air-gapped with a data diode. It's already isolated by design. Focusing on protecting what's already protected while ignoring the active spread in IT networks wastes time. Verify OT isolation is intact, but prioritize containing the active IT compromise.",
+            "consequence": "OT confirmed isolated (as it already was). Meanwhile, ransomware spreads from East to datacenter because IT segmentation wasn't addressed."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Attackers typically have broader access than visible ransomware activity shows. Think segment-level, not host-level."
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Isolate the known-compromised segment entirely, protect critical assets (datacenter) from potentially compromised areas, verify existing isolation (OT) is intact."
+        }
+      ],
+      "learning_note": "Network isolation during ransomware response should be segment-based, not host-based. Attackers establish multiple footholds before deploying ransomware. Isolate entire compromised network segments, add protection for critical assets, and verify existing air-gaps. Balance containment needs with business continuity where possible.",
+      "unlocks_artifact": "artifact_3"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Identifying Patient Zero",
+      "narrative": "With the East network isolated, you need to understand how the attack started. Your SIEM shows the earliest alerts originated from YOURK-PC-042 at 03:31, but the encryption started across multiple systems nearly simultaneously at 03:37. This suggests pre-positioning.",
+      "question": "What technique should you use to identify the true initial access point and timeline?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Interview the user of YOURK-PC-042 to ask what they did",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Useful but not the primary investigative method",
+            "detailed": "User interviews provide context but are unreliable for precise timeline reconstruction. Users may not remember details, may be unavailable at 4 AM, or may be defensive. Technical evidence from logs and EDR provides objective, timestamped data. Interview as supplementary source, not primary.",
+            "consequence": "User is asleep and unreachable. Investigation stalls waiting for interview that provides incomplete information anyway."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Review EDR telemetry and email logs to trace backward from first alert",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Technical evidence provides objective timeline",
+            "detailed": "EDR telemetry shows process execution, file access, and network connections with precise timestamps. Email logs reveal malicious message delivery. Working backward from the first alert (03:31 PowerShell execution) through EDR history reveals the full attack timeline: email received Friday 16:42, macro executed 16:43, C2 established 16:43, ~11 hours of attacker activity before ransomware deployment.",
+            "consequence": "Complete attack timeline reconstructed. Initial phishing email identified. Dwell time and attacker activities mapped."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Run antivirus scans across all systems to find the malware origin",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Wrong tool for timeline investigation",
+            "detailed": "Antivirus identifies current malware presence but doesn't provide historical timeline or show how the attack progressed. By the time ransomware is detected, the initial access malware may be deleted or evolved. AV is a detection tool, not an investigation tool. Use EDR and SIEM for forensic timeline.",
+            "consequence": "AV finds current ransomware but provides no insight into how or when attack started, or what else attackers did."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Focus on recovery - knowing how it started doesn't help stop the current attack",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Understanding attack is essential for effective response",
+            "detailed": "Understanding initial access and attack timeline is critical for: ensuring containment is complete (are there other access points?), credential compromise assessment (what did attackers access?), determining data exposure (what was exfiltrated?), and preventing reinfection during recovery. You can't effectively recover without understanding the attack.",
+            "consequence": "Recovery begins without understanding attack scope. Attackers' secondary access point allows them to recompromise restored systems."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "EDR solutions record detailed telemetry about process execution, file access, and network connections with timestamps."
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Work backward from the first alert through EDR history. Check email logs for the delivery time of any malicious attachments."
+        }
+      ],
+      "learning_note": "Root cause analysis uses technical evidence (EDR telemetry, email logs, SIEM correlation) to reconstruct attack timelines. Work backward from first detected activity to find true initial access. Understanding the full attack chain - initial access, persistence, lateral movement, data access - is essential for complete containment and safe recovery.",
+      "unlocks_artifact": "artifact_4"
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Credential Compromise Scope",
+      "narrative": "Your investigation reveals the attacker used Mimikatz to dump credentials and has been active for ~11 hours. They achieved lateral movement to file servers and possibly domain controllers. You need to assess credential compromise to plan recovery.",
+      "question": "What is the MOST critical assumption to make about credential compromise?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Only credentials on systems with detected Mimikatz activity are compromised",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Dangerously narrow assumption",
+            "detailed": "Mimikatz detection represents where you SAW it run - attackers may have run it on other systems without detection, or used other credential theft techniques. Additionally, credentials move with users - if an admin logged into a compromised system, their credentials are compromised even without Mimikatz running there. Assume broader compromise.",
+            "consequence": "Reset passwords for 3 accounts while 15 other compromised accounts are overlooked. Attacker retains access."
+          }
+        },
+        {
+          "id": "B",
+          "text": "All accounts that authenticated to ANY compromised system should be considered compromised",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Assume broad credential compromise",
+            "detailed": "Credential theft can capture any credentials present on a compromised system - not just local accounts but any user who authenticated there. Domain credentials, service accounts, cached credentials - all at risk. The safest assumption is that ANY account that touched ANY compromised system is compromised. This drives comprehensive password resets.",
+            "consequence": "Comprehensive credential compromise assessment identifies 147 accounts requiring reset, including service accounts and admin credentials."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Focus only on Domain Admin accounts since those are most critical",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Important but incomplete",
+            "detailed": "Domain Admin accounts are critical and must be prioritized, but attackers also leverage service accounts (often with excessive privileges), tier-1 admin accounts, and even standard user accounts for persistence. A compromised service account with backup privileges can be devastating. All privileged accounts need assessment.",
+            "consequence": "Domain Admin reset completed. Attacker returns via compromised backup service account that was overlooked."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Wait for forensic analysis to confirm which specific credentials were stolen",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Too slow during active incident",
+            "detailed": "Complete forensic confirmation of credential theft can take days or weeks. During an active incident, you must act on reasonable assumptions. If Mimikatz ran on a system, assume all credentials on that system are compromised. Act now, validate later. The risk of assuming too narrow is recompromise.",
+            "consequence": "Waiting for forensics while attacker uses stolen credentials to maintain access and monitor recovery efforts."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Credential theft tools can capture any credentials present in memory on a compromised system, not just local accounts."
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Assume all accounts that authenticated to any compromised system are compromised. This includes service accounts, admin accounts, and users who happened to log in."
+        }
+      ],
+      "learning_note": "Credential compromise assessment during ransomware response should assume broad compromise. Any account that authenticated to a compromised system may be compromised. This includes interactive logons, service accounts, scheduled tasks, and cached credentials. Comprehensive password resets, including krbtgt if domain controllers were compromised, are typically required.",
+      "unlocks_artifact": "artifact_5"
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Data Exfiltration Assessment",
+      "narrative": "The ransom note claims data exfiltration. Your network analysis confirms large outbound transfers to Mega.nz cloud storage: approximately 847 GB from Finance, Engineering, HR, and Contracts file shares. This happened before encryption began.",
+      "question": "How does confirmed data exfiltration change your incident response priorities?",
+      "options": [
+        {
+          "id": "A",
+          "text": "It doesn't - exfiltration already happened, focus on ransomware recovery",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Exfiltration has major implications beyond ransomware",
+            "detailed": "Data exfiltration transforms this from a ransomware incident to a data breach with regulatory notification requirements, potential extortion beyond decryption, and long-term business impact (intellectual property theft). Recovery focus shifts from 'restore systems' to 'breach response' with legal, regulatory, and customer notification requirements.",
+            "consequence": "Organization focuses on technical recovery while missing regulatory notification deadlines. Legal exposure increases."
+          }
+        },
+        {
+          "id": "B",
+          "text": "It strengthens the case for paying ransom to prevent data publication",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Payment doesn't guarantee data destruction",
+            "detailed": "There is NO guarantee attackers will delete exfiltrated data after payment. They may sell it, use it for future extortion, or simply lie. Multiple victims have paid and still had data leaked. The data is gone - payment decisions should focus on decryption value, not data deletion promises which are unenforceable.",
+            "consequence": "Organization pays ransom expecting data deletion. Data appears on leak site 3 months later anyway."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Initiate breach response procedures - legal notification, regulatory assessment, customer impact analysis",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Exfiltration triggers breach response requirements",
+            "detailed": "Confirmed exfiltration of PII and sensitive data triggers formal breach response: legal counsel engagement, regulatory notification timeline assessment (many states require notification within 72 hours), customer and employee impact analysis, and preparation for potential data publication. This runs parallel to technical recovery. Breach response has legal deadlines that can't wait for systems to be restored.",
+            "consequence": "Legal engaged immediately. Breach notification timeline established. Regulatory requirements met. Customer communication prepared."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Focus on identifying exactly what data was taken before any other actions",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Detailed analysis important but shouldn't delay notification preparation",
+            "detailed": "Understanding exactly what was exfiltrated is important but can take weeks. Regulatory notification clocks start when you discover the breach, not when you finish analyzing it. Begin breach response procedures immediately while conducting detailed data assessment in parallel. You can refine notifications as analysis progresses.",
+            "consequence": "Detailed analysis takes 2 weeks. 72-hour state notification deadline missed. Regulatory scrutiny intensifies."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Data exfiltration transforms a ransomware incident into a data breach with notification requirements."
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Breach notification laws have specific timelines (often 72 hours) that start when you discover the breach. Engage legal and begin notification assessment immediately."
+        }
+      ],
+      "learning_note": "Double extortion ransomware (encryption + data theft) requires parallel response tracks: technical recovery AND breach response. Data exfiltration triggers regulatory notification requirements with specific deadlines. Engage legal counsel immediately, assess notification requirements, and prepare for potential data publication regardless of ransom decision.",
+      "unlocks_artifact": "artifact_6"
+    },
+    {
+      "id": "decision_6",
+      "sequence": 6,
+      "title": "Backup Integrity Assessment",
+      "narrative": "Your backup administrator reports bad news: the Veeam backup server was compromised, and recent backups are encrypted. However, the Azure offsite replicas use immutable storage and separate credentials - they appear intact. The Data Domain has retention-locked backups older than 7 days.",
+      "question": "What is the correct approach to backup validation before recovery?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Begin restoration from Azure immediately - we need systems back online ASAP",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Speed without validation risks reinfection",
+            "detailed": "While urgency is real, restoring without validation risks: restoring systems that were already compromised before backup, reintroducing malware that was backed up, and wasting time if backups are corrupted. Validate backup integrity and check backup timestamps against attack timeline before restoration.",
+            "consequence": "Restored systems come back with Cobalt Strike beacon active. Attacker maintains access through 'recovered' systems."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Validate backup integrity in isolated environment and verify backup date is before compromise",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Validate before restoring to production",
+            "detailed": "Restore backups to an isolated environment first to: verify backup integrity (not corrupted), check for malware presence in backup data, confirm backup timestamp is before initial compromise (Friday 16:42 for ideal, Friday 23:00 acceptable with some exposure). Only restore validated, clean backups to production. This prevents restoring the infection.",
+            "consequence": "Backups validated in isolated environment. Friday 23:00 Azure backup confirmed clean. Restoration proceeds safely."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Use the oldest backups available to ensure we predate any possible compromise",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Safer but unnecessarily high data loss",
+            "detailed": "Using week-old backups means losing a week of business data when newer clean backups may exist. Compare backup timestamps to attack timeline - backups from Friday 23:00 predate ransomware deployment (Saturday 03:31) with only hours of data loss. Don't accept unnecessary data loss if newer clean backups exist.",
+            "consequence": "Week-old backup restored. 7 days of orders, transactions, and work lost when 5-hour-old clean backup was available."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Contact Veeam support to help decrypt the compromised backup server",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "The backup server itself was compromised",
+            "detailed": "The ransomware encrypted the Veeam backup server and catalog. Even if you could decrypt it, the integrity of backups managed by a compromised server is suspect. The attackers had access to the backup infrastructure and may have corrupted or manipulated backups. Use backups from infrastructure the attackers didn't control (Azure with separate creds).",
+            "consequence": "Days spent trying to recover compromised backup server. Backups from that server can't be trusted anyway."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Backups can contain malware if the backup was taken after initial compromise. Check backup timestamps against attack timeline."
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Restore to an isolated environment first to validate integrity and scan for malware before restoring to production."
+        }
+      ],
+      "learning_note": "Backup validation is critical before ransomware recovery. Verify: backup integrity (not corrupted), backup timestamp vs. attack timeline (before initial compromise), and absence of malware in backup data. Test restoration in isolated environment before production. Immutable, offsite backups with separate credentials are most trustworthy after an attack.",
+      "unlocks_artifact": "artifact_7"
+    },
+    {
+      "id": "decision_7",
+      "sequence": 7,
+      "title": "Understanding the Malware",
+      "narrative": "Your malware analysis team has examined the ransomware and associated tools. They've identified BlackMatter ransomware, Cobalt Strike for C2, and various living-off-the-land techniques. Understanding the malware helps plan eradication.",
+      "question": "Based on the malware analysis, what is MOST important for planning eradication?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The encryption algorithm - to assess if decryption without payment is possible",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Important for recovery options but not eradication",
+            "detailed": "BlackMatter uses ChaCha20 + RSA-4096 hybrid encryption which is not practically breakable. While checking for decryptors is worthwhile, this doesn't help plan eradication. Modern ransomware encryption is effectively unbreakable without the key. Focus on removing attacker access, not breaking crypto.",
+            "consequence": "Time spent researching impossible decryption while attacker maintains access through Cobalt Strike."
+          }
+        },
+        {
+          "id": "B",
+          "text": "The persistence mechanisms - to ensure complete removal of attacker access",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Persistence removal is key to eradication",
+            "detailed": "Attackers establish multiple persistence mechanisms: scheduled tasks, registry run keys, service installations, and potentially Golden Tickets if krbtgt was compromised. Complete eradication requires identifying and removing ALL persistence, not just the ransomware binary. Missing persistence means attackers can return after recovery.",
+            "consequence": "All persistence mechanisms identified: scheduled tasks, registry keys, and potential krbtgt compromise. Comprehensive eradication plan developed."
+          }
+        },
+        {
+          "id": "C",
+          "text": "The ransomware variant - to find victim communities and negotiation tips",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Relevant for business decisions, not technical eradication",
+            "detailed": "Knowing the ransomware group can help with ransom negotiation intelligence, but this is a business/legal decision separate from technical eradication. The technical team needs to focus on removing attacker access regardless of whether the organization decides to pay or not.",
+            "consequence": "Research into BlackMatter group provides negotiation intel but delays technical eradication planning."
+          }
+        },
+        {
+          "id": "D",
+          "text": "The exploit used for initial access - to patch the vulnerability",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Important for prevention but initial access was social engineering",
+            "detailed": "The initial access was a phishing email with malicious macro - not a software vulnerability to patch. While email security improvements are important lessons learned, the immediate eradication priority is removing current attacker access. The attackers are already in; patching the door doesn't remove them from the house.",
+            "consequence": "Email security review initiated but doesn't address the Cobalt Strike backdoors still active in the environment."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Attackers establish multiple ways to maintain access. What happens if you miss one during eradication?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Persistence mechanisms (scheduled tasks, registry keys, services, Kerberos Golden Tickets) allow attackers to return. All must be identified and removed."
+        }
+      ],
+      "learning_note": "Eradication planning requires understanding attacker persistence mechanisms. Common ransomware persistence includes: scheduled tasks, registry run keys, service installations, WMI subscriptions, and potentially Kerberos Golden Tickets (if krbtgt compromised). Complete eradication requires removing ALL persistence - missing any allows attacker return.",
+      "unlocks_artifact": "artifact_8"
+    },
+    {
+      "id": "decision_8",
+      "sequence": 8,
+      "title": "The Ransom Decision",
+      "narrative": "It's now Sunday morning. The CEO is demanding a recommendation on whether to pay the ransom. The business is losing $1.8M per day, customers are calling, and the attackers' 72-hour timer is counting down. Your recovery timeline is 5-7 days to restore critical systems.",
+      "question": "What recommendation should you provide regarding ransom payment?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Recommend paying - the business impact of extended downtime exceeds the likely ransom",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Financial analysis is incomplete",
+            "detailed": "Pure cost comparison is insufficient. Consider: payment doesn't guarantee working decryptor (some fail), payment funds criminal operations and may invite repeat attacks, payment may violate OFAC sanctions (legal risk), and you still need to rebuild security (criminals shouldn't stay in your network). Business decision, but security should present complete picture.",
+            "consequence": "Organization pays $3.5M ransom. Decryptor works on 85% of files. Attackers return 4 months later knowing organization will pay."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Recommend against paying - we have backups and can recover without funding criminals",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Principled but presents incomplete picture",
+            "detailed": "While not paying is often the right choice, presenting it as a simple recommendation oversimplifies. This is a business decision with trade-offs: backup recovery takes 5-7 days ($9-12.6M in downtime), data will likely be published (breach costs), and some unique data may be unrecoverable. Security provides analysis; executives make the decision.",
+            "consequence": "Executive team feels security dismissed business concerns. Trust damaged. Decision made without complete analysis."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Present a complete analysis of both options with risks, costs, and uncertainties - let leadership decide",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Provide analysis, not just recommendation",
+            "detailed": "Ransom decisions involve business, legal, ethical, and technical factors beyond security's sole purview. Security should provide: recovery timeline and costs without payment, ransom amount and payment risks, legal considerations (OFAC, cyber insurance), likelihood of decryptor working, and the fact that data publication risk exists regardless of payment. Leadership makes the informed decision.",
+            "consequence": "Complete briefing provided. Legal confirms no OFAC issues. Leadership decides to attempt recovery first with payment as backup option. Informed decision made."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Defer to law enforcement - let the FBI make the recommendation",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Law enforcement doesn't make business decisions for victims",
+            "detailed": "FBI provides guidance (generally recommends against payment) and may have intelligence about the threat actor, but they don't make ransom decisions for victims. The business must decide based on their specific circumstances. FBI engagement is valuable for intelligence and potential recovery assistance, but the decision remains with the organization.",
+            "consequence": "FBI provides standard 'don't pay' guidance but can't make the decision. Leadership still needs internal analysis to decide."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Ransom decisions involve business, legal, ethical, and technical considerations. Who should make this decision?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Security provides technical analysis and recovery options. Legal assesses regulatory implications. Leadership makes the business decision with complete information."
+        }
+      ],
+      "learning_note": "Ransom payment decisions are business decisions, not purely security decisions. Security's role is to provide complete analysis: recovery capabilities and timeline, payment risks (no guarantee, may invite repeat attacks, legal implications), and honest assessment of uncertainties. The decision rests with executive leadership after considering all factors.",
+      "unlocks_artifact": "artifact_9"
+    },
+    {
+      "id": "decision_9",
+      "sequence": 9,
+      "title": "Recovery Sequencing",
+      "narrative": "Leadership has decided to proceed with backup recovery (no ransom payment). You're planning the recovery sequence. Critical systems include Active Directory, ERP, email, and file servers. You have validated clean backups ready.",
+      "question": "What is the correct sequence for system recovery?",
+      "options": [
+        {
+          "id": "A",
+          "text": "ERP first - it has the highest business impact and revenue dependency",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Business priority doesn't equal technical sequence",
+            "detailed": "ERP is critical for business but depends on other infrastructure: Active Directory for authentication, DNS for name resolution, and network services for connectivity. Recovering ERP before its dependencies means it won't function properly. Technical dependencies must drive sequence even when business prioritizes differently.",
+            "consequence": "ERP restored but can't authenticate users because AD isn't recovered. Time wasted on non-functional restoration."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Active Directory first, then core infrastructure, then business applications",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Dependency-based recovery sequence",
+            "detailed": "Recovery must follow technical dependencies: (1) Active Directory/DNS - authentication and name resolution foundation; (2) Core infrastructure - network services, monitoring; (3) Critical applications - ERP, email; (4) File servers and secondary systems; (5) End-user workstations. Each layer depends on the previous. Additionally, krbtgt must be reset (twice) as part of AD recovery.",
+            "consequence": "AD restored with krbtgt reset. ERP brought online with working authentication. Systematic recovery proceeds without backtracking."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Email first - leadership needs communication capability for crisis management",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Understandable priority but wrong sequence",
+            "detailed": "Communication is important, but email (Exchange) depends on Active Directory. Restoring Exchange before AD means no authentication. Use alternative communication (Teams cloud, personal email, phone) during recovery. Technical dependencies must drive sequence even for high-priority systems.",
+            "consequence": "Exchange restored but users can't authenticate. Workaround communications continue anyway while AD is then recovered."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Recover everything in parallel to minimize total recovery time",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Parallel recovery of interdependent systems fails",
+            "detailed": "Systems have dependencies - recovering them in parallel means dependent systems fail because their prerequisites aren't ready. You'd spend more time troubleshooting failed recoveries than you'd save through parallelization. Dependency-ordered recovery is faster in practice.",
+            "consequence": "Multiple recovery failures as systems can't find their dependencies. Troubleshooting extends recovery time beyond sequential approach."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What systems do other systems depend on? Authentication? Name resolution?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Recovery sequence follows dependencies: Identity (AD) â†’ Infrastructure (DNS, DHCP) â†’ Applications (ERP, Email) â†’ Data (File servers) â†’ Endpoints."
+        }
+      ],
+      "learning_note": "Disaster recovery sequencing must follow technical dependencies, not business priority alone. Typical sequence: (1) Identity services (AD with krbtgt reset), (2) Core infrastructure (DNS, DHCP, network), (3) Critical applications, (4) File/data services, (5) End-user systems. Recovering a system before its dependencies wastes time on non-functional restoration."
+    },
+    {
+      "id": "decision_10",
+      "sequence": 10,
+      "title": "Post-Incident Improvements",
+      "narrative": "Recovery is progressing well - critical systems are back online. Leadership wants to know what security improvements will prevent this from happening again. You're preparing recommendations for the post-incident review.",
+      "question": "What is the MOST impactful security improvement based on this incident?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Implement email sandboxing to catch malicious attachments",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Addresses initial access but attackers adapt",
+            "detailed": "Email sandboxing is valuable and would likely have caught this initial access. However, it's just one control for one vector. Attackers will find other ways in (different phishing techniques, exploits, supply chain, etc.). Defense in depth requires controls across the entire attack chain, not just initial access.",
+            "consequence": "Sandboxing implemented. Next attack uses different initial access vector. Same outcome."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Deploy immutable, air-gapped backups with regular restoration testing",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Resilient backups are foundational",
+            "detailed": "The Azure immutable backups saved this organization. Resilient backup strategy (immutable storage, separate credentials, offsite/air-gapped copies, regular restoration testing) is the most impactful improvement because it provides recovery capability regardless of what attack succeeds. It's your last line of defense when prevention fails. Backup resilience changes ransomware from 'catastrophic' to 'expensive inconvenience.'",
+            "consequence": "Immutable backup strategy implemented across all critical systems. Future ransomware events have known recovery path with validated backups."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Mandatory security awareness training on phishing identification",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Helpful but relies on human perfection",
+            "detailed": "Training reduces phishing success rates but can't eliminate them - humans will always be fallible, especially with sophisticated spear-phishing. Training is part of defense-in-depth but shouldn't be the primary control. Technical controls (email security, EDR, network segmentation) provide more reliable protection.",
+            "consequence": "Training implemented. Click rates improve but next sophisticated phishing campaign still succeeds with different employee."
+          }
+        },
+        {
+          "id": "D",
+          "text": "24/7 SOC monitoring to detect attacks faster",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Better detection helps but doesn't prevent damage",
+            "detailed": "Faster detection is valuable - this attack had 11 hours of dwell time before ransomware deployment. However, detection without proper controls still means incident response, potential data exfiltration, and business impact. Detection is important but prevention and resilience (backups) reduce impact more than faster detection.",
+            "consequence": "24/7 SOC detects next attack at hour 3 instead of hour 11. Significant damage still occurs before containment."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What control provides recovery capability regardless of how successful the attack is?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Immutable, air-gapped backups with tested restoration procedures are the foundation of ransomware resilience. They provide recovery regardless of what prevention controls fail."
+        }
+      ],
+      "learning_note": "Post-incident improvements should prioritize resilience over prevention. While improving prevention (email security, network segmentation, EDR) is valuable, resilient backup strategies (immutable storage, air-gapped copies, separate credentials, tested restoration) provide recovery capability regardless of what attack succeeds. Ransomware resilience = prevention + detection + response + RECOVERY.",
+      "unlocks_artifact": "artifact_10"
+    }
+  ],
+  
+  "summary_teaching_points": [
+    {
+      "topic": "Ransomware Indicators",
+      "key_points": [
+        "Ransomware deployment is preceded by reconnaissance, credential theft, and lateral movement",
+        "Double extortion includes data exfiltration before encryption",
+        "C2 communication, unusual PowerShell, and mass file modification are key indicators"
+      ]
+    },
+    {
+      "topic": "Incident Response Priorities",
+      "key_points": [
+        "Containment (network isolation) is the immediate priority during active attacks",
+        "Segment-level isolation stops lateral movement more effectively than host-level",
+        "Evidence preservation is important but secondary to stopping the attack"
+      ]
+    },
+    {
+      "topic": "Attack Chain Analysis",
+      "key_points": [
+        "Trace backward from first alert to identify true initial access",
+        "Dwell time (initial access to ransomware) is typically hours to weeks",
+        "Understanding the full attack chain informs complete eradication"
+      ]
+    },
+    {
+      "topic": "Credential and Identity Response",
+      "key_points": [
+        "Assume all credentials on compromised systems are compromised",
+        "Krbtgt reset (twice) required if domain controllers were compromised",
+        "Service accounts and admin accounts require priority attention"
+      ]
+    },
+    {
+      "topic": "Recovery Strategies",
+      "key_points": [
+        "Validate backup integrity before restoration",
+        "Check backup timestamps against attack timeline",
+        "Recovery sequence follows technical dependencies, not business priority"
+      ]
+    }
+  ],
+  
+  "weakness_mapping": {
+    "malware_indicators_weak": {
+      "threshold": 2,
+      "indicators": ["decision_1", "decision_3", "decision_7"],
+      "remediation": "D2-REM-002",
+      "description": "Difficulty identifying malware behaviors and indicators"
+    },
+    "incident_response_weak": {
+      "threshold": 2,
+      "indicators": ["decision_2", "decision_4", "decision_9"],
+      "remediation": "D2-REM-002",
+      "description": "Difficulty with incident response procedures and prioritization"
+    },
+    "recovery_planning_weak": {
+      "threshold": 2,
+      "indicators": ["decision_6", "decision_9", "decision_10"],
+      "remediation": "D2-REM-003",
+      "description": "Difficulty with backup strategies and recovery planning"
+    }
+  },
+  
+  "prerequisites": ["D2-SIM-001", "D2-SIM-002"],
+  "unlocks": ["D2-SIM-004", "D3-SIM-001"],
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 2: Threats, Vulnerabilities, and Mitigations",
+    "job_role_alignment": ["Incident Responder", "SOC Analyst", "Security Engineer"],
+    "industry_context": "Manufacturing - OT/IT convergence environment"
+  }
+}

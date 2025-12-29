@@ -1,0 +1,1270 @@
+{
+  "simulation_id": "D3-SIM-004",
+  "title": "Infrastructure Hardening",
+  "domain": 3,
+  "category": "primary",
+  "difficulty": "intermediate",
+  "time_estimate": "45-60 minutes",
+  "passing_score": 200,
+  "max_score": 250,
+  
+  "exam_objectives": [
+    {
+      "id": "3.2",
+      "description": "Given a scenario, apply security principles to secure enterprise infrastructure",
+      "coverage": ["hardening", "secure baselines", "network security", "endpoint protection", "segmentation", "decommissioning"]
+    },
+    {
+      "id": "3.1",
+      "description": "Compare and contrast security implications of different architecture models",
+      "coverage": ["network architecture", "defense in depth", "secure protocols"]
+    }
+  ],
+  
+  "scenario_context": {
+    "organization": "Pacific Manufacturing Industries",
+    "industry": "Manufacturing",
+    "size": "4,200 employees, 6 manufacturing plants, corporate headquarters",
+    "setting": "Infrastructure security remediation program",
+    "your_role": "Infrastructure Security Engineer",
+    "reporting_to": "Director of IT Security James Morrison",
+    "environment": {
+      "current_state": {
+        "infrastructure": "Mixed Windows/Linux environment, legacy OT systems, recent cloud adoption",
+        "network": "Flat network in most plants, minimal segmentation between IT and OT",
+        "endpoints": "Windows 10/11 workstations, Windows Server 2016-2022, some legacy 2012",
+        "vulnerabilities": [
+          "Default configurations common",
+          "Inconsistent patching across plants",
+          "Legacy protocols in use (Telnet, FTP, SMBv1)",
+          "Shared admin accounts",
+          "No secure baselines"
+        ]
+      },
+      "recent_events": {
+        "incident": "Ransomware spread from IT to OT network at Plant 3",
+        "impact": "Production down for 5 days, $2.3M impact",
+        "root_causes": [
+          "Flat network allowed lateral movement",
+          "SMBv1 enabled EternalBlue propagation",
+          "Default credentials on HMI systems",
+          "No network monitoring for OT"
+        ]
+      },
+      "initiative": {
+        "name": "Secure Infrastructure Program",
+        "budget": "$1.8M",
+        "timeline": "12 months",
+        "goal": "Implement defense in depth, harden systems, segment networks"
+      }
+    },
+    "opening_narrative": "Pacific Manufacturing's ransomware incident exposed critical infrastructure weaknesses. The attackers exploited default configurations, legacy protocols, and a flat network to spread from a phished workstation to manufacturing systems in under 4 hours. As the Infrastructure Security Engineer, you're leading the remediation effort. Your challenge: harden systems, implement segmentation, and establish secure baselines without disrupting 24/7 manufacturing operations."
+  },
+  
+  "artifacts": [
+    {
+      "id": "artifact_1",
+      "title": "Current Infrastructure Assessment",
+      "type": "assessment_document",
+      "unlocks_at": "start",
+      "content": {
+        "infrastructure_inventory": {
+          "endpoints": {
+            "workstations": {"count": 3200, "os": "Windows 10/11 (85%), Windows 7 (15% - legacy apps)", "management": "SCCM, partial coverage"},
+            "servers_windows": {"count": 280, "os": "2022 (20%), 2019 (40%), 2016 (30%), 2012 R2 (10%)", "management": "SCCM, inconsistent"},
+            "servers_linux": {"count": 45, "os": "RHEL 8 (60%), CentOS 7 (40%)", "management": "Ansible, limited"}
+          },
+          "network_infrastructure": {
+            "firewalls": {"type": "Palo Alto (perimeter), Cisco ASA (inter-plant)", "age": "Mixed, some EOL"},
+            "switches": {"type": "Cisco Catalyst", "vlans": "Minimal use, mostly flat"},
+            "wireless": {"type": "Cisco WLC", "security": "WPA2-Enterprise (corporate), WPA2-PSK (plant floors)"}
+          },
+          "ot_systems": {
+            "plcs": {"count": 120, "vendors": "Allen-Bradley, Siemens", "connectivity": "Ethernet/IP, some serial"},
+            "hmis": {"count": 45, "os": "Windows 7 Embedded, Windows 10 IoT", "management": "Vendor-managed"},
+            "scada": {"count": 6, "type": "Wonderware, Ignition", "network": "Same network as IT"}
+          }
+        },
+        "vulnerability_scan_summary": {
+          "critical": 847,
+          "high": 2341,
+          "medium": 5892,
+          "top_issues": [
+            {"finding": "SMBv1 enabled", "affected": "78% of Windows systems", "risk": "Wormable vulnerabilities"},
+            {"finding": "Default/weak credentials", "affected": "34% of network devices", "risk": "Unauthorized access"},
+            {"finding": "Missing patches (>90 days)", "affected": "45% of servers", "risk": "Known exploits"},
+            {"finding": "Telnet enabled", "affected": "23% of network devices", "risk": "Credential exposure"},
+            {"finding": "Unnecessary services running", "affected": "67% of servers", "risk": "Expanded attack surface"}
+          ]
+        },
+        "incident_analysis": {
+          "attack_path": [
+            "Phishing email to Plant 3 workstation",
+            "User enabled macro, Cobalt Strike beacon deployed",
+            "SMBv1 used for lateral movement to file server",
+            "Credentials harvested from memory",
+            "EternalBlue spread to unpatched systems",
+            "Flat network allowed access to OT systems",
+            "Ransomware deployed across IT and OT"
+          ],
+          "contributing_factors": [
+            "No email filtering for macros",
+            "SMBv1 enabled unnecessarily",
+            "No segmentation between IT and OT",
+            "Default credentials on HMIs",
+            "No endpoint detection capability"
+          ]
+        }
+      }
+    },
+    {
+      "id": "artifact_2",
+      "title": "Secure Baseline Standards",
+      "type": "reference",
+      "unlocks_at": "decision_1",
+      "content": {
+        "baseline_sources": {
+          "cis_benchmarks": {
+            "description": "Center for Internet Security configuration guides",
+            "levels": {
+              "level_1": "Essential security, minimal impact on functionality",
+              "level_2": "Defense in depth, may impact some functionality"
+            },
+            "coverage": ["Windows", "Linux", "Network devices", "Cloud", "Applications"],
+            "advantages": ["Industry standard", "Regularly updated", "Detailed guidance", "Free"]
+          },
+          "disa_stigs": {
+            "description": "Defense Information Systems Agency Security Technical Implementation Guides",
+            "applicability": "DoD requirements, often used by government contractors",
+            "strictness": "Generally stricter than CIS Level 2",
+            "advantages": ["Comprehensive", "Required for some contracts", "CAT I/II/III prioritization"]
+          },
+          "vendor_guides": {
+            "description": "Microsoft, Red Hat, Cisco security configuration guides",
+            "advantages": ["Product-specific", "Supported by vendor"],
+            "disadvantages": ["May not be comprehensive", "Varies in quality"]
+          }
+        },
+        "baseline_components": {
+          "account_policies": ["Password complexity", "Lockout thresholds", "Admin account rename/disable"],
+          "local_policies": ["Audit settings", "User rights assignment", "Security options"],
+          "services": ["Disable unnecessary services", "Service account permissions"],
+          "network": ["Firewall enabled", "Protocol restrictions", "Remote access settings"],
+          "features": ["Disable SMBv1", "PowerShell logging", "Credential Guard"]
+        },
+        "implementation_approach": {
+          "gpo": "Group Policy for Windows domain members",
+          "sccm_intune": "Configuration baselines for managed devices",
+          "ansible_puppet": "Configuration management for Linux/mixed",
+          "scap": "Security Content Automation Protocol for validation"
+        }
+      }
+    },
+    {
+      "id": "artifact_3",
+      "title": "Protocol Security Reference",
+      "type": "reference",
+      "unlocks_at": "decision_2",
+      "content": {
+        "deprecated_protocols": {
+          "smbv1": {
+            "risk": "EternalBlue and related wormable vulnerabilities",
+            "replacement": "SMBv2/v3 with signing and encryption",
+            "legacy_needs": "Some old printers, NAS devices, XP clients",
+            "mitigation": "Disable, segment legacy devices that require it"
+          },
+          "telnet": {
+            "risk": "Cleartext credentials, no encryption",
+            "replacement": "SSH",
+            "legacy_needs": "Some OT devices, older network equipment",
+            "mitigation": "Disable, use SSH, segment if unavoidable"
+          },
+          "ftp": {
+            "risk": "Cleartext credentials, cleartext data transfer",
+            "replacement": "SFTP, FTPS, or modern file sharing",
+            "legacy_needs": "Some legacy systems, vendor uploads",
+            "mitigation": "Disable, use secure alternatives"
+          },
+          "ssl_tls_legacy": {
+            "risk": "SSL 2.0/3.0 and TLS 1.0/1.1 have known vulnerabilities",
+            "replacement": "TLS 1.2 or 1.3",
+            "legacy_needs": "Old browsers, legacy integrations",
+            "mitigation": "Disable, require TLS 1.2+"
+          },
+          "snmpv1_v2": {
+            "risk": "Community strings in cleartext, no encryption",
+            "replacement": "SNMPv3 with authentication and encryption",
+            "legacy_needs": "Network monitoring, OT devices",
+            "mitigation": "SNMPv3 where possible, isolate v2 devices"
+          }
+        },
+        "secure_alternatives": {
+          "remote_access": {
+            "avoid": ["Telnet", "RDP direct to internet", "VNC unencrypted"],
+            "use": ["SSH with key auth", "RDP via VPN/gateway", "VNC over SSH tunnel"]
+          },
+          "file_transfer": {
+            "avoid": ["FTP", "Cleartext HTTP uploads"],
+            "use": ["SFTP", "HTTPS", "Managed file transfer"]
+          },
+          "management": {
+            "avoid": ["HTTP management interfaces", "Cleartext SNMP"],
+            "use": ["HTTPS management", "SNMPv3", "Out-of-band management"]
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_4",
+      "title": "Network Segmentation Architecture",
+      "type": "architecture_document",
+      "unlocks_at": "decision_3",
+      "content": {
+        "segmentation_zones": {
+          "enterprise_it": {
+            "purpose": "Corporate workstations, business applications",
+            "trust_level": "Standard user",
+            "example_systems": ["Workstations", "File servers", "Print servers"]
+          },
+          "data_center": {
+            "purpose": "Core infrastructure, databases, applications",
+            "trust_level": "Higher security",
+            "example_systems": ["Domain controllers", "Database servers", "Application servers"]
+          },
+          "dmz": {
+            "purpose": "Internet-facing services",
+            "trust_level": "Untrusted inbound",
+            "example_systems": ["Web servers", "Email gateway", "VPN concentrators"]
+          },
+          "ot_network": {
+            "purpose": "Manufacturing operations",
+            "trust_level": "Isolated, critical",
+            "example_systems": ["PLCs", "HMIs", "SCADA servers"],
+            "special_requirements": ["Air gap or heavily restricted", "One-way data diodes where possible"]
+          },
+          "management": {
+            "purpose": "Infrastructure management",
+            "trust_level": "Privileged access",
+            "example_systems": ["Jump servers", "SIEM", "Vulnerability scanners"]
+          }
+        },
+        "purdue_model_ot": {
+          "description": "Industrial control system network architecture",
+          "levels": {
+            "level_5": "Enterprise network (IT)",
+            "level_4": "Site business planning (IT/OT boundary)",
+            "level_3": "Site operations (SCADA, historian)",
+            "level_2": "Area supervisory (HMI, engineering workstations)",
+            "level_1": "Basic control (PLC, RTU)",
+            "level_0": "Process (sensors, actuators)"
+          },
+          "dmz_3_5": {
+            "description": "Industrial DMZ between IT (Level 5) and OT (Levels 0-3)",
+            "purpose": "Controlled data exchange without direct connectivity"
+          }
+        },
+        "segmentation_technologies": {
+          "vlans": {"use": "Layer 2 isolation", "limitation": "Not firewall - needs routing/filtering"},
+          "firewalls": {"use": "Policy enforcement between zones", "types": ["Physical", "Virtual", "Host-based"]},
+          "microsegmentation": {"use": "Workload-level isolation", "benefit": "East-west traffic control"}
+        }
+      }
+    },
+    {
+      "id": "artifact_5",
+      "title": "Endpoint Hardening Checklist",
+      "type": "reference",
+      "unlocks_at": "decision_4",
+      "content": {
+        "windows_hardening": {
+          "operating_system": [
+            {"setting": "Enable Secure Boot", "purpose": "Prevent rootkits"},
+            {"setting": "Enable Device Guard/HVCI", "purpose": "Kernel protection"},
+            {"setting": "Enable Credential Guard", "purpose": "Protect credentials"},
+            {"setting": "Disable SMBv1", "purpose": "Prevent wormable attacks"},
+            {"setting": "Enable PowerShell logging", "purpose": "Detect attacks"},
+            {"setting": "Configure Windows Firewall", "purpose": "Host isolation"}
+          ],
+          "accounts": [
+            {"setting": "Rename/disable local Administrator", "purpose": "Reduce target"},
+            {"setting": "LAPS for local admin passwords", "purpose": "Unique passwords"},
+            {"setting": "Disable guest account", "purpose": "Prevent anonymous access"},
+            {"setting": "Configure account lockout", "purpose": "Prevent brute force"}
+          ],
+          "services": [
+            {"setting": "Disable unnecessary services", "purpose": "Reduce attack surface"},
+            {"setting": "Configure service accounts properly", "purpose": "Least privilege"},
+            {"setting": "Disable Remote Registry", "purpose": "Reduce exposure"}
+          ],
+          "software": [
+            {"setting": "Remove unnecessary applications", "purpose": "Reduce attack surface"},
+            {"setting": "Enable application whitelisting", "purpose": "Prevent unauthorized execution"},
+            {"setting": "Configure Office macro settings", "purpose": "Block malicious macros"}
+          ]
+        },
+        "server_additional": [
+          {"setting": "Install Server Core where possible", "purpose": "Minimal attack surface"},
+          {"setting": "Enable audit logging", "purpose": "Security monitoring"},
+          {"setting": "Configure RDP restrictions", "purpose": "Limit remote access"}
+        ],
+        "linux_hardening": [
+          {"setting": "Disable root SSH login", "purpose": "Prevent direct root access"},
+          {"setting": "Configure SSH key authentication", "purpose": "Strong authentication"},
+          {"setting": "Enable SELinux/AppArmor", "purpose": "Mandatory access control"},
+          {"setting": "Disable unnecessary services", "purpose": "Reduce attack surface"},
+          {"setting": "Configure firewalld/iptables", "purpose": "Host firewall"}
+        ]
+      }
+    },
+    {
+      "id": "artifact_6",
+      "title": "Privileged Access Management",
+      "type": "architecture_document",
+      "unlocks_at": "decision_5",
+      "content": {
+        "admin_account_risks": {
+          "current_issues": [
+            "Shared domain admin accounts",
+            "Same admin credentials across plants",
+            "Admin accounts used for daily work",
+            "No admin activity monitoring"
+          ],
+          "attack_exploitation": "Attackers harvested admin credentials from memory, used for lateral movement"
+        },
+        "privileged_access_model": {
+          "tier_model": {
+            "tier_0": {
+              "scope": "Domain controllers, AD infrastructure",
+              "admins": "Dedicated Tier 0 admin accounts",
+              "access": "Only from Tier 0 PAWs, never from regular workstations"
+            },
+            "tier_1": {
+              "scope": "Servers, applications",
+              "admins": "Dedicated Tier 1 admin accounts",
+              "access": "Only from Tier 1 PAWs or jump servers"
+            },
+            "tier_2": {
+              "scope": "Workstations, end-user devices",
+              "admins": "Helpdesk accounts with limited privileges",
+              "access": "From managed workstations"
+            }
+          },
+          "key_principle": "Tier 0 admins never log into Tier 1 or Tier 2 systems"
+        },
+        "pam_solutions": {
+          "capabilities": [
+            "Vaulted credentials (admins don't know passwords)",
+            "Just-in-time access (temporary elevation)",
+            "Session recording (audit trail)",
+            "Credential rotation (automatic password changes)"
+          ],
+          "vendors": ["CyberArk", "BeyondTrust", "Thycotic", "HashiCorp Vault"],
+          "implementation": "Start with Tier 0, expand to all privileged accounts"
+        },
+        "laps": {
+          "description": "Local Administrator Password Solution",
+          "function": "Unique, rotating local admin password per machine",
+          "benefit": "Prevents lateral movement via local admin"
+        }
+      }
+    },
+    {
+      "id": "artifact_7",
+      "title": "OT/ICS Security Considerations",
+      "type": "reference",
+      "unlocks_at": "decision_6",
+      "content": {
+        "ot_vs_it_security": {
+          "availability_priority": "OT prioritizes availability over confidentiality",
+          "patching_challenges": "OT systems often can't be patched (vendor support, uptime requirements)",
+          "lifecycle": "OT systems have 15-20 year lifecycles vs IT 3-5 years",
+          "protocols": "Industrial protocols (Modbus, EtherNet/IP) not designed for security"
+        },
+        "ot_security_approach": {
+          "network_segmentation": {
+            "description": "Primary control for OT security",
+            "implementation": "Purdue model, industrial DMZ, firewall rules",
+            "goal": "Isolate OT from IT, control data flows"
+          },
+          "monitoring": {
+            "description": "OT-specific threat detection",
+            "tools": ["Dragos", "Claroty", "Nozomi", "Tenable.ot"],
+            "capability": "Detect anomalous OT traffic without active scanning"
+          },
+          "compensating_controls": {
+            "for_unpatchable": [
+              "Network isolation",
+              "Application whitelisting on HMIs",
+              "USB restrictions",
+              "Enhanced monitoring"
+            ]
+          }
+        },
+        "ot_hardening_options": {
+          "hmis": [
+            "Remove unnecessary software",
+            "Disable autorun",
+            "Application whitelisting",
+            "Local firewall",
+            "Change default credentials"
+          ],
+          "plcs": [
+            "Physical key switches for programming",
+            "Disable unused ports/protocols",
+            "Change default credentials where possible",
+            "Implement PLC backup"
+          ],
+          "network": [
+            "Industrial firewalls",
+            "Data diodes for one-way data",
+            "Secure remote access (no direct internet)"
+          ]
+        }
+      }
+    },
+    {
+      "id": "artifact_8",
+      "title": "Change Management for Hardening",
+      "type": "process_document",
+      "unlocks_at": "decision_7",
+      "content": {
+        "hardening_change_challenges": {
+          "impact_risk": "Security changes can break applications or operations",
+          "scale": "Thousands of systems need consistent changes",
+          "testing": "Must validate changes don't impact functionality",
+          "rollback": "Need ability to reverse if problems occur"
+        },
+        "phased_rollout_approach": {
+          "phase_1_test": {
+            "scope": "Lab environment, non-production",
+            "duration": "2 weeks",
+            "validation": "Functionality testing, application compatibility"
+          },
+          "phase_2_pilot": {
+            "scope": "Limited production (one site, non-critical)",
+            "duration": "4 weeks",
+            "validation": "Real-world testing, monitor for issues"
+          },
+          "phase_3_rollout": {
+            "scope": "Production in waves",
+            "approach": "10% â†’ 25% â†’ 50% â†’ 100%",
+            "validation": "Monitoring at each stage"
+          }
+        },
+        "exception_process": {
+          "legitimate_exceptions": [
+            "Legacy application requires deprecated protocol",
+            "Vendor doesn't support hardened configuration",
+            "Operational requirement conflicts with security"
+          ],
+          "exception_requirements": [
+            "Documented business justification",
+            "Risk assessment",
+            "Compensating controls",
+            "Review timeline (not permanent)",
+            "Approval from security and business"
+          ]
+        }
+      }
+    },
+    {
+      "id": "artifact_9",
+      "title": "Secure Decommissioning Process",
+      "type": "process_document",
+      "unlocks_at": "decision_8",
+      "content": {
+        "decommissioning_importance": {
+          "risk_of_abandoned": [
+            "Forgotten systems still running, unpatched",
+            "Old credentials still valid",
+            "Network access remains",
+            "Data not properly destroyed"
+          ],
+          "real_incident": "Legacy server forgotten in closet became ransomware entry point"
+        },
+        "decommissioning_checklist": {
+          "pre_decommission": [
+            "Verify no dependencies (applications, users, integrations)",
+            "Document system configuration (for reference)",
+            "Backup data if needed for retention",
+            "Notify stakeholders"
+          ],
+          "network_disconnection": [
+            "Remove from DNS",
+            "Remove firewall rules",
+            "Disable switch port",
+            "Remove from monitoring"
+          ],
+          "account_cleanup": [
+            "Disable service accounts",
+            "Remove from AD groups",
+            "Revoke certificates",
+            "Remove from privileged access"
+          ],
+          "data_sanitization": [
+            "Data destruction per classification",
+            "Cryptographic erasure for encrypted drives",
+            "Physical destruction for highly sensitive",
+            "Verify sanitization"
+          ],
+          "asset_disposal": [
+            "Remove from inventory",
+            "Document disposal",
+            "Chain of custody for equipment",
+            "Certificate of destruction if required"
+          ]
+        },
+        "data_sanitization_methods": {
+          "clear": {"method": "Overwrite with zeros", "use": "Non-sensitive, reuse in organization"},
+          "purge": {"method": "Multiple overwrite passes or crypto erase", "use": "Sensitive data, external disposal"},
+          "destroy": {"method": "Physical destruction (shred, incinerate)", "use": "Highest sensitivity, required by regulation"}
+        }
+      }
+    },
+    {
+      "id": "artifact_10",
+      "title": "Defense in Depth Architecture",
+      "type": "architecture_document",
+      "unlocks_at": "decision_9",
+      "content": {
+        "defense_in_depth_layers": {
+          "perimeter": {
+            "controls": ["Firewall", "IDS/IPS", "Web application firewall", "DDoS protection"],
+            "purpose": "First line of defense against external threats"
+          },
+          "network": {
+            "controls": ["Segmentation", "Internal firewalls", "NAC", "Network monitoring"],
+            "purpose": "Limit lateral movement, detect internal threats"
+          },
+          "endpoint": {
+            "controls": ["EDR", "Antimalware", "Host firewall", "Application whitelisting"],
+            "purpose": "Protect and detect on individual systems"
+          },
+          "application": {
+            "controls": ["Input validation", "Authentication", "Authorization", "Logging"],
+            "purpose": "Protect application layer"
+          },
+          "data": {
+            "controls": ["Encryption", "DLP", "Access controls", "Classification"],
+            "purpose": "Protect the data itself"
+          }
+        },
+        "key_principle": "Assume any single control can fail - multiple layers provide resilience",
+        "applied_to_pacific": {
+          "before": "Single perimeter firewall, flat internal network, basic AV",
+          "after": [
+            "Perimeter: NGFW with IPS",
+            "Network: IT/OT segmentation, VLANs, internal firewalls",
+            "Endpoint: EDR, hardened baselines, LAPS",
+            "Application: Patched, secure configurations",
+            "Data: Encrypted backups, classified data controls"
+          ]
+        }
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Secure Baseline Standard Selection",
+      "narrative": "Pacific has no documented security baselines - each plant and team configures systems differently. You need to establish a consistent baseline standard for all systems.",
+      "question": "What secure baseline standard should Pacific adopt?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create custom baselines from scratch based on Pacific's needs",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Reinventing the wheel without industry expertise",
+            "detailed": "Creating baselines from scratch means: duplicating work already done by industry experts, likely missing important settings, no community validation or updates, and difficult to defend to auditors. Established baselines (CIS, STIG) represent collective industry wisdom and are regularly updated.",
+            "consequence": "Gaps in baselines, no update process, difficult audit defense."
+          }
+        },
+        {
+          "id": "B",
+          "text": "CIS Benchmarks Level 1 with Level 2 for critical systems",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Industry standard with appropriate rigor levels",
+            "detailed": "CIS Benchmarks are industry standard, regularly updated, and provide two levels: Level 1 (essential security, minimal functionality impact) for most systems, Level 2 (defense in depth, may impact some functionality) for critical systems. This provides appropriate security without unnecessary operational impact. CIS also provides automated assessment tools.",
+            "consequence": "Consistent baselines across organization. Industry-accepted standard. Audit-defensible."
+          }
+        },
+        {
+          "id": "C",
+          "text": "DISA STIGs for maximum security",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "STIGs are stricter than needed for non-DoD manufacturing",
+            "detailed": "DISA STIGs are designed for Department of Defense systems with very high security requirements. For a manufacturing company, STIGs may be unnecessarily restrictive, cause operational issues, and require more exceptions. CIS Level 1/2 provides appropriate security without DoD-level restrictions.",
+            "consequence": "Over-hardening causes operational issues. Many exceptions required. Unsustainable."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Vendor default configurations with basic security enabled",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Defaults are not secure baselines",
+            "detailed": "Vendor defaults prioritize ease of use over security. Default configurations typically: leave unnecessary services enabled, use weak settings, enable legacy protocols for compatibility, and don't implement defense-in-depth. This is what Pacific has now - and it contributed to the ransomware spread.",
+            "consequence": "No improvement over current insecure state."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What industry-standard baselines provide graduated security levels and are regularly updated?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "CIS Benchmarks: Level 1 for most systems (essential security), Level 2 for critical systems (defense in depth). Industry standard, regularly updated."
+        }
+      ],
+      "learning_note": "Secure baselines should be based on established standards (CIS Benchmarks, DISA STIGs) rather than created from scratch. CIS provides Level 1 (broad applicability) and Level 2 (critical systems). STIGs are more restrictive, typically for government. Choose appropriate rigor for your environment.",
+      "unlocks_artifact": "artifact_2"
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "Legacy Protocol Remediation",
+      "narrative": "The scan shows SMBv1 enabled on 78% of systems - this enabled the ransomware to spread via EternalBlue. IT argues some legacy systems require SMBv1. You need to decide the approach.",
+      "question": "How should Pacific address SMBv1 across the environment?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Disable SMBv1 everywhere immediately - security is paramount",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "May break critical systems without assessment",
+            "detailed": "Immediate blanket disable may break: legacy applications, older network devices (printers, NAS), and some OT systems that require SMBv1. Critical manufacturing could stop. The right approach is to identify dependencies first, then disable with appropriate mitigations for exceptions.",
+            "consequence": "Production outages from broken dependencies. Emergency rollback required."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Keep SMBv1 for compatibility - focus on other security improvements",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "SMBv1 is a critical vulnerability that enabled the attack",
+            "detailed": "SMBv1 was the key propagation mechanism for the ransomware. Keeping it enabled maintains the exact vulnerability that caused the incident. EternalBlue and related vulnerabilities make SMBv1 a critical risk that must be addressed. Compatibility concerns require mitigation, not acceptance.",
+            "consequence": "Ransomware attack vector remains open. Next attack will spread the same way."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Audit SMBv1 dependencies, disable where possible, isolate systems that require it",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Risk-based approach with compensating controls",
+            "detailed": "Audit first to identify what actually requires SMBv1 (usually less than expected). Disable on all systems that don't need it (majority). For systems that require it: isolate on separate network segment, apply additional monitoring, plan for replacement. This eliminates risk where possible and contains it where necessary.",
+            "consequence": "SMBv1 disabled on most systems. Remaining systems isolated and monitored. Risk significantly reduced."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Replace all systems that require SMBv1 before making changes",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Takes too long - risk remains during replacement",
+            "detailed": "Full replacement of legacy systems could take months or years and significant budget. During that time, SMBv1 remains enabled everywhere, maintaining the vulnerability. Disable where possible immediately, then work on replacing remaining legacy systems over time.",
+            "consequence": "Extended exposure while waiting for replacements."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can you balance security (disabling SMBv1) with operational needs (some systems may require it)?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Audit to find actual dependencies, disable on most systems, isolate and monitor systems that require it as compensating control."
+        }
+      ],
+      "learning_note": "Legacy protocol remediation approach: (1) Audit to identify actual dependencies (often less than assumed), (2) Disable on systems that don't need it, (3) Isolate and apply compensating controls for systems that require it, (4) Plan replacement for legacy systems. Don't let perfect be enemy of good - reduce risk now, eliminate over time.",
+      "unlocks_artifact": "artifact_3"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "IT/OT Segmentation Design",
+      "narrative": "The flat network allowed ransomware to spread from an IT workstation to OT systems in 4 hours. You need to design network segmentation between IT and OT environments.",
+      "question": "What segmentation architecture should separate IT from OT?",
+      "options": [
+        {
+          "id": "A",
+          "text": "VLAN separation with routing between IT and OT",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "VLANs alone don't provide security filtering",
+            "detailed": "VLANs provide Layer 2 separation, but if you route between them without firewall rules, traffic flows freely. This is slightly better than flat network but doesn't provide the control needed between IT and OT. Security filtering at network boundaries is essential.",
+            "consequence": "Logical separation but traffic still flows. Attack could still spread."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Industrial DMZ (Purdue Model Level 3.5) with firewalls and controlled data exchange",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Industry-standard OT security architecture",
+            "detailed": "The Purdue Model with industrial DMZ (Level 3.5) provides: firewall-enforced boundary between IT and OT, controlled data exchange through DMZ services (historian mirror, jump server), no direct IT-to-OT traffic, and industry-standard architecture. Firewalls enforce strict rules on what can cross the boundary.",
+            "consequence": "IT and OT properly separated. Controlled data exchange. Attack from IT cannot directly reach OT."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Complete air gap with no network connectivity between IT and OT",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Air gap often impractical for modern manufacturing",
+            "detailed": "Complete air gap provides strongest isolation but: prevents legitimate data flow (production data to ERP, remote monitoring), creates workarounds (USB drives - often worse security), and doesn't align with Industry 4.0 initiatives. Controlled connectivity through industrial DMZ is usually more practical.",
+            "consequence": "Operational inefficiency. USB workarounds create different risks."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Software-defined microsegmentation without network redesign",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Microsegmentation is valuable but OT devices may not support agents",
+            "detailed": "Software-defined microsegmentation requires agents on endpoints. Many OT devices (PLCs, HMIs, legacy systems) cannot run agents or the vendor won't support it. Network-based segmentation (firewalls) works regardless of endpoint capabilities. Microsegmentation complements but doesn't replace network segmentation for OT.",
+            "consequence": "IT endpoints protected but OT devices unprotected."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What industry-standard model provides security architecture for industrial control systems?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Purdue Model with industrial DMZ (Level 3.5): firewall-enforced IT/OT boundary, controlled data exchange, no direct IT-to-OT traffic."
+        }
+      ],
+      "learning_note": "IT/OT segmentation should follow the Purdue Model: Enterprise (Level 5), Site Operations (Level 3), Control (Levels 0-2), with Industrial DMZ (Level 3.5) between IT and OT. Firewalls enforce boundaries, and data exchange happens through controlled DMZ services. Air gap is often impractical; controlled connectivity is the standard approach.",
+      "unlocks_artifact": "artifact_4"
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Endpoint Hardening Priority",
+      "narrative": "With 3,200 workstations and 280 servers to harden, you need to prioritize. Resources are limited, and you can't harden everything at once.",
+      "question": "What endpoint hardening should be implemented FIRST?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Full CIS benchmark hardening on all workstations",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Good target but too broad for first priority",
+            "detailed": "Full benchmark hardening is the end goal, but implementing everything on all workstations at once is risky (may break things) and slow (thorough testing needed). Start with high-impact quick wins while planning comprehensive hardening. The incident analysis shows specific issues to address first.",
+            "consequence": "Long implementation timeline while high-impact risks remain."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Disable SMBv1, enable PowerShell logging, block Office macros - address attack vectors",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Address specific attack vectors from the incident",
+            "detailed": "Focus first on controls that would have prevented or detected the attack: SMBv1 disable (stopped propagation), PowerShell logging (detected Cobalt Strike), macro blocking (prevented initial execution). These high-impact changes can be deployed quickly and address known risks. Then continue with comprehensive hardening.",
+            "consequence": "Specific attack vectors closed quickly. High-impact security improvement. Foundation for broader hardening."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Deploy EDR on all endpoints before hardening",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "EDR detects but hardening prevents - both needed",
+            "detailed": "EDR provides detection and response capabilities - important! But EDR alone doesn't prevent vulnerabilities (SMBv1, macros). Hardening eliminates attack surface; EDR catches what gets through. Both are needed, but quick hardening wins can be faster than full EDR deployment.",
+            "consequence": "Can detect attacks but underlying vulnerabilities remain."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Focus on servers first - workstations are lower priority",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Workstations are often the initial entry point",
+            "detailed": "The attack started on a workstation (phishing). Servers are important, but workstations are typically the initial entry point for attacks. Hardening workstations (especially macro blocking, SMBv1 disable) addresses the attack chain start. A defense-in-depth approach addresses both.",
+            "consequence": "Servers hardened but attack entry point (workstations) remains vulnerable."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What specific controls would have prevented or detected this particular attack?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Address attack chain: macros (initial execution), SMBv1 (propagation), PowerShell logging (detection). High-impact quick wins."
+        }
+      ],
+      "learning_note": "Endpoint hardening prioritization: start with high-impact controls that address known attack vectors, then expand to comprehensive hardening. Key quick wins: disable legacy protocols (SMBv1), enable logging (PowerShell), block common attack techniques (macros). Use incident analysis to prioritize.",
+      "unlocks_artifact": "artifact_5"
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Privileged Account Management",
+      "narrative": "Investigation revealed attackers harvested domain admin credentials from memory on a compromised workstation - the admin had logged in earlier for support. Shared admin accounts and poor privileged access hygiene enabled lateral movement.",
+      "question": "What should be the FIRST step to improve privileged access security?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy full PAM solution with credential vaulting",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "PAM is valuable but takes months to deploy properly",
+            "detailed": "Full PAM deployment (vaulting, session recording, JIT access) is the target state but requires significant implementation time. While planning PAM, immediate improvements can reduce risk now. The tiered model and LAPS can be implemented faster than full PAM.",
+            "consequence": "Long deployment timeline while admin credential risks remain."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Implement tiered administration model - separate accounts, admins don't log into workstations",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Immediately reduces credential exposure risk",
+            "detailed": "Tiered administration provides immediate improvement: Tier 0 (domain admin) never logs into workstations or member servers, separate admin accounts per tier, domain admin credentials never exposed on lower-tier systems. This directly addresses how credentials were harvested. Can be implemented through policy and GPO while planning PAM deployment.",
+            "consequence": "Credential exposure significantly reduced. Foundation for PAM deployment."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Require MFA for all admin accounts",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "MFA is important but doesn't address credential exposure",
+            "detailed": "MFA adds authentication security, but the issue was credential harvesting from memory (Pass-the-Hash, Mimikatz). Once attackers have the credential hash, they can use it directly without MFA in many scenarios (NTLM authentication). Tiered model prevents exposure; MFA adds a layer but doesn't solve the core issue.",
+            "consequence": "MFA deployed but credential exposure on workstations continues."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Change all admin passwords immediately",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Passwords will be harvested again without architectural change",
+            "detailed": "Password reset is incident response 101, but without changing the architecture, new passwords will be exposed the same way when admins log into workstations. The systemic issue (admins logging into untrusted systems) must be addressed, not just the credentials.",
+            "consequence": "Passwords changed but same exposure continues. Will be compromised again."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can you prevent domain admin credentials from being exposed on workstations?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Tiered administration: Tier 0 admins only log into Tier 0 systems (DCs, PAWs). Credentials never exposed on workstations."
+        }
+      ],
+      "learning_note": "Privileged access security hierarchy: (1) Tiered model - prevent credential exposure across tiers, (2) LAPS - unique local admin passwords per machine, (3) PAM - vaulted credentials, JIT access, session recording. Tiered model addresses the fundamental problem of credential exposure. MFA and password changes don't prevent Pass-the-Hash.",
+      "unlocks_artifact": "artifact_6"
+    },
+    {
+      "id": "decision_6",
+      "sequence": 6,
+      "title": "OT System Hardening",
+      "narrative": "HMI systems on the plant floor are running Windows 7 Embedded with default vendor credentials. The vendor says hardening may void support. You need to balance security with operational requirements.",
+      "question": "How should Pacific approach OT/HMI hardening?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Don't harden - vendor support is essential for manufacturing",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Unacceptable risk - OT was compromised in the attack",
+            "detailed": "The ransomware reached OT systems. Accepting default credentials and no hardening maintains the vulnerability. Vendor support concerns are valid but can be addressed through negotiation and compensating controls. Security of production systems cannot be sacrificed for support.",
+            "consequence": "OT remains vulnerable. Next attack will compromise manufacturing again."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Apply IT hardening standards to OT systems",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "IT standards may break OT functionality",
+            "detailed": "OT systems have different requirements than IT: real-time operation, vendor-specific software, limited change windows. Standard IT hardening (patch Tuesday, aggressive GPO) may cause: application failures, safety system issues, vendor support problems. OT requires OT-specific approach.",
+            "consequence": "Hardening breaks OT applications. Production impact."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Vendor-approved hardening where possible, compensating controls where not, negotiate with vendor",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Balanced approach for OT environment",
+            "detailed": "OT hardening approach: work with vendor to identify supported hardening (often more than expected), apply what's supported (credential changes, USB disable, local firewall), implement compensating controls for what's not (network isolation, monitoring, application whitelisting), and negotiate support terms. Document everything for both security and vendor relationships.",
+            "consequence": "OT security improved within vendor constraints. Compensating controls cover gaps."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Replace all OT systems with newer, securable versions",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Long timeline and significant cost",
+            "detailed": "OT system replacement is expensive ($millions for manufacturing equipment), takes years (planning, installation, validation), and may not be necessary if compensating controls are effective. Improve security now with hardening and controls while planning upgrades on normal lifecycle.",
+            "consequence": "Years of exposure while planning replacement. Unnecessary cost if controls can mitigate."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can you improve OT security while maintaining vendor support and operational stability?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Work with vendors on supported hardening, implement compensating controls (network isolation, monitoring) for what can't be hardened, document everything."
+        }
+      ],
+      "learning_note": "OT hardening differs from IT: vendor relationships matter, availability is paramount, changes require extensive testing. Approach: vendor-approved hardening first, compensating controls (network segmentation, monitoring, whitelisting) for gaps, negotiate support terms. Document security decisions for both audit and vendor management.",
+      "unlocks_artifact": "artifact_7"
+    },
+    {
+      "id": "decision_7",
+      "sequence": 7,
+      "title": "Hardening Rollout Strategy",
+      "narrative": "You've defined baselines and prioritized changes. Now you need to roll out hardening across 3,200 workstations and 280 servers without disrupting 24/7 manufacturing operations.",
+      "question": "What rollout strategy should be used for hardening deployment?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy to all systems during a maintenance window",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Big bang rollout is risky for this scale",
+            "detailed": "Deploying to all 3,500 systems at once means: if something breaks, everything is impacted, difficult to identify which change caused issues, no time to respond before widespread impact, and manufacturing can't have 24/7 'maintenance window.' Too risky for critical operations.",
+            "consequence": "Widespread issues when problems discovered. Manufacturing disruption."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Phased rollout: test â†’ pilot â†’ waves with monitoring at each stage",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Controlled rollout with validation gates",
+            "detailed": "Phased approach provides safety: test in lab first (catch obvious issues), pilot on limited non-critical systems (real-world validation), then roll out in waves (10% â†’ 25% â†’ 50% â†’ 100%) with monitoring between each stage. Problems caught early affect small groups, not entire organization. Manufacturing critical systems last, with extra validation.",
+            "consequence": "Issues caught early. Minimal production impact. Validated changes."
+          }
+        },
+        {
+          "id": "C",
+          "text": "User-initiated: push to software center, let users install when convenient",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Security baselines shouldn't be optional",
+            "detailed": "User-initiated deployment means: many systems never get hardened (users ignore or delay), inconsistent security posture, impossible to track compliance, and security requirements aren't optional. Hardening must be centrally deployed and enforced.",
+            "consequence": "Incomplete deployment. Ongoing vulnerability. Compliance failure."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Start with servers - they're more important and fewer in number",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Reasonable prioritization but doesn't address deployment method",
+            "detailed": "Focusing on servers first is a valid prioritization decision, but the question is about HOW to deploy, not WHAT to deploy first. Servers still need phased rollout - deploying to all 280 servers at once carries risk. Phased approach applies regardless of target priority.",
+            "consequence": "Server focus is fine but doesn't answer the deployment strategy question."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What deployment approach catches problems early before they become widespread?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Phased rollout: test (lab) â†’ pilot (limited production) â†’ waves (increasing scope) with monitoring gates between phases."
+        }
+      ],
+      "learning_note": "Hardening deployment best practices: phased rollout (test â†’ pilot â†’ waves), monitoring between phases, rollback capability, exception process for legitimate issues. Never deploy major changes to all systems simultaneously - always have validation gates. Manufacturing/critical systems should be later phases with extra validation.",
+      "unlocks_artifact": "artifact_8"
+    },
+    {
+      "id": "decision_8",
+      "sequence": 8,
+      "title": "Legacy System Decommissioning",
+      "narrative": "The assessment found 15% of workstations still running Windows 7 and servers running 2012 R2. IT says these support legacy applications. You need to address these unsupported systems.",
+      "question": "How should Pacific handle end-of-support legacy systems?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Allow continued use with signed risk acceptance from business owners",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Risk acceptance without compensating controls is insufficient",
+            "detailed": "Risk acceptance alone doesn't reduce risk - it just documents who's accountable when something goes wrong. Legacy systems need compensating controls (isolation, monitoring, hardening where possible) in addition to documented acceptance. And there should be a plan to eventually eliminate the risk.",
+            "consequence": "Risk documented but not reduced. Legacy systems remain vulnerable."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Isolate on separate network segment, apply compensating controls, plan for replacement",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Contain risk while planning elimination",
+            "detailed": "Legacy system approach: isolate (separate network segment, restricted access), compensate (additional monitoring, application whitelisting, enhanced hardening where possible), and plan (timeline for application upgrade or replacement). This reduces risk now while working toward elimination. Document the compensating controls for audit.",
+            "consequence": "Risk contained. Monitoring detects issues. Replacement planned."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Immediately decommission all unsupported systems",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "May break critical business applications",
+            "detailed": "Legacy systems often support business-critical applications that can't run on newer OS. Immediate decommission could stop business processes. The goal is to reduce risk (isolation, controls) while planning for proper transition. Forced decommission creates business disruption.",
+            "consequence": "Critical applications unavailable. Business disruption."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Purchase extended security updates from Microsoft",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "ESU helps but doesn't solve the problem",
+            "detailed": "Extended Security Updates (ESU) provide continued patches for critical vulnerabilities - helpful for reducing risk. However, ESU is expensive, temporary (ends eventually), and doesn't address all risks of old OS. ESU can be part of the compensating controls but isn't a complete solution. Still need isolation and replacement plan.",
+            "consequence": "Some patches available but expensive and temporary. Still need broader strategy."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How do you reduce risk from systems that can't be immediately replaced?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Isolate (network segmentation), compensate (additional controls), plan (replacement timeline). Contain risk while working toward elimination."
+        }
+      ],
+      "learning_note": "Legacy system management: immediate decommission often isn't possible, but risk must be managed. Approach: isolate (network segmentation), compensate (whitelisting, monitoring, hardening), document (risk acceptance with controls), and plan (replacement timeline). ESU can extend patch support temporarily but isn't a long-term solution.",
+      "unlocks_artifact": "artifact_9"
+    },
+    {
+      "id": "decision_9",
+      "sequence": 9,
+      "title": "Defense in Depth Validation",
+      "narrative": "You've implemented significant improvements. James Morrison asks how you'll verify the security architecture is effective before considering the project complete.",
+      "question": "How should Pacific validate the hardening program's effectiveness?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Review documentation and configuration standards",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Documentation doesn't prove effectiveness",
+            "detailed": "Documentation shows what SHOULD be configured, not what IS configured or whether it's actually effective. Systems drift from baselines, exceptions accumulate, and controls may not work as expected. Technical validation is needed to verify actual security posture.",
+            "consequence": "Paper compliance but unknown actual security."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Penetration test simulating the original attack path",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Validate controls actually prevent the attack",
+            "detailed": "Penetration testing the original attack path validates that controls work: Can phishing still get malware execution? Can attackers move laterally? Can they reach OT? This validates the entire defense-in-depth architecture. Include tabletop exercise with incident response team to validate detection and response.",
+            "consequence": "Validated security improvement. Known gaps identified. Evidence of program success."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Run vulnerability scans to ensure all systems are hardened",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Scans show configuration but not defense effectiveness",
+            "detailed": "Vulnerability scanning verifies baseline compliance - important for confirming hardening is applied. But scans don't test whether the security architecture actually stops attacks. Penetration testing validates the full attack chain, not just individual configurations.",
+            "consequence": "Know systems are configured correctly but not whether defenses work together."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Monitor for 90 days with no incidents to prove effectiveness",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Absence of attacks doesn't prove defense",
+            "detailed": "No incidents could mean: good security, OR no attacks during that period. Lack of attacks doesn't validate that defenses would stop an attack. Proactive testing (penetration test) provides evidence that controls work, regardless of whether real attacks occur.",
+            "consequence": "False confidence if there were simply no attacks during monitoring period."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How do you prove that security controls actually stop attacks?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Penetration testing simulates real attacks to validate defenses. Test the original attack path to prove it's now blocked."
+        }
+      ],
+      "learning_note": "Security validation methods: vulnerability scanning (configuration compliance), penetration testing (attack simulation), red team (adversary emulation), purple team (collaborative testing). Penetration testing validates that controls work together to stop attacks. Particularly valuable to test the specific attack path from a known incident.",
+      "unlocks_artifact": "artifact_10"
+    },
+    {
+      "id": "decision_10",
+      "sequence": 10,
+      "title": "Ongoing Hardening Maintenance",
+      "narrative": "The initial hardening project is nearing completion. You need to ensure security posture is maintained over time, not just achieved once.",
+      "question": "What is most critical for maintaining hardening over time?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Annual security assessment to check compliance",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Annual is too infrequent - drift happens continuously",
+            "detailed": "Configuration drift happens every day: new systems deployed, changes made, exceptions granted. Annual assessment means up to 12 months of undetected drift. Continuous monitoring catches drift immediately. Annual assessments are valuable but not sufficient alone.",
+            "consequence": "Months of drift between assessments. Unknown security posture."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Continuous compliance monitoring with automated baseline validation",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Continuous monitoring catches drift immediately",
+            "detailed": "Automated continuous monitoring (SCCM compliance baselines, SCAP scanning, cloud security posture management) validates configurations continuously: new systems checked immediately, drift detected in near-real-time, compliance dashboards show current state. Combined with change management and exception tracking, this maintains security posture over time.",
+            "consequence": "Drift detected immediately. Continuous visibility into compliance. Sustained security posture."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Training for IT staff on hardening standards",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Training helps but doesn't ensure compliance",
+            "detailed": "Training ensures IT staff know the standards, but human processes aren't reliable for consistent compliance. Automated enforcement and monitoring ensure baselines are maintained regardless of individual actions. Training is valuable but not the primary control.",
+            "consequence": "Staff trained but configuration drift still possible."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Document all configurations for audit purposes",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Documentation doesn't maintain security",
+            "detailed": "Documentation is important for audits and reference, but documenting a standard doesn't ensure it's followed. Technical enforcement and continuous monitoring maintain security; documentation supports but doesn't replace those controls.",
+            "consequence": "Well-documented but possibly non-compliant systems."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How do you ensure hardening baselines are maintained over time across thousands of systems?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Continuous compliance monitoring: automated validation against baselines, immediate drift detection, compliance dashboards."
+        }
+      ],
+      "learning_note": "Hardening is not a one-time project - it requires continuous management. Key elements: automated baseline enforcement (GPO, SCCM, configuration management), continuous compliance monitoring (SCAP, cloud posture management), change management (control modifications), exception management (track and review), and periodic validation (penetration testing, audits)."
+    }
+  ],
+  
+  "scoring": {
+    "max_points": 250,
+    "passing_score": 200,
+    "passing_percentage": 80
+  },
+  
+  "outcome_thresholds": {
+    "expert": {"min_score": 238, "title": "Infrastructure Security Expert", "description": "Exceptional understanding of hardening and defense in depth."},
+    "proficient": {"min_score": 213, "title": "Infrastructure Security Professional", "description": "Strong grasp of infrastructure security principles."},
+    "competent": {"min_score": 200, "title": "Infrastructure Security Competent", "description": "Solid understanding of infrastructure hardening."},
+    "developing": {"min_score": 175, "title": "Infrastructure Security Developing", "description": "Gaps in infrastructure security concepts."},
+    "needs_remediation": {"min_score": 0, "title": "Infrastructure Fundamentals Needed", "description": "Review infrastructure security concepts."}
+  },
+  
+  "weakness_mapping": {
+    "baseline_gaps": {"indicators": ["decision_1_incorrect"], "remediation": "D3-REM-002", "focus": "Secure baseline concepts"},
+    "network_security_gaps": {"indicators": ["decision_2_incorrect", "decision_3_incorrect"], "remediation": "D3-REM-002", "focus": "Network security and segmentation"}
+  },
+  
+  "prerequisites": ["D3-SIM-002"],
+  "unlocks": ["D3-SIM-005"],
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 3: Security Architecture",
+    "job_role_alignment": ["Infrastructure Security Engineer", "Systems Administrator", "Security Engineer"],
+    "estimated_time": "45-60 minutes",
+    "industry_context": "Manufacturing"
+  }
+}

@@ -1,0 +1,1207 @@
+{
+  "simulation_id": "D4-SIM-005",
+  "title": "Security Automation and Orchestration",
+  "domain": 4,
+  "category": "primary",
+  "difficulty": "advanced",
+  "time_estimate": "45-60 minutes",
+  "passing_score": 200,
+  "max_score": 250,
+  
+  "exam_objectives": [
+    {
+      "id": "4.5",
+      "description": "Explain the purpose of mitigation techniques used to secure the enterprise",
+      "coverage": ["automation", "orchestration", "scripting", "API integration"]
+    },
+    {
+      "id": "4.4",
+      "description": "Explain security alerting and monitoring concepts and tools",
+      "coverage": ["SOAR", "automated response", "playbooks", "integration"]
+    },
+    {
+      "id": "4.8",
+      "description": "Explain appropriate incident response activities",
+      "coverage": ["automated containment", "response workflows", "escalation"]
+    }
+  ],
+  
+  "scenario_context": {
+    "organization": "Sentinel Insurance Group",
+    "industry": "Insurance/Financial Services",
+    "size": "4,800 employees, headquarters plus regional offices, cloud-hybrid environment",
+    "setting": "Security automation and SOAR implementation",
+    "your_role": "Security Automation Engineer",
+    "reporting_to": "Director of Security Operations, James Park",
+    "environment": {
+      "current_state": {
+        "soc_operations": {
+          "team_size": "12 analysts across three shifts",
+          "alert_volume": "8,500 alerts per day",
+          "manual_tasks": "90% of response actions are manual",
+          "tools": ["Splunk SIEM", "CrowdStrike EDR", "Palo Alto Firewalls", "Proofpoint Email", "ServiceNow ITSM"]
+        },
+        "pain_points": [
+          "Analysts spend 70% of time on repetitive tasks",
+          "Inconsistent response procedures across shifts",
+          "Mean time to respond: 45 minutes for routine alerts",
+          "No automated enrichment - manual lookups for every alert",
+          "Ticket creation takes 10 minutes per incident"
+        ],
+        "integration_status": {
+          "api_availability": "All major tools have APIs",
+          "current_integration": "Minimal - tools operate in silos",
+          "data_sharing": "Manual copy/paste between systems"
+        }
+      },
+      "recent_drivers": {
+        "incident_1": "Phishing response took 4 hours due to manual mailbox searches",
+        "incident_2": "Different analysts handled same alert type differently",
+        "audit_finding": "Inconsistent incident documentation",
+        "business_pressure": "Insurance regulators requiring faster breach response"
+      },
+      "initiative": {
+        "name": "Security Automation Program",
+        "budget": "$800K for SOAR platform and implementation",
+        "goals": [
+          "Reduce MTTR by 60%",
+          "Automate 50% of routine response tasks",
+          "Standardize response procedures",
+          "Improve analyst efficiency and job satisfaction"
+        ],
+        "platform_selected": "Palo Alto XSOAR (Cortex XSOAR)"
+      }
+    },
+    "opening_narrative": "Sentinel Insurance Group's SOC is drowning in manual work. Every alert requires the same repetitive steps: lookup the user, check the asset, query threat intel, create a ticket, document findings. Analysts are burning out on copy-paste workflows while real threats wait in queue. James Park has secured budget for a SOAR platform and brought you in to architect the automation program. The tools are ready - now you need to decide what to automate, how to automate it safely, and how to measure success. Where do you start?"
+  },
+  
+  "artifacts": [
+    {
+      "id": "artifact_1",
+      "title": "Current SOC Workflow Analysis",
+      "type": "assessment_document",
+      "unlocks_at": "start",
+      "content": {
+        "top_alert_types": [
+          {"type": "Phishing reported", "volume": "450/day", "manual_time": "25 min avg", "steps": ["Extract URLs/attachments", "Check reputation", "Search for other recipients", "Block if malicious", "Notify users", "Create ticket"]},
+          {"type": "Malware detected", "volume": "180/day", "manual_time": "35 min avg", "steps": ["Verify detection", "Check hash reputation", "Identify affected systems", "Isolate if needed", "Gather forensics", "Create ticket"]},
+          {"type": "Failed login alerts", "volume": "2200/day", "manual_time": "8 min avg", "steps": ["Check user context", "Verify if legitimate", "Check for patterns", "Close or escalate"]},
+          {"type": "Suspicious process", "volume": "890/day", "manual_time": "15 min avg", "steps": ["Check process reputation", "Review parent/child", "Check other endpoints", "Determine if malicious"]},
+          {"type": "DLP alerts", "volume": "340/day", "manual_time": "20 min avg", "steps": ["Review content", "Check user context", "Determine if violation", "Escalate or close"]}
+        ],
+        "time_breakdown": {
+          "enrichment_lookups": "35% of analyst time",
+          "ticket_documentation": "25% of analyst time",
+          "tool_switching": "15% of analyst time",
+          "actual_analysis": "25% of analyst time"
+        },
+        "automation_opportunities": {
+          "high_value": ["Alert enrichment", "Ticket creation", "Phishing analysis", "IOC blocking"],
+          "medium_value": ["User notification", "Report generation", "Escalation routing"],
+          "complex": ["Malware containment", "Investigation workflows", "Incident declaration"]
+        }
+      }
+    },
+    {
+      "id": "artifact_2",
+      "title": "SOAR Platform Capabilities",
+      "type": "reference",
+      "unlocks_at": "decision_1",
+      "content": {
+        "core_capabilities": {
+          "orchestration": {
+            "description": "Connect and coordinate actions across multiple security tools",
+            "examples": ["Query SIEM, enrich with threat intel, update firewall, create ticket"],
+            "benefit": "Single workflow spans multiple tools"
+          },
+          "automation": {
+            "description": "Execute tasks without human intervention",
+            "examples": ["Auto-enrich alerts", "Auto-block known-bad IOCs", "Auto-create tickets"],
+            "benefit": "Reduce manual repetitive work"
+          },
+          "playbooks": {
+            "description": "Codified response procedures",
+            "examples": ["Phishing response playbook", "Malware containment playbook"],
+            "benefit": "Consistent response regardless of analyst"
+          },
+          "case_management": {
+            "description": "Track incidents through lifecycle",
+            "examples": ["Evidence collection", "Timeline", "Collaboration", "Reporting"],
+            "benefit": "Centralized incident documentation"
+          }
+        },
+        "integration_types": {
+          "siem": "Ingest alerts, query logs, trigger playbooks",
+          "edr": "Query endpoints, isolate hosts, collect forensics",
+          "firewall": "Block IPs/domains, update rules",
+          "email": "Search mailboxes, delete messages, block senders",
+          "threat_intel": "Lookup IOCs, get context",
+          "ticketing": "Create/update tickets, track workflow"
+        },
+        "playbook_components": {
+          "triggers": "What starts the playbook (alert, schedule, manual)",
+          "tasks": "Individual actions (query, enrich, block, notify)",
+          "conditions": "Decision points (if malicious then...)",
+          "human_tasks": "Steps requiring analyst decision",
+          "outputs": "Results, reports, tickets"
+        }
+      }
+    },
+    {
+      "id": "artifact_3",
+      "title": "Automation Risk Assessment",
+      "type": "reference",
+      "unlocks_at": "decision_2",
+      "content": {
+        "automation_risk_levels": {
+          "low_risk": {
+            "characteristics": ["Read-only actions", "Reversible", "No business impact"],
+            "examples": ["Enrichment lookups", "Ticket creation", "Alert triage assistance"],
+            "approval": "Can automate fully"
+          },
+          "medium_risk": {
+            "characteristics": ["Modifying actions", "Limited blast radius", "Recoverable"],
+            "examples": ["Blocking external IPs", "Quarantining email", "Disabling user accounts"],
+            "approval": "Automate with guardrails or approval workflow"
+          },
+          "high_risk": {
+            "characteristics": ["Significant impact", "Difficult to reverse", "Business disruption possible"],
+            "examples": ["Isolating servers", "Blocking internal IPs", "Mass email deletion"],
+            "approval": "Human approval required"
+          }
+        },
+        "guardrails": {
+          "allowlists": "Never automate actions against critical systems/users",
+          "thresholds": "Human review if action affects >X systems",
+          "time_limits": "Auto-expire blocks after X hours",
+          "audit_trail": "Log all automated actions with justification"
+        },
+        "failure_modes": {
+          "false_positive": "Automated action on benign activity",
+          "scope_creep": "Action affects more than intended",
+          "integration_failure": "Downstream system doesn't respond correctly",
+          "mitigation": "Start conservative, expand based on confidence"
+        }
+      }
+    },
+    {
+      "id": "artifact_4",
+      "title": "Phishing Response Playbook Design",
+      "type": "process_document",
+      "unlocks_at": "decision_3",
+      "content": {
+        "playbook_workflow": {
+          "trigger": "User-reported phishing email or email security alert",
+          "phase_1_enrichment": {
+            "automated": true,
+            "actions": [
+              "Extract sender, URLs, attachments from email",
+              "Check sender reputation",
+              "Detonate URLs in sandbox",
+              "Check attachment hashes against threat intel",
+              "Identify all recipients of same email"
+            ],
+            "output": "Enriched alert with threat context"
+          },
+          "phase_2_analysis": {
+            "automated": "Partial - scoring automated, decision may need human",
+            "actions": [
+              "Calculate threat score based on enrichment",
+              "If score > threshold: auto-classify as malicious",
+              "If score ambiguous: queue for analyst review"
+            ]
+          },
+          "phase_3_containment": {
+            "automated": "With guardrails",
+            "actions": [
+              "Block sender domain (if not allowlisted)",
+              "Remove email from all recipient mailboxes",
+              "Block extracted malicious URLs at proxy",
+              "Add IOCs to blocklists"
+            ],
+            "guardrails": "No blocking of top 1000 domains, no action on exec mailboxes without approval"
+          },
+          "phase_4_notification": {
+            "automated": true,
+            "actions": [
+              "Notify affected users",
+              "Thank reporter",
+              "Update ticket with actions taken"
+            ]
+          },
+          "phase_5_closure": {
+            "automated": "Partial",
+            "actions": [
+              "Generate incident report",
+              "Update metrics",
+              "Close ticket (or escalate if needed)"
+            ]
+          }
+        },
+        "metrics_tracked": {
+          "volume": "Phishing reports processed",
+          "time": "Time from report to containment",
+          "accuracy": "False positive rate",
+          "coverage": "Percentage fully automated vs human-assisted"
+        }
+      }
+    },
+    {
+      "id": "artifact_5",
+      "title": "Integration Architecture",
+      "type": "reference",
+      "unlocks_at": "decision_4",
+      "content": {
+        "integration_patterns": {
+          "api_based": {
+            "description": "Direct REST/SOAP API calls",
+            "pros": "Real-time, full functionality",
+            "cons": "Requires development, API changes",
+            "use": "Primary integration method"
+          },
+          "webhook": {
+            "description": "Event-driven push notifications",
+            "pros": "Real-time triggers, low latency",
+            "cons": "One-way, requires endpoint",
+            "use": "Alert ingestion from SIEM/EDR"
+          },
+          "database": {
+            "description": "Direct database queries",
+            "pros": "Fast, flexible queries",
+            "cons": "Tight coupling, security risk",
+            "use": "Avoid if API available"
+          },
+          "file_based": {
+            "description": "CSV/JSON file exchange",
+            "pros": "Simple, works with legacy",
+            "cons": "Not real-time, error-prone",
+            "use": "Legacy systems only"
+          }
+        },
+        "authentication_methods": {
+          "api_keys": "Simple but less secure - rotate regularly",
+          "oauth": "Modern, token-based - preferred for cloud",
+          "service_accounts": "Dedicated accounts for automation",
+          "certificates": "Mutual TLS for high-security integrations"
+        },
+        "integration_best_practices": [
+          "Use dedicated service accounts (not personal credentials)",
+          "Apply least privilege to integration accounts",
+          "Log all API calls for audit",
+          "Handle rate limits gracefully",
+          "Build in retry logic for failures",
+          "Monitor integration health"
+        ]
+      }
+    },
+    {
+      "id": "artifact_6",
+      "title": "Playbook Development Lifecycle",
+      "type": "process_document",
+      "unlocks_at": "decision_5",
+      "content": {
+        "development_phases": {
+          "design": {
+            "activities": [
+              "Document current manual process",
+              "Identify automation opportunities",
+              "Define success criteria",
+              "Identify edge cases and exceptions"
+            ],
+            "output": "Playbook design document"
+          },
+          "build": {
+            "activities": [
+              "Develop playbook in SOAR platform",
+              "Build integrations needed",
+              "Create test cases"
+            ],
+            "output": "Functional playbook"
+          },
+          "test": {
+            "activities": [
+              "Test with synthetic data",
+              "Test edge cases",
+              "Test failure scenarios",
+              "Validate outputs"
+            ],
+            "output": "Tested playbook"
+          },
+          "pilot": {
+            "activities": [
+              "Run in shadow mode (observe, don't act)",
+              "Compare to manual process",
+              "Tune thresholds",
+              "Validate accuracy"
+            ],
+            "output": "Validated playbook"
+          },
+          "deploy": {
+            "activities": [
+              "Enable in production",
+              "Monitor closely initially",
+              "Gather feedback from analysts"
+            ],
+            "output": "Production playbook"
+          },
+          "maintain": {
+            "activities": [
+              "Monitor performance metrics",
+              "Update for environmental changes",
+              "Incorporate lessons learned",
+              "Regular review and optimization"
+            ],
+            "output": "Continuously improved playbook"
+          }
+        },
+        "version_control": {
+          "importance": "Track changes, enable rollback",
+          "practices": ["Git for playbook code", "Change documentation", "Approval workflow for production changes"]
+        }
+      }
+    },
+    {
+      "id": "artifact_7",
+      "title": "Alert Enrichment Framework",
+      "type": "reference",
+      "unlocks_at": "decision_6",
+      "content": {
+        "enrichment_sources": {
+          "asset_context": {
+            "source": "CMDB/Asset inventory",
+            "data": ["Asset owner", "Business criticality", "Location", "OS/applications"],
+            "value": "Prioritize based on asset importance"
+          },
+          "user_context": {
+            "source": "HR system/Active Directory",
+            "data": ["Department", "Role", "Manager", "Employment status", "Risk score"],
+            "value": "Understand who is involved"
+          },
+          "threat_intelligence": {
+            "source": "TIP, VirusTotal, commercial feeds",
+            "data": ["IOC reputation", "Associated campaigns", "TTPs"],
+            "value": "Determine if known threat"
+          },
+          "historical_context": {
+            "source": "SIEM, case management",
+            "data": ["Previous alerts for user/asset", "Related incidents", "Past behavior"],
+            "value": "Pattern recognition"
+          },
+          "network_context": {
+            "source": "Network tools, firewall logs",
+            "data": ["Recent connections", "Data transfer volumes", "Anomalies"],
+            "value": "Understand network activity"
+          }
+        },
+        "enrichment_workflow": {
+          "parallel_execution": "Query all sources simultaneously for speed",
+          "timeout_handling": "Continue if source unavailable",
+          "caching": "Cache results to reduce API calls",
+          "output": "Single enriched alert with all context"
+        },
+        "analyst_benefit": {
+          "before": "Analyst manually queries 5-10 systems per alert",
+          "after": "Alert arrives pre-enriched with all context"
+        }
+      }
+    },
+    {
+      "id": "artifact_8",
+      "title": "Automated Containment Actions",
+      "type": "reference",
+      "unlocks_at": "decision_7",
+      "content": {
+        "containment_actions": {
+          "network_containment": {
+            "block_ip": {"risk": "Low for external IPs, High for internal", "reversible": "Yes", "scope": "Single IP"},
+            "block_domain": {"risk": "Medium - could affect legitimate services", "reversible": "Yes", "scope": "Domain"},
+            "isolate_host": {"risk": "High - disconnects from network", "reversible": "Yes but disruptive", "scope": "Single host"}
+          },
+          "identity_containment": {
+            "disable_account": {"risk": "High - affects user productivity", "reversible": "Yes", "scope": "Single user"},
+            "force_password_reset": {"risk": "Medium - inconvenience", "reversible": "N/A", "scope": "Single user"},
+            "revoke_sessions": {"risk": "Medium - logs out user", "reversible": "Yes (re-login)", "scope": "Single user"}
+          },
+          "email_containment": {
+            "quarantine_email": {"risk": "Low - can release if FP", "reversible": "Yes", "scope": "Single email"},
+            "delete_from_mailboxes": {"risk": "Medium - harder to recover", "reversible": "Difficult", "scope": "Multiple users"},
+            "block_sender": {"risk": "Low to Medium depending on sender", "reversible": "Yes", "scope": "Organization-wide"}
+          }
+        },
+        "automation_recommendations": {
+          "fully_automate": ["Block known-bad external IPs", "Quarantine suspicious emails", "Add IOCs to threat intel"],
+          "automate_with_approval": ["Isolate endpoints", "Disable user accounts", "Block internal IPs"],
+          "human_only": ["Isolate servers", "Mass containment actions", "Actions affecting executives"]
+        }
+      }
+    },
+    {
+      "id": "artifact_9",
+      "title": "Automation Metrics Framework",
+      "type": "reference",
+      "unlocks_at": "decision_8",
+      "content": {
+        "efficiency_metrics": {
+          "time_saved": {
+            "definition": "Manual time eliminated by automation",
+            "calculation": "(Manual time Ã— volume) - (Automated time Ã— volume)",
+            "target": "Quantify analyst hours recovered"
+          },
+          "mttr_reduction": {
+            "definition": "Improvement in mean time to respond",
+            "before_after": "Compare automated vs manual response times",
+            "target": "60% reduction goal"
+          },
+          "automation_rate": {
+            "definition": "Percentage of alerts handled without human intervention",
+            "calculation": "Fully automated closures / Total alerts",
+            "target": "50% of routine alerts"
+          }
+        },
+        "quality_metrics": {
+          "false_positive_rate": {
+            "definition": "Automated actions on benign activity",
+            "monitoring": "Review automated containment actions",
+            "target": "<1% for containment actions"
+          },
+          "accuracy": {
+            "definition": "Correct classification by automation",
+            "validation": "Sample review of automated decisions",
+            "target": ">95% accuracy"
+          },
+          "coverage": {
+            "definition": "Percentage of alert types with playbooks",
+            "tracking": "Playbook coverage by alert category",
+            "target": "80% of volume covered"
+          }
+        },
+        "operational_metrics": {
+          "playbook_execution": "Success/failure rates by playbook",
+          "integration_health": "Availability and performance of integrations",
+          "error_rates": "Failed automation attempts"
+        }
+      }
+    },
+    {
+      "id": "artifact_10",
+      "title": "SOAR Implementation Roadmap",
+      "type": "project_document",
+      "unlocks_at": "decision_9",
+      "content": {
+        "phase_1": {
+          "duration": "Months 1-2",
+          "focus": "Foundation",
+          "deliverables": [
+            "Platform deployment and configuration",
+            "Core integrations (SIEM, EDR, ticketing)",
+            "Alert enrichment playbook",
+            "Analyst training"
+          ],
+          "success_criteria": "All alerts enriched automatically"
+        },
+        "phase_2": {
+          "duration": "Months 3-4",
+          "focus": "High-volume automation",
+          "deliverables": [
+            "Phishing response playbook",
+            "Failed login triage playbook",
+            "Automated ticket creation",
+            "Threat intel integration"
+          ],
+          "success_criteria": "50% of phishing handled automatically"
+        },
+        "phase_3": {
+          "duration": "Months 5-6",
+          "focus": "Containment automation",
+          "deliverables": [
+            "Automated IOC blocking",
+            "Malware response playbook",
+            "Endpoint isolation workflow",
+            "Approval workflows for high-risk actions"
+          ],
+          "success_criteria": "Automated containment for confirmed threats"
+        },
+        "phase_4": {
+          "duration": "Months 7-12",
+          "focus": "Optimization and expansion",
+          "deliverables": [
+            "Additional use case playbooks",
+            "Advanced analytics integration",
+            "Custom reporting",
+            "Continuous improvement process"
+          ],
+          "success_criteria": "60% MTTR reduction achieved"
+        },
+        "change_management": {
+          "analyst_involvement": "Include analysts in playbook design",
+          "training": "Ongoing training as capabilities expand",
+          "feedback_loop": "Regular feedback sessions to improve playbooks"
+        }
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Automation Starting Point",
+      "narrative": "You have a SOAR platform and dozens of potential use cases. Analysts want help with everything, but you need to prioritize. Some want automated containment immediately; others want basic enrichment first.",
+      "question": "What should be the FIRST automation use case to implement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Automated endpoint isolation for malware alerts",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "High-risk action too early - need to build trust first",
+            "detailed": "Automated containment is valuable but risky to start with. If automation makes a mistake isolating a critical system, you'll lose organizational trust. Start with lower-risk automation to prove value and accuracy before moving to containment actions."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Alert enrichment - automatically add context to all alerts",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Low-risk, high-value, builds foundation",
+            "detailed": "Alert enrichment is ideal first use case: low risk (read-only, no actions taken), high value (saves 35% of analyst time), high visibility (every analyst benefits immediately), and foundation for future automation (enrichment data feeds into decision-making). Prove value with enrichment, then expand to actions."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Full phishing response automation including containment",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Too complex for first playbook",
+            "detailed": "Full phishing automation involves multiple integrations (email, proxy, threat intel), containment actions, and many edge cases. Better to start simpler, prove the platform works, then tackle complex workflows. Phishing is a great second or third playbook."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Automated ticket creation for all alerts",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Valuable but less impactful than enrichment",
+            "detailed": "Ticket creation saves time (25% of analyst work) but creates less analyst value than enrichment. An auto-created ticket without context still requires manual lookups. Enrichment + ticket creation together is powerful, but enrichment alone provides more value."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What automation is low-risk (read-only) but high-value for analysts?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Alert enrichment: automatically adds asset, user, and threat intel context. Read-only (safe), benefits every alert, saves 35% of analyst time."
+        }
+      ],
+      "learning_note": "SOAR implementation order: start with low-risk, high-value automation. Alert enrichment is ideal: read-only (no risk of incorrect actions), high value (every alert improved), and foundational (enables better automated decisions later). Build organizational trust before implementing containment automation.",
+      "unlocks_artifact": "artifact_2"
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "Containment Automation Risk",
+      "narrative": "After successful enrichment automation, leadership wants to automate containment - blocking IPs, isolating hosts, disabling accounts. Some analysts are nervous about automated actions causing outages.",
+      "question": "How should containment automation be approached?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Fully automate all containment - speed is critical in incident response",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Too risky - automation errors can cause major disruption",
+            "detailed": "Full automation for containment risks isolating critical systems based on false positives, blocking legitimate services, or taking actions during sensitive business hours. Speed is important but not at the cost of reliability. Graduated approach is safer."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Risk-based approach: auto-execute low-risk actions, require approval for high-risk",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Balance speed with safety using risk-based automation",
+            "detailed": "Risk-based containment: low-risk actions (block external IPs, quarantine email) can be fully automated, medium-risk actions (disable user, block domain) automated with guardrails (allowlists, thresholds), and high-risk actions (isolate servers, mass actions) require human approval. This balances speed with safety."
+          }
+        },
+        {
+          "id": "C",
+          "text": "No automated containment - always require human approval",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Misses automation value for clear-cut cases",
+            "detailed": "Requiring approval for everything defeats the purpose of SOAR. Blocking a known-malicious external IP is low risk and shouldn't need human approval. The goal is to automate what's safe to automate while preserving human judgment for ambiguous or high-impact decisions."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Automate during business hours only, manual after hours",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Doesn't address the actual risk factors",
+            "detailed": "Time of day isn't the primary risk factor - the nature of the action is. A false positive isolation is bad at 2 PM or 2 AM. Risk-based approach addresses what makes actions safe or risky, not when they occur."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can you automate safe actions while protecting against high-impact mistakes?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Risk-based: categorize actions by impact. Low-risk = full automation. Medium-risk = automation with guardrails. High-risk = human approval required."
+        }
+      ],
+      "learning_note": "Containment automation risk management: categorize actions by risk level and impact. Low-risk (reversible, limited scope) can be fully automated. Medium-risk (moderate impact) needs guardrails (allowlists, thresholds, time limits). High-risk (significant impact, hard to reverse) requires human approval. This enables speed while preventing costly mistakes.",
+      "unlocks_artifact": "artifact_3"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Phishing Playbook Design",
+      "narrative": "Phishing is the highest-volume alert type (450/day). You're designing the phishing response playbook. The team wants to automate as much as possible while maintaining accuracy.",
+      "question": "What's the BEST approach for automated phishing classification?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Fully automated classification - machine learning determines malicious/benign",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "ML alone has false positive risk",
+            "detailed": "Pure ML classification will have false positives that lead to blocking legitimate emails or senders. ML is valuable for scoring, but clear-cut cases should be handled by deterministic rules, and ambiguous cases should go to humans. Hybrid approach is better."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Scoring system: auto-classify high-confidence cases, human review for ambiguous",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Automate the clear-cut, escalate the ambiguous",
+            "detailed": "Hybrid approach: enrichment feeds into scoring (known bad indicators, sandbox results, reputation), high-confidence malicious (score > threshold) auto-classified and contained, high-confidence benign auto-closed, and ambiguous (middle scores) queued for human review. This automates the majority while preserving human judgment for edge cases."
+          }
+        },
+        {
+          "id": "C",
+          "text": "All classification requires human review - automation only assists",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Misses opportunity to automate clear-cut cases",
+            "detailed": "Requiring human review for every email means 450 manual reviews per day. Many phishing emails are clearly malicious (known bad URLs, failed sandbox). Automate the obvious cases to free analysts for the genuinely ambiguous ones."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Auto-classify based on sender reputation only",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Single factor is insufficient",
+            "detailed": "Sender reputation alone misses many attack types: compromised legitimate senders, new domains, spoofing. Effective classification needs multiple factors: sender reputation, URL analysis, attachment analysis, and content indicators. Single-factor classification has high error rates."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can automation handle obvious cases while preserving human judgment for difficult ones?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Scoring system: multiple enrichment factors feed into score. High-confidence (clear malicious/benign) automated. Ambiguous scores go to human review."
+        }
+      ],
+      "learning_note": "Automated classification best practice: multi-factor scoring combining enrichment data (sender rep, URL analysis, sandbox results, threat intel). Auto-act on high-confidence results, queue ambiguous for human review. This typically automates 60-80% of volume while maintaining accuracy. Review automated decisions regularly to tune thresholds.",
+      "unlocks_artifact": "artifact_4"
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Integration Security",
+      "narrative": "The SOAR platform needs to integrate with multiple systems: SIEM, EDR, email, Active Directory, firewalls. Each integration requires authentication credentials. IT security is concerned about credential management.",
+      "question": "What is the MOST important security consideration for SOAR integrations?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Use personal admin accounts for integrations - easier to manage",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Personal accounts create accountability and security issues",
+            "detailed": "Personal accounts for automation: no accountability (who did what?), credentials tied to individual (employee leaves = broken integrations), potential for misuse, and violates least privilege. Always use dedicated service accounts."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Dedicated service accounts with least privilege and credential vaulting",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Service accounts with proper controls",
+            "detailed": "Integration security: dedicated service accounts (clear accountability, survive employee turnover), least privilege (only permissions needed for specific automation), credential vaulting (secrets managed securely, not in plaintext), regular rotation, and audit logging of all automated actions."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Single master account with full admin access to all systems",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Violates least privilege - excessive risk",
+            "detailed": "Single account with full admin: if compromised, attacker has access to everything. SOAR doesn't need full admin - it needs specific permissions for specific actions. Separate service accounts per integration with least privilege limits blast radius."
+          }
+        },
+        {
+          "id": "D",
+          "text": "API keys stored in the SOAR platform configuration",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Better than plaintext but proper vaulting is preferred",
+            "detailed": "Storing API keys in platform config is better than plaintext files but: SOAR platforms have their own vulnerabilities, keys should be in dedicated secrets management, and rotation should be automated. Use proper credential vaulting (HashiCorp Vault, Azure Key Vault) when possible."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What type of accounts should be used for automation, and how should credentials be managed?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Dedicated service accounts (not personal), least privilege (only needed permissions), credential vaulting (secrets management), audit logging."
+        }
+      ],
+      "learning_note": "SOAR integration security: dedicated service accounts (not personal), least privilege (minimum permissions for function), credential vaulting (secure secrets management), regular credential rotation, comprehensive audit logging, and monitoring for anomalous automated actions. SOAR platforms are powerful - if compromised, they can access many systems, so security is critical.",
+      "unlocks_artifact": "artifact_5"
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Playbook Testing Strategy",
+      "narrative": "You've built a new malware response playbook that can isolate infected endpoints. Before production deployment, you need to validate it works correctly and won't cause problems.",
+      "question": "What is the BEST approach to testing the playbook before production?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Deploy to production and monitor closely",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Testing in production risks real-world impact",
+            "detailed": "Production testing with containment actions risks isolating legitimate systems, disrupting business operations, and losing organizational trust in automation. Test thoroughly before production deployment."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Test with synthetic data, then run in shadow mode before enabling actions",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Progressive testing builds confidence",
+            "detailed": "Playbook testing progression: development testing with synthetic data (verify logic), shadow mode (run against real alerts, log what WOULD happen but don't act), comparison (validate shadow decisions match what analysts would do), and then production enablement. This catches issues before they impact production."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Test only with known malware samples",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Misses edge cases and false positive scenarios",
+            "detailed": "Testing only positive cases misses: false positives (legitimate software triggering detection), edge cases (unusual environments), and failure scenarios (what if integration is down?). Test both positive and negative cases."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Have analysts review the playbook code",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Code review is helpful but doesn't replace functional testing",
+            "detailed": "Code review catches logic errors but doesn't validate real-world behavior. Integrations may behave differently than expected, edge cases may not be obvious in code, and performance issues only appear in testing. Review AND test."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can you validate a playbook works correctly without risking production impact?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Progressive testing: synthetic data testing â†’ shadow mode (log actions without executing) â†’ validate against analyst decisions â†’ production enablement."
+        }
+      ],
+      "learning_note": "Playbook testing lifecycle: development testing (synthetic data, verify logic), integration testing (real systems, test environment), shadow mode (real alerts, log actions but don't execute), validation (compare shadow decisions to analyst decisions), and production deployment. Shadow mode is critical for containment playbooks - see what automation would do before letting it act.",
+      "unlocks_artifact": "artifact_6"
+    },
+    {
+      "id": "decision_6",
+      "sequence": 6,
+      "title": "Enrichment Performance",
+      "narrative": "The enrichment playbook queries 8 different sources for every alert. Some queries are slow, causing enrichment to take 30+ seconds. Analysts are complaining about delays.",
+      "question": "How should enrichment performance be optimized?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Remove slow sources - speed is more important than context",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Loses valuable context",
+            "detailed": "Removing enrichment sources reduces the value of automation. Threat intel might be slow but is critical context. Better to optimize the process while keeping valuable sources."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Execute enrichment queries in parallel with timeout handling",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Parallel execution and graceful degradation",
+            "detailed": "Performance optimization: execute all enrichment queries in parallel (don't wait for one to finish before starting next), set timeouts for each source (don't let one slow source delay everything), graceful degradation (continue without failed source, note it's missing), and caching (reuse recent results for same IOCs)."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Run enrichment in background and notify analyst when complete",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Async helps but doesn't optimize the enrichment itself",
+            "detailed": "Background processing helps analyst workflow but enrichment still takes 30+ seconds. Parallel execution addresses the actual bottleneck. Background processing can complement parallel execution but shouldn't replace it."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Only enrich high-severity alerts",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Low-severity alerts also benefit from context",
+            "detailed": "All alerts benefit from enrichment - a low-severity alert with context might be quickly closed (saving analyst time) or might reveal it's actually higher severity. Enrich everything but optimize performance."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "If you're querying 8 sources sequentially, how could you reduce total time?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Parallel execution: query all sources simultaneously. Timeouts: don't wait forever for slow sources. Caching: reuse recent results."
+        }
+      ],
+      "learning_note": "Enrichment performance optimization: parallel execution (query all sources simultaneously), timeout handling (set max wait per source), graceful degradation (continue with partial results if source fails), and caching (store results to avoid redundant queries). These techniques reduce 30+ second sequential enrichment to a few seconds.",
+      "unlocks_artifact": "artifact_7"
+    },
+    {
+      "id": "decision_7",
+      "sequence": 7,
+      "title": "Automated Containment Guardrails",
+      "narrative": "You're implementing automated IOC blocking. The playbook will automatically block malicious IPs at the firewall. You need to prevent the automation from blocking something critical.",
+      "question": "What is the MOST important guardrail for automated blocking?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Require analyst approval for every block",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Defeats the purpose of automation",
+            "detailed": "Requiring approval for every block means analysts must review each one - not much different from manual blocking. The goal is to automate safe blocks automatically while protecting against high-risk mistakes. Targeted guardrails are better than blanket approval requirements."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Allowlist of critical IPs/domains that are never auto-blocked",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Protect critical assets from automation mistakes",
+            "detailed": "Allowlist guardrail: maintain list of IPs/domains that are NEVER automatically blocked (critical infrastructure, major business partners, cloud services, etc.). If automation tries to block an allowlisted entity, alert human for review instead. This prevents catastrophic mistakes while allowing automation for non-critical entities."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Only block IPs, never domains",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Arbitrary restriction that misses the actual risk",
+            "detailed": "Domains can be just as safe or risky to block as IPs. The risk isn't IP vs. domain - it's whether it's critical to the business. Blocking malicious.evil.com is low risk; blocking your cloud provider's domain is high risk regardless of format."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Limit to 10 blocks per hour",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Rate limiting doesn't prevent blocking something critical",
+            "detailed": "Rate limiting prevents mass blocks but doesn't prevent blocking the one critical IP that's on block number 1. A guardrail needs to identify WHAT shouldn't be blocked, not just HOW MANY. Rate limits can complement allowlists but not replace them."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What would prevent automation from blocking something business-critical?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Allowlist: maintain list of critical IPs/domains (cloud providers, partners, internal infrastructure). Never auto-block allowlisted entities - escalate to human review instead."
+        }
+      ],
+      "learning_note": "Automated containment guardrails: allowlists (never auto-block critical entities), thresholds (human review if action affects >N systems), time limits (auto-expire blocks after X hours), scope limits (can't block internal subnets), and audit logging. Guardrails enable automation by preventing worst-case scenarios.",
+      "unlocks_artifact": "artifact_8"
+    },
+    {
+      "id": "decision_8",
+      "sequence": 8,
+      "title": "Measuring Automation Success",
+      "narrative": "Three months into the SOAR implementation, James Park asks for metrics to justify the investment to the board. He wants to show concrete ROI on the $800K investment.",
+      "question": "What metric BEST demonstrates SOAR value to leadership?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Number of playbooks deployed",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Activity metric, not outcome metric",
+            "detailed": "Playbook count measures activity, not value. 50 playbooks that rarely run provide less value than 5 high-volume playbooks. Leadership cares about outcomes (time saved, risk reduced), not activity (playbooks built)."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Analyst hours saved and MTTR reduction with cost translation",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Quantified value in terms leadership understands",
+            "detailed": "SOAR ROI metrics: analyst hours saved (time automation reclaimed Ã— analyst cost = $ saved), MTTR reduction (faster response = less damage/exposure), and coverage (percentage of alerts handled automatically). Translate to business terms: 'Automation saves 120 analyst hours/week ($X/year) and reduced average response time from 45 minutes to 8 minutes.'"
+          }
+        },
+        {
+          "id": "C",
+          "text": "Alert volume processed by automation",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Volume doesn't indicate value",
+            "detailed": "Processing volume shows automation is running but not whether it's providing value. 10,000 alerts enriched means nothing if enrichment doesn't improve analyst decisions or save time. Connect volume to outcomes."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Integration uptime percentage",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Operational metric, not value metric",
+            "detailed": "Integration uptime is important for operations but doesn't demonstrate value to leadership. High uptime on low-value automation is still low value. Focus on outcomes delivered."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What metrics translate automation benefits into terms leadership cares about?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Time saved (hours Ã— analyst cost = $ saved), MTTR reduction (faster response = lower risk), and automation rate (% handled without human). Translate to business impact."
+        }
+      ],
+      "learning_note": "SOAR ROI metrics: quantify time saved (analyst hours Ã— loaded cost), measure MTTR improvement (before/after automation), calculate coverage (% of alerts automated), and track quality (false positive rate of automation). Present in business terms - 'X hours saved per week at $Y/hour = $Z annual savings plus faster threat response.'",
+      "unlocks_artifact": "artifact_9"
+    },
+    {
+      "id": "decision_9",
+      "sequence": 9,
+      "title": "Analyst Adoption",
+      "narrative": "Some analysts are enthusiastic about automation, but others are resistant. One senior analyst says 'automation will make mistakes and I'll be blamed' and refuses to use the playbooks.",
+      "question": "How should analyst resistance to automation be addressed?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Mandate playbook use and discipline non-compliance",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Forcing adoption creates resentment and workarounds",
+            "detailed": "Mandating use without addressing concerns creates: resentment, workarounds (analysts bypass automation), lack of feedback for improvement, and blame culture if something goes wrong. Adoption requires addressing legitimate concerns."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Involve analysts in playbook design and address accountability concerns",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Involvement drives adoption and improves quality",
+            "detailed": "Address resistance through: involving analysts in playbook design (they know the edge cases), clear accountability model (automation is a tool, not a replacement - analysts still make key decisions), transparent logging (see what automation did and why), easy override capability (analysts can intervene), and celebrating wins (show how automation helps, not threatens)."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Let resistant analysts work manually while others use automation",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Creates inconsistent processes and doesn't address concerns",
+            "detailed": "Split approaches create: inconsistent incident response, difficulty measuring automation value, and continued resistance from influential team members. Address the concerns to get everyone on board, which also surfaces legitimate issues with the automation."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Remove human override capability to ensure automation is used",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Dangerous - removes safety valve",
+            "detailed": "Human override is a critical safety mechanism. Removing it: creates risk when automation is wrong, removes accountability, and signals analysts aren't trusted. The goal is augmenting analysts, not replacing their judgment."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How can analysts become advocates for automation rather than resisters?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Involvement: analysts design playbooks, address their concerns (accountability, overrides), show them the value (time saved on repetitive work). Adoption follows understanding."
+        }
+      ],
+      "learning_note": "SOAR adoption success factors: analyst involvement in design (they know edge cases and will use what they helped build), clear accountability model (automation assists, humans decide), transparency (analysts can see what automation did), easy override (human judgment preserved), and demonstrated value (show time saved on tedious work). Resistance often stems from legitimate concerns that, when addressed, improve the automation.",
+      "unlocks_artifact": "artifact_10"
+    },
+    {
+      "id": "decision_10",
+      "sequence": 10,
+      "title": "Automation Failure Handling",
+      "narrative": "A playbook failed overnight: the threat intel integration was down, so enrichment returned no data. The automation classified several phishing emails as benign (low threat score due to missing intel) and closed them. Two were actually malicious.",
+      "question": "How should automation failures like this be prevented?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Disable automation when any integration is unavailable",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Too aggressive - minor outages would stop all automation",
+            "detailed": "Disabling all automation for any integration failure is overkill. Some integrations are more critical than others, and temporary failures are common. Better to handle failures gracefully within the playbook logic."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Build failure awareness into playbook logic - flag when key data is missing",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Graceful degradation with human escalation for uncertainty",
+            "detailed": "Failure-aware automation: detect when critical enrichment sources fail, adjust confidence accordingly (missing threat intel = lower confidence), escalate to human review when data is incomplete rather than auto-deciding with insufficient information, and alert operations about integration issues. 'I don't have enough information' should trigger human review, not auto-closure."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Add redundant threat intel sources",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Helps with this specific failure but doesn't address the general problem",
+            "detailed": "Redundant sources help availability but: any source can fail, cost adds up for redundancy everywhere, and this specific failure would still happen if all threat intel was down. The playbook logic needs to handle missing data gracefully."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Have an analyst review all automation decisions",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Defeats the purpose of automation",
+            "detailed": "Reviewing every decision eliminates the efficiency gain of automation. The goal is smart automation that knows when it's confident and when it needs human help - not human review of everything."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "How should automation behave when it doesn't have complete information?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Failure-aware logic: detect missing/failed data sources, reduce confidence when data is incomplete, escalate to human when uncertain rather than guessing."
+        }
+      ],
+      "learning_note": "Automation resilience: build failure awareness into playbook logic. When critical data is missing: detect the gap, adjust confidence scores, escalate to human review rather than making low-confidence decisions, and alert on integration issues. The playbook should know what it doesn't know and ask for help when uncertain."
+    }
+  ],
+  
+  "scoring": {
+    "max_points": 250,
+    "passing_score": 200,
+    "passing_percentage": 80
+  },
+  
+  "outcome_thresholds": {
+    "expert": {"min_score": 238, "title": "Security Automation Expert", "description": "Exceptional automation and orchestration capabilities."},
+    "proficient": {"min_score": 213, "title": "Security Automation Professional", "description": "Strong grasp of SOAR implementation."},
+    "competent": {"min_score": 200, "title": "Security Automation Competent", "description": "Solid understanding of automation concepts."},
+    "developing": {"min_score": 175, "title": "Security Automation Developing", "description": "Gaps in automation concepts."},
+    "needs_remediation": {"min_score": 0, "title": "Automation Fundamentals Needed", "description": "Review automation concepts."}
+  },
+  
+  "weakness_mapping": {
+    "automation_strategy_gaps": {"indicators": ["decision_1_incorrect", "decision_2_incorrect"], "remediation": "D4-REM-001", "focus": "Automation strategy and risk"},
+    "integration_gaps": {"indicators": ["decision_4_incorrect", "decision_10_incorrect"], "remediation": "D4-REM-001", "focus": "Integration and resilience"}
+  },
+  
+  "prerequisites": ["D4-SIM-001", "D4-SIM-002"],
+  "unlocks": [],
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 4: Security Operations",
+    "job_role_alignment": ["Security Automation Engineer", "SOC Engineer", "Security Architect"],
+    "estimated_time": "45-60 minutes",
+    "industry_context": "Insurance/Financial Services"
+  }
+}

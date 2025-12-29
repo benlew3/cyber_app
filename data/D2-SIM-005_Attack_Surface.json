@@ -1,0 +1,1417 @@
+{
+  "simulation_id": "D2-SIM-005",
+  "title": "Attack Surface Reduction",
+  "domain": 2,
+  "category": "primary",
+  "difficulty": "intermediate",
+  "time_estimate": "45-60 minutes",
+  "passing_score": 200,
+  "max_score": 250,
+  
+  "exam_objectives": [
+    {
+      "id": "2.2",
+      "description": "Explain common threat vectors and attack surfaces",
+      "coverage": ["attack surface analysis", "threat modeling", "entry points", "data flows"]
+    },
+    {
+      "id": "2.3",
+      "description": "Explain various types of vulnerabilities",
+      "coverage": ["application vulnerabilities", "configuration weaknesses", "design flaws", "third-party risks"]
+    },
+    {
+      "id": "2.5",
+      "description": "Explain the purpose of mitigation techniques used to secure the enterprise",
+      "coverage": ["hardening", "least privilege", "segmentation", "input validation", "secure defaults"]
+    }
+  ],
+  
+  "scenario_context": {
+    "organization": "VaultPay",
+    "industry": "FinTech - Digital Payments",
+    "size": "85 employees, Series B startup",
+    "your_role": "Security Architect",
+    "environment": {
+      "product": "Mobile payment platform with merchant APIs",
+      "infrastructure": "AWS native (EKS, RDS, Lambda, API Gateway)",
+      "users": "Consumer mobile app + merchant dashboard + admin portal",
+      "data": "Payment card data, PII, transaction history",
+      "compliance_targets": ["PCI-DSS", "SOC 2 Type II"],
+      "launch_timeline": "Public launch in 6 weeks"
+    },
+    "opening_narrative": "VaultPay is six weeks from public launch of their mobile payment platform. The CEO has brought you in as Security Architect to conduct a pre-launch security assessment. The development team has been moving fast - really fast - and security has been 'on the roadmap' but never quite prioritized. Now, with $40 million in Series B funding and partnerships with major retailers pending, the board is demanding a security review before launch. Your job is to identify the attack surface, find the critical vulnerabilities, and recommend prioritized hardening measures that can be implemented before launch day."
+  },
+  
+  "artifacts": [
+    {
+      "id": "artifact_1",
+      "title": "System Architecture Overview",
+      "type": "reference",
+      "unlocks_at": "start",
+      "content": {
+        "architecture_components": {
+          "consumer_mobile_app": {
+            "platforms": ["iOS", "Android"],
+            "authentication": "Email/password + SMS OTP",
+            "features": ["Account management", "Card linking", "P2P payments", "Merchant payments"],
+            "data_stored_locally": "Auth tokens, transaction cache, user preferences"
+          },
+          "merchant_dashboard": {
+            "type": "React SPA",
+            "hosting": "CloudFront + S3",
+            "authentication": "Username/password (no MFA currently)",
+            "features": ["Transaction reporting", "Refund processing", "API key management", "Settlement reports"]
+          },
+          "admin_portal": {
+            "type": "Internal React app",
+            "hosting": "EC2 behind ALB",
+            "authentication": "Username/password + IP whitelist",
+            "features": ["User management", "Merchant onboarding", "Fraud review", "System configuration"]
+          },
+          "api_layer": {
+            "gateway": "AWS API Gateway",
+            "compute": "EKS (Kubernetes) + Lambda",
+            "apis": ["Consumer API", "Merchant API", "Internal API", "Webhook delivery"]
+          },
+          "data_layer": {
+            "primary_db": "RDS PostgreSQL (Multi-AZ)",
+            "cache": "ElastiCache Redis",
+            "search": "OpenSearch",
+            "storage": "S3 for documents and logs"
+          },
+          "third_party_integrations": {
+            "payment_processor": "Stripe Connect",
+            "identity_verification": "Plaid",
+            "fraud_detection": "Sift",
+            "communications": "Twilio (SMS), SendGrid (email)"
+          }
+        },
+        "network_architecture": {
+          "vpc_design": "Single VPC, public/private subnets",
+          "ingress": "CloudFront â†’ API Gateway â†’ ALB â†’ EKS",
+          "egress": "NAT Gateway for outbound",
+          "current_segmentation": "Minimal - most services can reach most other services"
+        }
+      }
+    },
+    {
+      "id": "artifact_2",
+      "title": "Attack Surface Inventory",
+      "type": "analysis",
+      "unlocks_at": "decision_1",
+      "content": {
+        "external_attack_surface": {
+          "internet_facing": [
+            {
+              "component": "Consumer Mobile API",
+              "endpoint": "api.vaultpay.io",
+              "exposure": "Public internet",
+              "authentication": "JWT tokens",
+              "rate_limiting": "None implemented"
+            },
+            {
+              "component": "Merchant API",
+              "endpoint": "merchant-api.vaultpay.io",
+              "exposure": "Public internet",
+              "authentication": "API keys",
+              "rate_limiting": "Basic (1000 req/min)"
+            },
+            {
+              "component": "Merchant Dashboard",
+              "endpoint": "dashboard.vaultpay.io",
+              "exposure": "Public internet",
+              "authentication": "Username/password only",
+              "rate_limiting": "None"
+            },
+            {
+              "component": "Webhook Endpoints",
+              "endpoint": "webhooks.vaultpay.io",
+              "exposure": "Public internet",
+              "authentication": "Signature verification",
+              "rate_limiting": "None"
+            }
+          ],
+          "partner_connections": [
+            {"partner": "Stripe", "direction": "Outbound API + Inbound webhooks"},
+            {"partner": "Plaid", "direction": "Outbound API + Inbound webhooks"},
+            {"partner": "Sift", "direction": "Outbound API"},
+            {"partner": "Twilio", "direction": "Outbound API"}
+          ]
+        },
+        "internal_attack_surface": {
+          "admin_portal": {
+            "exposure": "IP whitelist (office IPs only)",
+            "concern": "Remote work means VPN or whitelist expansion needed"
+          },
+          "kubernetes_api": {
+            "exposure": "Private subnet",
+            "concern": "kubectl access from developer laptops"
+          },
+          "database": {
+            "exposure": "Private subnet",
+            "concern": "Accessible from all EKS pods"
+          }
+        },
+        "data_flows": {
+          "card_data": "Mobile app â†’ API Gateway â†’ EKS â†’ Stripe (tokenized)",
+          "pii": "Mobile app â†’ API Gateway â†’ EKS â†’ RDS PostgreSQL",
+          "credentials": "Apps â†’ API Gateway â†’ EKS â†’ RDS (hashed)",
+          "logs": "All services â†’ CloudWatch â†’ S3 (contains PII)"
+        }
+      }
+    },
+    {
+      "id": "artifact_3",
+      "title": "Vulnerability Scan Results",
+      "type": "evidence",
+      "unlocks_at": "decision_2",
+      "content": {
+        "scan_summary": {
+          "scan_date": "2024-02-10",
+          "tools_used": ["Nessus", "Burp Suite Pro", "AWS Inspector", "Snyk"],
+          "critical": 3,
+          "high": 12,
+          "medium": 34,
+          "low": 67
+        },
+        "critical_findings": [
+          {
+            "id": "VULN-001",
+            "title": "SQL Injection in Transaction Search",
+            "location": "Merchant API - /api/v1/transactions/search",
+            "description": "Search parameter 'merchant_id' passed directly to SQL query without parameterization",
+            "cvss": 9.8,
+            "exploitability": "Trivial - standard SQLi techniques",
+            "impact": "Full database access, data exfiltration"
+          },
+          {
+            "id": "VULN-002",
+            "title": "Broken Access Control - IDOR",
+            "location": "Consumer API - /api/v1/users/{id}/transactions",
+            "description": "User ID in URL not validated against authenticated user. Any user can view any other user's transactions.",
+            "cvss": 9.1,
+            "exploitability": "Trivial - change ID in URL",
+            "impact": "Complete PII and financial data exposure"
+          },
+          {
+            "id": "VULN-003",
+            "title": "Hardcoded API Credentials",
+            "location": "GitHub repository - config/production.yml",
+            "description": "Stripe API keys and database credentials committed to repository",
+            "cvss": 9.0,
+            "exploitability": "Requires repo access (50+ people have access)",
+            "impact": "Payment system compromise, database access"
+          }
+        ],
+        "high_findings_summary": [
+          "No rate limiting on authentication endpoints (brute force risk)",
+          "JWT tokens don't expire (stolen tokens valid indefinitely)",
+          "Missing input validation on 7 API endpoints",
+          "Default AWS security group allows broad internal access",
+          "CloudWatch logs contain unmasked PII",
+          "No WAF in front of API Gateway",
+          "Merchant passwords stored with MD5 (deprecated algorithm)",
+          "Admin portal accessible from any whitelisted IP (no user attribution)",
+          "Missing HTTPS redirect on merchant dashboard",
+          "Outdated dependencies with known CVEs (Log4j, Spring)",
+          "S3 buckets with overly permissive policies",
+          "No encryption at rest on ElastiCache"
+        ]
+      }
+    },
+    {
+      "id": "artifact_4",
+      "title": "Threat Model - STRIDE Analysis",
+      "type": "analysis",
+      "unlocks_at": "decision_3",
+      "content": {
+        "stride_analysis": {
+          "spoofing": {
+            "threats": [
+              "Account takeover via credential stuffing (no rate limiting)",
+              "Merchant impersonation via stolen API keys",
+              "Admin impersonation from compromised whitelisted IP"
+            ],
+            "current_controls": "Basic password authentication",
+            "gaps": "No MFA, no anomaly detection, weak rate limiting"
+          },
+          "tampering": {
+            "threats": [
+              "Transaction amount modification",
+              "Webhook payload manipulation",
+              "Log tampering to hide malicious activity"
+            ],
+            "current_controls": "HTTPS in transit, basic input validation",
+            "gaps": "No integrity verification on webhooks, insufficient input validation"
+          },
+          "repudiation": {
+            "threats": [
+              "Users denying transactions they made",
+              "Merchants disputing settlements",
+              "Admins denying configuration changes"
+            ],
+            "current_controls": "Basic logging to CloudWatch",
+            "gaps": "Logs contain PII (compliance issue), no tamper-proof audit trail"
+          },
+          "information_disclosure": {
+            "threats": [
+              "IDOR exposing user transaction data",
+              "SQL injection exfiltrating database",
+              "Log exposure revealing PII and credentials",
+              "Error messages leaking stack traces"
+            ],
+            "current_controls": "HTTPS",
+            "gaps": "Multiple access control flaws, verbose error handling"
+          },
+          "denial_of_service": {
+            "threats": [
+              "API flooding (no rate limiting)",
+              "Resource exhaustion via expensive queries",
+              "Webhook amplification attacks"
+            ],
+            "current_controls": "Basic rate limiting on merchant API only",
+            "gaps": "No WAF, no DDoS protection, no circuit breakers"
+          },
+          "elevation_of_privilege": {
+            "threats": [
+              "Regular user accessing admin functions",
+              "Merchant accessing other merchants' data",
+              "Compromised service account escalating to database admin"
+            ],
+            "current_controls": "Role-based access in application code",
+            "gaps": "No defense in depth, database accessible from all pods"
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_5",
+      "title": "Third-Party Risk Assessment",
+      "type": "analysis",
+      "unlocks_at": "decision_4",
+      "content": {
+        "third_party_inventory": {
+          "stripe": {
+            "data_shared": "Payment card tokens, transaction amounts, merchant IDs",
+            "integration_type": "API + webhooks",
+            "security_posture": "PCI-DSS Level 1, SOC 2 Type II",
+            "risk_level": "Low",
+            "concerns": "API key management, webhook verification"
+          },
+          "plaid": {
+            "data_shared": "Bank account access tokens, account/routing numbers",
+            "integration_type": "API + Link SDK",
+            "security_posture": "SOC 2 Type II, bank-level security",
+            "risk_level": "Low",
+            "concerns": "Token storage, Link integration security"
+          },
+          "sift": {
+            "data_shared": "User behavior data, transaction patterns, device fingerprints",
+            "integration_type": "API",
+            "security_posture": "SOC 2 Type II",
+            "risk_level": "Low",
+            "concerns": "PII in fraud scoring requests"
+          },
+          "twilio": {
+            "data_shared": "Phone numbers, SMS content (OTP codes)",
+            "integration_type": "API",
+            "security_posture": "SOC 2 Type II, ISO 27001",
+            "risk_level": "Medium",
+            "concerns": "SMS interception risk for OTP, SIM swap attacks"
+          },
+          "sendgrid": {
+            "data_shared": "Email addresses, email content",
+            "integration_type": "API",
+            "security_posture": "SOC 2 Type II",
+            "risk_level": "Low",
+            "concerns": "Email template injection"
+          },
+          "npm_packages": {
+            "data_shared": "N/A - code dependencies",
+            "integration_type": "Build-time",
+            "security_posture": "Varies widely",
+            "risk_level": "High",
+            "concerns": "47 packages with known vulnerabilities, including critical Log4j"
+          },
+          "docker_base_images": {
+            "data_shared": "N/A - container base",
+            "integration_type": "Build-time",
+            "security_posture": "Varies",
+            "risk_level": "Medium",
+            "concerns": "Using 'latest' tags, no image scanning"
+          }
+        },
+        "supply_chain_risks": [
+          "No SBOM (Software Bill of Materials) maintained",
+          "Dependencies not pinned to specific versions",
+          "No automated vulnerability scanning in CI/CD",
+          "Open source components not reviewed for licensing or security"
+        ]
+      }
+    },
+    {
+      "id": "artifact_6",
+      "title": "Authentication & Access Control Review",
+      "type": "analysis",
+      "unlocks_at": "decision_5",
+      "content": {
+        "authentication_mechanisms": {
+          "consumer_app": {
+            "method": "Email/password + SMS OTP",
+            "password_policy": "8 characters minimum, no complexity requirements",
+            "mfa": "SMS OTP (optional, only 12% of users enabled)",
+            "session_management": "JWT tokens, no expiration set",
+            "issues": [
+              "SMS OTP vulnerable to SIM swap",
+              "No rate limiting on login attempts",
+              "Password policy too weak",
+              "JWT tokens never expire"
+            ]
+          },
+          "merchant_dashboard": {
+            "method": "Username/password only",
+            "password_policy": "6 characters minimum",
+            "mfa": "Not implemented",
+            "session_management": "Session cookies, 24-hour expiration",
+            "issues": [
+              "No MFA for financial access",
+              "Extremely weak password policy",
+              "No account lockout",
+              "Sessions don't invalidate on password change"
+            ]
+          },
+          "admin_portal": {
+            "method": "Username/password + IP whitelist",
+            "password_policy": "8 characters, requires number",
+            "mfa": "Not implemented",
+            "session_management": "Session cookies, 8-hour expiration",
+            "issues": [
+              "IP whitelist is single control (no user MFA)",
+              "No privileged access management",
+              "No session recording or audit"
+            ]
+          }
+        },
+        "authorization_model": {
+          "design": "Role-based (Consumer, Merchant, Admin)",
+          "implementation": "Checked in application code",
+          "issues": [
+            "IDOR vulnerabilities indicate broken implementation",
+            "No object-level authorization checks",
+            "Admin functions not segregated by duty",
+            "No attribute-based access control for sensitive operations"
+          ]
+        }
+      }
+    },
+    {
+      "id": "artifact_7",
+      "title": "Data Security Assessment",
+      "type": "analysis",
+      "unlocks_at": "decision_6",
+      "content": {
+        "data_classification": {
+          "payment_card_data": {
+            "classification": "PCI Restricted",
+            "handling": "Tokenized via Stripe - VaultPay never sees full PAN",
+            "storage": "Tokens only in RDS",
+            "status": "COMPLIANT - properly tokenized"
+          },
+          "bank_account_data": {
+            "classification": "Highly Sensitive",
+            "handling": "Access tokens from Plaid",
+            "storage": "Encrypted in RDS",
+            "status": "ACCEPTABLE - tokens rotatable"
+          },
+          "pii": {
+            "classification": "Sensitive",
+            "examples": "Name, email, phone, address, SSN (for high-value accounts)",
+            "storage": "RDS PostgreSQL",
+            "encryption_at_rest": "RDS encryption enabled",
+            "status": "CONCERN - SSN storage needs review"
+          },
+          "transaction_data": {
+            "classification": "Confidential",
+            "storage": "RDS + OpenSearch",
+            "retention": "Indefinite (no retention policy)",
+            "status": "CONCERN - no retention policy, OpenSearch not encrypted"
+          },
+          "credentials": {
+            "classification": "Secret",
+            "storage": "RDS (user passwords), GitHub (API keys - CRITICAL)",
+            "hashing": "MD5 for merchants (CRITICAL), bcrypt for consumers",
+            "status": "CRITICAL - hardcoded secrets, weak hashing"
+          },
+          "logs": {
+            "classification": "Should be Internal, currently contains Sensitive",
+            "storage": "CloudWatch â†’ S3",
+            "issues": "Unmasked PII in logs, no access controls on S3",
+            "status": "CRITICAL - PII exposure in logs"
+          }
+        },
+        "encryption_status": {
+          "in_transit": "TLS 1.2+ enforced on external, TLS 1.0 still accepted internally",
+          "at_rest_rds": "Enabled (AES-256)",
+          "at_rest_s3": "Not enabled on log buckets",
+          "at_rest_elasticache": "Not enabled",
+          "at_rest_opensearch": "Not enabled"
+        }
+      }
+    },
+    {
+      "id": "artifact_8",
+      "title": "Infrastructure Security Review",
+      "type": "analysis",
+      "unlocks_at": "decision_7",
+      "content": {
+        "aws_security_posture": {
+          "iam": {
+            "findings": [
+              "5 IAM users with console access (should use SSO)",
+              "2 access keys older than 90 days",
+              "3 overly permissive IAM policies (Admin access)",
+              "No SCPs (Service Control Policies) in organization"
+            ],
+            "risk": "High"
+          },
+          "networking": {
+            "findings": [
+              "Default security group allows all internal traffic",
+              "No network ACLs configured",
+              "NAT Gateway is single point of failure",
+              "No VPC Flow Logs enabled"
+            ],
+            "risk": "High"
+          },
+          "compute": {
+            "findings": [
+              "EKS nodes using default AMI (not hardened)",
+              "No pod security policies in Kubernetes",
+              "Containers running as root",
+              "No resource limits set on pods"
+            ],
+            "risk": "Medium"
+          },
+          "storage": {
+            "findings": [
+              "2 S3 buckets with public access possible",
+              "No S3 bucket policies enforcing encryption",
+              "EBS volumes not encrypted by default"
+            ],
+            "risk": "High"
+          },
+          "monitoring": {
+            "findings": [
+              "CloudTrail enabled but not monitored",
+              "No GuardDuty enabled",
+              "No Security Hub enabled",
+              "No alerting on security events"
+            ],
+            "risk": "High"
+          }
+        },
+        "kubernetes_security": {
+          "cluster_config": {
+            "api_server": "Private endpoint (good)",
+            "rbac": "Enabled but overly permissive",
+            "network_policies": "Not implemented",
+            "secrets_management": "Kubernetes secrets (not encrypted at rest)",
+            "service_mesh": "Not implemented"
+          },
+          "container_security": {
+            "base_images": "Using 'latest' tags",
+            "vulnerability_scanning": "Not implemented",
+            "runtime_security": "Not implemented",
+            "image_signing": "Not implemented"
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_9",
+      "title": "Prioritized Remediation Plan",
+      "type": "operational",
+      "unlocks_at": "decision_9",
+      "content": {
+        "remediation_phases": {
+          "phase_1_critical": {
+            "timeline": "Week 1 (Before any launch)",
+            "items": [
+              {
+                "issue": "SQL Injection",
+                "remediation": "Implement parameterized queries",
+                "effort": "2 days",
+                "owner": "Backend team"
+              },
+              {
+                "issue": "IDOR vulnerability",
+                "remediation": "Implement object-level authorization",
+                "effort": "3 days",
+                "owner": "Backend team"
+              },
+              {
+                "issue": "Hardcoded credentials",
+                "remediation": "Rotate all exposed credentials, implement AWS Secrets Manager",
+                "effort": "2 days",
+                "owner": "DevOps + Security"
+              },
+              {
+                "issue": "MD5 password hashing",
+                "remediation": "Migrate to bcrypt, force password reset",
+                "effort": "1 day",
+                "owner": "Backend team"
+              }
+            ]
+          },
+          "phase_2_high": {
+            "timeline": "Weeks 2-3",
+            "items": [
+              {
+                "issue": "No MFA on merchant dashboard",
+                "remediation": "Implement TOTP MFA, require for all merchants",
+                "effort": "1 week",
+                "owner": "Frontend + Backend"
+              },
+              {
+                "issue": "JWT token expiration",
+                "remediation": "Set 1-hour expiration with refresh tokens",
+                "effort": "3 days",
+                "owner": "Backend team"
+              },
+              {
+                "issue": "Missing rate limiting",
+                "remediation": "Implement rate limiting on all endpoints via API Gateway",
+                "effort": "2 days",
+                "owner": "DevOps"
+              },
+              {
+                "issue": "No WAF",
+                "remediation": "Deploy AWS WAF with OWASP ruleset",
+                "effort": "2 days",
+                "owner": "DevOps"
+              },
+              {
+                "issue": "PII in logs",
+                "remediation": "Implement log sanitization, mask sensitive data",
+                "effort": "1 week",
+                "owner": "Backend team"
+              }
+            ]
+          },
+          "phase_3_medium": {
+            "timeline": "Weeks 4-6",
+            "items": [
+              "Implement network segmentation",
+              "Enable encryption on ElastiCache and OpenSearch",
+              "Deploy GuardDuty and Security Hub",
+              "Implement container security scanning",
+              "Establish secrets rotation",
+              "Create incident response procedures"
+            ]
+          },
+          "phase_4_ongoing": {
+            "timeline": "Post-launch",
+            "items": [
+              "Vulnerability management program",
+              "Penetration testing (quarterly)",
+              "Security awareness training",
+              "Third-party security assessments",
+              "PCI-DSS certification process"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_10",
+      "title": "Launch Readiness Assessment",
+      "type": "operational",
+      "unlocks_at": "decision_10",
+      "content": {
+        "launch_criteria": {
+          "critical_blockers": {
+            "status": "Must resolve before launch",
+            "items": [
+              {"item": "SQL Injection fixed", "status": "PENDING"},
+              {"item": "IDOR fixed", "status": "PENDING"},
+              {"item": "Credentials rotated", "status": "PENDING"},
+              {"item": "Password hashing upgraded", "status": "PENDING"}
+            ]
+          },
+          "high_priority": {
+            "status": "Should resolve before launch",
+            "items": [
+              {"item": "Merchant MFA", "status": "PENDING"},
+              {"item": "Rate limiting", "status": "PENDING"},
+              {"item": "WAF deployed", "status": "PENDING"},
+              {"item": "JWT expiration", "status": "PENDING"}
+            ]
+          },
+          "acceptable_risk": {
+            "status": "Can launch with documented risk acceptance",
+            "items": [
+              {"item": "Full network segmentation", "rationale": "Time constraint, compensating controls in place"},
+              {"item": "Complete container hardening", "rationale": "Lower risk, monitoring in place"},
+              {"item": "PCI-DSS certification", "rationale": "Not processing cards directly (Stripe tokenization)"}
+            ]
+          }
+        },
+        "risk_summary": {
+          "before_remediation": "CRITICAL - Not launch-ready. Multiple trivially exploitable vulnerabilities.",
+          "after_phase_1": "HIGH - Core vulnerabilities fixed. Still significant gaps.",
+          "after_phase_2": "MEDIUM - Major security controls in place. Acceptable for controlled launch.",
+          "after_phase_3": "LOW - Mature security posture. Ready for full public launch."
+        },
+        "recommendation": "Complete Phase 1 (critical) and Phase 2 (high) before any public launch. Phase 3 can continue post-launch with limited user base."
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Attack Surface Mapping",
+      "narrative": "Your first task is to understand VaultPay's attack surface. The development team has provided architecture documentation, but you need to identify all the ways an attacker could potentially interact with the system.",
+      "question": "What is the MOST important category of attack surface to prioritize in your initial assessment?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Internal infrastructure - databases, Kubernetes cluster, internal services",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Important but not the highest priority initially",
+            "detailed": "Internal infrastructure is important, but attackers typically need to breach the perimeter first. For a FinTech about to launch publicly, internet-facing attack surface is the most critical because it's exposed to every attacker on the internet from day one. Internal hardening matters, but external exposure is the front door.",
+            "consequence": "Internal infrastructure reviewed while internet-facing APIs have exploitable vulnerabilities accessible to anyone."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Internet-facing APIs and web applications - everything directly accessible from the internet",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! External attack surface faces the most threat exposure",
+            "detailed": "Internet-facing components are accessible to every attacker in the world. For a payment platform, this includes consumer APIs, merchant APIs, dashboards, and webhook endpoints. These are the front door - if they're vulnerable, attackers don't need to breach internal defenses. Prioritize external attack surface first.",
+            "consequence": "External attack surface mapped: 4 major internet-facing components identified with authentication, input handling, and rate limiting analysis."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Third-party integrations - Stripe, Plaid, and other external services",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important but third parties have their own security",
+            "detailed": "Third-party risk is real, but established fintech providers (Stripe, Plaid) have mature security programs. The bigger risk is usually how YOU integrate with them - API key management, webhook verification, data handling. This is part of attack surface analysis but not the top priority for initial assessment.",
+            "consequence": "Third-party security reviewed - all major vendors have SOC 2. Meanwhile, first-party vulnerabilities remain unexamined."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Mobile applications - iOS and Android apps are the primary user interface",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Mobile is part of external surface but APIs matter more",
+            "detailed": "Mobile apps are important, but they're essentially clients to your APIs. A secure API protects against both mobile app attacks AND direct API attacks. An insecure API is vulnerable regardless of mobile app security. Focus on the API layer that mobile apps consume - that's where the real risk is.",
+            "consequence": "Mobile app security reviewed. APIs that mobile apps consume still have SQLi and IDOR vulnerabilities."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What attack surface is exposed to every potential attacker in the world, not just those who've already breached your perimeter?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Internet-facing APIs, web applications, and services are accessible to anyone. They're the front door that must be secured before worrying about internal defenses."
+        }
+      ],
+      "learning_note": "Attack surface prioritization should focus on exposure level. Internet-facing components are accessible to all attackers globally - they're the highest priority. Internal attack surface matters for defense-in-depth, but breaching external defenses is typically required first. Map and secure external attack surface before internal.",
+      "unlocks_artifact": "artifact_2"
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "Critical Vulnerability Assessment",
+      "narrative": "Vulnerability scanning has identified multiple issues, including SQL injection, broken access control (IDOR), and hardcoded credentials. The development lead asks which should be fixed first, arguing that the IDOR 'only affects user data viewing, not payments.'",
+      "question": "Which vulnerability should be the TOP priority for immediate remediation?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Hardcoded credentials in GitHub - they provide keys to the kingdom",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Critical but requires repository access to exploit",
+            "detailed": "Hardcoded credentials are serious and must be rotated, but exploitation requires access to the repository (50+ people internally). SQL injection and IDOR are exploitable by ANYONE on the internet with no prior access. External vulnerabilities exploitable by anonymous attackers take priority over internal credential exposure.",
+            "consequence": "Credentials rotated. SQLi remains - external attacker dumps database including all those credentials anyway."
+          }
+        },
+        {
+          "id": "B",
+          "text": "SQL Injection - it allows complete database compromise from the internet",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! SQLi = full database compromise from anonymous attacker",
+            "detailed": "SQL injection is trivially exploitable from the internet by anonymous attackers and leads to complete database compromise - all user data, all transactions, all credentials. This is the highest impact, highest exploitability vulnerability. While IDOR is also critical, SQLi typically enables more complete compromise more quickly.",
+            "consequence": "SQLi fixed first. Database protected from external injection attacks. Other critical issues addressed in sequence."
+          }
+        },
+        {
+          "id": "C",
+          "text": "IDOR (broken access control) - user financial data exposure is the biggest regulatory risk",
+          "is_correct": false,
+          "points": 20,
+          "feedback": {
+            "short": "Critical but SQLi is even worse",
+            "detailed": "IDOR is absolutely critical - any user viewing any other user's transactions is a serious breach. However, SQLi enables not just viewing but complete database extraction, modification, and potentially command execution. Both need immediate attention, but SQLi's broader impact gives it slight priority.",
+            "consequence": "IDOR fixed. SQLi remains - attacker extracts entire database including the transactions IDOR would have exposed, plus everything else."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Outdated dependencies (Log4j) - it's been in the news and auditors will flag it",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Important but requires specific conditions to exploit",
+            "detailed": "Log4j is a known critical vulnerability, but exploitation requires the vulnerable component to process attacker-controlled input that gets logged. First-party SQLi and IDOR are immediately exploitable through normal API usage. Fix the vulnerabilities YOU created first, then address dependency vulnerabilities.",
+            "consequence": "Dependencies updated. First-party code still has SQLi - attacker compromises database without needing Log4j."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Consider both exploitability (how easy to attack) and impact (what damage is possible). Which combination is worst?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "SQL injection is trivially exploitable from the internet and leads to complete database compromise. It's often the single worst vulnerability a web application can have."
+        }
+      ],
+      "learning_note": "Vulnerability prioritization considers both exploitability and impact. SQL injection is often the highest priority because it's trivially exploitable (many automated tools) and has maximum impact (complete database compromise). CVSS scores help but context matters - an internet-facing SQLi is worse than an internal-only vulnerability with the same CVSS.",
+      "unlocks_artifact": "artifact_3"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Threat Modeling Approach",
+      "narrative": "You need to systematically identify threats to VaultPay. The CISO asks you to conduct threat modeling to ensure you're not missing anything. You have the STRIDE framework available and architecture documentation.",
+      "question": "What is the PRIMARY purpose of threat modeling in this assessment?",
+      "options": [
+        {
+          "id": "A",
+          "text": "To document threats for compliance auditors and board presentations",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Documentation is a byproduct, not the purpose",
+            "detailed": "While threat models can support compliance and executive communication, that's not their primary purpose. Threat modeling exists to systematically identify threats that might be missed by ad-hoc analysis or scanning. Documentation is valuable but secondary to the actual threat identification.",
+            "consequence": "Threat model document created for auditors. Actual threats not systematically analyzed. Gaps remain."
+          }
+        },
+        {
+          "id": "B",
+          "text": "To systematically identify threats and security gaps that scanning might miss",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Systematic identification of design-level threats",
+            "detailed": "Threat modeling (like STRIDE) provides systematic analysis that identifies threats scanners miss: design flaws, business logic vulnerabilities, abuse cases, and architectural weaknesses. Scanners find implementation bugs; threat modeling finds design problems. Together they provide comprehensive coverage.",
+            "consequence": "STRIDE analysis reveals threats scanners missed: authentication weaknesses, authorization design flaws, denial of service risks, and audit logging gaps."
+          }
+        },
+        {
+          "id": "C",
+          "text": "To replace vulnerability scanning with a more thorough approach",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Threat modeling complements, doesn't replace scanning",
+            "detailed": "Threat modeling and vulnerability scanning serve different purposes. Scanning finds implementation vulnerabilities (SQLi, XSS, misconfigurations). Threat modeling finds design issues and architectural weaknesses. You need BOTH for comprehensive security assessment.",
+            "consequence": "Threat modeling performed instead of scanning. Design issues found but implementation vulnerabilities (SQLi, IDOR) missed."
+          }
+        },
+        {
+          "id": "D",
+          "text": "To prioritize which vulnerabilities to fix based on threat likelihood",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Prioritization is an output, not the primary purpose",
+            "detailed": "Threat modeling can inform prioritization, but its primary purpose is threat IDENTIFICATION. You need to know what threats exist before you can prioritize them. Risk assessment and prioritization happen after threat modeling identifies the threat landscape.",
+            "consequence": "Focused on prioritization before completing threat identification. Some threats never identified and therefore never prioritized."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What can threat modeling find that automated scanners typically miss?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Threat modeling systematically identifies design-level threats, business logic flaws, and architectural weaknesses. Scanners find implementation bugs."
+        }
+      ],
+      "learning_note": "Threat modeling provides systematic threat identification that complements vulnerability scanning. STRIDE (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege) ensures comprehensive coverage of threat categories. Use threat modeling to find design issues; use scanning to find implementation bugs.",
+      "unlocks_artifact": "artifact_4"
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Third-Party Risk Assessment",
+      "narrative": "VaultPay integrates with multiple third-party services. The CEO asks whether these integrations introduce risk and whether you should reduce reliance on external services for security reasons.",
+      "question": "What is the MOST significant third-party risk in VaultPay's current architecture?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Stripe and Plaid - they handle the most sensitive financial data",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Major vendors have mature security programs",
+            "detailed": "Stripe and Plaid are PCI-compliant, SOC 2 certified financial infrastructure providers. They're likely MORE secure than what VaultPay could build in-house. The risk isn't these vendors' security - it's HOW VaultPay integrates with them (API key management, webhook verification). Major fintech vendors are usually the lowest third-party risk.",
+            "consequence": "Time spent reviewing Stripe and Plaid's security certifications. They're fine. Meanwhile, vulnerable npm packages remain unexamined."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Twilio for SMS - SMS is vulnerable to SIM swapping attacks",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Real risk but not the most significant",
+            "detailed": "SMS OTP vulnerabilities are real (SIM swap, SS7 attacks), but this is a known risk with known mitigations (push-based MFA, authenticator apps). It's a concern for authentication design, not a critical third-party vendor risk. The bigger third-party risk is in the software supply chain.",
+            "consequence": "SMS OTP risk documented. Recommendation to offer authenticator app option added. Supply chain vulnerabilities unaddressed."
+          }
+        },
+        {
+          "id": "C",
+          "text": "NPM packages and Docker images - unvetted code in the software supply chain",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Supply chain is the highest third-party risk",
+            "detailed": "47 npm packages with known vulnerabilities (including Log4j), no SBOM, unpinned versions, no scanning in CI/CD - this is significant supply chain risk. Unlike vetted fintech partners, open source dependencies vary wildly in security posture. Malicious or vulnerable packages can compromise the entire application. Supply chain security is often the overlooked third-party risk.",
+            "consequence": "Supply chain risk prioritized. Vulnerability scanning added to CI/CD. Dependencies pinned and reviewed. Log4j and other critical CVEs addressed."
+          }
+        },
+        {
+          "id": "D",
+          "text": "AWS - reliance on a single cloud provider creates concentration risk",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Availability concern, not security risk",
+            "detailed": "Single cloud provider is an availability and vendor lock-in consideration, not primarily a security risk. AWS has a strong security posture with shared responsibility model. The security risks in VaultPay's AWS usage are configuration issues (their responsibility), not AWS itself.",
+            "consequence": "Multi-cloud strategy discussions initiated. First-party AWS misconfigurations remain unaddressed."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Which third-party components have the least vetting and the most direct access to your application code?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Open source dependencies (npm packages, container images) run with full application privileges but may have vulnerabilities or even malicious code. This supply chain risk is often overlooked."
+        }
+      ],
+      "learning_note": "Third-party risk includes software supply chain, not just vendor services. Open source dependencies run with full application privileges and vary widely in security posture. Major fintech vendors (Stripe, Plaid) typically have mature security; your npm packages may not. Implement SBOM, dependency scanning, and version pinning.",
+      "unlocks_artifact": "artifact_5"
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Authentication Security",
+      "narrative": "Review of authentication mechanisms reveals significant weaknesses: no MFA on merchant dashboard, SMS-only OTP on consumer app, non-expiring JWT tokens, and weak password policies. The product team pushes back: 'MFA creates friction that hurts user conversion.'",
+      "question": "What authentication improvement should be the TOP priority for a payment platform?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Implement MFA on the admin portal first - highest privilege users",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Admin portal already has IP whitelist control",
+            "detailed": "Admin portal has IP whitelisting as a compensating control. While MFA would be better, the merchant dashboard has NO additional controls AND provides access to financial operations. Merchants can process refunds, view settlements, and manage API keys with just a weak password. That's the higher risk.",
+            "consequence": "Admin MFA implemented. Merchant accounts still protected only by weak passwords. Merchant account compromise leads to fraudulent refunds."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Require MFA on merchant dashboard - financial access with weak authentication is critical",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Merchant dashboard has financial access with minimal protection",
+            "detailed": "Merchant dashboard allows: viewing all transaction data, processing refunds, managing API keys, and accessing settlement reports. Currently protected only by 6-character passwords with no MFA. A single compromised merchant could lead to mass fraud. For payment platforms, financial access points require strong authentication. User friction is acceptable for financial operations.",
+            "consequence": "Merchant MFA implemented. Financial operations protected by TOTP. Account takeover risk dramatically reduced."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Fix JWT token expiration first - non-expiring tokens are the root cause of many issues",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important but MFA provides more immediate protection",
+            "detailed": "JWT expiration is important for limiting the window of a stolen token. However, if credentials are easily compromised (weak passwords, no MFA), attackers can simply get new tokens. MFA prevents credential compromise at the authentication point - fixing the root cause rather than limiting damage duration.",
+            "consequence": "JWT expiration set to 1 hour. Attackers still compromise merchant accounts easily with weak passwords, request new tokens hourly."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Upgrade SMS OTP to authenticator apps - SMS is vulnerable to SIM swap",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Good improvement but consumers already have some MFA",
+            "detailed": "Upgrading from SMS to authenticator is a valid improvement, but consumers already have SOME MFA (even if weak). Merchants have NO MFA at all for financial access. Adding MFA where none exists is more impactful than upgrading existing MFA. Address the zero-MFA problem first.",
+            "consequence": "Consumer app upgraded to authenticator. Merchants still have no MFA. Merchant account compromise remains trivial."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Which user type has financial access (refunds, settlements) with the weakest authentication?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Merchants can process refunds with only a 6-character password, no MFA. This is financial access with minimal protection."
+        }
+      ],
+      "learning_note": "Authentication strength should match access sensitivity. For payment platforms, any access that enables financial transactions (refunds, transfers, API key management) requires strong authentication. 'User friction' arguments don't apply to financial operations - B2B users expect security. Prioritize MFA where it's missing over upgrading existing MFA.",
+      "unlocks_artifact": "artifact_6"
+    },
+    {
+      "id": "decision_6",
+      "sequence": 6,
+      "title": "Data Security Priorities",
+      "narrative": "Data security review reveals multiple issues: PII in logs, MD5 password hashing for merchants, unencrypted ElastiCache, and SSN storage. The compliance officer wants to focus on PCI-DSS scope; the privacy officer wants to focus on PII protection.",
+      "question": "What data security issue poses the GREATEST immediate risk?",
+      "options": [
+        {
+          "id": "A",
+          "text": "PII in CloudWatch logs - violates privacy principles and creates exposure",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Significant issue but requires AWS access to exploit",
+            "detailed": "PII in logs is a real compliance and security issue, but exploitation requires access to CloudWatch or the S3 log archives - this is an internal exposure. MD5 password hashing combined with database exposure (SQLi was found) means passwords can be cracked EXTERNALLY. Internal data exposure is lower priority than external.",
+            "consequence": "Log sanitization implemented. MD5-hashed passwords extracted via SQLi and cracked within hours. Mass account takeover."
+          }
+        },
+        {
+          "id": "B",
+          "text": "MD5 password hashing for merchants - trivially crackable if database is compromised",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! MD5 + SQLi = mass credential exposure",
+            "detailed": "MD5 is cryptographically broken for password storage. Combined with the SQL injection vulnerability, an attacker can extract the merchant password table and crack most passwords within hours using rainbow tables or GPU cracking. This enables mass merchant account takeover. Fix MD5 immediately, especially given the database exposure risk.",
+            "consequence": "Merchant passwords migrated to bcrypt with forced password reset. Even if SQLi exploited before fix, passwords are properly protected going forward."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Unencrypted ElastiCache - cache data exposed without encryption at rest",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Good hygiene but requires internal access to exploit",
+            "detailed": "ElastiCache encryption at rest protects against physical media theft or snapshot exposure - relatively rare attack scenarios. The cache is in a private subnet requiring network access first. While encryption should be enabled, it's lower priority than externally-exploitable password storage issues.",
+            "consequence": "ElastiCache encryption enabled. MD5 passwords still crackable from database dump."
+          }
+        },
+        {
+          "id": "D",
+          "text": "SSN storage - highest sensitivity PII with regulatory implications",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Sensitive but encrypted and in limited scope",
+            "detailed": "SSN storage is high-sensitivity and should be minimized, but the SSNs are in encrypted RDS (AES-256) and limited to high-value accounts. The immediate risk is MD5-hashed passwords that can be cracked instantly if extracted. Fix the active vulnerability before optimizing sensitive data handling.",
+            "consequence": "SSN storage review initiated. Meanwhile, MD5 passwords cracked from database dump."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Consider which data security issues can be exploited in combination with other vulnerabilities you've found."
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "SQL injection can extract the password table. MD5 hashes can be cracked almost instantly with rainbow tables. The combination is catastrophic."
+        }
+      ],
+      "learning_note": "Data security prioritization should consider attack chains. MD5 password hashing is bad; MD5 + database extraction vulnerability is catastrophic. Always use modern password hashing (bcrypt, Argon2) with unique salts. When assessing data security, consider how vulnerabilities combine to create worse outcomes.",
+      "unlocks_artifact": "artifact_7"
+    },
+    {
+      "id": "decision_7",
+      "sequence": 7,
+      "title": "Infrastructure Hardening",
+      "narrative": "AWS security review reveals multiple issues: default security groups allowing broad internal access, containers running as root, no VPC flow logs, and missing GuardDuty. With limited time before launch, you need to prioritize infrastructure hardening.",
+      "question": "What infrastructure security improvement provides the BEST risk reduction for the time investment?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Implement strict network segmentation with security groups and NACLs",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "High impact but significant implementation time",
+            "detailed": "Network segmentation is important for defense-in-depth, but proper implementation requires understanding all legitimate traffic flows, implementing gradually, and testing thoroughly. This is a multi-week effort. For pre-launch, focus on higher-impact quick wins that can be implemented in days.",
+            "consequence": "Network segmentation project started. Takes 4 weeks to implement properly. Other quick wins delayed."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Deploy AWS WAF with OWASP managed rules on API Gateway",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! WAF provides broad protection with quick deployment",
+            "detailed": "AWS WAF with OWASP managed rules can be deployed in hours and provides immediate protection against common web attacks (SQLi, XSS, known attack patterns) at the perimeter. While not a substitute for fixing code vulnerabilities, it provides defense-in-depth and catches attack attempts. High value for low implementation time.",
+            "consequence": "WAF deployed in 2 days. Immediately blocking known attack patterns. Provides protection while code fixes are implemented."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Enable GuardDuty and Security Hub for threat detection",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Valuable for detection but doesn't prevent attacks",
+            "detailed": "GuardDuty and Security Hub improve visibility and detection but don't prevent attacks. For pre-launch when you're fixing critical vulnerabilities, preventive controls (WAF) provide more immediate value than detective controls. Enable detection, but prioritize prevention for launch readiness.",
+            "consequence": "GuardDuty detecting reconnaissance. No prevention of actual attacks. SQLi still exploitable."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Fix container security - stop running as root, add resource limits",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Good hardening but reduces impact, not likelihood",
+            "detailed": "Container hardening (non-root, resource limits) limits blast radius if containers are compromised, but doesn't prevent the compromise. With SQLi and IDOR vulnerabilities present, attackers can compromise the application regardless of container configuration. Fix the external vulnerabilities first, then harden containers.",
+            "consequence": "Containers hardened. Application still compromised via SQLi. Better container security limits lateral movement slightly."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What control can be deployed quickly and provides broad protection against common web attacks?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "AWS WAF with managed rules (OWASP) deploys in hours and blocks common attack patterns at the perimeter - quick win with high value."
+        }
+      ],
+      "learning_note": "Infrastructure hardening prioritization should balance risk reduction with implementation time. WAF deployment is a quick win that provides broad protection. Network segmentation and container hardening are important but take longer. For launch deadlines, prioritize high-value quick wins while planning longer-term improvements.",
+      "unlocks_artifact": "artifact_8"
+    },
+    {
+      "id": "decision_8",
+      "sequence": 8,
+      "title": "Input Validation Strategy",
+      "narrative": "Multiple input validation issues were found across APIs. The development team asks whether they should implement validation at the API Gateway level, in the application code, or both. They're concerned about maintenance overhead of duplicate validation.",
+      "question": "What is the correct approach to input validation for a payment platform?",
+      "options": [
+        {
+          "id": "A",
+          "text": "API Gateway validation only - single point of enforcement is easier to maintain",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Single layer validation is insufficient",
+            "detailed": "API Gateway can validate request structure (schema validation) but can't understand business logic. It can check 'amount is a number' but not 'amount doesn't exceed user's balance.' Application-layer validation is essential for business rules. Single-layer validation also fails to defense in depth principle.",
+            "consequence": "Gateway validates format. Application doesn't validate business logic. Negative amounts, excessive refunds, and business logic bypasses successful."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Application code validation only - that's where business logic lives",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Misses the perimeter defense opportunity",
+            "detailed": "Application validation is essential but shouldn't be the only layer. Gateway-level validation can reject obviously malicious requests before they reach your application, reducing attack surface and load. Defense in depth means validation at multiple layers with different purposes.",
+            "consequence": "Application validates thoroughly but malformed requests still reach backend, consuming resources and potentially finding parser vulnerabilities."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Defense in depth - schema validation at Gateway, business logic validation in application",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Multiple layers with appropriate validation at each",
+            "detailed": "Proper input validation uses multiple layers: API Gateway enforces schema (data types, required fields, basic format), application code enforces business logic (authorization, business rules, semantic validation), and database uses parameterized queries (preventing injection). Each layer has a specific role. Maintenance overhead is acceptable for security-critical applications.",
+            "consequence": "Gateway rejects malformed requests. Application validates business logic. Database prevents injection. Defense in depth achieved."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Rely primarily on WAF rules - they're designed to catch malicious input",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "WAF complements but doesn't replace validation",
+            "detailed": "WAF catches known attack patterns but can be bypassed with encoding, obfuscation, or novel attacks. WAF is defense in depth, not a substitute for proper input validation. Your code must validate input regardless of what perimeter controls exist.",
+            "consequence": "WAF catches some attacks. Business logic validation absent. Novel attacks and logic flaws bypass WAF successfully."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What can each layer (Gateway, Application, Database) validate that other layers can't?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Gateway: schema/format. Application: business logic. Database: parameterized queries. Each layer has unique validation capabilities."
+        }
+      ],
+      "learning_note": "Input validation should be implemented in depth. API Gateway validates schema and format. Application code validates business logic and authorization. Database layer uses parameterized queries. WAF provides additional pattern-based protection. Each layer catches different attack types - no single layer is sufficient."
+    },
+    {
+      "id": "decision_9",
+      "sequence": 9,
+      "title": "Launch Readiness Decision",
+      "narrative": "It's now 4 weeks to launch. Critical vulnerabilities (SQLi, IDOR) have been fixed. MFA is implemented for merchants. WAF is deployed. But network segmentation, complete container hardening, and PCI-DSS certification are incomplete. The CEO wants to know: can we launch?",
+      "question": "What is the appropriate launch readiness recommendation?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Ready for full public launch - critical vulnerabilities are fixed",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Some important controls are still missing",
+            "detailed": "While critical vulnerabilities are fixed, important controls are incomplete: network segmentation isn't finished, detection capabilities are limited, and incident response procedures don't exist. A full public launch at scale could overwhelm your ability to respond if issues arise. Controlled launch is more appropriate.",
+            "consequence": "Full public launch. Minor vulnerability discovered in week 2. No incident response capability. Scrambled response damages reputation."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Not ready for any launch - complete all security improvements first",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Overly conservative - business needs matter too",
+            "detailed": "Security doesn't exist in a vacuum. Critical vulnerabilities are fixed, important controls are in place, and continued delay has business cost. A controlled launch with limited users allows you to operate, learn, and continue improving. Demanding perfection before any launch isn't realistic or necessary.",
+            "consequence": "Launch delayed indefinitely. Competitors gain market share. Eventually launch anyway under pressure with less security testing than planned."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Ready for limited/controlled launch with documented risk acceptance for remaining gaps",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Controlled launch with risk management",
+            "detailed": "Critical vulnerabilities fixed, authentication strengthened, WAF deployed - the most exploitable issues are addressed. Remaining gaps (segmentation, detection) are important but don't block a controlled launch. Document remaining risks, get executive acceptance, launch with limited users, and continue security improvements. This balances security with business needs.",
+            "consequence": "Controlled launch with 1,000 users. Security improvements continue. Issues discovered early with limited impact. Full launch after Phase 3 complete."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Ready once PCI-DSS certification is complete - can't process payments without it",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "PCI scope is limited due to tokenization",
+            "detailed": "VaultPay uses Stripe tokenization - they never see full card numbers, which significantly limits PCI scope. SAQ-A (minimal scope) likely applies. Full PCI-DSS certification isn't required before launch when properly using tokenization. The security improvements already made are more important than the certification paperwork.",
+            "consequence": "Launch delayed for PCI certification. Certification completed but based on current (improved) security posture anyway. Time wasted."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Consider what risks remain after critical fixes, and whether a controlled launch mitigates those risks."
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "A limited/controlled launch reduces risk exposure while allowing business progress. Document remaining gaps, get risk acceptance, and continue improvements."
+        }
+      ],
+      "learning_note": "Launch readiness is a risk management decision, not a binary yes/no. Critical vulnerabilities must be fixed. Important controls should be in place. Remaining gaps can be managed through: controlled launch scope, documented risk acceptance, accelerated remediation timeline, and monitoring. Perfect security isn't required; appropriate security is.",
+      "unlocks_artifact": "artifact_9"
+    },
+    {
+      "id": "decision_10",
+      "sequence": 10,
+      "title": "Ongoing Security Program",
+      "narrative": "With launch approaching, you need to establish an ongoing security program. The CEO asks what's most important for maintaining security after launch. 'We can't do another full assessment every month.'",
+      "question": "What is the MOST important ongoing security activity for a payment platform?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Annual penetration testing by third-party firm",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Important but not frequent enough for fast-moving development",
+            "detailed": "Annual penetration testing provides valuable external validation but happens too infrequently for a startup shipping code weekly. By the time the pentest happens, dozens of new features have shipped. Continuous security practices integrated into development are more impactful than annual point-in-time assessments.",
+            "consequence": "Annual pentest scheduled. 52 weeks of development happen between tests. Vulnerabilities introduced and exploited before next pentest."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Continuous vulnerability scanning integrated into CI/CD pipeline",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Continuous security in development pipeline",
+            "detailed": "For a fast-moving development team, security must be integrated into the development process. Automated scanning (SAST, DAST, dependency scanning) in CI/CD catches issues before deployment. Every code change is checked. This provides continuous security assurance that matches development velocity. Complement with periodic pentests for deep analysis.",
+            "consequence": "Every deployment scanned. Vulnerabilities caught before production. Security scales with development velocity."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Comprehensive security awareness training for all employees",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Important but doesn't catch code vulnerabilities",
+            "detailed": "Security awareness training helps with phishing and social engineering but doesn't catch SQLi or IDOR in code. For a payment platform, code-level security is the primary concern. Training is part of a complete program but not the most important element for ongoing technical security.",
+            "consequence": "Employees trained. Development continues introducing code vulnerabilities. Training doesn't help with application security."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Bug bounty program to crowdsource vulnerability discovery",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Valuable but reactive, not proactive",
+            "detailed": "Bug bounties leverage external researchers for vulnerability discovery - valuable for finding issues your team missed. However, it's reactive - researchers find issues in production code. CI/CD scanning is proactive - catching issues before deployment. Bug bounties complement but don't replace proactive security testing.",
+            "consequence": "Bug bounty launched. Researchers find issues in production. Better than not finding them, but vulnerabilities reached production first."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What security approach can keep up with weekly code deployments?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "CI/CD integrated security scanning runs with every deployment. This scales with development velocity and catches issues before production."
+        }
+      ],
+      "learning_note": "Ongoing security for fast-moving development requires continuous practices: SAST (static analysis), DAST (dynamic testing), SCA (dependency scanning) integrated into CI/CD. Annual pentests and bug bounties provide valuable additional coverage but can't keep up with rapid deployment cycles. Shift security left into development process.",
+      "unlocks_artifact": "artifact_10"
+    }
+  ],
+  
+  "summary_teaching_points": [
+    {
+      "topic": "Attack Surface Analysis",
+      "key_points": [
+        "External/internet-facing attack surface is highest priority",
+        "Map all entry points: APIs, web apps, partner integrations",
+        "Consider data flows and trust boundaries in analysis"
+      ]
+    },
+    {
+      "topic": "Vulnerability Prioritization",
+      "key_points": [
+        "Consider both exploitability and impact together",
+        "External vulnerabilities typically higher priority than internal",
+        "Attack chains multiply severity - consider how vulnerabilities combine"
+      ]
+    },
+    {
+      "topic": "Threat Modeling",
+      "key_points": [
+        "STRIDE provides systematic threat identification",
+        "Threat modeling finds design issues; scanning finds implementation bugs",
+        "Both approaches are complementary, not exclusive"
+      ]
+    },
+    {
+      "topic": "Security Architecture",
+      "key_points": [
+        "Defense in depth: validation at multiple layers",
+        "Authentication strength must match access sensitivity",
+        "Quick wins (WAF) while planning longer-term improvements"
+      ]
+    },
+    {
+      "topic": "Risk-Based Decision Making",
+      "key_points": [
+        "Launch readiness is risk management, not perfection",
+        "Document and accept residual risk appropriately",
+        "Continuous security practices for ongoing assurance"
+      ]
+    }
+  ],
+  
+  "weakness_mapping": {
+    "attack_surface_weak": {
+      "threshold": 2,
+      "indicators": ["decision_1", "decision_4"],
+      "remediation": "D2-REM-001",
+      "description": "Difficulty with attack surface and threat vector analysis"
+    },
+    "vulnerability_types_weak": {
+      "threshold": 2,
+      "indicators": ["decision_2", "decision_6"],
+      "remediation": "D2-REM-003",
+      "description": "Difficulty with vulnerability classification and prioritization"
+    },
+    "mitigation_techniques_weak": {
+      "threshold": 2,
+      "indicators": ["decision_5", "decision_7", "decision_8"],
+      "remediation": "D2-REM-003",
+      "description": "Difficulty with security controls and hardening techniques"
+    }
+  },
+  
+  "prerequisites": ["D2-SIM-002"],
+  "unlocks": ["D3-SIM-001", "D3-SIM-002"],
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 2: Threats, Vulnerabilities, and Mitigations",
+    "job_role_alignment": ["Security Architect", "Application Security Engineer", "Security Consultant"],
+    "industry_context": "FinTech - PCI-DSS environment"
+  }
+}

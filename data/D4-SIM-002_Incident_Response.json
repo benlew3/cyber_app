@@ -1,0 +1,1179 @@
+{
+  "simulation_id": "D4-SIM-002",
+  "title": "Incident Response",
+  "domain": 4,
+  "category": "primary",
+  "difficulty": "advanced",
+  "time_estimate": "50-65 minutes",
+  "passing_score": 200,
+  "max_score": 250,
+  
+  "exam_objectives": [
+    {
+      "id": "4.8",
+      "description": "Explain appropriate incident response activities",
+      "coverage": ["preparation", "detection", "analysis", "containment", "eradication", "recovery", "lessons learned"]
+    },
+    {
+      "id": "4.9",
+      "description": "Given a scenario, use data sources to support an investigation",
+      "coverage": ["log analysis", "forensic acquisition", "chain of custody", "evidence handling"]
+    },
+    {
+      "id": "1.3",
+      "description": "Explain the importance of change management processes and the impact to security",
+      "coverage": ["incident response planning", "communication procedures"]
+    }
+  ],
+  
+  "scenario_context": {
+    "organization": "Axiom Pharmaceuticals",
+    "industry": "Pharmaceutical/Healthcare",
+    "size": "6,500 employees, research facilities, manufacturing plants, global operations",
+    "setting": "Active security incident - ransomware attack in progress",
+    "your_role": "Incident Response Lead",
+    "reporting_to": "CISO Margaret Torres",
+    "environment": {
+      "current_situation": {
+        "day": "Tuesday, 6:47 AM",
+        "alert": "EDR alerts showing ransomware encryption activity on multiple servers",
+        "scope": {
+          "known_affected": "15 servers in research network showing encryption",
+          "potential_scope": "Unknown - attack origin and spread not yet determined",
+          "critical_systems": "R&D file servers containing drug research data"
+        },
+        "initial_observations": [
+          "Ransomware note demanding 50 BTC ($2.1M)",
+          "Encryption spreading to new servers every few minutes",
+          "VPN concentrator shows suspicious login 3 hours ago",
+          "Attacker claims to have exfiltrated data (double extortion)"
+        ]
+      },
+      "organization_context": {
+        "critical_data": "Drug research, clinical trial data, manufacturing formulas",
+        "regulatory": "FDA, HIPAA (clinical trial PHI), trade secrets",
+        "ir_preparedness": {
+          "ir_plan": "Documented but not tested in 2 years",
+          "ir_team": "5-person team, partial training",
+          "backups": "Daily backups, offsite, untested restoration",
+          "cyber_insurance": "Active policy, $10M coverage"
+        }
+      },
+      "timeline_so_far": {
+        "t_minus_3h": "Suspicious VPN login from unusual location",
+        "t_minus_2h": "Lateral movement to research network (unknown at time)",
+        "t_minus_30m": "First encryption activity begins",
+        "t_0": "EDR alerts trigger, SOC escalates"
+      }
+    },
+    "opening_narrative": "It's 6:47 AM and your phone is ringing. The SOC has detected ransomware actively encrypting servers in the research network. You're the Incident Response Lead, and this is the real thing. Drug research data worth billions is at risk, encryption is spreading, and the attacker claims to have stolen data. Every minute matters. Margaret Torres is en route and needs you to lead the technical response. What do you do?"
+  },
+  
+  "artifacts": [
+    {
+      "id": "artifact_1",
+      "title": "Initial Alert and Evidence",
+      "type": "evidence_document",
+      "unlocks_at": "start",
+      "content": {
+        "edr_alerts": [
+          {"time": "06:17:23", "host": "RES-FS-01", "alert": "Ransomware behavior detected - mass file encryption", "action": "Alert only (not blocked)"},
+          {"time": "06:18:45", "host": "RES-FS-02", "alert": "Ransomware behavior detected - mass file encryption", "action": "Alert only"},
+          {"time": "06:22:31", "host": "RES-APP-03", "alert": "Ransomware behavior detected", "action": "Alert only"},
+          {"time": "06:31:12", "host": "RES-DB-01", "alert": "Suspicious process execution", "action": "Alert only"},
+          {"time": "06:35:44", "host": "LAB-WKS-107", "alert": "Ransomware behavior detected", "action": "Blocked"}
+        ],
+        "ransom_note": {
+          "threat_actor": "BlackMatter affiliate",
+          "demand": "50 BTC within 72 hours",
+          "threats": [
+            "All files will remain encrypted",
+            "Stolen data will be published on leak site",
+            "Demand doubles after 72 hours"
+          ],
+          "proof_of_theft": "Sample file listing showing research folder names"
+        },
+        "vpn_log_excerpt": {
+          "time": "03:42:17",
+          "user": "jsmith_admin",
+          "source_ip": "185.220.101.xxx (Tor exit node)",
+          "authentication": "Success - password only (no MFA)",
+          "note": "James Smith (IT admin) claims he was asleep at this time"
+        },
+        "affected_systems_initial": [
+          {"hostname": "RES-FS-01", "role": "Research file server", "data": "Drug compound research", "encryption": "60%"},
+          {"hostname": "RES-FS-02", "role": "Research file server", "data": "Clinical trial protocols", "encryption": "40%"},
+          {"hostname": "RES-APP-03", "role": "Research application server", "data": "Analysis tools", "encryption": "25%"},
+          {"hostname": "RES-DB-01", "role": "Research database", "data": "Research data", "encryption": "Unknown"},
+          {"hostname": "LAB-WKS-107", "role": "Lab workstation", "data": "Local research files", "encryption": "Blocked"}
+        ]
+      }
+    },
+    {
+      "id": "artifact_2",
+      "title": "Incident Response Plan Reference",
+      "type": "reference",
+      "unlocks_at": "decision_1",
+      "content": {
+        "ir_phases": {
+          "preparation": {
+            "activities": ["IR plan development", "Team training", "Tool readiness", "Communication plans"],
+            "axiom_status": "Plan exists but outdated; team partially trained"
+          },
+          "detection_and_analysis": {
+            "activities": ["Alert triage", "Scope determination", "Evidence collection", "Impact assessment"],
+            "goals": "Understand what happened, what's affected, and severity"
+          },
+          "containment": {
+            "short_term": "Stop immediate damage (isolate, block, disable)",
+            "long_term": "Prevent re-infection while investigation continues",
+            "goals": "Prevent further damage without destroying evidence"
+          },
+          "eradication": {
+            "activities": ["Remove malware", "Close attack vectors", "Patch vulnerabilities", "Reset credentials"],
+            "goals": "Eliminate attacker presence from environment"
+          },
+          "recovery": {
+            "activities": ["Restore systems", "Verify integrity", "Monitor for re-infection", "Return to operations"],
+            "goals": "Safely restore normal operations"
+          },
+          "lessons_learned": {
+            "activities": ["Timeline reconstruction", "Root cause analysis", "Improvement recommendations", "Report generation"],
+            "goals": "Improve defenses and response capability"
+          }
+        },
+        "severity_levels": {
+          "critical": {"criteria": "Active attack, critical data at risk, significant business impact", "response": "All hands, executive notification, potential breach disclosure"},
+          "high": {"criteria": "Confirmed compromise, sensitive data exposure possible", "response": "Full IR team, management notification"},
+          "medium": {"criteria": "Suspicious activity, limited impact", "response": "IR team investigation"},
+          "low": {"criteria": "Policy violation, no immediate threat", "response": "Standard investigation"}
+        }
+      }
+    },
+    {
+      "id": "artifact_3",
+      "title": "Containment Options Analysis",
+      "type": "decision_document",
+      "unlocks_at": "decision_2",
+      "content": {
+        "containment_strategies": {
+          "network_isolation": {
+            "action": "Isolate research network segment from corporate network",
+            "impact": "Stops spread to corporate; research operations halted",
+            "evidence_preservation": "Maintains system state for analysis",
+            "recommendation": "Immediate - stops lateral movement"
+          },
+          "system_isolation": {
+            "action": "Isolate individual infected systems",
+            "impact": "Targeted, may miss systems not yet identified",
+            "evidence_preservation": "Good - individual systems preserved",
+            "recommendation": "Good for known systems, may miss scope"
+          },
+          "credential_reset": {
+            "action": "Reset compromised admin credentials immediately",
+            "impact": "Removes attacker's authenticated access",
+            "evidence_preservation": "Minimal impact",
+            "recommendation": "Immediate for known compromised accounts"
+          },
+          "vpn_shutdown": {
+            "action": "Disable VPN access entirely",
+            "impact": "Blocks attacker's entry point; affects remote workers",
+            "evidence_preservation": "None",
+            "recommendation": "Consider after determining scope"
+          },
+          "full_shutdown": {
+            "action": "Shut down all affected systems",
+            "impact": "Stops all activity; may lose volatile evidence",
+            "evidence_preservation": "Loses memory contents, running processes",
+            "recommendation": "Last resort - significant evidence loss"
+          }
+        },
+        "key_principle": "Contain to stop damage while preserving evidence for investigation. Balance speed vs. evidence preservation."
+      }
+    },
+    {
+      "id": "artifact_4",
+      "title": "Evidence Collection Procedures",
+      "type": "process_document",
+      "unlocks_at": "decision_3",
+      "content": {
+        "order_of_volatility": {
+          "description": "Collect most volatile evidence first - it disappears fastest",
+          "order": [
+            {"rank": 1, "type": "CPU registers, cache", "volatility": "Nanoseconds", "collection": "Rarely practical"},
+            {"rank": 2, "type": "Memory (RAM)", "volatility": "Lost on power-off", "collection": "Memory dump tools"},
+            {"rank": 3, "type": "Network state", "volatility": "Connections terminate", "collection": "Netstat, connection logs"},
+            {"rank": 4, "type": "Running processes", "volatility": "Lost on power-off", "collection": "Process listing, handles"},
+            {"rank": 5, "type": "Disk contents", "volatility": "Persistent", "collection": "Disk imaging"},
+            {"rank": 6, "type": "Logs (remote)", "volatility": "May rotate/overwrite", "collection": "SIEM, log servers"},
+            {"rank": 7, "type": "Physical evidence", "volatility": "Stable", "collection": "Secure storage"}
+          ]
+        },
+        "chain_of_custody": {
+          "purpose": "Document evidence handling for legal proceedings",
+          "requirements": [
+            "Document who collected what, when, where",
+            "Secure storage with access controls",
+            "Hash verification of digital evidence",
+            "Transfer documentation between handlers"
+          ],
+          "form_fields": ["Evidence ID", "Description", "Collection time", "Collector", "Hash", "Storage location", "Transfer log"]
+        },
+        "forensic_imaging": {
+          "purpose": "Exact copy of storage for analysis",
+          "methods": ["Bit-for-bit copy (dd)", "Forensic tools (FTK Imager, EnCase)"],
+          "requirements": ["Write-blocker for source", "Hash verification", "Work on copy, not original"]
+        }
+      }
+    },
+    {
+      "id": "artifact_5",
+      "title": "Attack Timeline Reconstruction",
+      "type": "evidence_document",
+      "unlocks_at": "decision_4",
+      "content": {
+        "reconstructed_timeline": {
+          "day_minus_14": {
+            "event": "Phishing email to jsmith_admin",
+            "evidence": "Email logs show malicious attachment",
+            "technique": "Initial Access - Spearphishing Attachment"
+          },
+          "day_minus_14_plus_2h": {
+            "event": "Infostealer executed, credentials harvested",
+            "evidence": "EDR shows suspicious process (missed alert)",
+            "technique": "Credential Access - Credential Dumping"
+          },
+          "day_minus_7": {
+            "event": "Attacker tests VPN access from Tor",
+            "evidence": "Failed VPN login from Tor IP",
+            "technique": "Initial Access - Valid Accounts"
+          },
+          "day_0_0342": {
+            "event": "Successful VPN login with stolen credentials",
+            "evidence": "VPN logs",
+            "technique": "Initial Access - Valid Accounts"
+          },
+          "day_0_0358": {
+            "event": "Lateral movement to jump server",
+            "evidence": "Windows Security logs - logon type 10",
+            "technique": "Lateral Movement - Remote Desktop Protocol"
+          },
+          "day_0_0415": {
+            "event": "Privilege escalation to domain admin",
+            "evidence": "AD logs show group modification",
+            "technique": "Privilege Escalation - Domain Policy Modification"
+          },
+          "day_0_0445": {
+            "event": "Data staging and exfiltration begins",
+            "evidence": "Firewall logs show large outbound transfer to cloud storage",
+            "technique": "Exfiltration - Exfiltration Over Web Service"
+          },
+          "day_0_0617": {
+            "event": "Ransomware deployment begins",
+            "evidence": "EDR alerts, encryption activity",
+            "technique": "Impact - Data Encrypted for Impact"
+          }
+        },
+        "attack_summary": {
+          "initial_access": "Phishing â†’ credential theft â†’ VPN access",
+          "dwell_time": "14 days from initial compromise to ransomware",
+          "data_exfiltrated": "Estimated 200GB to external cloud storage",
+          "ransomware_deployed": "BlackMatter variant via PsExec"
+        }
+      }
+    },
+    {
+      "id": "artifact_6",
+      "title": "Communication Plan",
+      "type": "process_document",
+      "unlocks_at": "decision_5",
+      "content": {
+        "internal_communications": {
+          "ir_team": {"frequency": "Continuous", "channel": "War room + secure chat", "updates": "Real-time"},
+          "executive_team": {"frequency": "Every 2 hours", "channel": "Secure briefing", "updates": "Status, decisions needed"},
+          "it_operations": {"frequency": "As needed", "channel": "Direct contact", "updates": "Technical coordination"},
+          "employees": {"frequency": "As appropriate", "channel": "Corporate comms", "updates": "Work impact, what to do"}
+        },
+        "external_communications": {
+          "law_enforcement": {
+            "when": "Consider early - they may have intel on attacker",
+            "who": "FBI IC3, local FBI field office",
+            "benefit": "Decryption keys may be available, attacker tracking"
+          },
+          "legal_counsel": {
+            "when": "Immediately",
+            "who": "General counsel + external breach counsel",
+            "purpose": "Attorney-client privilege, regulatory guidance"
+          },
+          "cyber_insurance": {
+            "when": "Within 24 hours per policy",
+            "who": "Insurance carrier breach hotline",
+            "purpose": "Approved vendors, coverage confirmation"
+          },
+          "regulators": {
+            "when": "Per regulatory requirements (HIPAA 60 days, varies by state)",
+            "who": "FDA, HHS, state AGs as applicable",
+            "purpose": "Breach notification compliance"
+          },
+          "affected_parties": {
+            "when": "After investigation determines scope",
+            "who": "Individuals whose data was exposed",
+            "purpose": "Breach notification compliance, reputation"
+          }
+        },
+        "communication_principles": [
+          "Clear chain of command for external statements",
+          "No unauthorized disclosure (especially ransom negotiation)",
+          "Document all communications",
+          "Coordinate messaging across channels"
+        ]
+      }
+    },
+    {
+      "id": "artifact_7",
+      "title": "Eradication Checklist",
+      "type": "process_document",
+      "unlocks_at": "decision_6",
+      "content": {
+        "eradication_activities": {
+          "malware_removal": {
+            "tasks": [
+              "Identify all systems with malware artifacts",
+              "Determine persistence mechanisms",
+              "Remove or rebuild affected systems",
+              "Verify removal with scanning"
+            ],
+            "approach": "Rebuild preferred over cleaning for ransomware"
+          },
+          "credential_reset": {
+            "tasks": [
+              "Reset ALL domain admin passwords",
+              "Reset service account passwords",
+              "Reset passwords for affected users",
+              "Revoke and reissue certificates",
+              "Reset KRBTGT password (twice, 10 hours apart)"
+            ],
+            "warning": "Partial reset leaves attacker access"
+          },
+          "vulnerability_remediation": {
+            "tasks": [
+              "Patch vulnerability that enabled initial access",
+              "Implement MFA on VPN (immediate)",
+              "Address any other identified gaps"
+            ],
+            "timing": "Before recovery to prevent reinfection"
+          },
+          "access_review": {
+            "tasks": [
+              "Audit admin group memberships",
+              "Review service accounts",
+              "Check for unauthorized accounts",
+              "Verify firewall rules"
+            ]
+          }
+        },
+        "verification": {
+          "requirements": [
+            "Scan all systems for malware artifacts",
+            "Verify no unauthorized accounts",
+            "Confirm persistence mechanisms removed",
+            "Validate network segmentation"
+          ]
+        }
+      }
+    },
+    {
+      "id": "artifact_8",
+      "title": "Recovery Planning",
+      "type": "process_document",
+      "unlocks_at": "decision_7",
+      "content": {
+        "recovery_sources": {
+          "backups": {
+            "axiom_status": "Daily backups, offsite storage, last test: 18 months ago",
+            "considerations": [
+              "Verify backups are not infected",
+              "Determine clean restore point (before compromise)",
+              "Test restoration process first"
+            ]
+          },
+          "decryption": {
+            "possibilities": [
+              "Law enforcement may have keys (check No More Ransom project)",
+              "Attacker may provide keys after payment (not guaranteed)",
+              "Some ransomware has implementation flaws"
+            ],
+            "reality": "Most modern ransomware has no free decryption"
+          },
+          "rebuild": {
+            "approach": "Rebuild systems from known-good images",
+            "advantages": "Ensures clean state, no hidden malware",
+            "disadvantages": "Time-consuming, may lose some data"
+          }
+        },
+        "recovery_sequence": {
+          "phase_1": "Critical infrastructure (AD, DNS, backup systems)",
+          "phase_2": "Business-critical applications",
+          "phase_3": "User workstations",
+          "phase_4": "Secondary systems"
+        },
+        "validation_before_production": [
+          "Scan restored systems for malware",
+          "Verify system integrity",
+          "Confirm data integrity",
+          "Test application functionality",
+          "Enhanced monitoring in place"
+        ]
+      }
+    },
+    {
+      "id": "artifact_9",
+      "title": "Ransom Payment Considerations",
+      "type": "reference",
+      "unlocks_at": "decision_8",
+      "content": {
+        "arguments_against_payment": [
+          "Funds criminal organizations",
+          "No guarantee of decryption (30% receive no keys)",
+          "No guarantee data won't be published anyway",
+          "May be illegal (OFAC sanctions)",
+          "Marks organization as willing to pay",
+          "May fund future attacks"
+        ],
+        "arguments_for_payment": [
+          "May be faster than restoration",
+          "Some data may not be backed up",
+          "Business continuity pressure",
+          "Decryption success rate for BlackMatter: ~70%"
+        ],
+        "fbi_guidance": {
+          "recommendation": "FBI discourages payment but acknowledges business reality",
+          "reporting": "Report incident to IC3 regardless of payment decision"
+        },
+        "ofac_considerations": {
+          "risk": "Payment to sanctioned entities is illegal",
+          "due_diligence": "Screen attackers against sanctions lists",
+          "note": "Many ransomware groups have connections to sanctioned nations"
+        },
+        "axiom_considerations": {
+          "backup_status": "Backups exist but untested - restoration time unknown",
+          "data_sensitivity": "R&D data is critical IP; publication would be devastating",
+          "insurance": "Policy may cover ransom payment with approval",
+          "recommendation": "Decision for executive team and board with legal counsel"
+        }
+      }
+    },
+    {
+      "id": "artifact_10",
+      "title": "Lessons Learned Framework",
+      "type": "process_document",
+      "unlocks_at": "decision_9",
+      "content": {
+        "post_incident_review": {
+          "timing": "Within 2 weeks of incident closure",
+          "participants": "IR team, IT, affected business units, management",
+          "approach": "Blameless - focus on process improvement, not fault"
+        },
+        "review_questions": {
+          "detection": [
+            "How was the incident detected?",
+            "What detection gaps allowed attack to succeed?",
+            "What would have detected this earlier?"
+          ],
+          "response": [
+            "Was the IR plan followed? Where did it fail?",
+            "Were roles and responsibilities clear?",
+            "Was communication effective?",
+            "Were tools and access available?"
+          ],
+          "impact": [
+            "What was the business impact?",
+            "Could impact have been reduced?",
+            "Were recovery processes effective?"
+          ],
+          "prevention": [
+            "What allowed initial access?",
+            "What allowed escalation/lateral movement?",
+            "What controls would have prevented this?"
+          ]
+        },
+        "deliverables": {
+          "timeline": "Detailed incident timeline",
+          "root_cause": "Root cause analysis",
+          "recommendations": "Prioritized improvement actions",
+          "metrics": "Incident metrics (MTTD, MTTR, impact)",
+          "executive_summary": "Board-level summary"
+        },
+        "improvement_tracking": {
+          "process": "Log recommendations, assign owners, track completion",
+          "priority": "Critical findings addressed within 30 days",
+          "validation": "Verify improvements are effective"
+        }
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Immediate First Response",
+      "narrative": "It's 6:47 AM. Ransomware is actively encrypting research servers. You've just arrived and are getting briefed. Encryption is spreading to new servers every few minutes. What's your first action?",
+      "question": "What should be your IMMEDIATE first action?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Begin forensic imaging of affected systems",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Forensics is important but attack is still active",
+            "detailed": "Forensic imaging is important for investigation but: the attack is still spreading, imaging takes hours per system, and more systems are being encrypted while you image. Stop the active attack first, then collect evidence. Containment before evidence collection when attack is active."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Contain the attack - isolate the research network segment immediately",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Stop the active attack from spreading",
+            "detailed": "With an active attack spreading every few minutes, containment is the first priority. Isolate the research network segment from the rest of the corporate network to stop lateral movement. This buys time for investigation and protects unaffected systems. Evidence can be collected after containment."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Call emergency executive briefing",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Executives need to know, but containment can't wait",
+            "detailed": "Executive notification is important but not the FIRST action. While you're in a meeting, the attack spreads to more systems. Contain first, then notify. Delegate notification while you focus on technical response."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Shut down all servers to stop the encryption",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Stops encryption but destroys volatile evidence",
+            "detailed": "Shutdown stops encryption but: loses volatile memory evidence (running malware, network connections), may corrupt partially encrypted files, and is harder to recover from than network isolation. Network isolation stops spread while preserving system state for analysis."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "With active encryption spreading, what action stops the damage while preserving evidence?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Network isolation: stops lateral movement, preserves system state (volatile evidence), allows investigation of isolated systems. First priority in active attack."
+        }
+      ],
+      "learning_note": "Active incident priority: CONTAIN FIRST to stop ongoing damage. Network isolation is preferred over system shutdown because it stops spread while preserving volatile evidence (memory, running processes). Once contained, evidence collection and investigation can proceed. Don't let the perfect (forensics) be enemy of the good (stopping the attack).",
+      "unlocks_artifact": "artifact_2"
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "Containment Strategy",
+      "narrative": "You've isolated the research network. Now you need to determine full containment strategy. The attacker came in via VPN with stolen admin credentials. The compromised admin account is jsmith_admin.",
+      "question": "What additional containment action is MOST critical?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Disable VPN for all users until further notice",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Too broad - disrupts legitimate work unnecessarily",
+            "detailed": "Disabling VPN entirely affects all remote workers and may not be necessary if the compromised credentials are addressed. More targeted containment: disable/reset the compromised account, implement emergency MFA requirement, block the source IPs. VPN shutdown may be needed but shouldn't be first action."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Disable and reset the compromised admin account immediately",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Remove the attacker's authenticated access",
+            "detailed": "The attacker is using jsmith_admin credentials. Immediately: disable the account (prevents new logins), reset the password (invalidates current sessions on most systems), and reset any service accounts this admin manages. This removes the attacker's primary means of access. Additional credential resets will follow, but this is the immediate priority."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Block the source IP address at the firewall",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Attacker can easily change IPs",
+            "detailed": "The source IP was a Tor exit node - blocking it has minimal effect as the attacker can use different exit nodes or other infrastructure. Blocking the credential (disabling the account) is more effective than blocking the IP. IP blocking is secondary to credential action."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Begin resetting all user passwords in Active Directory",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Mass reset causes chaos and may not be needed yet",
+            "detailed": "Mass password reset disrupts all users and may not be necessary if only one account is compromised. Start with the known compromised account, then expand based on investigation findings. Mass reset may be needed later but is not the immediate priority."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "The attacker is using stolen credentials. What removes that access immediately?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Disable and reset the compromised account. This cuts off the attacker's authenticated access. More surgical than VPN shutdown or mass reset."
+        }
+      ],
+      "learning_note": "Containment with compromised credentials: disable the account immediately, reset password (invalidates sessions), review account's permissions and access history. This is faster and less disruptive than broader actions (VPN shutdown, mass reset). Expand containment based on investigation - if attacker created other accounts or compromised other credentials, address those as discovered.",
+      "unlocks_artifact": "artifact_3"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Evidence Collection Priority",
+      "narrative": "The attack is contained. Now you need to collect evidence for investigation and potential legal proceedings. You have limited forensic resources. Systems are isolated but still running.",
+      "question": "What evidence should be collected FIRST?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Full disk images of all affected servers",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Disk imaging is important but not most time-sensitive",
+            "detailed": "Disk contents are persistent - they won't disappear while you collect other evidence. Memory contents, running processes, and network connections are volatile and will be lost if systems are rebooted or crash. Collect volatile evidence first, then disk images."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Memory dumps and running process information from key systems",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Collect most volatile evidence first",
+            "detailed": "Order of volatility: collect evidence that disappears fastest first. Memory contains: running malware code, decryption keys (possibly), network connections, attacker commands. This evidence is lost on reboot. Capture memory dumps from key affected systems first, then move to disk imaging. Memory analysis often reveals more than disk analysis for active incidents."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Copies of the ransom notes",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Ransom notes are files on disk - not volatile",
+            "detailed": "Ransom notes are important but they're just text files on disk - they'll be there when you get to disk imaging. Prioritize volatile evidence that won't survive a reboot."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Interview the compromised user immediately",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Important but technical evidence takes priority",
+            "detailed": "User interview is valuable but: the user's memory won't disappear in the next hour, technical volatile evidence will. Collect volatile technical evidence first, interview can happen in parallel by another team member."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What evidence will be lost if the systems crash or reboot?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Order of volatility: memory > running processes > network connections > disk. Collect memory dumps first - they contain running malware, possibly decryption keys, attacker commands."
+        }
+      ],
+      "learning_note": "Evidence collection order of volatility: most volatile (memory, registers, cache) â†’ running processes â†’ network connections â†’ disk contents â†’ logs (remote) â†’ physical evidence. Memory analysis can reveal: running malware, decryption keys, command history, network connections, credentials in memory. Always collect volatile evidence before persistent.",
+      "unlocks_artifact": "artifact_4"
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Scope Determination",
+      "narrative": "Investigation reveals the attacker was in the network for 14 days before deploying ransomware. They exfiltrated approximately 200GB of data. The attack started with a phishing email to the compromised admin.",
+      "question": "Based on this timeline, what is the KEY implication for the response?",
+      "options": [
+        {
+          "id": "A",
+          "text": "The phishing filter needs to be upgraded",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Improvement needed but not the key implication for current response",
+            "detailed": "Phishing filter improvement is a valid lesson learned but doesn't affect the current response. The key implication is about the scope of compromise and required eradication actions based on the 14-day dwell time."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Data exfiltration means this is likely double extortion - paying ransom won't prevent data leak",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Exfiltration changes the calculus significantly",
+            "detailed": "With 200GB exfiltrated, this is double extortion: pay for decryption AND pay to prevent data publication. Key implications: paying ransom may not prevent data leak (attackers often publish anyway), this affects breach notification decisions (data was accessed, not just encrypted), and incident severity increases significantly. This must inform executive decision-making and disclosure planning."
+          }
+        },
+        {
+          "id": "C",
+          "text": "14 days means complete credential reset is required",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "True but not the KEY implication",
+            "detailed": "Credential reset is needed due to the dwell time (attacker may have harvested many credentials). But the KEY implication is the data exfiltration - it changes the entire nature of the incident from encryption-only to data breach with potential regulatory and legal consequences."
+          }
+        },
+        {
+          "id": "D",
+          "text": "We need to identify every system accessed in 14 days",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important for eradication but not the key implication",
+            "detailed": "Identifying all accessed systems is necessary for eradication and scope determination. But the KEY implication is understanding that data exfiltration fundamentally changes the incident - it's now a data breach requiring notification, regardless of whether encryption is resolved."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What does data exfiltration mean for the overall incident severity and response options?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Double extortion: even if you pay for decryption or restore from backup, the data is already stolen. Attackers may still publish data. This is a data breach requiring notification."
+        }
+      ],
+      "learning_note": "Double extortion ransomware: attackers encrypt AND steal data. Implications: paying ransom doesn't guarantee data won't be published, incident is a data breach (notification required), recovery doesn't eliminate the breach, and decision calculus changes (backup restoration doesn't solve the data theft). This trend makes ransomware incidents significantly more complex.",
+      "unlocks_artifact": "artifact_5"
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "External Communication",
+      "narrative": "Margaret Torres asks who should be notified externally. The organization has cyber insurance, clinical trial data (HIPAA) is involved, the FBI has asked to be informed of ransomware incidents, and the board wants to know about media strategy.",
+      "question": "Who should be contacted FIRST among external parties?",
+      "options": [
+        {
+          "id": "A",
+          "text": "FBI to report the ransomware attack",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important but legal counsel should be engaged first",
+            "detailed": "FBI notification is valuable - they may have intelligence on the attacker or decryption keys. However, legal counsel should be engaged first to establish attorney-client privilege over incident communications and advise on regulatory and legal implications. FBI can be contacted shortly after legal counsel engagement."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Legal counsel (both internal and external breach counsel)",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Legal counsel establishes privilege and guides notifications",
+            "detailed": "Legal counsel first because: attorney-client privilege protects sensitive incident communications, legal counsel advises on regulatory notification requirements (HIPAA timeline, state breach laws), counsel guides interaction with law enforcement, and counsel reviews all external communications. All other notifications flow more smoothly with legal guidance."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Cyber insurance carrier to activate coverage",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important but typically within 24-72 hours, not immediate",
+            "detailed": "Insurance notification is required (usually within 24-72 hours per policy) but isn't the first call. Legal counsel helps understand policy requirements and may participate in insurance calls. Insurance often provides approved vendors for IR - but Axiom already has a response underway."
+          }
+        },
+        {
+          "id": "D",
+          "text": "PR firm to manage media communications",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Premature - no external communications until legal reviews",
+            "detailed": "Media communications may be needed eventually but: no public statement should be made without legal review, the incident is still being investigated (facts aren't yet clear), and premature disclosure can create legal exposure. PR comes after legal counsel establishes communication strategy."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Which external party helps protect communications and guides other notifications?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Legal counsel first: establishes attorney-client privilege, advises on regulatory requirements, guides law enforcement interaction, reviews external communications."
+        }
+      ],
+      "learning_note": "External notification sequence: (1) Legal counsel - establishes privilege, advises on requirements, (2) Insurance - per policy requirements, may provide resources, (3) Law enforcement - FBI for ransomware, may have intelligence, (4) Regulators - per legal requirements (HIPAA, state laws), (5) Affected parties - after scope is understood. Legal counsel guides all external communications.",
+      "unlocks_artifact": "artifact_6"
+    },
+    {
+      "id": "decision_6",
+      "sequence": 6,
+      "title": "Eradication Completeness",
+      "narrative": "You're ready to begin eradication. The attacker used the compromised admin account to access multiple systems over 14 days. They likely harvested additional credentials and may have established persistence mechanisms.",
+      "question": "What is the MOST critical eradication action to prevent re-compromise?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Remove the ransomware from affected systems",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Necessary but not sufficient",
+            "detailed": "Removing ransomware addresses the symptom, not the root cause. The attacker has valid credentials and possibly persistence mechanisms. Removing ransomware without credential reset and persistence removal means the attacker can return. Think about what enables the attacker, not just the malware."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Reset all privileged credentials including KRBTGT and service accounts",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Eliminate all potential credential-based access",
+            "detailed": "With 14 days in the environment, the attacker likely harvested many credentials. Comprehensive credential reset: all admin accounts, all service accounts, KRBTGT (twice, 10 hours apart - invalidates all Kerberos tickets), and any accounts that accessed compromised systems. Without this, the attacker retains access even after malware removal."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Patch the vulnerabilities used for initial access",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Initial access was phishing, not vulnerability",
+            "detailed": "The attack started with phishing, not a technical vulnerability. Patching is always good but doesn't address this attack vector. MFA on VPN (the secondary entry point) is more relevant. But credentials are still the most critical - attacker already has access."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Implement network segmentation",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Important for future prevention, doesn't eradicate current access",
+            "detailed": "Segmentation is valuable for defense-in-depth but doesn't remove the attacker's current access. If they have credentials, they may still be able to access systems in their segment. Credential reset removes access; segmentation limits what they can do with access."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "The attacker was in for 14 days harvesting credentials. What eradication action addresses this?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Comprehensive credential reset: all admin accounts, service accounts, KRBTGT (twice). Without this, attacker retains access regardless of malware removal."
+        }
+      ],
+      "learning_note": "Eradication for credential-based attacks: reset all potentially compromised credentials. For extended dwell time: assume all privileged credentials are compromised. KRBTGT reset (twice, 10 hours apart) invalidates all Kerberos tickets including golden tickets. Service accounts are often overlooked but critical. Malware removal without credential reset is incomplete eradication.",
+      "unlocks_artifact": "artifact_7"
+    },
+    {
+      "id": "decision_7",
+      "sequence": 7,
+      "title": "Recovery Approach",
+      "narrative": "Eradication is underway. You need to decide on the recovery approach. Backups exist but haven't been tested in 18 months. The attacker may have been in backups too. Some systems were partially encrypted.",
+      "question": "What is the SAFEST recovery approach?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Restore all systems from backup immediately to minimize downtime",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Backups may be infected or compromised",
+            "detailed": "With 14-day dwell time, backups from the last 2 weeks may contain malware or attacker artifacts. Restoring without verification could re-introduce the threat. Additionally, untested backups may fail. Verify backup integrity and infection status before restoration."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Restore from backup taken before the compromise date, verify integrity, test before production",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Use pre-compromise backup with verification",
+            "detailed": "Safe recovery: identify backup from before compromise (>14 days ago), scan backup for malware artifacts, test restoration in isolated environment, verify data integrity, then restore to production. This ensures you're not restoring infected systems. Accept data loss from the period between clean backup and incident."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Attempt to decrypt files using the attacker's decryption tool",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Risky and requires ransom payment",
+            "detailed": "Using attacker-provided decryption: requires paying ransom (ethical, legal, and practical concerns), decryption tool may be malware, no guarantee it works completely, and doesn't address data exfiltration. Backup restoration is preferred when viable."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Clean and rebuild only the encrypted systems, leave others as-is",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "May leave attacker artifacts on 'unaffected' systems",
+            "detailed": "The attacker accessed many systems over 14 days - encryption was just the final act. Systems that weren't encrypted may still have malware, backdoors, or compromised credentials. Any system potentially accessed during dwell time should be treated as compromised."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "The attacker was in for 14 days. What does this mean for recent backups?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Restore from pre-compromise backup (>14 days old), verify it's clean (scan for malware), test restoration, then deploy to production."
+        }
+      ],
+      "learning_note": "Recovery from ransomware: identify clean restore point (before compromise), scan backups for malware before restoration, test restoration process, verify data integrity, restore in phases with validation. Recent backups may contain malware if attacker had dwell time. Accept data loss from the compromised period - it's safer than restoring infected backups.",
+      "unlocks_artifact": "artifact_8"
+    },
+    {
+      "id": "decision_8",
+      "sequence": 8,
+      "title": "Ransom Payment Decision",
+      "narrative": "The executive team asks for your technical input on ransom payment. Legal and business considerations aside, they want to understand the technical implications. Backups will take 5-7 days to restore fully. The ransom is $2.1M.",
+      "question": "What is the KEY technical factor for the ransom decision?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Payment is faster than backup restoration",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Speed is a factor but not the key technical issue",
+            "detailed": "Payment might be faster, but: decryption success rate is ~70% for BlackMatter, decryption is often slow and error-prone, and you still need to rebuild trust in systems regardless. Speed alone doesn't make payment the right choice."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Data exfiltration means paying won't prevent the data breach",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Payment doesn't solve the exfiltration problem",
+            "detailed": "The key technical factor: 200GB is already exfiltrated. Paying ransom may get decryption keys but: doesn't delete the stolen data, doesn't prevent publication, and attackers often leak anyway (or resell data). The data breach has already occurred. Payment only potentially addresses encryption, not exfiltration. This changes the value proposition significantly."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Backup restoration is 5-7 days vs. potential hours for decryption",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Decryption time is often underestimated",
+            "detailed": "Decryption sounds fast but: getting keys can take days of negotiation, decryption of large volumes is slow, errors require re-decryption, and you still need system validation. The time difference may not be as significant as it appears."
+          }
+        },
+        {
+          "id": "D",
+          "text": "The research data may not be in backups",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Important consideration but backups do exist",
+            "detailed": "If critical data wasn't backed up, that changes the equation. But the scenario indicates backups exist (albeit untested). The key issue is still exfiltration - even if you decrypt, the data breach has occurred."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What problem does ransom payment NOT solve in this double-extortion scenario?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Data exfiltration has already occurred. Payment might get decryption but doesn't retrieve or protect the stolen data. The breach happened regardless of payment decision."
+        }
+      ],
+      "learning_note": "Ransom payment considerations: technical factors (backup availability, decryption reliability, data exfiltration impact), legal factors (OFAC sanctions, legal counsel), business factors (downtime cost, reputation), and ethical factors (funding criminals). Double extortion changes the equation significantly - payment doesn't address data theft. This is ultimately a business decision with technical input.",
+      "unlocks_artifact": "artifact_9"
+    },
+    {
+      "id": "decision_9",
+      "sequence": 9,
+      "title": "Post-Incident Actions",
+      "narrative": "Recovery is complete after 8 days. Systems are restored from clean backups, credentials are reset, MFA is implemented on VPN, and enhanced monitoring is in place. Margaret asks what happens next.",
+      "question": "What is the MOST important post-incident activity?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Immediately implement all security improvements identified during the incident",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Improvements are needed but structured approach is better",
+            "detailed": "Rushing to implement changes without proper lessons learned analysis may miss root causes or create new issues. A structured post-incident review identifies prioritized improvements with proper change management. Immediate critical gaps (MFA) are already addressed; systematic improvement follows."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Conduct formal lessons learned review with all stakeholders",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Structured review drives lasting improvement",
+            "detailed": "Lessons learned review: analyze what happened (timeline, attack path), evaluate response effectiveness (what worked, what didn't), identify improvements (technical, procedural, organizational), prioritize and assign owners, and track completion. This ensures incident leads to lasting improvement rather than being forgotten once systems are restored."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Return to normal operations and move on",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Wastes the learning opportunity",
+            "detailed": "Without lessons learned, the organization may suffer similar incidents. The incident revealed gaps in detection, prevention, and response. Moving on without systematic review means those gaps remain. Every incident is a learning opportunity."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Focus on regulatory notifications and legal matters only",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Compliance is necessary but not the only focus",
+            "detailed": "Regulatory compliance (breach notifications, etc.) is required but is one aspect of post-incident activity. Lessons learned to improve defenses is equally important. Both are needed, but lessons learned drives security improvement."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What activity ensures the organization learns from the incident?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Lessons learned review: timeline reconstruction, what worked/didn't work, root cause analysis, improvement recommendations, action tracking."
+        }
+      ],
+      "learning_note": "Lessons learned (post-incident review): blameless analysis of what happened and why, evaluate IR process effectiveness, identify detection/prevention gaps, recommend and prioritize improvements, assign owners and track completion. Conducted within 2 weeks while memory is fresh. This phase transforms an incident from a negative event into a security improvement opportunity.",
+      "unlocks_artifact": "artifact_10"
+    },
+    {
+      "id": "decision_10",
+      "sequence": 10,
+      "title": "Improvement Prioritization",
+      "narrative": "The lessons learned review identified 15 improvement recommendations. Budget and resources are limited. The board wants to know what's most important to prevent recurrence.",
+      "question": "Which improvement should be HIGHEST priority based on this incident?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Upgrade the email security gateway",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Helpful but didn't prevent initial compromise",
+            "detailed": "Email security improvements might catch similar phishing in the future, but: phishing will always get through sometimes, and the bigger failure was post-compromise (no MFA, insufficient monitoring). Address the gaps that allowed escalation, not just initial access."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Implement MFA on all remote access and privileged accounts",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Addresses the critical gap that enabled the attack",
+            "detailed": "The attack succeeded because stolen credentials allowed VPN access without MFA. With MFA, the stolen password alone wouldn't have allowed access. MFA on remote access and privileged accounts directly addresses the attack vector that made this incident possible. This is the highest-impact control."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Implement EDR blocking mode instead of alert-only",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Would have limited damage but didn't address initial access",
+            "detailed": "EDR in blocking mode would have stopped ransomware execution on one endpoint. This is valuable, but the attacker would still have had 14 days of access via compromised VPN credentials. EDR blocking is important but MFA prevents the access entirely."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Hire more security analysts",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "More analysts without better controls doesn't prevent this attack",
+            "detailed": "The issue wasn't analyst capacity - it was missing controls (MFA) and insufficient detection. More analysts won't help if they don't have the tools and data to detect attacks. Address control gaps before staffing."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What single control would have prevented the attacker from using stolen credentials?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "MFA on VPN would have stopped the attack - stolen password alone wasn't sufficient. MFA on privileged accounts adds further protection."
+        }
+      ],
+      "learning_note": "Post-incident improvement prioritization: focus on controls that would have prevented the specific attack path. This incident: MFA would have stopped initial (re-)access, EDR blocking would have stopped final payload. Prioritize based on attack path analysis. MFA is consistently the highest-impact control for credential-based attacks."
+    }
+  ],
+  
+  "scoring": {
+    "max_points": 250,
+    "passing_score": 200,
+    "passing_percentage": 80
+  },
+  
+  "outcome_thresholds": {
+    "expert": {"min_score": 238, "title": "Incident Response Expert", "description": "Exceptional incident response capabilities."},
+    "proficient": {"min_score": 213, "title": "Incident Response Professional", "description": "Strong incident response skills across all phases."},
+    "competent": {"min_score": 200, "title": "Incident Response Competent", "description": "Solid understanding of IR lifecycle."},
+    "developing": {"min_score": 175, "title": "Incident Response Developing", "description": "Gaps in incident response concepts."},
+    "needs_remediation": {"min_score": 0, "title": "IR Fundamentals Needed", "description": "Review incident response concepts."}
+  },
+  
+  "weakness_mapping": {
+    "ir_lifecycle_gaps": {"indicators": ["decision_1_incorrect", "decision_2_incorrect"], "remediation": "D4-REM-002", "focus": "IR phases and containment"},
+    "evidence_handling_gaps": {"indicators": ["decision_3_incorrect"], "remediation": "D4-REM-002", "focus": "Evidence collection and forensics"}
+  },
+  
+  "prerequisites": ["D4-SIM-001"],
+  "unlocks": ["D4-SIM-005"],
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 4: Security Operations",
+    "job_role_alignment": ["Incident Response Lead", "SOC Analyst", "Security Engineer", "CISO"],
+    "estimated_time": "50-65 minutes",
+    "industry_context": "Pharmaceutical/Healthcare"
+  }
+}

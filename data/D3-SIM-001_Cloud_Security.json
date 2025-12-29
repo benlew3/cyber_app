@@ -1,0 +1,1382 @@
+{
+  "simulation_id": "D3-SIM-001",
+  "title": "Cloud Security Architecture",
+  "domain": 3,
+  "category": "primary",
+  "difficulty": "intermediate",
+  "time_estimate": "45-60 minutes",
+  "passing_score": 200,
+  "max_score": 250,
+  
+  "exam_objectives": [
+    {
+      "id": "3.1",
+      "description": "Compare and contrast security implications of different architecture models",
+      "coverage": ["cloud models (IaaS, PaaS, SaaS)", "shared responsibility", "cloud-native controls", "serverless", "containerization", "hybrid considerations"]
+    },
+    {
+      "id": "3.2",
+      "description": "Given a scenario, apply security principles to secure enterprise infrastructure",
+      "coverage": ["cloud security controls", "identity federation", "network segmentation in cloud", "encryption", "logging and monitoring"]
+    }
+  ],
+  
+  "scenario_context": {
+    "organization": "Meridian Financial Services",
+    "industry": "Financial Services",
+    "size": "2,500 employees, $800M annual revenue",
+    "setting": "Cloud migration initiative",
+    "your_role": "Cloud Security Architect",
+    "reporting_to": "CISO Sarah Chen",
+    "environment": {
+      "current_state": {
+        "infrastructure": "85% on-premises data centers (2 locations)",
+        "cloud_presence": "15% AWS (dev/test environments)",
+        "applications": "Core banking platform, CRM, trading systems, customer portal",
+        "compliance": "SOX, PCI-DSS, GLBA, state privacy laws"
+      },
+      "migration_plan": {
+        "target_state": "60% cloud, 40% on-premises (3-year plan)",
+        "cloud_strategy": "Multi-cloud (AWS primary, Azure secondary)",
+        "priority_workloads": ["Customer portal", "CRM", "Analytics platform", "DevOps tooling"],
+        "timeline": "Phase 1 complete in 12 months"
+      },
+      "team": {
+        "cloud_team": "8 engineers (mixed AWS/Azure experience)",
+        "security_team": "4 cloud security specialists",
+        "compliance": "2 analysts dedicated to cloud"
+      }
+    },
+    "opening_narrative": "Meridian Financial Services is executing an ambitious cloud migration strategy. As the newly hired Cloud Security Architect, you're responsible for designing the security architecture that will protect critical financial data across a multi-cloud environment. The CISO has emphasized that security cannot be an afterthought - it must be built into the architecture from day one. Your first week involves critical decisions that will shape the security posture for years to come."
+  },
+  
+  "artifacts": [
+    {
+      "id": "artifact_1",
+      "title": "Current Infrastructure Assessment",
+      "type": "technical_document",
+      "unlocks_at": "start",
+      "content": {
+        "on_premises_inventory": {
+          "data_center_1_primary": {
+            "location": "Chicago, IL",
+            "capacity": "400 servers, 2PB storage",
+            "workloads": ["Core banking", "Trading systems", "Primary databases"],
+            "security_controls": ["Physical security", "Network firewalls", "IDS/IPS", "DLP"]
+          },
+          "data_center_2_dr": {
+            "location": "Dallas, TX",
+            "capacity": "200 servers, 1PB storage",
+            "workloads": ["DR replicas", "Backup systems", "Secondary processing"],
+            "rpo_rto": "RPO: 15 min, RTO: 4 hours"
+          }
+        },
+        "existing_aws_environment": {
+          "account_structure": "Single account (dev/test)",
+          "services_used": ["EC2", "S3", "RDS (dev only)"],
+          "security_posture": {
+            "findings": [
+              "No centralized identity management",
+              "Inconsistent security groups",
+              "No encryption enforcement",
+              "Limited logging (CloudTrail not enabled)",
+              "No network segmentation"
+            ],
+            "risk_level": "High - not production ready"
+          }
+        },
+        "applications_for_migration": [
+          {
+            "name": "Customer Portal",
+            "type": "Web application (.NET)",
+            "data_classification": "Confidential (PII, financial data)",
+            "current_users": "450,000 customers",
+            "availability_requirement": "99.9%"
+          },
+          {
+            "name": "CRM Platform",
+            "type": "Salesforce + custom integrations",
+            "data_classification": "Confidential (customer data)",
+            "users": "800 internal users"
+          },
+          {
+            "name": "Analytics Platform",
+            "type": "Data warehouse + BI tools",
+            "data_classification": "Confidential (aggregated financial data)",
+            "data_volume": "50TB, growing 20% annually"
+          },
+          {
+            "name": "DevOps Tooling",
+            "type": "CI/CD, code repositories, artifact storage",
+            "data_classification": "Internal (source code, configs)",
+            "users": "200 developers"
+          }
+        ]
+      }
+    },
+    {
+      "id": "artifact_2",
+      "title": "Cloud Service Model Comparison",
+      "type": "reference",
+      "unlocks_at": "decision_1",
+      "content": {
+        "service_models": {
+          "iaas": {
+            "name": "Infrastructure as a Service",
+            "description": "Virtualized computing resources over the internet",
+            "customer_responsibility": ["Applications", "Data", "Runtime", "Middleware", "OS"],
+            "provider_responsibility": ["Virtualization", "Servers", "Storage", "Networking"],
+            "examples": ["AWS EC2", "Azure VMs", "Google Compute Engine"],
+            "security_considerations": [
+              "Customer responsible for OS patching",
+              "Customer configures network security",
+              "Customer manages access controls",
+              "Most flexibility, most responsibility"
+            ],
+            "use_cases": ["Lift-and-shift migrations", "Custom applications", "Dev/test environments"]
+          },
+          "paas": {
+            "name": "Platform as a Service",
+            "description": "Platform for developing, running, and managing applications",
+            "customer_responsibility": ["Applications", "Data"],
+            "provider_responsibility": ["Runtime", "Middleware", "OS", "Virtualization", "Servers", "Storage", "Networking"],
+            "examples": ["AWS Elastic Beanstalk", "Azure App Service", "Google App Engine"],
+            "security_considerations": [
+              "Provider handles OS/runtime security",
+              "Customer focuses on application security",
+              "Less control over underlying infrastructure",
+              "Shared responsibility shifts significantly to provider"
+            ],
+            "use_cases": ["Web applications", "API backends", "Microservices"]
+          },
+          "saas": {
+            "name": "Software as a Service",
+            "description": "Complete application delivered over the internet",
+            "customer_responsibility": ["Data", "User access management"],
+            "provider_responsibility": ["Application", "Runtime", "Middleware", "OS", "Virtualization", "Servers", "Storage", "Networking"],
+            "examples": ["Salesforce", "Microsoft 365", "Workday"],
+            "security_considerations": [
+              "Provider handles most security",
+              "Customer manages user access and data",
+              "Dependent on provider's security posture",
+              "Must evaluate provider security (SOC 2, etc.)"
+            ],
+            "use_cases": ["Email", "CRM", "HR systems", "Collaboration tools"]
+          },
+          "serverless": {
+            "name": "Function as a Service / Serverless",
+            "description": "Event-driven compute without managing servers",
+            "customer_responsibility": ["Function code", "Data", "IAM configuration"],
+            "provider_responsibility": ["Everything else including scaling"],
+            "examples": ["AWS Lambda", "Azure Functions", "Google Cloud Functions"],
+            "security_considerations": [
+              "Minimal infrastructure to secure",
+              "Focus on code security and IAM",
+              "Event source security critical",
+              "Cold start and timeout considerations"
+            ],
+            "use_cases": ["Event processing", "API backends", "Scheduled tasks", "Data transformation"]
+          }
+        },
+        "shared_responsibility_summary": {
+          "always_customer": ["Data classification", "User access management", "Client-side encryption"],
+          "always_provider": ["Physical security", "Global infrastructure", "Hardware maintenance"],
+          "varies_by_model": ["OS patching", "Network configuration", "Application security", "Encryption configuration"]
+        }
+      }
+    },
+    {
+      "id": "artifact_3",
+      "title": "Multi-Account Strategy Options",
+      "type": "architecture_document",
+      "unlocks_at": "decision_2",
+      "content": {
+        "option_a_single_account": {
+          "description": "All workloads in one AWS account",
+          "pros": ["Simple management", "Easy resource sharing", "Lower overhead"],
+          "cons": ["No blast radius isolation", "Complex IAM", "Difficult compliance separation", "Single bill complexity"],
+          "recommendation": "Not recommended for enterprise or regulated workloads"
+        },
+        "option_b_environment_separation": {
+          "description": "Separate accounts for Dev, Test, Staging, Production",
+          "structure": {
+            "accounts": ["Development", "Test", "Staging", "Production"],
+            "management": "AWS Organizations with SCPs"
+          },
+          "pros": ["Environment isolation", "Cleaner IAM", "Separate billing"],
+          "cons": ["Limited workload isolation", "Shared production risks"],
+          "recommendation": "Good for small/medium organizations"
+        },
+        "option_c_workload_separation": {
+          "description": "Separate accounts per workload/application plus environment",
+          "structure": {
+            "organizational_units": ["Security", "Infrastructure", "Workloads"],
+            "account_types": [
+              "Management account (Organizations, billing)",
+              "Security account (GuardDuty, Security Hub, logs)",
+              "Network account (Transit Gateway, DNS)",
+              "Shared Services (AD, artifacts)",
+              "Workload accounts (per application per environment)"
+            ]
+          },
+          "pros": ["Maximum isolation", "Granular permissions", "Compliance boundaries", "Cost allocation"],
+          "cons": ["More accounts to manage", "Cross-account complexity", "Requires automation"],
+          "recommendation": "Recommended for regulated industries and enterprise"
+        },
+        "aws_organizations_features": {
+          "service_control_policies": "Guardrails across all accounts",
+          "consolidated_billing": "Single payment, per-account visibility",
+          "organizational_units": "Group accounts by function/compliance",
+          "delegated_administrator": "Security services managed centrally"
+        }
+      }
+    },
+    {
+      "id": "artifact_4",
+      "title": "Identity Architecture Options",
+      "type": "architecture_document",
+      "unlocks_at": "decision_3",
+      "content": {
+        "current_identity_landscape": {
+          "on_premises": "Active Directory (2 domain controllers)",
+          "aws_current": "Local IAM users (inconsistent)",
+          "saas_apps": "Mix of local accounts and some SAML"
+        },
+        "option_a_cloud_native": {
+          "description": "AWS IAM Identity Center (SSO) as primary IdP",
+          "architecture": {
+            "identity_source": "AWS IAM Identity Center managed",
+            "authentication": "IAM Identity Center handles all cloud auth",
+            "on_prem_integration": "Limited - separate from AD"
+          },
+          "pros": ["Simple setup", "Native AWS integration", "No additional cost"],
+          "cons": ["Separate from existing AD", "Duplicate identity management", "Limited enterprise features"],
+          "best_for": "Cloud-only organizations"
+        },
+        "option_b_federated_identity": {
+          "description": "Federate existing AD with cloud via SAML/OIDC",
+          "architecture": {
+            "identity_source": "On-premises Active Directory",
+            "federation": "AD FS or Azure AD as IdP",
+            "aws_integration": "SAML federation to IAM Identity Center",
+            "azure_integration": "Native Azure AD"
+          },
+          "pros": ["Single source of truth", "Existing processes work", "Unified experience", "Leverage AD investment"],
+          "cons": ["Dependency on on-prem AD", "Federation complexity", "Latency considerations"],
+          "best_for": "Hybrid environments with existing AD"
+        },
+        "option_c_hybrid_with_azure_ad": {
+          "description": "Azure AD as cloud IdP synced with on-prem AD",
+          "architecture": {
+            "identity_source": "Azure AD (synced from on-prem AD)",
+            "on_prem_sync": "Azure AD Connect",
+            "aws_integration": "SAML federation from Azure AD",
+            "saas_integration": "Native Azure AD app gallery"
+          },
+          "pros": ["Best of both worlds", "Strong SaaS integration", "Conditional access", "MFA built-in"],
+          "cons": ["Azure dependency", "Licensing cost", "Sync complexity"],
+          "best_for": "Multi-cloud and heavy SaaS environments"
+        },
+        "mfa_requirements": {
+          "regulatory": "PCI-DSS requires MFA for admin access",
+          "best_practice": "MFA for all users accessing cloud resources",
+          "options": ["Hardware tokens", "Authenticator apps", "Push notifications", "FIDO2 keys"]
+        }
+      }
+    },
+    {
+      "id": "artifact_5",
+      "title": "Network Architecture Design",
+      "type": "architecture_document",
+      "unlocks_at": "decision_4",
+      "content": {
+        "design_requirements": {
+          "connectivity": "Secure connection between on-prem and cloud",
+          "segmentation": "Isolate workloads by sensitivity",
+          "inspection": "Traffic inspection for compliance",
+          "performance": "Low latency for real-time applications"
+        },
+        "connectivity_options": {
+          "vpn": {
+            "description": "Site-to-site VPN over internet",
+            "bandwidth": "Up to 1.25 Gbps per tunnel",
+            "latency": "Variable (internet-dependent)",
+            "cost": "Low (~$0.05/hour per connection)",
+            "security": "IPsec encryption",
+            "use_case": "Backup connectivity, dev/test, low-bandwidth workloads"
+          },
+          "direct_connect": {
+            "description": "Dedicated private connection to AWS",
+            "bandwidth": "1 Gbps to 100 Gbps",
+            "latency": "Consistent, lower than internet",
+            "cost": "Higher (port fee + data transfer)",
+            "security": "Private connection (add MACsec for encryption)",
+            "use_case": "Production workloads, high bandwidth, consistent performance"
+          },
+          "hybrid_approach": {
+            "description": "Direct Connect primary, VPN backup",
+            "recommendation": "Best for production financial services"
+          }
+        },
+        "vpc_architecture": {
+          "hub_and_spoke": {
+            "description": "Central transit VPC connecting workload VPCs",
+            "components": ["Transit Gateway", "Shared services VPC", "Workload VPCs"],
+            "traffic_flow": "All inter-VPC traffic through Transit Gateway",
+            "inspection": "Centralized firewall in transit VPC",
+            "pros": ["Centralized control", "Scalable", "Consistent policy"],
+            "cons": ["Transit Gateway costs", "Single point of inspection"]
+          },
+          "subnet_strategy": {
+            "public_subnet": "Load balancers, NAT gateways, bastion hosts",
+            "private_subnet": "Application servers, containers",
+            "data_subnet": "Databases, sensitive data storage",
+            "management_subnet": "Monitoring, logging, security tools"
+          }
+        },
+        "security_groups_vs_nacls": {
+          "security_groups": {
+            "level": "Instance/ENI level",
+            "state": "Stateful",
+            "rules": "Allow only (implicit deny)",
+            "use": "Primary access control"
+          },
+          "network_acls": {
+            "level": "Subnet level",
+            "state": "Stateless",
+            "rules": "Allow and Deny",
+            "use": "Subnet-level guardrails, blocking known bad"
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_6",
+      "title": "Data Protection Requirements",
+      "type": "compliance_document",
+      "unlocks_at": "decision_5",
+      "content": {
+        "regulatory_requirements": {
+          "pci_dss": {
+            "encryption_at_rest": "Required for cardholder data",
+            "encryption_in_transit": "Required (TLS 1.2+)",
+            "key_management": "Documented key management procedures",
+            "data_location": "Know where cardholder data resides"
+          },
+          "glba": {
+            "safeguards": "Administrative, technical, physical safeguards",
+            "encryption": "Required for NPI in transit over public networks",
+            "access_controls": "Limit access to customer information"
+          },
+          "sox": {
+            "integrity": "Ensure accuracy of financial reporting data",
+            "access_controls": "Segregation of duties",
+            "audit_trails": "Maintain evidence of controls"
+          }
+        },
+        "data_classification": {
+          "public": {
+            "description": "Information intended for public release",
+            "examples": ["Marketing materials", "Public website content"],
+            "encryption_requirement": "Optional"
+          },
+          "internal": {
+            "description": "Business information not for public",
+            "examples": ["Internal policies", "Non-sensitive business data"],
+            "encryption_requirement": "Recommended"
+          },
+          "confidential": {
+            "description": "Sensitive business and customer data",
+            "examples": ["Customer PII", "Financial transactions", "Account data"],
+            "encryption_requirement": "Required at rest and in transit"
+          },
+          "restricted": {
+            "description": "Highly sensitive regulated data",
+            "examples": ["Cardholder data", "Authentication credentials", "Encryption keys"],
+            "encryption_requirement": "Required, additional controls"
+          }
+        },
+        "aws_encryption_options": {
+          "s3": {
+            "sse_s3": "AWS managed keys (default)",
+            "sse_kms": "Customer managed KMS keys (audit trail)",
+            "sse_c": "Customer provided keys (customer manages)",
+            "client_side": "Encrypt before upload"
+          },
+          "ebs": {
+            "encryption": "AES-256 with KMS keys",
+            "default_encryption": "Can enable at account level"
+          },
+          "rds": {
+            "encryption": "AES-256 with KMS keys",
+            "note": "Must enable at creation time"
+          },
+          "kms_considerations": {
+            "aws_managed": "Convenient, limited control",
+            "customer_managed": "Full control, audit trail, rotation options",
+            "byok": "Import your own key material"
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_7",
+      "title": "Logging and Monitoring Strategy",
+      "type": "architecture_document",
+      "unlocks_at": "decision_6",
+      "content": {
+        "logging_requirements": {
+          "compliance": {
+            "pci_dss": "Log all access to cardholder data, retain 1 year",
+            "sox": "Audit trail for financial system changes",
+            "security": "Security event logs for incident response"
+          },
+          "retention": {
+            "security_logs": "1 year minimum, 7 years for some compliance",
+            "operational_logs": "90 days active, archive longer"
+          }
+        },
+        "aws_logging_services": {
+          "cloudtrail": {
+            "purpose": "API activity logging",
+            "scope": "Management events, data events (optional)",
+            "critical_for": "Security investigation, compliance audit",
+            "recommendation": "Enable in all accounts, centralize to security account"
+          },
+          "vpc_flow_logs": {
+            "purpose": "Network traffic metadata",
+            "scope": "Source/dest IP, ports, action (accept/reject)",
+            "critical_for": "Network security monitoring, troubleshooting",
+            "recommendation": "Enable on all VPCs, send to central logging"
+          },
+          "config": {
+            "purpose": "Resource configuration tracking",
+            "scope": "Configuration changes over time",
+            "critical_for": "Compliance, drift detection, forensics",
+            "recommendation": "Enable with conformance packs for standards"
+          },
+          "guardduty": {
+            "purpose": "Threat detection",
+            "scope": "CloudTrail, VPC Flow Logs, DNS logs",
+            "critical_for": "Detecting malicious activity",
+            "recommendation": "Enable in all accounts, delegate to security"
+          },
+          "security_hub": {
+            "purpose": "Security findings aggregation",
+            "scope": "Findings from GuardDuty, Inspector, Config, etc.",
+            "critical_for": "Unified security view",
+            "recommendation": "Enable with CIS/PCI standards"
+          }
+        },
+        "centralized_logging_architecture": {
+          "pattern": "Spoke accounts â†’ Central logging account",
+          "components": {
+            "s3_log_bucket": "Centralized, encrypted, versioned",
+            "cross_account_access": "Resource policies for log delivery",
+            "siem_integration": "Forward to enterprise SIEM",
+            "retention_policies": "Lifecycle rules per log type"
+          }
+        }
+      }
+    },
+    {
+      "id": "artifact_8",
+      "title": "Container Security Considerations",
+      "type": "technical_document",
+      "unlocks_at": "decision_7",
+      "content": {
+        "container_strategy": {
+          "current_plans": "Customer portal modernization using containers",
+          "target_platform": "Amazon EKS (Elastic Kubernetes Service)",
+          "container_registry": "Amazon ECR (Elastic Container Registry)"
+        },
+        "container_security_layers": {
+          "image_security": {
+            "concerns": ["Vulnerable base images", "Embedded secrets", "Unnecessary packages"],
+            "controls": [
+              "Use minimal base images (Alpine, distroless)",
+              "Scan images in CI/CD pipeline",
+              "Sign images for integrity",
+              "No secrets in images"
+            ],
+            "tools": ["ECR image scanning", "Trivy", "Snyk", "Aqua"]
+          },
+          "registry_security": {
+            "concerns": ["Unauthorized image push", "Image tampering"],
+            "controls": [
+              "Private registry (ECR)",
+              "IAM-based access control",
+              "Image immutability",
+              "Encryption at rest"
+            ]
+          },
+          "runtime_security": {
+            "concerns": ["Container escape", "Resource abuse", "Network attacks"],
+            "controls": [
+              "Pod security policies/standards",
+              "Resource limits",
+              "Network policies",
+              "Read-only root filesystem",
+              "Non-root users"
+            ]
+          },
+          "orchestration_security": {
+            "concerns": ["Kubernetes API access", "RBAC misconfiguration", "Secrets exposure"],
+            "controls": [
+              "Private API endpoint",
+              "RBAC with least privilege",
+              "Secrets encryption with KMS",
+              "Audit logging enabled"
+            ]
+          }
+        },
+        "eks_security_features": {
+          "control_plane": "AWS managed, automatic patching",
+          "iam_integration": "IAM roles for service accounts (IRSA)",
+          "networking": "VPC CNI, security groups for pods",
+          "secrets": "Integration with Secrets Manager/KMS"
+        }
+      }
+    },
+    {
+      "id": "artifact_9",
+      "title": "Compliance Mapping",
+      "type": "compliance_document",
+      "unlocks_at": "decision_8",
+      "content": {
+        "cloud_compliance_approach": {
+          "inherit_from_aws": {
+            "description": "Leverage AWS compliance certifications",
+            "available": ["SOC 1/2/3", "PCI DSS", "ISO 27001", "FedRAMP"],
+            "documentation": "AWS Artifact for compliance reports"
+          },
+          "customer_responsibility": {
+            "description": "Controls customer must implement",
+            "examples": ["Access controls", "Encryption configuration", "Logging", "Vulnerability management"]
+          },
+          "evidence_collection": {
+            "automated": "AWS Config rules, Security Hub findings",
+            "manual": "Policies, procedures, exception documentation"
+          }
+        },
+        "pci_dss_cloud_mapping": {
+          "requirement_1": {
+            "title": "Firewall configuration",
+            "aws_controls": ["Security groups", "NACLs", "WAF", "Network Firewall"],
+            "customer_action": "Configure and document firewall rules"
+          },
+          "requirement_3": {
+            "title": "Protect stored cardholder data",
+            "aws_controls": ["KMS encryption", "S3 encryption", "RDS encryption"],
+            "customer_action": "Enable encryption, manage keys, document scope"
+          },
+          "requirement_7": {
+            "title": "Restrict access to cardholder data",
+            "aws_controls": ["IAM policies", "Resource policies", "SCPs"],
+            "customer_action": "Implement least privilege, review access"
+          },
+          "requirement_10": {
+            "title": "Track and monitor access",
+            "aws_controls": ["CloudTrail", "Config", "GuardDuty", "Security Hub"],
+            "customer_action": "Enable logging, configure alerts, retain logs"
+          }
+        },
+        "compliance_automation": {
+          "aws_config_rules": "Continuous compliance checking",
+          "security_hub_standards": "CIS Benchmark, PCI DSS, AWS Best Practices",
+          "custom_rules": "Organization-specific requirements",
+          "remediation": "Automated or manual remediation workflows"
+        }
+      }
+    },
+    {
+      "id": "artifact_10",
+      "title": "Final Architecture Decision",
+      "type": "architecture_document",
+      "unlocks_at": "decision_9",
+      "content": {
+        "architecture_summary": {
+          "identity": "Federated identity with Azure AD + AWS IAM Identity Center",
+          "accounts": "Multi-account strategy with workload isolation",
+          "network": "Hub-and-spoke with Direct Connect + VPN backup",
+          "security_services": "Centralized logging and security monitoring",
+          "data_protection": "KMS encryption with customer-managed keys",
+          "compliance": "Automated compliance monitoring with Security Hub"
+        },
+        "implementation_phases": {
+          "phase_1": {
+            "duration": "Months 1-3",
+            "activities": [
+              "AWS Organizations setup",
+              "Landing zone deployment",
+              "Identity federation",
+              "Centralized logging",
+              "Direct Connect provisioning"
+            ]
+          },
+          "phase_2": {
+            "duration": "Months 4-6",
+            "activities": [
+              "Workload account creation",
+              "Network connectivity testing",
+              "Security services deployment",
+              "DevOps pipeline security"
+            ]
+          },
+          "phase_3": {
+            "duration": "Months 7-12",
+            "activities": [
+              "Workload migrations",
+              "Compliance validation",
+              "DR testing",
+              "Operational handoff"
+            ]
+          }
+        },
+        "success_criteria": {
+          "security": "No critical findings in Security Hub",
+          "compliance": "Pass PCI DSS assessment",
+          "operations": "Meet 99.9% availability SLA",
+          "performance": "Latency within requirements"
+        }
+      }
+    }
+  ],
+  
+  "decision_points": [
+    {
+      "id": "decision_1",
+      "sequence": 1,
+      "title": "Service Model Selection for Customer Portal",
+      "narrative": "Your first task is migrating the customer-facing portal to AWS. The portal is a .NET application currently running on Windows servers. The development team wants to modernize but also needs to move quickly. You need to recommend the appropriate cloud service model.",
+      "question": "Which cloud service model should you recommend for the customer portal migration?",
+      "options": [
+        {
+          "id": "A",
+          "text": "IaaS (EC2 instances) - lift and shift the existing application",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Works but doesn't leverage cloud benefits",
+            "detailed": "Lift-and-shift to EC2 is possible and low-risk, but you inherit all OS patching, scaling, and management overhead. For a customer-facing portal requiring 99.9% availability, you'd need to build auto-scaling, load balancing, and high availability yourself. This approach moves to cloud without benefiting from cloud-native features.",
+            "consequence": "Migration completes but operational burden remains high. Team spends time on infrastructure instead of application improvement."
+          }
+        },
+        {
+          "id": "B",
+          "text": "PaaS (Elastic Beanstalk or App Service) - platform handles infrastructure",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! PaaS reduces operational burden while maintaining control",
+            "detailed": "PaaS is ideal for web applications like the customer portal. AWS Elastic Beanstalk handles capacity provisioning, load balancing, auto-scaling, and health monitoring. You maintain control over the application code while AWS manages the platform. This reduces your security responsibility (no OS patching) while meeting the 99.9% availability requirement more easily.",
+            "consequence": "Successful migration with reduced operational overhead. Security team can focus on application security rather than infrastructure."
+          }
+        },
+        {
+          "id": "C",
+          "text": "SaaS - find a third-party customer portal solution",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "SaaS isn't appropriate for custom applications",
+            "detailed": "The customer portal is a custom .NET application with proprietary business logic and integrations. SaaS solutions are pre-built applications - you can't deploy your custom code to a SaaS platform. SaaS is for adopting existing applications, not hosting your own.",
+            "consequence": "This approach isn't technically feasible for the custom application."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Serverless (Lambda) - maximum cloud-native benefits",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Serverless requires significant refactoring for existing applications",
+            "detailed": "While serverless offers compelling benefits (no server management, pay-per-use), migrating an existing .NET application to Lambda requires significant refactoring into functions. This conflicts with the need to 'move quickly.' Serverless is better for new development or applications designed for event-driven architecture.",
+            "consequence": "Extended timeline and development effort for refactoring. Risk of project delays."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Consider the balance between migration speed and operational benefits. Which model handles infrastructure while accepting your existing application?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "PaaS services like Elastic Beanstalk accept application code and handle scaling, patching, and availability automatically."
+        }
+      ],
+      "learning_note": "Cloud service model selection should consider: migration complexity (existing app vs. greenfield), operational capabilities (who manages what), security responsibility distribution (shared responsibility model), and time-to-value. PaaS reduces infrastructure security burden while maintaining application control.",
+      "unlocks_artifact": "artifact_2"
+    },
+    {
+      "id": "decision_2",
+      "sequence": 2,
+      "title": "AWS Account Strategy",
+      "narrative": "The existing single AWS account is inadequate for production workloads. You need to design an account strategy that provides security isolation, supports compliance requirements, and scales with the organization.",
+      "question": "What AWS account strategy should you implement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Keep single account but improve IAM policies and tagging",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Single account doesn't provide adequate isolation",
+            "detailed": "A single account creates significant risks: no blast radius containment (one compromised workload affects all), complex IAM (everyone's policies in one place), compliance difficulties (PCI scope includes everything), and cost allocation challenges. For regulated financial services, this approach is inadequate.",
+            "consequence": "Auditors flag account structure as a control weakness. IAM complexity leads to privilege creep."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Environment-based accounts (Dev, Test, Staging, Production)",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Better but doesn't provide workload isolation",
+            "detailed": "Environment separation is an improvement - production is isolated from dev/test. However, all production workloads share one account, meaning a vulnerability in one application could affect others. For financial services with multiple sensitive applications, workload-level isolation is preferable.",
+            "consequence": "Improved but PCI assessor questions why all production workloads share an account."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Multi-account with workload isolation (Organizations, SCPs, dedicated security account)",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Maximum isolation and control for regulated workloads",
+            "detailed": "Multi-account strategy with AWS Organizations provides: blast radius isolation (issues contained to one account), granular IAM (simpler policies per account), compliance boundaries (PCI workloads in dedicated accounts), cost allocation, and centralized governance via SCPs. The dedicated security account enables centralized logging, GuardDuty, and Security Hub management.",
+            "consequence": "Strong foundation for secure, compliant cloud operations. Auditors appreciate clear isolation boundaries."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Separate AWS accounts per team without central governance",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Decentralized accounts create governance gaps",
+            "detailed": "Account sprawl without Organizations creates chaos: no consistent security controls, no centralized logging, inconsistent compliance posture, billing complexity. Each team could have different (or no) security configurations. Central governance through Organizations and SCPs is essential.",
+            "consequence": "Shadow IT in the cloud. Security team has no visibility across accounts."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Consider: How do you isolate workloads while maintaining central governance and visibility?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "AWS Organizations with SCPs provides governance. Separate accounts per workload provide isolation. A security account enables centralized monitoring."
+        }
+      ],
+      "learning_note": "Multi-account strategy is AWS best practice for enterprise: Organizations for governance, SCPs for guardrails, dedicated security account for centralized monitoring, workload accounts for isolation. This aligns with Security+ concepts of segmentation, least privilege, and defense in depth.",
+      "unlocks_artifact": "artifact_3"
+    },
+    {
+      "id": "decision_3",
+      "sequence": 3,
+      "title": "Identity and Access Architecture",
+      "narrative": "The organization has 2,500 employees using on-premises Active Directory. Cloud resources need identity management that integrates with existing systems, supports MFA, and provides SSO across AWS and SaaS applications.",
+      "question": "What identity architecture should you implement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Create IAM users in each AWS account for cloud access",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "IAM users don't scale and create management overhead",
+            "detailed": "Creating IAM users means: managing credentials in multiple places (AD + AWS), no SSO (users need separate AWS credentials), complex offboarding (must remove from AD AND each AWS account), and no leverage of existing AD groups. This approach is only suitable for service accounts or break-glass access.",
+            "consequence": "Identity sprawl, inconsistent access revocation, users sharing credentials due to friction."
+          }
+        },
+        {
+          "id": "B",
+          "text": "AWS IAM Identity Center (SSO) with native directory",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Creates duplicate identity management",
+            "detailed": "Using IAM Identity Center with its own directory means managing two separate identity stores (AD + Identity Center). Users must be provisioned in both systems. This creates sync issues, doesn't leverage existing AD investment, and doubles identity management workload.",
+            "consequence": "Two identity systems to manage. Access inconsistencies between on-prem and cloud."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Federate with Azure AD (synced from on-prem AD) using SAML",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Single identity source with cloud-native capabilities",
+            "detailed": "Azure AD synced with on-prem AD provides: single identity source (manage in AD, sync to cloud), SSO across AWS and SaaS (Azure AD as identity hub), built-in MFA and Conditional Access, mature enterprise features, and clean integration path for Microsoft 365 and other SaaS. AWS IAM Identity Center can federate from Azure AD for AWS access.",
+            "consequence": "Unified identity management. Users get SSO experience. Security team has centralized access control and MFA."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Direct AD FS federation to each AWS account",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Works but adds complexity and on-prem dependency",
+            "detailed": "AD FS federation directly to AWS works but: requires maintaining AD FS infrastructure (high availability, patching), creates tight dependency on on-premises systems, and doesn't provide the rich SaaS integration that Azure AD offers. For a multi-cloud strategy including SaaS, Azure AD is more flexible.",
+            "consequence": "Functional but increased infrastructure management and limited SaaS integration."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What approach provides single identity source, SSO across cloud and SaaS, and built-in MFA?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Azure AD synced with on-prem AD becomes the cloud identity hub. AWS and SaaS apps federate from Azure AD."
+        }
+      ],
+      "learning_note": "Identity federation is key to hybrid cloud security: single source of truth, SSO reduces credential fatigue, centralized MFA enforcement, clean provisioning/deprovisioning. Azure AD commonly serves as identity hub for multi-cloud and SaaS integration.",
+      "unlocks_artifact": "artifact_4"
+    },
+    {
+      "id": "decision_4",
+      "sequence": 4,
+      "title": "Network Connectivity Architecture",
+      "narrative": "Production workloads require secure, reliable connectivity between on-premises data centers and AWS. The core banking system will remain on-premises, requiring low-latency communication with cloud workloads.",
+      "question": "What network connectivity architecture should you implement?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Site-to-site VPN as the primary connection",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "VPN has bandwidth and latency limitations for production",
+            "detailed": "Site-to-site VPN traverses the internet, resulting in variable latency and limited bandwidth (~1.25 Gbps per tunnel). For financial services requiring low-latency communication with core banking systems, VPN doesn't provide the performance consistency needed. VPN is appropriate for backup connectivity or dev/test.",
+            "consequence": "Performance issues during high-traffic periods. Occasional latency spikes affect user experience."
+          }
+        },
+        {
+          "id": "B",
+          "text": "AWS Direct Connect as primary, VPN as backup",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Dedicated connection with redundant backup",
+            "detailed": "Direct Connect provides dedicated, private connectivity with consistent low latency and high bandwidth (up to 100 Gbps). Combined with VPN as backup, you get: production-grade performance for core banking integration, private connectivity (doesn't traverse internet), and automatic failover if Direct Connect fails. This hybrid approach balances performance, cost, and reliability.",
+            "consequence": "Consistent, high-performance connectivity. Automatic failover provides resilience. Clean network path for compliance."
+          }
+        },
+        {
+          "id": "C",
+          "text": "All traffic over public internet with TLS encryption",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Internet connectivity doesn't meet financial services requirements",
+            "detailed": "Public internet connectivity, even encrypted, is unsuitable for sensitive financial data: highly variable latency, potential compliance concerns with data traversing public networks, bandwidth limitations, and no SLA. This approach is inappropriate for production financial workloads.",
+            "consequence": "Performance unpredictability. Potential compliance violations. No SLA for connectivity."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Dual Direct Connect connections without VPN backup",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Dual Direct Connect is ideal but expensive without flexibility",
+            "detailed": "Dual Direct Connect provides maximum performance and redundancy, but: higher cost (two dedicated connections), longer provisioning time for the second connection, and no diversity if both connections terminate in the same facility. VPN backup provides different-path redundancy at lower cost.",
+            "consequence": "Higher cost without significantly better resilience than Direct Connect + VPN."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Financial services need consistent, low-latency connectivity. What provides dedicated bandwidth while maintaining backup options?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Direct Connect provides dedicated private connectivity. VPN provides backup over a different path at lower cost."
+        }
+      ],
+      "learning_note": "Hybrid cloud connectivity options: VPN (encrypted over internet, variable performance, low cost), Direct Connect (dedicated private connection, consistent performance, higher cost). Production financial workloads typically use Direct Connect for primary connectivity with VPN backup for resilience.",
+      "unlocks_artifact": "artifact_5"
+    },
+    {
+      "id": "decision_5",
+      "sequence": 5,
+      "title": "Data Encryption Strategy",
+      "narrative": "The customer portal handles sensitive financial data including PII and transaction information. PCI-DSS and GLBA require encryption. You need to define the encryption strategy for data at rest in AWS.",
+      "question": "What encryption approach should you implement for sensitive data at rest?",
+      "options": [
+        {
+          "id": "A",
+          "text": "AWS managed keys (SSE-S3) for simplicity",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "AWS managed keys lack audit trail and control",
+            "detailed": "SSE-S3 encrypts data but: you can't audit key usage (no CloudTrail entries for key access), can't enforce separation of duties (anyone with S3 access can decrypt), and can't implement key rotation policies. For regulated financial data, you need more control and auditability than AWS managed keys provide.",
+            "consequence": "Encryption exists but auditors question lack of key access logging and control."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Customer-managed KMS keys with key policies and rotation",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Full control, audit trail, and compliance alignment",
+            "detailed": "Customer-managed KMS keys provide: CloudTrail logging of all key usage (who decrypted what, when), key policies for access control (separation of duties), automatic key rotation, and the ability to disable/delete keys if compromised. This meets PCI-DSS requirements for key management documentation and auditing.",
+            "consequence": "Full encryption audit trail. Clear key access controls. Compliance requirements satisfied."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Client-side encryption before uploading to AWS",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Client-side is more complex without significant benefit here",
+            "detailed": "Client-side encryption provides maximum control (AWS never sees unencrypted data) but: increases application complexity, makes server-side processing impossible (can't query encrypted data), and requires managing key distribution to clients. For most use cases, KMS encryption provides sufficient control with less complexity.",
+            "consequence": "Increased development complexity. Difficult to implement analytics or search on encrypted data."
+          }
+        },
+        {
+          "id": "D",
+          "text": "No encryption at rest - TLS in transit is sufficient",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "PCI-DSS requires encryption at rest for cardholder data",
+            "detailed": "PCI-DSS Requirement 3.4 mandates rendering cardholder data unreadable wherever it's stored. 'TLS in transit only' is a compliance violation. Additionally, data at rest encryption protects against various threats including insider access and backup theft.",
+            "consequence": "PCI-DSS compliance failure. Potential security breach exposure."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Regulated data requires encryption with audit trails and access control. Which approach provides logging and key management?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "KMS customer-managed keys: CloudTrail logs all usage, key policies control who can use keys, automatic rotation available."
+        }
+      ],
+      "learning_note": "AWS KMS key types: AWS owned (no control), AWS managed (some logging, default), Customer managed (full control, complete audit trail, key policies). Regulated workloads typically require customer-managed keys for auditability and control. Key policies enable separation of duties between key admins and key users.",
+      "unlocks_artifact": "artifact_6"
+    },
+    {
+      "id": "decision_6",
+      "sequence": 6,
+      "title": "Logging and Monitoring Architecture",
+      "narrative": "Security and compliance require comprehensive logging across all AWS accounts. You need to design a logging architecture that captures security events, supports incident response, and meets compliance requirements.",
+      "question": "How should you implement logging across the AWS environment?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Enable CloudTrail in each account with logs stored locally",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Decentralized logging creates visibility gaps",
+            "detailed": "CloudTrail per account is a start, but local storage means: no unified view for security monitoring, logs could be deleted by compromised account, no correlation across accounts, and complex log collection for SIEM. Security needs centralized visibility across all accounts.",
+            "consequence": "Security team must check multiple accounts for investigations. Potential for log tampering."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Centralized logging: CloudTrail, VPC Flow Logs, Config all sent to security account",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Centralized logging with comprehensive coverage",
+            "detailed": "Centralized logging in a dedicated security account provides: tamper-resistant storage (workload accounts can't delete security logs), unified visibility across all accounts, single integration point for SIEM, simplified incident response, and compliance evidence collection. Combine with GuardDuty and Security Hub for threat detection and security posture management.",
+            "consequence": "Complete security visibility. Efficient incident response. Clean compliance evidence."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Third-party SIEM directly collecting from each account",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "SIEM integration is good but shouldn't replace centralized AWS logging",
+            "detailed": "SIEM integration is valuable for correlation and alerting, but relying solely on SIEM collection means: logs must traverse internet to SIEM, no local copy if SIEM is unavailable, and you lose AWS-native capabilities (Security Hub, GuardDuty integration). Best practice is centralized AWS logging PLUS SIEM forwarding.",
+            "consequence": "SIEM dependency without resilient log storage. Lose AWS-native security analytics."
+          }
+        },
+        {
+          "id": "D",
+          "text": "CloudWatch Logs only - sufficient for operational and security needs",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "CloudWatch alone misses critical security logs",
+            "detailed": "CloudWatch Logs captures application logs but doesn't include: API activity (CloudTrail), network flows (VPC Flow Logs), or resource configuration (Config). Security monitoring requires all these sources. CloudWatch is part of the solution, not the complete solution.",
+            "consequence": "Missing critical security telemetry for detection and compliance."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Security team needs logs from all accounts in one place, protected from tampering by workload accounts."
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Centralized security account receives CloudTrail, Flow Logs, and Config from all accounts. GuardDuty and Security Hub provide threat detection and posture management."
+        }
+      ],
+      "learning_note": "Centralized logging architecture: all accounts send logs to dedicated security account. This provides protection (workload accounts can't delete), visibility (single pane of glass), and compliance (centralized retention and access). AWS services to centralize: CloudTrail (API activity), VPC Flow Logs (network), Config (resource changes), GuardDuty (threat detection).",
+      "unlocks_artifact": "artifact_7"
+    },
+    {
+      "id": "decision_7",
+      "sequence": 7,
+      "title": "Container Security for Modernized Portal",
+      "narrative": "The development team is modernizing the customer portal using containers on EKS (Kubernetes). You need to ensure the container platform is secured appropriately for financial services workloads.",
+      "question": "What is the most critical container security control to implement first?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Runtime security monitoring and threat detection",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Runtime security is important but not the first priority",
+            "detailed": "Runtime security detects threats in running containers, but if you're deploying vulnerable images, you're already compromised. The security hierarchy should be: prevent (image scanning), detect (runtime monitoring), respond. Starting with runtime means you're detecting problems you could have prevented.",
+            "consequence": "Detecting vulnerabilities that could have been caught earlier in the pipeline."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Image scanning in CI/CD pipeline with gate for critical vulnerabilities",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Shift left - catch vulnerabilities before deployment",
+            "detailed": "Image scanning in CI/CD prevents vulnerable images from ever reaching production. This 'shift left' approach: catches vulnerabilities before deployment, integrates security into developer workflow, enforces standards (no critical vulns in prod), and is more cost-effective than runtime remediation. Build the foundation before adding runtime detection.",
+            "consequence": "Vulnerabilities caught before production. Developers get immediate feedback. Clean images deployed."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Network policies to isolate container traffic",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Network policies are important but assume secure containers",
+            "detailed": "Network policies implement microsegmentation for containers - important for limiting lateral movement. However, if containers themselves are vulnerable, network policies don't prevent exploitation - they only limit blast radius. Address image security first, then layer in network controls.",
+            "consequence": "Network isolation around potentially vulnerable containers."
+          }
+        },
+        {
+          "id": "D",
+          "text": "EKS cluster hardening and RBAC configuration",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Cluster security is important but images matter more",
+            "detailed": "EKS hardening and RBAC are essential (private API endpoint, least privilege access), but the most common container security issues come from vulnerable images (unpatched base images, vulnerable dependencies). Secure the supply chain (images) first, then the platform.",
+            "consequence": "Secure cluster running vulnerable container images."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What's the principle of 'shift left' in DevSecOps? Where do you catch problems earliest?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "CI/CD image scanning catches vulnerabilities before deployment. Prevent rather than detect."
+        }
+      ],
+      "learning_note": "Container security layers: (1) Image security - scan in CI/CD, use minimal base images, no secrets in images, (2) Registry security - private registry, access control, (3) Orchestration security - RBAC, API security, secrets management, (4) Runtime security - monitoring, network policies. Start with image security (shift left) before adding detection layers.",
+      "unlocks_artifact": "artifact_8"
+    },
+    {
+      "id": "decision_8",
+      "sequence": 8,
+      "title": "Compliance Monitoring Approach",
+      "narrative": "PCI-DSS assessment is in 6 months. You need to implement continuous compliance monitoring to identify and remediate gaps before the assessment and maintain compliance ongoing.",
+      "question": "How should you implement continuous compliance monitoring?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Manual quarterly compliance reviews against PCI requirements",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Manual reviews are insufficient for cloud environments",
+            "detailed": "Cloud environments change rapidly - infrastructure can be modified in seconds. Quarterly manual reviews miss drift between reviews, are labor-intensive, provide point-in-time snapshots only, and don't scale. Compliance monitoring must be continuous and automated in cloud environments.",
+            "consequence": "Three months of drift between reviews. Discover compliance issues right before assessment."
+          }
+        },
+        {
+          "id": "B",
+          "text": "AWS Config rules with Security Hub standards (PCI DSS, CIS)",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! Automated, continuous compliance monitoring",
+            "detailed": "AWS Config rules continuously evaluate resource configurations. Security Hub aggregates findings and provides compliance scoring against standards including PCI DSS and CIS benchmarks. Together they provide: real-time compliance visibility, automated drift detection, centralized dashboard across accounts, and evidence for auditors. Add custom rules for organization-specific requirements.",
+            "consequence": "Continuous compliance visibility. Issues detected immediately. Evidence ready for auditors."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Third-party compliance tool separate from AWS native services",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Third-party tools can supplement but shouldn't replace native",
+            "detailed": "Third-party compliance tools (Prisma Cloud, Dome9, etc.) offer multi-cloud support and additional features. However, they add cost and complexity when AWS native services (Config, Security Hub) provide strong compliance monitoring. Use third-party tools for multi-cloud consistency, not as replacement for native capabilities.",
+            "consequence": "Additional cost and complexity when native tools would suffice."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Rely on cloud provider compliance certifications (SOC 2, PCI)",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Provider certifications don't cover your responsibility",
+            "detailed": "AWS's PCI DSS certification covers AWS's responsibility in the shared responsibility model. It does NOT cover your configuration, access controls, encryption settings, or application security. You inherit AWS's controls but must still implement and monitor your own. Provider compliance is necessary but not sufficient.",
+            "consequence": "PCI assessor identifies numerous customer-responsibility control gaps."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "Cloud changes rapidly. What AWS services provide continuous, automated compliance evaluation?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "AWS Config continuously evaluates configuration. Security Hub aggregates findings against compliance standards like PCI DSS."
+        }
+      ],
+      "learning_note": "Cloud compliance monitoring should be continuous and automated: AWS Config rules evaluate resource configurations continuously, Security Hub aggregates findings and provides compliance dashboards, pre-built standards (PCI DSS, CIS) provide baselines, and custom rules address organization-specific requirements. Provider certifications (shared responsibility) are necessary but not sufficient.",
+      "unlocks_artifact": "artifact_9"
+    },
+    {
+      "id": "decision_9",
+      "sequence": 9,
+      "title": "Serverless Security Considerations",
+      "narrative": "The analytics team wants to use Lambda for data processing pipelines. Before approving, you need to ensure appropriate security controls for serverless workloads handling financial data.",
+      "question": "What is the PRIMARY security concern for Lambda functions processing financial data?",
+      "options": [
+        {
+          "id": "A",
+          "text": "OS patching and vulnerability management",
+          "is_correct": false,
+          "points": 5,
+          "feedback": {
+            "short": "Lambda is serverless - no OS to patch",
+            "detailed": "Lambda is serverless - AWS manages the underlying infrastructure including OS patching. This is a security benefit of serverless, not a concern. Your responsibility shifts to function code and IAM configuration, not infrastructure management.",
+            "consequence": "Worrying about something AWS handles while missing actual serverless security concerns."
+          }
+        },
+        {
+          "id": "B",
+          "text": "IAM role permissions - ensuring least privilege for function execution",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! IAM is the security control plane for Lambda",
+            "detailed": "In serverless, IAM IS the primary security control. Lambda execution roles determine what resources the function can access. Overly permissive roles (a common mistake) could allow data exfiltration or privilege escalation. Function permissions must follow least privilege: only the specific resources and actions needed. Event source permissions (who can invoke) are equally important.",
+            "consequence": "Functions operate with minimum necessary permissions. Blast radius limited if code is compromised."
+          }
+        },
+        {
+          "id": "C",
+          "text": "Network security groups for Lambda functions",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Lambda only uses VPC/SG when VPC-connected",
+            "detailed": "Lambda functions don't require VPC connectivity by default - they run in AWS-managed infrastructure. Security groups only apply when you explicitly configure Lambda for VPC access (to reach private resources). IAM permissions, not network security groups, are the primary access control mechanism for Lambda.",
+            "consequence": "Focusing on network controls when IAM is more important for serverless."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Container escape vulnerabilities",
+          "is_correct": false,
+          "points": 0,
+          "feedback": {
+            "short": "Lambda isolation is AWS's responsibility",
+            "detailed": "AWS manages Lambda's execution environment isolation (using Firecracker microVMs). Container/VM escape is AWS's responsibility in the shared responsibility model. Your responsibility is function code security and IAM configuration, not infrastructure isolation.",
+            "consequence": "Worrying about AWS's responsibility while missing customer responsibilities."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "In serverless, what's the primary way you control what resources a function can access?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "IAM execution roles define Lambda permissions. Least privilege is critical - functions should only access what they need."
+        }
+      ],
+      "learning_note": "Serverless security shifts responsibility: AWS handles infrastructure (patching, isolation), you handle application (code, IAM). IAM becomes the primary security control - execution roles must follow least privilege. Additional considerations: event source permissions (who can invoke), environment variable encryption, VPC connectivity (only if needed), and code dependencies (vulnerabilities in libraries).",
+      "unlocks_artifact": "artifact_10"
+    },
+    {
+      "id": "decision_10",
+      "sequence": 10,
+      "title": "Architecture Review and Approval",
+      "narrative": "You've designed the cloud security architecture and need CISO approval. Sarah Chen asks: 'What's the single most important architectural decision we've made, and why does it matter for our security posture?'",
+      "question": "What is the most important architectural decision for Meridian's cloud security posture?",
+      "options": [
+        {
+          "id": "A",
+          "text": "Direct Connect for network connectivity - ensures secure data transfer",
+          "is_correct": false,
+          "points": 10,
+          "feedback": {
+            "short": "Important for performance but not the foundation",
+            "detailed": "Direct Connect provides reliable, private connectivity - important for performance and data transfer security. However, network connectivity is one component. The fundamental architectural decisions around account structure, identity, and governance have broader security implications.",
+            "consequence": "Valid point but not the most foundational architectural decision."
+          }
+        },
+        {
+          "id": "B",
+          "text": "Multi-account strategy with centralized security - provides isolation, governance, and visibility",
+          "is_correct": true,
+          "points": 25,
+          "feedback": {
+            "short": "Correct! The foundation for everything else",
+            "detailed": "Multi-account with Organizations is foundational: it enables blast radius containment (workload isolation), centralized governance (SCPs enforce guardrails), unified security monitoring (centralized logging, GuardDuty, Security Hub), compliance boundaries (PCI workloads isolated), and cost allocation. Every other security decision builds on this account structure. Identity, encryption, and monitoring all leverage this foundation.",
+            "consequence": "Strong architectural foundation. Security controls can be implemented consistently across all accounts."
+          }
+        },
+        {
+          "id": "C",
+          "text": "KMS encryption with customer-managed keys - protects sensitive data",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Critical for data protection but builds on architecture",
+            "detailed": "KMS encryption is essential for protecting financial data and meeting compliance requirements. However, encryption is implemented within the account structure - it's a control that lives within the architecture, not the architecture itself. The multi-account foundation enables consistent encryption policy enforcement via SCPs.",
+            "consequence": "Important control but not the foundational decision."
+          }
+        },
+        {
+          "id": "D",
+          "text": "Federated identity with Azure AD - enables secure access management",
+          "is_correct": false,
+          "points": 15,
+          "feedback": {
+            "short": "Essential for access control but builds on architecture",
+            "detailed": "Federated identity is critical for access management - single source of truth, SSO, MFA. However, identity federation is implemented across the account structure. The multi-account architecture enables centralized identity configuration (IAM Identity Center) and consistent access policies via SCPs.",
+            "consequence": "Important decision but builds on the account architecture."
+          }
+        }
+      ],
+      "hints": [
+        {
+          "level": 1,
+          "cost": 2,
+          "text": "What architectural decision creates the foundation that all other security controls build upon?"
+        },
+        {
+          "level": 2,
+          "cost": 5,
+          "text": "Multi-account with Organizations enables: isolation (accounts), governance (SCPs), visibility (centralized logging), and compliance boundaries. Everything else builds on this."
+        }
+      ],
+      "learning_note": "Cloud security architecture is hierarchical: account structure (Organizations, accounts, OUs) is foundational. Identity, network, encryption, and monitoring are implemented within and across this structure. SCPs provide guardrails that all accounts must follow. Centralized security account enables unified visibility. This architecture enables defense in depth, least privilege, and isolation - core Security+ principles."
+    }
+  ],
+  
+  "scoring": {
+    "max_points": 250,
+    "passing_score": 200,
+    "passing_percentage": 80
+  },
+  
+  "outcome_thresholds": {
+    "expert": {
+      "min_score": 238,
+      "title": "Cloud Security Expert",
+      "description": "Exceptional cloud security architecture skills. Ready for complex multi-cloud environments."
+    },
+    "proficient": {
+      "min_score": 213,
+      "title": "Cloud Security Professional",
+      "description": "Strong understanding of cloud security architecture principles and implementation."
+    },
+    "competent": {
+      "min_score": 200,
+      "title": "Cloud Security Competent",
+      "description": "Solid grasp of cloud security fundamentals. Ready for supervised cloud security work."
+    },
+    "developing": {
+      "min_score": 175,
+      "title": "Cloud Security Developing",
+      "description": "Understanding of concepts but gaps in application. Review shared responsibility and account architecture."
+    },
+    "needs_remediation": {
+      "min_score": 0,
+      "title": "Cloud Security Fundamentals Needed",
+      "description": "Significant gaps in cloud security understanding. Complete D3-REM-001 before retry."
+    }
+  },
+  
+  "weakness_mapping": {
+    "service_model_confusion": {
+      "indicators": ["decision_1_incorrect"],
+      "remediation": "D3-REM-001",
+      "focus": "Cloud service models and shared responsibility"
+    },
+    "identity_architecture_gaps": {
+      "indicators": ["decision_3_incorrect"],
+      "remediation": "D3-REM-001",
+      "focus": "Cloud identity and federation"
+    },
+    "encryption_understanding": {
+      "indicators": ["decision_5_incorrect"],
+      "remediation": "D3-REM-003",
+      "focus": "Cloud encryption and key management"
+    }
+  },
+  
+  "prerequisites": ["D2-SIM-005"],
+  "unlocks": ["D3-SIM-002", "D3-SIM-003"],
+  
+  "metadata": {
+    "version": "1.0",
+    "created": "2024-02-13",
+    "author": "Security+ Training System",
+    "domain_alignment": "Domain 3: Security Architecture",
+    "job_role_alignment": ["Cloud Security Architect", "Cloud Engineer", "Security Architect"],
+    "estimated_time": "45-60 minutes",
+    "industry_context": "Financial Services"
+  }
+}

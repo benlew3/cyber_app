@@ -1,0 +1,710 @@
+{
+  "scenario": {
+    "id": "D1-SIM-004",
+    "title": "Zero Trust Migration",
+    "type": "primary",
+    "difficulty": "intermediate",
+    "role": "security_engineer",
+    "estimated_duration": "35-45 minutes",
+    "prerequisites": ["D1-SIM-002"],
+    "unlocks": ["D1-SIM-005", "D2-SIM-001"],
+    
+    "objectives_covered": ["1.2"],
+    "topics_covered": ["Zero Trust Architecture", "Defense in Depth", "Network Segmentation", "Microsegmentation", "Identity-Centric Security"],
+    
+    "study_links": [
+      {"topic": "Zero Trust Principles", "path": "domain1/topic2/study-guide"},
+      {"topic": "Defense in Depth", "path": "domain1/topic2/study-guide"},
+      {"topic": "Network Segmentation", "path": "domain3/topic2/study-guide"}
+    ],
+
+    "overview": {
+      "situation": "Stratos Aerospace, a defense contractor, has been mandated by the DoD to implement Zero Trust Architecture per Executive Order 14028 and NIST SP 800-207. Their current perimeter-based security model has a flat internal network where any authenticated user can access most resources. A recent insider threat incident exposed sensitive design documents. You've been brought in to architect and begin implementing Zero Trust.",
+      "your_role": "Security Architect - Zero Trust Implementation Lead",
+      "mission": "Design and implement Zero Trust architecture principles: verify explicitly, use least privilege access, and assume breach. Transform from perimeter-based to identity-centric security."
+    },
+
+    "company_context": {
+      "name": "Stratos Aerospace",
+      "industry": "Defense Contractor / Aerospace Manufacturing",
+      "size": "3,200 employees across 4 facilities, plus 500 remote engineers",
+      "infrastructure": "On-premise data centers, classified networks (SIPR), unclassified networks, cloud dev environments (AWS GovCloud)",
+      "compliance_requirements": ["NIST 800-171", "CMMC Level 2", "ITAR", "DFARS", "Executive Order 14028"],
+      "recent_events": "Insider accessed engineering documents outside their project scope. Lateral movement went undetected for 3 months."
+    },
+
+    "artifacts": [
+      {
+        "id": "D1S4-ART-001",
+        "type": "network_diagram",
+        "title": "Current Network Architecture",
+        "available_at_start": true,
+        "content": "STRATOS AEROSPACE - CURRENT NETWORK TOPOLOGY\n\n[Internet] --> [Perimeter Firewall] --> [DMZ]\n                                            |\n                                    [Internal Firewall]\n                                            |\n            +---------------+---------------+---------------+\n            |               |               |               |\n       [Corporate]    [Engineering]    [Manufacturing]   [R&D]\n            |               |               |               |\n       All VLANs        All VLANs       All VLANs      All VLANs\n       Can Talk         Can Talk        Can Talk       Can Talk\n            |               |               |               |\n            +---------------+---------------+---------------+\n                                    |\n                            [Data Center]\n                       (File Servers, Databases,\n                        Applications, Backups)\n\nCURRENT STATE:\n- Single trust boundary at perimeter\n- Flat internal network with minimal segmentation\n- VPN grants full internal network access\n- Service accounts have broad privileges\n- Limited east-west traffic monitoring\n- Authentication: AD username/password only"
+      },
+      {
+        "id": "D1S4-ART-002",
+        "type": "incident_report",
+        "title": "Insider Threat Incident Summary",
+        "available_at_start": true,
+        "content": "INCIDENT REPORT: INT-2024-0847\nClassification: SENSITIVE - INTERNAL USE ONLY\n\nSUMMARY:\nAn engineer in the commercial aviation division accessed and downloaded 47 technical documents related to the classified military drone program. The employee had no legitimate need for this access.\n\nTIMELINE:\n- Day 1: Employee logged into corporate network via VPN\n- Day 1-90: Employee browsed engineering file shares, accessed documents outside their project\n- Day 90: Anomaly detected during quarterly access review\n- Day 91: Investigation initiated\n- Day 95: Employee terminated, referred to authorities\n\nROOT CAUSE ANALYSIS:\n1. File share permissions based on department, not project/need-to-know\n2. No monitoring of file access patterns\n3. VPN provided same access as on-site presence\n4. No data loss prevention (DLP) controls\n5. Single-factor authentication (password only)\n\nRECOMMENDATIONS:\n- Implement Zero Trust Architecture\n- Deploy behavioral analytics (UEBA)\n- Project-based access controls\n- Continuous access verification"
+      },
+      {
+        "id": "D1S4-ART-003",
+        "type": "policy_document",
+        "title": "NIST SP 800-207 Zero Trust Summary",
+        "available_at_start": true,
+        "content": "NIST SP 800-207 - ZERO TRUST ARCHITECTURE TENETS\n\n1. All data sources and computing services are considered resources\n2. All communication is secured regardless of network location\n3. Access to individual enterprise resources is granted on a per-session basis\n4. Access to resources is determined by dynamic policy\n5. The enterprise monitors and measures the integrity and security posture of all owned and associated assets\n6. All resource authentication and authorization are dynamic and strictly enforced before access is allowed\n7. The enterprise collects as much information as possible about the current state of assets, network infrastructure, and communications and uses it to improve its security posture\n\nCORE PRINCIPLES:\n- Never trust, always verify\n- Assume breach\n- Verify explicitly\n- Use least privilege access\n- Implement microsegmentation"
+      },
+      {
+        "id": "D1S4-ART-004",
+        "type": "architecture_diagram",
+        "title": "Zero Trust Reference Architecture",
+        "available_at_start": false,
+        "unlock_after": "D1S4-DP-002",
+        "content": "ZERO TRUST REFERENCE ARCHITECTURE\n\n[User/Device] --> [Policy Enforcement Point (PEP)]\n                            |\n                  [Policy Decision Point (PDP)]\n                     /      |      \\\n            [Identity]  [Device]  [Context]\n            Provider    Health    Evaluation\n                \\         |         /\n                 [Policy Engine]\n                 [Trust Algorithm]\n                        |\n                [Access Decision]\n                   /         \\\n            [ALLOW]         [DENY]\n                |               |\n          [Resource]      [Block + Log]\n\nCOMPONENTS:\n- Policy Enforcement Point (PEP): Gateway that enforces access decisions\n- Policy Decision Point (PDP): Makes access decisions based on policy\n- Policy Engine: Evaluates requests against defined policies\n- Trust Algorithm: Calculates trust score based on multiple factors\n\nTRUST FACTORS:\n- User identity and authentication strength\n- Device health and compliance\n- Location and network context\n- Resource sensitivity\n- Behavioral patterns\n- Time-based policies"
+      }
+    ],
+
+    "decision_points": [
+      {
+        "id": "D1S4-DP-001",
+        "sequence": 1,
+        "title": "Zero Trust Foundation",
+        "context": "Leadership has approved the Zero Trust initiative but wants to understand the fundamental shift in security philosophy. The CTO asks you to explain the core difference from their current model.",
+        "question": "What is the FUNDAMENTAL difference between traditional perimeter security and Zero Trust?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Zero Trust requires more firewalls and network security devices",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Zero Trust isn't about adding more perimeter devices - it's a philosophical shift. Traditional security adds more walls; Zero Trust assumes walls are already breached and protects resources individually.",
+            "consequence": "The CTO asks for clarification - they're already investing heavily in firewalls.",
+            "next_dp": "D1S4-DP-002"
+          },
+          {
+            "id": "B",
+            "text": "Traditional security trusts internal users by default; Zero Trust verifies every access request regardless of location",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Exactly right. Traditional perimeter security operates on 'trust but verify' - once inside the network, users are trusted. Zero Trust operates on 'never trust, always verify' - every access request is authenticated and authorized regardless of whether it originates inside or outside the network.",
+            "consequence": "The CTO understands - it's about eliminating implicit trust, not just adding technology.",
+            "next_dp": "D1S4-DP-002"
+          },
+          {
+            "id": "C",
+            "text": "Zero Trust means removing all firewalls and letting identity be the only security control",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "This is a misconception. Zero Trust is additive - it adds identity-centric controls on top of existing security layers. Firewalls still provide value for network protection and segmentation. Zero Trust enhances, not replaces, defense in depth.",
+            "consequence": "The security team expresses concern about removing existing protections.",
+            "next_dp": "D1S4-DP-002"
+          },
+          {
+            "id": "D",
+            "text": "Zero Trust is primarily about implementing VPNs for all remote access",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "VPNs actually represent the old model - they grant broad network access once authenticated. Zero Trust often replaces VPNs with Zero Trust Network Access (ZTNA) that grants access to specific applications, not entire network segments.",
+            "consequence": "The CTO notes they already have VPNs - that was part of the problem in the incident.",
+            "next_dp": "D1S4-DP-002"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Think about what happens AFTER a user authenticates in each model.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Traditional: authenticate once, trusted thereafter. Zero Trust: verify continuously, trust nothing by default.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Zero Trust Core Principle: 'Never trust, always verify.' Traditional perimeter security creates trusted zones; Zero Trust assumes no implicit trust regardless of network location. Every access request is fully authenticated, authorized, and encrypted."
+      },
+      {
+        "id": "D1S4-DP-002",
+        "sequence": 2,
+        "title": "Implementation Starting Point",
+        "context": "With leadership aligned, you need to determine where to begin implementation. The organization has limited resources and needs quick wins while building toward full Zero Trust.",
+        "question": "What should be the FIRST major Zero Trust implementation focus?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Implement full microsegmentation across all network segments immediately",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Full microsegmentation is important but attempting it first is extremely complex and disruptive. You need strong identity foundations before you can effectively enforce granular network policies. This approach often stalls due to scope and complexity.",
+            "consequence": "The network team estimates 18+ months for full microsegmentation with significant business disruption.",
+            "next_dp": "D1S4-DP-003"
+          },
+          {
+            "id": "B",
+            "text": "Start with identity - implement strong authentication (MFA) and centralized identity management",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. Identity is the foundation of Zero Trust. Before you can make access decisions based on user, device, and context, you need to reliably know WHO is requesting access. Strong authentication (MFA) and unified identity management enable all other Zero Trust controls.",
+            "consequence": "You begin deploying MFA and consolidating identity providers. This creates the foundation for all future Zero Trust controls.",
+            "next_dp": "D1S4-DP-003"
+          },
+          {
+            "id": "C",
+            "text": "Deploy a Zero Trust Network Access (ZTNA) product to replace VPN",
+            "is_correct": false,
+            "points": 15,
+            "feedback": "ZTNA is valuable but putting it before identity creates a weak foundation. ZTNA effectiveness depends on strong authentication and identity signals. Without solid identity, ZTNA can't make good access decisions.",
+            "consequence": "ZTNA deployment begins, but effectiveness is limited by single-factor authentication still in use.",
+            "next_dp": "D1S4-DP-003"
+          },
+          {
+            "id": "D",
+            "text": "Begin by encrypting all internal network traffic",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Encrypting internal traffic (mutual TLS) is a Zero Trust principle, but it doesn't help with access control. Without strong identity and authorization, encrypted traffic from unauthorized users is still unauthorized - just encrypted. Identity comes first.",
+            "consequence": "Internal encryption project starts, but doesn't address the access control gaps that enabled the insider incident.",
+            "next_dp": "D1S4-DP-003"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Zero Trust decisions are based on who, what, where, when. Which of these is most fundamental?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Identity is the foundation. You can't verify users or make access decisions without reliable identity first.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Zero Trust implementation typically follows: 1) Identity - strong authentication, MFA, unified identity, 2) Devices - health checks, compliance verification, 3) Network - segmentation, ZTNA, encrypted traffic, 4) Applications - per-app access policies, 5) Data - classification, DLP, encryption. Identity enables everything else."
+      },
+      {
+        "id": "D1S4-DP-003",
+        "sequence": 3,
+        "title": "Multi-Factor Authentication Strategy",
+        "context": "MFA deployment is approved. You need to select the authentication factors and methods for the organization. Security must be strong, but usability affects adoption.",
+        "question": "What MFA strategy should you recommend for general workforce authentication?",
+        "options": [
+          {
+            "id": "A",
+            "text": "SMS-based one-time passwords as the second factor",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "SMS OTP is better than password-only but is considered weak MFA. SMS is vulnerable to SIM swapping, SS7 attacks, and social engineering. NIST and security frameworks recommend against SMS for high-security environments like defense contractors.",
+            "consequence": "The security assessment flags SMS as insufficient for CMMC compliance requirements.",
+            "next_dp": "D1S4-DP-004"
+          },
+          {
+            "id": "B",
+            "text": "Phishing-resistant MFA: FIDO2 security keys for privileged users, authenticator apps with number matching for general users",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent tiered approach. FIDO2 security keys provide the strongest phishing resistance for high-value accounts. Authenticator apps with number matching (not just push approve) provide strong protection for general users while maintaining usability. This meets CMMC and EO 14028 requirements.",
+            "consequence": "You deploy hardware keys to admins and engineers, authenticator apps to general staff. Phishing resistance is dramatically improved.",
+            "next_dp": "D1S4-DP-004"
+          },
+          {
+            "id": "C",
+            "text": "Biometric authentication only - fingerprint or facial recognition on all devices",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Biometrics alone (something you are) combined with password (something you know) is reasonable, but biometrics can be bypassed and can't be changed if compromised. A combination approach with hardware tokens provides stronger assurance. Also, not all devices support biometrics.",
+            "consequence": "Legacy workstations lack biometric capability, creating inconsistent authentication across the environment.",
+            "next_dp": "D1S4-DP-004"
+          },
+          {
+            "id": "D",
+            "text": "Email-based verification codes as the second factor",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Email-based codes are weak MFA - if an attacker compromises email (common in phishing attacks), they get the MFA codes too. This creates circular dependency and doesn't meaningfully improve security over passwords alone.",
+            "consequence": "Red team demonstrates that email compromise leads to full account takeover despite 'MFA.'",
+            "next_dp": "D1S4-DP-004"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Consider attack resistance - phishing is the most common credential theft method.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "FIDO2/WebAuthn security keys are phishing-resistant by design. Tiered approaches match security strength to risk level.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "MFA strength hierarchy: Weakest - SMS/Email OTP (interceptable), Medium - Authenticator apps (phishable with real-time proxies), Strong - Push with number matching (harder to phish), Strongest - FIDO2 hardware keys (phishing-resistant by design). Defense environments should require phishing-resistant MFA."
+      },
+      {
+        "id": "D1S4-DP-004",
+        "sequence": 4,
+        "title": "Device Trust Implementation",
+        "context": "With identity strengthened, you're implementing device trust - ensuring only compliant devices can access resources. The organization has a mix of corporate-managed and personal devices (BYOD for some roles).",
+        "question": "How should device trust be implemented in this environment?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Block all personal devices - only corporate-managed devices can access any resources",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "While simpler, completely blocking personal devices may not be practical for all roles and can hurt productivity. A risk-based approach that limits what BYOD can access while allowing managed devices full access is more balanced.",
+            "consequence": "Remote engineers complain they can't work from personal devices during off-hours emergencies.",
+            "next_dp": "D1S4-DP-005"
+          },
+          {
+            "id": "B",
+            "text": "Allow any device that has current antivirus installed",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Antivirus alone is insufficient for device trust. Device posture should include: OS version and patches, encryption status, management enrollment, security configuration, and more. Antivirus is just one factor.",
+            "consequence": "An unpatched personal device with antivirus becomes an entry point for attackers.",
+            "next_dp": "D1S4-DP-005"
+          },
+          {
+            "id": "C",
+            "text": "Implement tiered access: managed devices with full compliance get full access; BYOD with basic checks get limited access to non-sensitive resources",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. Tiered device trust aligns access with device assurance level. Managed devices meeting all compliance requirements (patched, encrypted, managed, healthy) access sensitive resources. BYOD meeting basic requirements (current OS, screen lock) access only low-sensitivity resources like email and general collaboration.",
+            "consequence": "Device trust tiers are implemented. Managed devices access engineering systems; BYOD accesses email and Teams only.",
+            "next_dp": "D1S4-DP-005"
+          },
+          {
+            "id": "D",
+            "text": "Use network location as the primary trust signal - on-premise devices are trusted",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "This is the opposite of Zero Trust! Network location should not determine trust level. A compromised device on the corporate network is more dangerous than a healthy device remotely. Zero Trust evaluates device health regardless of location.",
+            "consequence": "The CISO points out this is exactly the model that enabled the insider threat - location-based trust.",
+            "next_dp": "D1S4-DP-005"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "Consider how device trust level should affect what resources that device can access.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Zero Trust matches access to risk. Higher device assurance = more sensitive resource access. Lower assurance = limited access.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Device trust in Zero Trust considers: Is the device managed? Is the OS current and patched? Is disk encryption enabled? Is security software present and healthy? Is the device compliant with configuration policies? Access decisions combine device trust with user identity and resource sensitivity."
+      },
+      {
+        "id": "D1S4-DP-005",
+        "sequence": 5,
+        "title": "Network Segmentation Strategy",
+        "context": "The network team is ready to begin segmentation. Currently, the network is relatively flat with broad VLAN access. You need to design the segmentation approach.",
+        "question": "What segmentation strategy best aligns with Zero Trust for this defense contractor?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Traditional VLAN segmentation by department: Engineering VLAN, Corporate VLAN, Manufacturing VLAN",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Department-based VLANs are a start but still create large trust zones. The insider incident occurred because an engineer could access all engineering resources, not just their project. Zero Trust requires more granular segmentation based on data sensitivity and need-to-know.",
+            "consequence": "Departmental VLANs are implemented, but lateral movement within departments is still possible.",
+            "next_dp": "D1S4-DP-006"
+          },
+          {
+            "id": "B",
+            "text": "Microsegmentation with application-level policies - each application/workload isolated with explicit allow rules",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. Microsegmentation creates security boundaries around individual workloads or applications rather than network segments. Traffic is allowed only via explicit policies based on identity, device, and context. This prevents lateral movement even if one system is compromised.",
+            "consequence": "Software-defined microsegmentation is deployed. Each project system can only communicate with explicitly authorized resources.",
+            "next_dp": "D1S4-DP-006"
+          },
+          {
+            "id": "C",
+            "text": "Air-gap all sensitive systems with no network connectivity",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Air-gapping prevents all network-based attacks but severely impacts usability and collaboration. True air-gapping is reserved for the most sensitive classified systems. Most resources need some connectivity; Zero Trust provides protection while maintaining usability.",
+            "consequence": "Engineering teams can't collaborate on projects effectively. Productivity plummets.",
+            "next_dp": "D1S4-DP-006"
+          },
+          {
+            "id": "D",
+            "text": "Segment only between classified and unclassified networks",
+            "is_correct": false,
+            "points": 10,
+            "feedback": "Classification-based segmentation is necessary but insufficient. The insider incident occurred entirely within the unclassified network - commercial aviation vs. military drone documents. You need segmentation within classification levels based on project and need-to-know.",
+            "consequence": "Classified network is protected, but lateral movement within unclassified systems remains possible.",
+            "next_dp": "D1S4-DP-006"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "The insider moved laterally within the engineering department. Department-level segmentation wouldn't have helped.",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Microsegmentation creates boundaries around individual applications/workloads, enforcing explicit communication policies.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Microsegmentation vs. traditional segmentation: Traditional VLANs create large trust zones (whole departments). Microsegmentation creates tiny zones around individual workloads. Traffic policies are based on workload identity, not network location. Software-defined solutions (like VMware NSX, Illumio) enable granular east-west traffic control."
+      },
+      {
+        "id": "D1S4-DP-006",
+        "sequence": 6,
+        "title": "Continuous Verification Design",
+        "context": "Zero Trust requires continuous verification, not just point-in-time authentication. You're designing the ongoing verification mechanisms for established sessions.",
+        "question": "How should continuous verification be implemented for active user sessions?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Re-authenticate users every 15 minutes with full MFA",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Constant re-authentication disrupts productivity without necessarily improving security. Continuous verification should be risk-based and adaptive, not just time-based. Forcing MFA every 15 minutes would make systems unusable.",
+            "consequence": "Users complain constantly. Some start leaving sessions open and walking away to avoid re-auth.",
+            "next_dp": "D1S4-DP-007"
+          },
+          {
+            "id": "B",
+            "text": "Monitor user behavior (UEBA) and require step-up authentication when anomalies are detected",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. User and Entity Behavior Analytics (UEBA) enables risk-adaptive verification. Normal behavior continues uninterrupted; anomalies (unusual access patterns, impossible travel, suspicious file access) trigger step-up authentication or access blocking. This balances security with usability.",
+            "consequence": "UEBA deployment begins. The system learns baseline behaviors and will flag deviations like the insider incident would have shown.",
+            "next_dp": "D1S4-DP-007"
+          },
+          {
+            "id": "C",
+            "text": "Extend session timeouts to 24 hours to reduce authentication friction",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Long sessions without verification are the opposite of continuous verification. A 24-hour session means a compromised credential or stolen session can be used all day without challenge. This approach enables exactly the kind of prolonged unauthorized access seen in the incident.",
+            "consequence": "Longer sessions increase risk exposure. A compromised session could be active for an entire workday.",
+            "next_dp": "D1S4-DP-007"
+          },
+          {
+            "id": "D",
+            "text": "Use only session cookies with standard timeout expiration",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Standard session management is passive - it doesn't continuously evaluate risk. Once authenticated, the user is trusted until timeout regardless of what they do. This misses the 'assume breach' aspect of Zero Trust.",
+            "consequence": "Sessions work normally but provide no detection of compromised credentials being misused.",
+            "next_dp": "D1S4-DP-007"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "How could the 3-month insider activity have been detected earlier?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Behavioral analytics detect anomalies - unusual access patterns, times, volumes. Risk-based step-up auth challenges suspicious behavior.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Continuous verification in Zero Trust uses behavioral analytics to monitor: access patterns (what resources, when), data volumes (unusual downloads), location changes (impossible travel), device changes, and peer group comparison. Anomalies trigger step-up auth, alerts, or automatic blocking."
+      },
+      {
+        "id": "D1S4-DP-007",
+        "sequence": 7,
+        "title": "Least Privilege Access Design",
+        "context": "The current access model grants permissions based on department and job title. You're redesigning toward least privilege. Engineering file shares contain documents for dozens of different projects.",
+        "question": "How should file share access be restructured for least privilege?",
+        "options": [
+          {
+            "id": "A",
+            "text": "All engineers get read access to all engineering files; write access requires manager approval",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "This is essentially the current model that enabled the insider incident. Read access to files outside one's project still allows data exfiltration. Least privilege means access only to resources needed for specific job duties, not broad department access.",
+            "consequence": "Engineers can still browse and read documents from any project - the same vulnerability exploited by the insider.",
+            "next_dp": "D1S4-DP-008"
+          },
+          {
+            "id": "B",
+            "text": "Project-based access groups with automatic provisioning when assigned to a project and automatic removal when assignment ends",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. Project-based access implements need-to-know: engineers access only their assigned projects. Automatic provisioning/deprovisioning through HR/project management integration ensures access stays current. This would have prevented the insider from accessing the drone program files.",
+            "consequence": "Access groups are aligned with project assignments in the PM system. Engineers see only their project files.",
+            "next_dp": "D1S4-DP-008"
+          },
+          {
+            "id": "C",
+            "text": "Require IT ticket for each individual file access request",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Per-file ticketing creates massive administrative overhead and slows work to a crawl. Access should be role/project-based with self-service within appropriate boundaries. Security controls shouldn't make legitimate work impossible.",
+            "consequence": "IT is overwhelmed with access tickets. Engineers wait days to access files they legitimately need.",
+            "next_dp": "D1S4-DP-008"
+          },
+          {
+            "id": "D",
+            "text": "Senior engineers get full access; junior engineers get limited access based on tenure",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Tenure-based access doesn't align with need-to-know. A senior engineer shouldn't access all projects just because they've been there longer. Least privilege is about job function and current assignments, not seniority or trust based on tenure.",
+            "consequence": "Senior engineer with broad access could still browse projects they're not assigned to.",
+            "next_dp": "D1S4-DP-008"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "What access did the insider legitimately need vs. what they actually had?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Least privilege aligns access to job duties - in engineering, that means project assignments, not department membership.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Least Privilege implementation: Access should match current job duties, not department, title, or tenure. Automate provisioning tied to authoritative sources (HR for role, PM for projects). Regular access reviews verify continued need. Just-in-time (JIT) access for elevated privileges. Automatic deprovisioning when roles/assignments change."
+      },
+      {
+        "id": "D1S4-DP-008",
+        "sequence": 8,
+        "title": "Defense in Depth Integration",
+        "context": "A security architect asks how Zero Trust relates to the existing defense in depth strategy. Some team members think Zero Trust replaces defense in depth.",
+        "question": "What is the relationship between Zero Trust and defense in depth?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Zero Trust replaces defense in depth - multiple security layers are no longer needed when access is continuously verified",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "This is a dangerous misconception. Zero Trust does NOT eliminate the need for multiple security layers. If identity is compromised, you still want network controls, endpoint protection, and data-level security. Zero Trust enhances defense in depth by adding identity-centric controls.",
+            "consequence": "Security team debates this position. Removing layers would create single points of failure.",
+            "next_dp": "D1S4-DP-009"
+          },
+          {
+            "id": "B",
+            "text": "Defense in depth becomes even more important - Zero Trust adds an identity-centric layer while maintaining network, endpoint, and data layers",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Exactly right. Zero Trust adds identity as a primary control plane while keeping existing layers. The result is deeper defense: perimeter controls, network segmentation, identity verification, device health, application controls, and data protection all work together. No single layer failure compromises everything.",
+            "consequence": "The architecture maintains existing controls while adding Zero Trust capabilities - true defense in depth.",
+            "next_dp": "D1S4-DP-009"
+          },
+          {
+            "id": "C",
+            "text": "Defense in depth and Zero Trust are competing philosophies - you must choose one approach",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "These are complementary, not competing. Defense in depth is about multiple layers; Zero Trust is about how those layers make decisions (based on identity and context rather than network location). They work together to strengthen overall security posture.",
+            "consequence": "This creates confusion about the security strategy direction.",
+            "next_dp": "D1S4-DP-009"
+          },
+          {
+            "id": "D",
+            "text": "Zero Trust only applies to the network layer - other layers remain unchanged",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Zero Trust applies across all layers: identity, device, network, application, and data. Each layer implements Zero Trust principles of verification and least privilege. It's not just a network architecture change.",
+            "consequence": "Limited implementation misses the full value of Zero Trust principles.",
+            "next_dp": "D1S4-DP-009"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "What happens if the identity system is compromised? Do you want other protections in place?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Zero Trust enhances defense in depth by adding identity-centric controls. Existing layers provide protection if any single component fails.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Zero Trust and Defense in Depth are complementary: Defense in Depth provides multiple security layers (network, endpoint, application, data). Zero Trust adds identity-centric decision making at each layer. Together: even if identity is compromised, network segmentation limits blast radius. Even if network is penetrated, identity verification blocks unauthorized access. Layers reinforce each other."
+      },
+      {
+        "id": "D1S4-DP-009",
+        "sequence": 9,
+        "title": "Assume Breach Preparation",
+        "context": "The 'assume breach' principle requires preparing for successful attacks, not just trying to prevent them. You need to design detection and response capabilities.",
+        "question": "What capabilities best implement the 'assume breach' principle?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Focus primarily on prevention - strong enough controls mean breaches won't happen",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Prevention-only thinking is why breaches go undetected for months (like the insider incident - 90 days). Assume breach means accepting that prevention eventually fails and designing for rapid detection and response. Even the best controls have gaps.",
+            "consequence": "The next breach, like the last one, may go undetected for months.",
+            "next_dp": "D1S4-DP-010"
+          },
+          {
+            "id": "B",
+            "text": "Comprehensive logging with SIEM correlation, automated threat detection, incident response playbooks, and regular breach simulations",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. Assume breach preparation means: visibility (comprehensive logging), detection (SIEM, analytics, threat intel), response capability (playbooks, trained team), and validation (red team exercises, breach simulations). This reduces dwell time and limits impact when breaches occur.",
+            "consequence": "Enhanced SOC capabilities are deployed. The team practices response procedures through tabletop exercises.",
+            "next_dp": "D1S4-DP-010"
+          },
+          {
+            "id": "C",
+            "text": "Purchase cyber insurance to cover breach costs",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Insurance transfers financial risk but doesn't detect, prevent, or respond to breaches. It's a business decision, not a security control. Assume breach is about operational preparation for incidents, not just financial preparation.",
+            "consequence": "Insurance provides financial backstop but doesn't improve detection or response capabilities.",
+            "next_dp": "D1S4-DP-010"
+          },
+          {
+            "id": "D",
+            "text": "Implement data loss prevention (DLP) as the primary assume breach control",
+            "is_correct": false,
+            "points": 15,
+            "feedback": "DLP is valuable for preventing data exfiltration, but assume breach is broader. You also need to detect unauthorized access, lateral movement, privilege escalation, and other attack behaviors - not just data leaving the network.",
+            "consequence": "DLP helps protect data but doesn't provide visibility into attack progression within the network.",
+            "next_dp": "D1S4-DP-010"
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "The insider operated for 90 days undetected. What was missing?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Assume breach = visibility + detection + response capability + validation through exercises.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Assume Breach implementation: 1) Visibility - log everything, retain for analysis, 2) Detection - SIEM, UEBA, threat intelligence correlation, 3) Response - documented playbooks, trained team, practiced procedures, 4) Validation - red team exercises, breach simulations, tabletop exercises. Measure and minimize 'dwell time' - how long attackers can operate undetected."
+      },
+      {
+        "id": "D1S4-DP-010",
+        "sequence": 10,
+        "title": "Zero Trust Maturity Assessment",
+        "context": "After six months of implementation, leadership wants a maturity assessment. You need to evaluate progress and identify the most critical gap for next-phase investment.",
+        "question": "Based on the implementation so far, what should be the NEXT priority to advance Zero Trust maturity?",
+        "options": [
+          {
+            "id": "A",
+            "text": "Expand MFA to 100% of users before other improvements",
+            "is_correct": false,
+            "points": 15,
+            "feedback": "MFA expansion is important, but you've already deployed strong MFA. The next maturity step should advance other pillars. Zero Trust maturity requires balanced advancement across identity, devices, network, applications, and data.",
+            "consequence": "MFA coverage increases, but other Zero Trust pillars remain at lower maturity.",
+            "next_dp": null
+          },
+          {
+            "id": "B",
+            "text": "Implement data classification and protection - applying Zero Trust to the data layer",
+            "is_correct": true,
+            "points": 25,
+            "feedback": "Excellent. With identity, device, and network controls progressing, the data layer is the critical gap. Data classification enables DLP, encryption decisions, and access policies based on data sensitivity. Ultimately, protecting data is the goal - other controls are means to that end.",
+            "consequence": "Data classification initiative begins. Sensitive data is identified, labeled, and protected with sensitivity-appropriate controls.",
+            "next_dp": null
+          },
+          {
+            "id": "C",
+            "text": "Replace all on-premise applications with cloud SaaS equivalents",
+            "is_correct": false,
+            "points": 5,
+            "feedback": "Cloud migration isn't inherently a Zero Trust advancement. Cloud applications still need Zero Trust controls. The migration might be a business decision, but it's not automatically a security improvement. Focus on controls, not just platform.",
+            "consequence": "Cloud migration discussion diverts focus from security architecture improvements.",
+            "next_dp": null
+          },
+          {
+            "id": "D",
+            "text": "Increase firewall rules and perimeter security investments",
+            "is_correct": false,
+            "points": 0,
+            "feedback": "Reinforcing the perimeter contradicts Zero Trust principles. The whole point is that perimeter-focused security failed (the insider was inside the perimeter). Next investments should continue the Zero Trust journey, not revert to perimeter thinking.",
+            "consequence": "Perimeter investments don't address the identity and data protection gaps that enabled the original incident.",
+            "next_dp": null
+          }
+        ],
+        "hints": [
+          {
+            "level": 1,
+            "text": "What was actually stolen in the incident? What's the ultimate protection goal?",
+            "penalty": 2
+          },
+          {
+            "level": 2,
+            "text": "Data is what attackers want. With identity, device, and network controls in place, protecting the data itself is the next critical layer.",
+            "penalty": 5
+          }
+        ],
+        "learning_note": "Zero Trust maturity models (like CISA's) assess pillars: Identity, Devices, Networks, Applications, Data. Mature organizations advance all pillars together. Data protection (classification, DLP, encryption) is often the most overlooked pillar but is ultimately what all other controls protect. Regular maturity assessments identify gaps and guide investment."
+      }
+    ],
+
+    "completion_criteria": {
+      "pass_threshold": 80,
+      "points_possible": 250,
+      "minimum_decisions": 10
+    },
+
+    "summary_teaching_points": [
+      "Zero Trust operates on 'never trust, always verify' - eliminating implicit trust based on network location",
+      "Identity is the foundation of Zero Trust - strong authentication enables all other controls",
+      "Phishing-resistant MFA (FIDO2) provides the strongest authentication protection",
+      "Device trust should be tiered - managed devices get more access than BYOD",
+      "Microsegmentation creates security boundaries around individual workloads, not just network segments",
+      "Continuous verification through behavioral analytics detects compromised credentials in use",
+      "Least privilege access should align with job duties and current assignments, not department membership",
+      "Zero Trust enhances defense in depth - identity-centric controls add to, not replace, existing layers",
+      "Assume breach means building detection and response capabilities, not just prevention",
+      "Data protection is the ultimate goal - identity, device, and network controls protect the data layer"
+    ],
+
+    "weakness_mapping": [
+      {
+        "if_missed": ["D1S4-DP-001", "D1S4-DP-002"],
+        "weak_topic": "Zero Trust Fundamentals and Implementation",
+        "objectives": ["1.2"],
+        "suggested_review": "domain1/topic2/study-guide",
+        "suggested_simulation": "D1-REM-002"
+      },
+      {
+        "if_missed": ["D1S4-DP-003"],
+        "weak_topic": "Multi-Factor Authentication",
+        "objectives": ["1.2"],
+        "suggested_review": "domain1/topic2/study-guide",
+        "suggested_simulation": "D1-REM-002"
+      },
+      {
+        "if_missed": ["D1S4-DP-004", "D1S4-DP-005"],
+        "weak_topic": "Device Trust and Network Segmentation",
+        "objectives": ["1.2"],
+        "suggested_review": "domain3/topic2/study-guide",
+        "suggested_simulation": "D1-REM-002"
+      },
+      {
+        "if_missed": ["D1S4-DP-006", "D1S4-DP-007"],
+        "weak_topic": "Continuous Verification and Least Privilege",
+        "objectives": ["1.2"],
+        "suggested_review": "domain1/topic2/study-guide",
+        "suggested_simulation": "D1-REM-002"
+      },
+      {
+        "if_missed": ["D1S4-DP-008", "D1S4-DP-009"],
+        "weak_topic": "Defense in Depth and Assume Breach",
+        "objectives": ["1.2"],
+        "suggested_review": "domain1/topic2/study-guide",
+        "suggested_simulation": "D1-REM-002"
+      }
+    ],
+
+    "next_recommended": "D1-SIM-005"
+  }
+}
