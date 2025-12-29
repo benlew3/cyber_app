@@ -2426,7 +2426,7 @@ This knowledge is critical for protecting organizational assets.`
                 ${lessonContent.introduction ? `
                     <div class="lesson-section">
                         <h3>Introduction</h3>
-                        <p>${lessonContent.introduction}</p>
+                        <p>${escapeHtml(lessonContent.introduction)}</p>
                     </div>
                 ` : ''}
                 
@@ -2434,15 +2434,15 @@ This knowledge is critical for protecting organizational assets.`
                     <div class="lesson-section">
                         <h3>Learning Goals</h3>
                         <ul style="margin-left: 20px; line-height: 2;">
-                            ${lessonContent.learningGoals.map(goal => `<li>${goal}</li>`).join('')}
+                            ${lessonContent.learningGoals.map(goal => `<li>${escapeHtml(goal)}</li>`).join('')}
                         </ul>
                     </div>
                 ` : ''}
                 
                 ${lessonContent.sections ? lessonContent.sections.map(section => `
                     <div class="lesson-section">
-                        <h3>${section.title}</h3>
-                        <p style="white-space: pre-line;">${section.content}</p>
+                        <h3>${escapeHtml(section.title)}</h3>
+                        <div class="lesson-content" style="white-space: pre-line;">${formatContent(section.content)}</div>
                     </div>
                 `).join('') : ''}
                 
@@ -2450,7 +2450,7 @@ This knowledge is critical for protecting organizational assets.`
                     <div class="lesson-section">
                         <h3>Key Points to Remember</h3>
                         <ul style="margin-left: 20px; line-height: 2;">
-                            ${lessonContent.keyPoints.map(point => `<li>${point}</li>`).join('')}
+                            ${lessonContent.keyPoints.map(point => `<li>${escapeHtml(point)}</li>`).join('')}
                         </ul>
                     </div>
                 ` : ''}
@@ -2459,7 +2459,7 @@ This knowledge is critical for protecting organizational assets.`
                     <div class="lesson-section" style="background: #1e1e2e; padding: 20px; border-radius: 8px; border-left: 4px solid #6366f1;">
                         <h3>💡 Exam Tips</h3>
                         <ul style="margin-left: 20px; line-height: 2;">
-                            ${lessonContent.examTips.map(tip => `<li>${tip}</li>`).join('')}
+                            ${lessonContent.examTips.map(tip => `<li>${escapeHtml(tip)}</li>`).join('')}
                         </ul>
                     </div>
                 ` : ''}

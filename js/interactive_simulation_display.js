@@ -85,6 +85,9 @@ function showBriefingStage(stage) {
     // Get incident details based on simulation type
     const incidentDetails = getIncidentDetails(sim);
     
+    // Helper to safely escape - fallback if utils.js not loaded
+    const escape = typeof escapeHtml === 'function' ? escapeHtml : (s) => s || '';
+    
     content.innerHTML = `
         <div class="container">
             <button class="back-btn" onclick="confirmExitSimulation()">← Exit Simulation</button>
@@ -94,9 +97,9 @@ function showBriefingStage(stage) {
                 ${createProgressBar()}
                 
                 <div style="text-align: center; margin-bottom: 30px;">
-                    <h1>${sim.title || 'Security Incident Response'}</h1>
+                    <h1>${escape(sim.title) || 'Security Incident Response'}</h1>
                     <p style="color: #71717a;">
-                        Stage ${simEngine.currentStage + 1} of ${sim.stages.length}: ${stage.title}
+                        Stage ${simEngine.currentStage + 1} of ${sim.stages.length}: ${escape(stage.title)}
                     </p>
                 </div>
                 
@@ -120,7 +123,7 @@ function showBriefingStage(stage) {
                     <div style="background: #0a0a0a; border-left: 4px solid #ef4444; 
                                 padding: 20px; margin-bottom: 20px; border-radius: 4px;">
                         <p style="line-height: 1.8; font-size: 1.1rem; color: #fafafa;">
-                            ${sim.scenario || incidentDetails.scenario}
+                            ${escape(sim.scenario || incidentDetails.scenario)}
                         </p>
                     </div>
                     
@@ -131,9 +134,9 @@ function showBriefingStage(stage) {
                             <div style="background: #27272a; padding: 15px; border-radius: 8px;
                                         border-left: 3px solid ${info.color || '#6366f1'};">
                                 <h4 style="color: ${info.color || '#6366f1'}; margin-bottom: 10px;">
-                                    ${info.icon || '📌'} ${info.label}
+                                    ${info.icon || '📌'} ${escape(info.label)}
                                 </h4>
-                                <p style="color: #fafafa; font-size: 1.1rem;">${info.value}</p>
+                                <p style="color: #fafafa; font-size: 1.1rem;">${escape(info.value)}</p>
                             </div>
                         `).join('')}
                     </div>
@@ -143,7 +146,7 @@ function showBriefingStage(stage) {
                         <h3 style="color: #fafafa; margin-bottom: 15px;">🔍 Initial Indicators</h3>
                         <ul style="line-height: 2; color: #a1a1aa;">
                             ${incidentDetails.indicators.map(ind => `
-                                <li>${ind}</li>
+                                <li>${escape(ind)}</li>
                             `).join('')}
                         </ul>
                     </div>

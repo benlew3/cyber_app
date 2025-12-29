@@ -401,36 +401,36 @@ function showEnhancedSimulationIntro() {
             
             <div class="simulation-container" style="max-width: 1000px; margin: 0 auto;">
                 <div style="text-align: center; margin-bottom: 30px;">
-                    <h1>${sim.title}</h1>
+                    <h1>${escapeHtml(sim.title)}</h1>
                     <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; color: #71717a;">
                         <span>📍 Domain ${sim.domain}</span>
                         <span>⏱️ ${sim.time_estimate_minutes} minutes</span>
-                        <span>🎯 ${sim.difficulty}</span>
+                        <span>🎯 ${escapeHtml(sim.difficulty)}</span>
                         <span>📊 10 Decision Points</span>
                     </div>
                 </div>
                 
                 <div class="simulation-section">
                     <h2>📋 Scenario Overview</h2>
-                    <p style="white-space: pre-wrap; line-height: 1.8;">${sim.scenario_introduction}</p>
+                    <p style="white-space: pre-wrap; line-height: 1.8;">${escapeHtml(sim.scenario_introduction)}</p>
                 </div>
                 
                 <div class="simulation-section">
                     <h3>🏢 Organization Context</h3>
                     <div style="background: #18181b; border-radius: 8px; padding: 20px;">
-                        <p><strong>${sim.organization.name}</strong></p>
+                        <p><strong>${escapeHtml(sim.organization.name)}</strong></p>
                         <p style="color: #a1a1aa; margin: 10px 0;">
-                            <span>${sim.organization.industry}</span> • 
-                            <span>${sim.organization.size}</span>
+                            <span>${escapeHtml(sim.organization.industry)}</span> • 
+                            <span>${escapeHtml(sim.organization.size)}</span>
                         </p>
-                        <p style="margin-top: 15px; line-height: 1.8;">${sim.organization.current_state}</p>
+                        <p style="margin-top: 15px; line-height: 1.8;">${escapeHtml(sim.organization.current_state)}</p>
                     </div>
                 </div>
                 
                 <div class="simulation-section">
                     <h3>👤 Your Role</h3>
                     <div style="background: #27272a; border-radius: 8px; padding: 15px;">
-                        <p style="margin: 0;">${sim.role}</p>
+                        <p style="margin: 0;">${escapeHtml(sim.role)}</p>
                         <p style="color: #a1a1aa; margin-top: 10px;">
                             You have full authority to make security decisions and recommendations. 
                             Your choices will be evaluated based on security best practices and business impact.
@@ -441,7 +441,7 @@ function showEnhancedSimulationIntro() {
                 <div class="simulation-section">
                     <h3>🎯 Learning Objectives</h3>
                     <ul style="line-height: 2; margin-left: 20px;">
-                        ${sim.learning_objectives.map(obj => `<li>${obj}</li>`).join('')}
+                        ${sim.learning_objectives.map(obj => `<li>${escapeHtml(obj)}</li>`).join('')}
                     </ul>
                 </div>
                 
@@ -548,7 +548,7 @@ function showEnhancedDecision() {
                 <!-- Decision Header -->
                 <div style="background: #18181b; border-radius: 12px; padding: 25px; margin-bottom: 25px;">
                     <h2 style="color: #fafafa; margin-bottom: 15px; font-size: 1.8rem;">
-                        ${decision.title}
+                        ${escapeHtml(decision.title)}
                     </h2>
                     <div style="display: flex; gap: 15px; color: #71717a;">
                         <span>🎯 Domain ${sim.domain}</span>
@@ -564,7 +564,7 @@ function showEnhancedDecision() {
                         📍 Current Situation
                     </h3>
                     <div style="white-space: pre-wrap; line-height: 1.8; color: #fafafa;">
-${decision.situation}
+${escapeHtml(decision.situation)}
                     </div>
                 </div>
                 
@@ -572,7 +572,7 @@ ${decision.situation}
                 <div style="background: linear-gradient(135deg, #1e1e2e, #27272a); 
                             border-left: 4px solid #6366f1; padding: 20px; margin-bottom: 30px; border-radius: 4px;">
                     <h3 style="color: #fafafa; margin-bottom: 0; font-size: 1.2rem;">
-                        ${decision.question}
+                        ${escapeHtml(decision.question)}
                     </h3>
                 </div>
                 
@@ -591,7 +591,7 @@ ${decision.situation}
                                     ${String.fromCharCode(65 + i)}
                                 </div>
                                 <div style="flex: 1; line-height: 1.7;">
-                                    ${opt.text}
+                                    ${escapeHtml(opt.text)}
                                 </div>
                             </div>
                             <div class="option-indicator" style="position: absolute; top: 10px; right: 10px;"></div>
@@ -842,17 +842,17 @@ function showEnhancedFeedback(selected, decision) {
             
             <!-- Your Choice Feedback -->
             <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-                <h4 style="color: #6366f1; margin-bottom: 15px;">Your Choice: Option ${selected.id.toUpperCase()}</h4>
-                <p style="line-height: 1.8; margin-bottom: 15px;">${selected.feedback}</p>
+                <h4 style="color: #6366f1; margin-bottom: 15px;">Your Choice: Option ${escapeHtml(selected.id).toUpperCase()}</h4>
+                <p style="line-height: 1.8; margin-bottom: 15px;">${escapeHtml(selected.feedback)}</p>
                 
                 <!-- Consequences -->
                 ${selected.consequences ? `
                     <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 15px; margin-top: 15px;">
                         <h5 style="color: #f59e0b; margin-bottom: 12px;">Consequences of This Decision:</h5>
                         <ul style="line-height: 1.8; margin-left: 20px; color: #a1a1aa;">
-                            <li><strong>Immediate:</strong> ${selected.consequences.immediate}</li>
-                            <li><strong>Security Impact:</strong> ${selected.consequences.security_impact}</li>
-                            <li><strong>Business Impact:</strong> ${selected.consequences.business_impact}</li>
+                            <li><strong>Immediate:</strong> ${escapeHtml(selected.consequences.immediate)}</li>
+                            <li><strong>Security Impact:</strong> ${escapeHtml(selected.consequences.security_impact)}</li>
+                            <li><strong>Business Impact:</strong> ${escapeHtml(selected.consequences.business_impact)}</li>
                         </ul>
                     </div>
                 ` : ''}
@@ -863,7 +863,7 @@ function showEnhancedFeedback(selected, decision) {
                 <div style="background: linear-gradient(135deg, #1e1e3e, #27273a); 
                             border-left: 4px solid #6366f1; padding: 20px; margin-bottom: 20px; border-radius: 4px;">
                     <h4 style="color: #6366f1; margin-bottom: 12px;">📚 Key Learning Point</h4>
-                    <p style="line-height: 1.8;">${selected.learning_note}</p>
+                    <p style="line-height: 1.8;">${escapeHtml(selected.learning_note)}</p>
                 </div>
             ` : ''}
             
@@ -872,11 +872,11 @@ function showEnhancedFeedback(selected, decision) {
                 <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; 
                             border-radius: 8px; padding: 20px; margin-bottom: 20px;">
                     <h4 style="color: #10b981; margin-bottom: 15px;">
-                        🎯 Optimal Choice Was: Option ${optimalOption.id.toUpperCase()}
+                        🎯 Optimal Choice Was: Option ${escapeHtml(optimalOption.id).toUpperCase()}
                     </h4>
-                    <p style="margin-bottom: 10px;">${optimalOption.text}</p>
+                    <p style="margin-bottom: 10px;">${escapeHtml(optimalOption.text)}</p>
                     <p style="color: #a1a1aa; line-height: 1.8; margin-top: 15px;">
-                        <strong>Why it's optimal:</strong> ${optimalOption.feedback}
+                        <strong>Why it's optimal:</strong> ${escapeHtml(optimalOption.feedback)}
                     </p>
                 </div>
             ` : ''}
