@@ -3741,20 +3741,10 @@ function updateNavigation() {
 function initApp() {
     console.log('════════════════════════════════════════');
     console.log('🚀 INITIALIZING SECURITY+ v29 COMPLETE');
-    console.log('   All 25 Simulations Interactive');
+    console.log('   All 26 Simulations Interactive');
     console.log('   All Content Fully Functional');
     console.log('════════════════════════════════════════');
 
-    setupDOM();
-    injectStyles();
-    loadProgress();
-    
-    // ADD THIS LINE HERE:
-    loadSimulationsFromDataFolder();  // Load from data/simulations.json
-    
-    createHeader();
-    showDashboard();
-    
     try {
         console.log('Step 1: Setting up DOM...');
         setupDOM();
@@ -3762,13 +3752,19 @@ function initApp() {
         console.log('Step 2: Injecting styles...');
         injectStyles();
         
-        console.log('Step 3: Loading all content...');
+        console.log('Step 3: Loading progress from localStorage...');
+        loadProgress();
+        
+        console.log('Step 4: Loading simulation data...');
+        loadSimulationsFromDataFolder();  // Load from data/simulations.json (async, non-blocking)
+        
+        console.log('Step 5: Loading all content...');
         loadData();
         
-        console.log('Step 4: Creating navigation header...');
+        console.log('Step 6: Creating navigation header...');
         createHeader();
         
-        console.log('Step 5: Showing dashboard...');
+        console.log('Step 7: Showing dashboard...');
         showDashboard();
         
         APP.initialized = true;
@@ -3784,6 +3780,13 @@ function initApp() {
         console.log('✅ ' + Object.keys(GLOSSARY).length + ' glossary terms');
         console.log('════════════════════════════════════════');
         
+        // Show welcome notification if ElegantUI is available
+        setTimeout(() => {
+            if (window.notify) {
+                window.notify.success('Platform loaded successfully!', 3000);
+            }
+        }, 500);
+        
     } catch (error) {
         console.error('❌ INITIALIZATION ERROR:', error);
         console.error('Stack:', error.stack);
@@ -3795,9 +3798,9 @@ function initApp() {
                 <p style="margin: 20px 0;">The application encountered an error during startup.</p>
                 <div style="background: #18181b; border: 1px solid #ef4444; border-radius: 8px; padding: 20px; 
                             max-width: 600px; margin: 20px auto; text-align: left;">
-                    <strong>Error:</strong> ${error.message}<br>
+                    <strong>Error:</strong> ${escapeHtml(error.message)}<br>
                     <pre style="margin-top: 10px; font-size: 0.9rem; color: #a1a1aa; overflow-x: auto;">
-${error.stack}
+${escapeHtml(error.stack)}
                     </pre>
                 </div>
                 <button onclick="location.reload()" 
