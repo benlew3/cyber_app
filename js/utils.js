@@ -1,7 +1,7 @@
 // ================================================
 // UTILITY FUNCTIONS - Security+ Platform
 // HTML Escaping and Content Sanitization
-// Version: 1.0
+// Version: 2.0 - Enhanced for readability
 // ================================================
 // CRITICAL: This file MUST load FIRST before any other JS files
 // It provides the escapeHtml function needed to safely render content
@@ -31,8 +31,8 @@ function escapeHtml(text) {
 }
 
 /**
- * Format content with basic markdown-like support while keeping HTML escaped
- * Converts **bold**, *italic*, `code`, and preserves line breaks
+ * Format content with enhanced markdown support for educational content
+ * Handles bold definitions, lists, code blocks, and proper spacing
  * @param {string} content - Raw content with potential markdown
  * @returns {string} - HTML-formatted string (safe)
  */
@@ -42,30 +42,81 @@ function formatContent(content) {
     // First escape HTML to prevent XSS
     let html = escapeHtml(content);
     
-    // Then apply markdown-like formatting on the escaped content
-    // Bold: **text** or __text__
-    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+    // === BOLD TEXT ===
+    // **text** or __text__ → <strong>
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong class="definition-term">$1</strong>');
+    html = html.replace(/__([^_]+)__/g, '<strong class="definition-term">$1</strong>');
     
-    // Inline code: `code`
+    // === INLINE CODE ===
+    // `code` → styled code element
     html = html.replace(/`([^`]+)`/g, 
-        '<code style="background: #27272a; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em;">$1</code>');
+        '<code class="inline-code">$1</code>');
     
-    // Code blocks: ```code``` (with optional language)
+    // === CODE BLOCKS ===
+    // ```code``` → pre block
     html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, function(match, lang, code) {
-        return `<pre style="background: #1a1a1a; padding: 15px; border-radius: 8px; overflow-x: auto; margin: 10px 0; font-family: monospace;"><code>${code.trim()}</code></pre>`;
+        return `<pre class="code-block"><code>${code.trim()}</code></pre>`;
     });
     
-    // Double line breaks to paragraphs
-    html = html.replace(/\n\n/g, '</p><p>');
+    // === LISTS ===
+    // Process bullet points: lines starting with • or -
+    // Group consecutive bullet points into proper <ul> lists
+    const lines = html.split('\n');
+    let inList = false;
+    let processedLines = [];
     
-    // Single line breaks
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        const bulletMatch = line.match(/^[•\-]\s*(.+)$/);
+        
+        if (bulletMatch) {
+            if (!inList) {
+                processedLines.push('<ul class="content-list">');
+                inList = true;
+            }
+            processedLines.push(`<li>${bulletMatch[1]}</li>`);
+        } else {
+            if (inList) {
+                processedLines.push('</ul>');
+                inList = false;
+            }
+            processedLines.push(line);
+        }
+    }
+    if (inList) {
+        processedLines.push('</ul>');
+    }
+    html = processedLines.join('\n');
+    
+    // === PARAGRAPHS ===
+    // Double line breaks → new paragraph
+    html = html.replace(/\n\n+/g, '</p><p class="content-para">');
+    
+    // Single line breaks within paragraphs
     html = html.replace(/\n/g, '<br>');
     
-    // Bullet points (• or -)
-    html = html.replace(/^• (.+)$/gm, '<li style="margin-left: 20px;">$1</li>');
-    html = html.replace(/^- (.+)$/gm, '<li style="margin-left: 20px;">$1</li>');
+    // Clean up empty paragraphs
+    html = html.replace(/<p class="content-para"><\/p>/g, '');
+    html = html.replace(/<p class="content-para"><br>/g, '<p class="content-para">');
     
+    // Wrap in paragraph if not already
+    if (!html.startsWith('<ul') && !html.startsWith('<pre') && !html.startsWith('<p')) {
+        html = '<p class="content-para">' + html + '</p>';
+    }
+    
+    return html;
+}
+
+/**
+ * Format a simple text string (single line, no complex formatting)
+ * Used for titles, labels, short descriptions
+ */
+function formatSimple(text) {
+    if (!text) return '';
+    let html = escapeHtml(text);
+    // Just handle bold
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/__([^_]+)__/g, '<strong>$1</strong>');
     return html;
 }
 
@@ -114,8 +165,9 @@ function formatDuration(seconds) {
 // Make all functions globally available
 window.escapeHtml = escapeHtml;
 window.formatContent = formatContent;
+window.formatSimple = formatSimple;
 window.safeRender = safeRender;
 window.safeGet = safeGet;
 window.formatDuration = formatDuration;
 
-console.log('✅ Utils.js loaded - HTML escaping functions available');
+console.log('✅ Utils.js v2.0 loaded - Enhanced content formatting available');

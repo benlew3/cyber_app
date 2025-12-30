@@ -1650,25 +1650,645 @@ function injectStyles() {
             border-color: #10b981;
         }
         
-        /* Lesson Viewer */
+        /* ====================================
+           LESSON VIEWER - IMPROVED UX/UI
+           ==================================== */
         .lesson-viewer {
-            background: #18181b;
-            border-radius: 12px;
-            padding: 30px;
-            margin-top: 20px;
-            max-width: 1000px;
+            background: #141416;
+            border-radius: 16px;
+            padding: 40px;
+            margin-top: 24px;
+            max-width: 900px;
             margin-left: auto;
             margin-right: auto;
         }
         
+        /* Lesson Header */
+        .lesson-viewer h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #f4f4f5;
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+        
+        /* Lesson Meta Info */
+        .lesson-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            color: #a1a1aa;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+            align-items: center;
+        }
+        
+        /* Lesson Navigation Buttons */
+        .lesson-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 40px;
+            padding: 0;
+        }
+        
+        .lesson-nav-btn {
+            background: #1e1e22;
+            border: 1px solid #2a2a2e;
+            border-radius: 12px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            color: #e4e4e7;
+        }
+        
+        .lesson-nav-btn:hover {
+            background: #252529;
+            border-color: #3f3f46;
+        }
+        
+        .lesson-nav-btn.next {
+            text-align: right;
+            background: linear-gradient(135deg, #3730a3, #4f46e5);
+            border-color: #4f46e5;
+        }
+        
+        .lesson-nav-btn.next:hover {
+            background: linear-gradient(135deg, #4338ca, #6366f1);
+        }
+        
+        .lesson-nav-btn-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #71717a;
+            margin-bottom: 4px;
+        }
+        
+        .lesson-nav-btn.next .lesson-nav-btn-label {
+            color: #a5b4fc;
+        }
+        
+        .lesson-nav-btn-title {
+            font-size: 0.95rem;
+            font-weight: 500;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .lesson-nav-placeholder {
+            visibility: hidden;
+        }
+        
+        /* Lesson Sections */
         .lesson-section {
-            margin: 30px 0;
+            margin: 0 0 40px 0;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #27272a;
+        }
+        
+        .lesson-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 24px;
         }
         
         .lesson-section h3 {
+            color: #93c5fd;
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        
+        .lesson-section p,
+        .lesson-content {
+            color: #d4d4d8;
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+        
+        /* Lists in lessons */
+        .lesson-section ul,
+        .lesson-section ol {
+            margin: 16px 0 16px 24px;
+            line-height: 1.9;
+            color: #d4d4d8;
+        }
+        
+        .lesson-section li {
+            margin-bottom: 12px;
+            padding-left: 8px;
+        }
+        
+        .lesson-section li::marker {
             color: #6366f1;
-            margin-bottom: 15px;
-            font-size: 1.3rem;
+        }
+        
+        /* Key Points Box */
+        .key-points-box {
+            background: #1a1a1f;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-top: 24px;
+        }
+        
+        .key-points-box strong {
+            color: #93c5fd;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .key-points-box ul {
+            margin: 12px 0 0 20px;
+        }
+        
+        /* Exam Tips Box */
+        .exam-tips-box {
+            background: linear-gradient(135deg, #1e1b4b 0%, #1e1e2e 100%);
+            border: 1px solid #312e81;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-top: 24px;
+        }
+        
+        .exam-tips-box strong {
+            color: #c4b5fd;
+            font-size: 0.9rem;
+        }
+        
+        .exam-tips-box ul {
+            margin: 12px 0 0 20px;
+            color: #e9d5ff;
+        }
+        
+        /* Learning Goals specific styling */
+        .learning-goals ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .learning-goals li {
+            position: relative;
+            padding: 12px 0 12px 32px;
+            margin: 0;
+            border-bottom: 1px solid #1f1f23;
+        }
+        
+        .learning-goals li:last-child {
+            border-bottom: none;
+        }
+        
+        .learning-goals li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        /* Introduction section */
+        .intro-section {
+            background: #1a1a1f;
+            border-left: 3px solid #3b82f6;
+            padding: 24px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 32px;
+        }
+        
+        .intro-section p {
+            margin: 0;
+            font-size: 1.05rem;
+        }
+        
+        /* Bottom Navigation */
+        .lesson-bottom-nav {
+            background: #1a1a1f;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 32px;
+        }
+        
+        .lesson-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .lesson-prev-next {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding-top: 24px;
+            border-top: 1px solid #27272a;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .lesson-viewer {
+                padding: 24px 18px;
+                margin-top: 16px;
+            }
+            
+            .lesson-viewer h1 {
+                font-size: 1.35rem;
+                line-height: 1.35;
+            }
+            
+            .lesson-nav {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .lesson-nav-btn {
+                padding: 14px 16px;
+            }
+            
+            .lesson-nav-btn.next {
+                text-align: left;
+            }
+            
+            .lesson-section {
+                margin-bottom: 36px;
+                padding-bottom: 28px;
+            }
+            
+            .lesson-section h3 {
+                font-size: 1.2rem;
+                margin-bottom: 18px;
+            }
+            
+            .lesson-content {
+                font-size: 1rem;
+                line-height: 1.8;
+            }
+            
+            .intro-section {
+                padding: 20px;
+                margin-bottom: 28px;
+            }
+            
+            .intro-section p {
+                font-size: 1rem;
+            }
+            
+            .key-points-box,
+            .exam-tips-box,
+            .real-world-box {
+                padding: 18px 20px;
+                margin-top: 20px;
+            }
+            
+            .learning-goals li {
+                padding: 14px 16px 14px 40px;
+            }
+            
+            .learning-goals li::before {
+                left: 12px;
+            }
+            
+            .content-list li {
+                padding: 8px 0 8px 24px;
+            }
+            
+            .content-list li::before {
+                left: 4px;
+            }
+            
+            .lesson-prev-next {
+                flex-direction: column;
+            }
+            
+            .lesson-actions {
+                flex-direction: column;
+            }
+            
+            .lesson-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .lesson-bottom-nav {
+                padding: 20px;
+            }
+        }
+        
+        /* ====================================
+           CONTENT FORMATTING CLASSES
+           ==================================== */
+        
+        /* Definition terms - bold keywords */
+        .definition-term {
+            color: #f0abfc;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+        
+        /* Alternative: white bold for better contrast */
+        .lesson-content .definition-term {
+            color: #fafafa;
+            font-weight: 700;
+        }
+        
+        /* Content paragraphs from formatContent */
+        .content-para {
+            margin-bottom: 20px;
+            line-height: 1.85;
+        }
+        
+        .content-para:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Content lists from formatContent */
+        .content-list {
+            margin: 20px 0;
+            padding-left: 0;
+            list-style: none;
+        }
+        
+        .content-list li {
+            position: relative;
+            padding: 10px 0 10px 28px;
+            margin: 0;
+            line-height: 1.7;
+            border-bottom: 1px solid rgba(39, 39, 42, 0.5);
+        }
+        
+        .content-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .content-list li::before {
+            content: "›";
+            position: absolute;
+            left: 8px;
+            color: #6366f1;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        /* Inline code */
+        .inline-code {
+            background: #27272a;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 0.9em;
+            color: #f472b6;
+            border: 1px solid #3f3f46;
+        }
+        
+        /* Code blocks */
+        .code-block {
+            background: #0d0d0f;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            border: 1px solid #27272a;
+        }
+        
+        .code-block code {
+            color: #e4e4e7;
+        }
+        
+        /* Real world example box */
+        .real-world-box {
+            background: #0f1a14;
+            border: 1px solid #166534;
+            border-left: 4px solid #22c55e;
+            border-radius: 0 12px 12px 0;
+            padding: 20px 24px;
+            margin-top: 24px;
+        }
+        
+        .real-world-box strong {
+            color: #86efac;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .real-world-box p {
+            margin-top: 12px;
+            line-height: 1.75;
+            color: #d1d5db;
+        }
+        
+        .real-world-box .company-name {
+            font-size: 0.9rem;
+            color: #71717a;
+            font-style: italic;
+            margin-top: 8px;
+        }
+        
+        /* Summary list at end of lessons */
+        .summary-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .summary-list li {
+            position: relative;
+            padding: 14px 0 14px 36px;
+            margin: 0;
+            border-bottom: 1px solid #1f1f23;
+            line-height: 1.7;
+        }
+        
+        .summary-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 8px;
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        /* Better intro section */
+        .intro-section {
+            background: linear-gradient(135deg, #0f172a 0%, #1a1a1f 100%);
+            border-left: 4px solid #3b82f6;
+            padding: 28px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 36px;
+        }
+        
+        .intro-section p {
+            margin: 0;
+            font-size: 1.05rem;
+            line-height: 1.85;
+            color: #e2e8f0;
+        }
+        
+        /* Nested paragraphs in intro */
+        .intro-section .content-para {
+            margin-bottom: 16px;
+        }
+        
+        /* Key points box improvements */
+        .key-points-box {
+            background: linear-gradient(135deg, #171720 0%, #1a1a1f 100%);
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-top: 28px;
+        }
+        
+        .key-points-box > strong {
+            display: block;
+            color: #93c5fd;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            margin-bottom: 16px;
+        }
+        
+        .key-points-box ul {
+            margin: 0;
+            padding-left: 0;
+            list-style: none;
+        }
+        
+        .key-points-box li {
+            position: relative;
+            padding: 10px 0 10px 24px;
+            margin: 0;
+            line-height: 1.7;
+            color: #d4d4d8;
+        }
+        
+        .key-points-box li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #6366f1;
+        }
+        
+        /* Exam tips box improvements */
+        .exam-tips-box {
+            background: linear-gradient(135deg, #1e1b4b 0%, #1a1a2e 100%);
+            border: 1px solid #312e81;
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-top: 28px;
+        }
+        
+        .exam-tips-box > strong {
+            display: block;
+            color: #c4b5fd;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            margin-bottom: 16px;
+        }
+        
+        .exam-tips-box ul {
+            margin: 0;
+            padding-left: 0;
+            list-style: none;
+        }
+        
+        .exam-tips-box li {
+            position: relative;
+            padding: 10px 0 10px 24px;
+            margin: 0;
+            line-height: 1.7;
+            color: #e9d5ff;
+        }
+        
+        .exam-tips-box li::before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+            font-size: 0.85em;
+        }
+        
+        /* Learning goals improvements */
+        .learning-goals {
+            background: #141416;
+            border-radius: 12px;
+            padding: 8px 0;
+        }
+        
+        .learning-goals ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .learning-goals li {
+            position: relative;
+            padding: 16px 20px 16px 48px;
+            margin: 0;
+            border-bottom: 1px solid #1f1f23;
+            line-height: 1.7;
+            color: #e4e4e7;
+        }
+        
+        .learning-goals li:last-child {
+            border-bottom: none;
+        }
+        
+        .learning-goals li::before {
+            content: "✓";
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        /* Improve overall lesson spacing */
+        .lesson-section {
+            margin: 0 0 48px 0;
+            padding-bottom: 40px;
+            border-bottom: 1px solid #27272a;
+        }
+        
+        .lesson-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 32px;
+            padding-bottom: 0;
+        }
+        
+        .lesson-section h3 {
+            color: #93c5fd;
+            margin-bottom: 24px;
+            font-size: 1.35rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+        
+        .lesson-content {
+            color: #d4d4d8;
+            line-height: 1.85;
+            font-size: 1.02rem;
+        }
+        
+        /* Better br spacing in content */
+        .lesson-content br {
+            display: block;
+            content: "";
+            margin-top: 12px;
         }
         
         /* Quiz Container */
@@ -2516,8 +3136,8 @@ This knowledge is critical for protecting organizational assets.`
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 20px; color: #71717a; margin-bottom: 20px; align-items: center; flex-wrap: wrap;">
-                    ${lesson.objectives ? `<span>📍 Objectives: ${lesson.objectives.join(', ')}</span>` : ''}
+                <div class="lesson-meta">
+                    ${lesson.objectives ? `<span>📍 ${lesson.objectives.join(', ')}</span>` : ''}
                     ${lesson.duration ? `<span>⏱️ ${lesson.duration}</span>` : ''}
                     ${lesson.difficulty ? `<span class="difficulty-badge difficulty-${lesson.difficulty}">${lesson.difficulty}</span>` : ''}
                     ${isCompleted ? '<span style="color: #10b981;">✅ Completed</span>' : ''}
@@ -2525,39 +3145,32 @@ This knowledge is critical for protecting organizational assets.`
                 </div>
                 
                 <!-- Lesson Navigation Bar -->
-                <div style="display: flex; justify-content: space-between; margin-bottom: 30px; padding: 15px; background: #18181b; border-radius: 8px;">
+                <div class="lesson-nav">
                     ${prevLesson ? `
-                        <button class="btn" onclick="showLessonViewer('${prevLesson.id}')" style="display: flex; align-items: center; gap: 10px;">
-                            <span>←</span>
-                            <div style="text-align: left;">
-                                <div style="font-size: 0.8rem; color: #71717a;">Previous</div>
-                                <div style="font-size: 0.9rem;">${prevLesson.title}</div>
-                            </div>
+                        <button class="lesson-nav-btn prev" onclick="showLessonViewer('${prevLesson.id}')">
+                            <div class="lesson-nav-btn-label">← Previous</div>
+                            <div class="lesson-nav-btn-title">${escapeHtml(prevLesson.title)}</div>
                         </button>
-                    ` : '<div></div>'}
+                    ` : '<div class="lesson-nav-placeholder"></div>'}
                     
                     ${nextLesson ? `
-                        <button class="btn btn-primary" onclick="showLessonViewer('${nextLesson.id}')" style="display: flex; align-items: center; gap: 10px;">
-                            <div style="text-align: right;">
-                                <div style="font-size: 0.8rem; color: #a1a1aa;">Next</div>
-                                <div style="font-size: 0.9rem;">${nextLesson.title}</div>
-                            </div>
-                            <span>→</span>
+                        <button class="lesson-nav-btn next" onclick="showLessonViewer('${nextLesson.id}')">
+                            <div class="lesson-nav-btn-label">Next →</div>
+                            <div class="lesson-nav-btn-title">${escapeHtml(nextLesson.title)}</div>
                         </button>
-                    ` : '<div></div>'}
+                    ` : '<div class="lesson-nav-placeholder"></div>'}
                 </div>
                 
                 ${lessonContent.introduction ? `
-                    <div class="lesson-section">
-                        <h3>Introduction</h3>
-                        <p>${escapeHtml(lessonContent.introduction)}</p>
+                    <div class="intro-section">
+                        <p>${formatContent(lessonContent.introduction)}</p>
                     </div>
                 ` : ''}
                 
                 ${lessonContent.learningGoals ? `
-                    <div class="lesson-section">
+                    <div class="lesson-section learning-goals">
                         <h3>Learning Goals</h3>
-                        <ul style="margin-left: 20px; line-height: 2;">
+                        <ul>
                             ${lessonContent.learningGoals.map(goal => `<li>${escapeHtml(goal)}</li>`).join('')}
                         </ul>
                     </div>
@@ -2578,34 +3191,32 @@ This knowledge is critical for protecting organizational assets.`
                     return `
                     <div class="lesson-section">
                         <h3>${escapeHtml(section.title)}</h3>
-                        <div class="lesson-content" style="white-space: pre-line;">${escapeHtml(section.content || '')}</div>
+                        <div class="lesson-content">${formatContent(section.content || '')}</div>
                         
                         ${section.keyPoints || section.key_points ? `
-                            <div style="background: #1e1e2e; border-radius: 8px; padding: 15px; margin-top: 15px;">
-                                <strong style="color: #6366f1;">Key Points:</strong>
-                                <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
-                                    ${(section.keyPoints || section.key_points).map(p => `<li>${escapeHtml(p)}</li>`).join('')}
+                            <div class="key-points-box">
+                                <strong>📌 Key Points</strong>
+                                <ul>
+                                    ${(section.keyPoints || section.key_points).map(p => `<li>${formatSimple(p)}</li>`).join('')}
                                 </ul>
                             </div>
                         ` : ''}
                         
                         ${section.examTips || section.exam_tips ? `
-                            <div style="background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 8px; padding: 15px; margin-top: 15px;">
-                                <strong style="color: #a5b4fc;">💡 Exam Tip:</strong>
-                                <ul style="margin: 10px 0 0 20px; line-height: 1.8; color: #c7d2fe;">
-                                    ${(section.examTips || section.exam_tips).map(t => `<li>${escapeHtml(t)}</li>`).join('')}
+                            <div class="exam-tips-box">
+                                <strong>💡 Exam Tip</strong>
+                                <ul>
+                                    ${(section.examTips || section.exam_tips).map(t => `<li>${formatSimple(t)}</li>`).join('')}
                                 </ul>
                             </div>
                         ` : ''}
                         
                         ${section.realWorldExample || section.real_world_example ? `
-                            <div style="background: #18181b; border-left: 4px solid #10b981; border-radius: 0 8px 8px 0; padding: 15px; margin-top: 15px;">
-                                <strong style="color: #10b981;">🏢 Real-World Example:</strong>
-                                <p style="margin-top: 10px; color: #a1a1aa;">
-                                    ${escapeHtml((section.realWorldExample || section.real_world_example).scenario || '')}
-                                </p>
+                            <div class="real-world-box">
+                                <strong>🏢 Real-World Example</strong>
+                                <p>${formatContent((section.realWorldExample || section.real_world_example).scenario || '')}</p>
                                 ${(section.realWorldExample || section.real_world_example).company ? `
-                                    <p style="margin-top: 5px; font-size: 0.9rem; color: #71717a;">
+                                    <p class="company-name">
                                         Company: ${escapeHtml((section.realWorldExample || section.real_world_example).company)}
                                     </p>
                                 ` : ''}
@@ -2621,49 +3232,49 @@ This knowledge is critical for protecting organizational assets.`
                 ${lessonContent.keyPoints ? `
                     <div class="lesson-section">
                         <h3>Key Points to Remember</h3>
-                        <ul style="margin-left: 20px; line-height: 2;">
-                            ${lessonContent.keyPoints.map(point => `<li>${escapeHtml(point)}</li>`).join('')}
+                        <ul class="summary-list">
+                            ${lessonContent.keyPoints.map(point => `<li>${formatSimple(point)}</li>`).join('')}
                         </ul>
                     </div>
                 ` : ''}
                 
                 ${lessonContent.examTips ? `
-                    <div class="lesson-section" style="background: #1e1e2e; padding: 20px; border-radius: 8px; border-left: 4px solid #6366f1;">
-                        <h3>💡 Exam Tips</h3>
-                        <ul style="margin-left: 20px; line-height: 2;">
-                            ${lessonContent.examTips.map(tip => `<li>${escapeHtml(tip)}</li>`).join('')}
+                    <div class="lesson-section exam-tips-box">
+                        <h3 style="color: #c4b5fd;">💡 Exam Tips</h3>
+                        <ul>
+                            ${lessonContent.examTips.map(tip => `<li>${formatSimple(tip)}</li>`).join('')}
                         </ul>
                     </div>
                 ` : ''}
                 
                 <!-- Bottom Navigation with Previous/Next -->
-                <div style="margin-top: 30px; padding: 20px; background: #18181b; border-radius: 8px;">
-                    <div style="display: flex; gap: 10px; justify-content: space-between; margin-bottom: 20px;">
+                <div class="lesson-bottom-nav">
+                    <div class="lesson-actions">
                         <button class="btn ${isCompleted ? 'btn-success' : 'btn-primary'}" 
                                 onclick="markLessonComplete('${lessonId}')">
-                            ${isCompleted ? '✅ Mark as Review' : '📌 Mark Complete'}
+                            ${isCompleted ? '✅ Completed' : '📌 Mark Complete'}
                         </button>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn" onclick="startLessonQuiz(${lesson.domain})">
-                                Take Quiz →
-                            </button>
-                            <button class="btn" onclick="showRelatedSimulation(${lesson.domain})">
-                                Try Simulation →
-                            </button>
-                        </div>
+                        <button class="btn" onclick="startLessonQuiz(${lesson.domain})">
+                            Take Quiz →
+                        </button>
+                        <button class="btn" onclick="showRelatedSimulation(${lesson.domain})">
+                            Try Simulation →
+                        </button>
                     </div>
                     
                     <!-- Previous/Next Navigation -->
-                    <div style="display: flex; justify-content: space-between; border-top: 1px solid #27272a; padding-top: 20px;">
+                    <div class="lesson-prev-next">
                         ${prevLesson ? `
-                            <button class="btn" onclick="showLessonViewer('${prevLesson.id}')">
-                                ← Previous: ${prevLesson.title}
+                            <button class="lesson-nav-btn prev" onclick="showLessonViewer('${prevLesson.id}')">
+                                <div class="lesson-nav-btn-label">← Previous</div>
+                                <div class="lesson-nav-btn-title">${escapeHtml(prevLesson.title)}</div>
                             </button>
                         ` : '<div></div>'}
                         
                         ${nextLesson ? `
-                            <button class="btn btn-primary" onclick="markLessonCompleteAndNext('${lessonId}', '${nextLesson.id}')">
-                                Complete & Next: ${nextLesson.title} →
+                            <button class="lesson-nav-btn next" onclick="markLessonCompleteAndNext('${lessonId}', '${nextLesson.id}')">
+                                <div class="lesson-nav-btn-label">Complete & Next →</div>
+                                <div class="lesson-nav-btn-title">${escapeHtml(nextLesson.title)}</div>
                             </button>
                         ` : `
                             <button class="btn btn-success" onclick="showDomainLessons(${lesson.domain})">
