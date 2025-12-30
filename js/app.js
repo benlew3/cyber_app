@@ -1,12 +1,12 @@
-// Security+ Platform v29 COMPLETE - Full v28 Functionality + Professional Simulations
-// Combines ALL v28 features with enhanced simulation system from v29
+// Security+ Platform v32 - Full v30 Functionality + Professional Simulations
+// Combines ALL v30 features with enhanced simulation system from v29
 // 41 lessons (with navigation), 26 simulations (260 decision points), 15 remediation, 
 // 250 questions, 30 PBQs, 300+ glossary terms, practice exam
 // 
 // v29 KEY ENHANCEMENT: Each simulation now has 10 comprehensive decision points
 // matching the actual JSON files (1000+ lines each) for professional training
 
-console.log('🚀 Security+ v29 COMPLETE - All v28 Features + 260 Decision Points!');
+console.log('🚀 Security+ v31 - All v30 Features + 260 Decision Points!');
 
 // ============================================
 // IMMEDIATE LOADING FIX & ERROR PREVENTION
@@ -88,14 +88,26 @@ const APP = {
         currentDecisionIndex: 0, // v29: Track which of 10 decisions
         simulationScore: 0, // v29: Track score across decisions
         simulationMaxScore: 250, // v29: 10 decisions × 25 points
-        simulationStep: 0, // Legacy v28 support
+        simulationStep: 0, // Legacy v30 support
         currentPBQ: null,
         currentQuestionIndex: 0,
         currentQuizQuestions: [],
+        currentQuizDomain: null, // Track which domain quiz is for
         selectedOption: undefined,
         score: 0,
         quizActive: false,
-        pbqAnswers: {}
+        pbqAnswers: {},
+        // Exam timer state
+        isFullExam: false,
+        examTimeRemaining: 0,
+        examStartTime: null,
+        examTimerInterval: null,
+        // Remediation state
+        currentRemediation: null,
+        remediationIndex: 0,
+        remediationScore: 0,
+        remediationHistory: [],
+        selectedRemediationOption: null
     },
     progress: {
         completedQuestions: [],
@@ -2047,6 +2059,7 @@ function createHeader() {
             <button class="nav-btn" onclick="showQuizMenu()">📝 Quiz</button>
             <button class="nav-btn" onclick="showGlossary()">📖 Glossary</button>
             <button class="nav-btn" onclick="showPracticeExam()">📋 Exam</button>
+            <button class="nav-btn" onclick="NotesSystem.showAllNotes()">🗒️ Notes</button>
         </nav>
     `;
     
@@ -2082,11 +2095,90 @@ function showDashboard() {
          (totalLessons + totalSims + totalRem + totalPBQs)) * 100
     ) || 0;
     
+    // Get adaptive learning analytics
+    let analyticsHtml = '';
+    let recommendationsHtml = '';
+    let weakAreasHtml = '';
+    
+    if (window.AdaptiveLearning) {
+        const analytics = window.AdaptiveLearning.getPerformanceAnalytics();
+        
+        // Exam readiness badge
+        const readinessClass = analytics.readiness.score >= 85 ? 'ready' : 
+                              analytics.readiness.score >= 70 ? 'almost' : 
+                              analytics.readiness.score >= 50 ? 'progress' : 'starting';
+        
+        analyticsHtml = `
+            <div style="background: linear-gradient(135deg, #18181b, #27272a); border-radius: 12px; padding: 25px; margin: 30px 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <h3 style="margin: 0 0 10px 0;">🎯 Exam Readiness</h3>
+                        <p style="color: #a1a1aa; margin: 0;">Based on your quiz performance and content completion</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <span class="readiness-badge ${readinessClass}">${analytics.readiness.status}</span>
+                        <div style="font-size: 2rem; font-weight: bold; margin-top: 10px; color: ${
+                            readinessClass === 'ready' ? '#10b981' : 
+                            readinessClass === 'almost' ? '#f59e0b' : '#6366f1'
+                        };">${analytics.readiness.score}%</div>
+                    </div>
+                </div>
+                
+                ${analytics.overall.questionsAnswered > 0 ? `
+                    <div class="analytics-grid" style="margin-top: 20px;">
+                        <div class="analytics-card">
+                            <div class="analytics-value">${analytics.overall.questionsAnswered}</div>
+                            <div class="analytics-label">Questions Answered</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-value" style="color: #10b981;">${analytics.overall.accuracy}%</div>
+                            <div class="analytics-label">Accuracy</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-value">${APP.progress.practiceExamScores?.length || 0}</div>
+                            <div class="analytics-label">Practice Exams</div>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+        
+        // Weak areas warning
+        const weakAreas = APP.progress.weakAreas || [];
+        if (weakAreas.length > 0) {
+            weakAreasHtml = `
+                <div style="background: linear-gradient(135deg, #7f1d1d, #991b1b); border: 1px solid #ef4444; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                    <h3 style="color: #fca5a5; margin: 0 0 10px 0;">⚠️ Weak Areas Detected</h3>
+                    <p style="color: #fecaca; margin: 0 0 15px 0;">
+                        Focus your study on these domains to improve your exam readiness:
+                    </p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        ${weakAreas.map(domain => {
+                            const domainInfo = DOMAINS.find(d => d.id === domain);
+                            return domainInfo ? `
+                                <button class="btn" onclick="showDomainLessons(${domain})" 
+                                        style="background: rgba(0,0,0,0.3); border-color: #ef4444;">
+                                    ${domainInfo.icon} Domain ${domain}: ${domainInfo.name}
+                                </button>
+                            ` : '';
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Study recommendations
+        recommendationsHtml = window.AdaptiveLearning.renderStudyRecommendations();
+    }
+    
     content.innerHTML = `
         <div class="container">
-            <h1 class="page-title">🛡️ Security+ Training Platform v29 Complete</h1>
-            <p style="color: #71717a; margin-bottom: 30px;">Full v28 Features + Enhanced Simulations (260 Decision Points)</p>
+            <h1 class="page-title">🛡️ Security+ Training Platform v32</h1>
+            <p style="color: #71717a; margin-bottom: 30px;">Adaptive Learning + Interactive PBQs + Knowledge Checks</p>
             <p class="page-subtitle">CompTIA Security+ SY0-701 - Complete Training System</p>
+            
+            ${analyticsHtml}
+            ${weakAreasHtml}
             
             <div class="stats-grid">
                 <div class="stat-card">
@@ -2119,14 +2211,21 @@ function showDashboard() {
                 </div>
             </div>
             
+            ${recommendationsHtml}
+            
             <h2 style="margin-top: 40px;">Select Your Learning Path:</h2>
             
             <div class="domain-grid">
-                ${DOMAINS.map(domain => `
+                ${DOMAINS.map(domain => {
+                    const isWeak = APP.progress.weakAreas?.includes(domain.id);
+                    return `
                     <div class="domain-card" onclick="showDomain(${domain.id})" 
-                         style="border-left: 4px solid ${domain.color};">
+                         style="border-left: 4px solid ${domain.color}; ${isWeak ? 'box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);' : ''}">
                         <div style="font-size: 2rem; margin-bottom: 10px;">${domain.icon}</div>
-                        <div style="font-size: 1.2rem; font-weight: bold;">Domain ${domain.id}</div>
+                        <div style="font-size: 1.2rem; font-weight: bold;">
+                            Domain ${domain.id}
+                            ${isWeak ? '<span style="color: #ef4444; font-size: 0.8rem; margin-left: 8px;">⚠️ FOCUS</span>' : ''}
+                        </div>
                         <div style="color: #a1a1aa; margin: 10px 0;">${domain.name}</div>
                         <div style="font-size: 0.9rem; color: #71717a; line-height: 1.8;">
                             <div>📚 ${domain.lessons} Lessons</div>
@@ -2138,7 +2237,7 @@ function showDashboard() {
                             </div>
                         </div>
                     </div>
-                `).join('')}
+                `}).join('')}
                 
                 <div class="domain-card" onclick="showPracticeExam()" 
                      style="border-left: 4px solid #ec4899;">
@@ -2147,7 +2246,7 @@ function showDashboard() {
                     <div style="color: #a1a1aa; margin: 10px 0;">Full exam simulation</div>
                     <div style="font-size: 0.9rem; color: #71717a;">
                         <div>90 Questions</div>
-                        <div>5-6 PBQs</div>
+                        <div>🧠 Adaptive</div>
                         <div>90 Minutes</div>
                         <div style="margin-top: 10px; font-weight: bold;">
                             Passing: 750/900
@@ -2156,11 +2255,35 @@ function showDashboard() {
                 </div>
             </div>
             
+            <!-- Data Management -->
+            <div style="background: #18181b; border-radius: 12px; padding: 20px; margin-top: 30px;">
+                <h3 style="margin: 0 0 15px 0; color: #a1a1aa;">📊 Data Management</h3>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <button class="btn" onclick="exportAllData()">
+                        📤 Export Progress
+                    </button>
+                    <button class="btn" onclick="document.getElementById('import-file-input').click()">
+                        📥 Import Progress
+                    </button>
+                    <button class="btn" onclick="NotesSystem.showAllNotes()" style="border-color: #6366f1;">
+                        🗒️ My Notes (${window.NotesSystem ? window.NotesSystem.getAllNotes().length : 0})
+                    </button>
+                    <button class="btn" onclick="clearAllProgress()" style="border-color: #ef4444; color: #ef4444;">
+                        🗑️ Reset Progress
+                    </button>
+                </div>
+                <input type="file" id="import-file-input" accept=".json" style="display: none;"
+                       onchange="if(this.files[0]){ const r = new FileReader(); r.onload = (e) => importAllData(e.target.result); r.readAsText(this.files[0]); }">
+            </div>
+            
             <div class="success-message">
                 <p style="color: #10b981; font-weight: bold;">✅ Platform Loaded Successfully!</p>
                 <p style="color: #a1a1aa; margin-top: 10px;">
                     All ${totalLessons} lessons, ${totalSims} simulations, ${totalRem} remediation scenarios, 
                     ${totalPBQs} PBQs, ${totalQuestions} questions, and ${totalGlossary}+ glossary terms are ready.
+                </p>
+                <p style="color: #6366f1; margin-top: 5px; font-size: 0.9rem;">
+                    🧠 Adaptive learning adjusts question selection based on your performance
                 </p>
             </div>
         </div>
@@ -2393,11 +2516,12 @@ This knowledge is critical for protecting organizational assets.`
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 20px; color: #71717a; margin-bottom: 20px;">
+                <div style="display: flex; gap: 20px; color: #71717a; margin-bottom: 20px; align-items: center; flex-wrap: wrap;">
                     ${lesson.objectives ? `<span>📍 Objectives: ${lesson.objectives.join(', ')}</span>` : ''}
                     ${lesson.duration ? `<span>⏱️ ${lesson.duration}</span>` : ''}
                     ${lesson.difficulty ? `<span class="difficulty-badge difficulty-${lesson.difficulty}">${lesson.difficulty}</span>` : ''}
                     ${isCompleted ? '<span style="color: #10b981;">✅ Completed</span>' : ''}
+                    ${window.NotesSystem ? window.NotesSystem.renderNoteButton('lesson', lessonId, lesson.title) : ''}
                 </div>
                 
                 <!-- Lesson Navigation Bar -->
@@ -2439,12 +2563,60 @@ This knowledge is critical for protecting organizational assets.`
                     </div>
                 ` : ''}
                 
-                ${lessonContent.sections ? lessonContent.sections.map(section => `
+                <!-- Knowledge Check Progress Indicator -->
+                ${lessonContent.sections && lessonContent.sections.some(s => s.knowledgeCheck || s.knowledge_check) ? `
+                    <div id="kc-progress" class="kc-progress" style="margin-bottom: 20px;">
+                        <span class="kc-progress-label">Knowledge Checks:</span>
+                        <span class="kc-progress-value">0/0 complete</span>
+                    </div>
+                ` : ''}
+                
+                ${lessonContent.sections ? lessonContent.sections.map((section, sectionIndex) => {
+                    const sectionId = section.section_id || section.sectionId || `section-${sectionIndex}`;
+                    const knowledgeCheck = section.knowledgeCheck || section.knowledge_check;
+                    
+                    return `
                     <div class="lesson-section">
                         <h3>${escapeHtml(section.title)}</h3>
-                        <div class="lesson-content" style="white-space: pre-line;">${formatContent(section.content)}</div>
+                        <div class="lesson-content" style="white-space: pre-line;">${escapeHtml(section.content || '')}</div>
+                        
+                        ${section.keyPoints || section.key_points ? `
+                            <div style="background: #1e1e2e; border-radius: 8px; padding: 15px; margin-top: 15px;">
+                                <strong style="color: #6366f1;">Key Points:</strong>
+                                <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
+                                    ${(section.keyPoints || section.key_points).map(p => `<li>${escapeHtml(p)}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        
+                        ${section.examTips || section.exam_tips ? `
+                            <div style="background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 8px; padding: 15px; margin-top: 15px;">
+                                <strong style="color: #a5b4fc;">💡 Exam Tip:</strong>
+                                <ul style="margin: 10px 0 0 20px; line-height: 1.8; color: #c7d2fe;">
+                                    ${(section.examTips || section.exam_tips).map(t => `<li>${escapeHtml(t)}</li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        
+                        ${section.realWorldExample || section.real_world_example ? `
+                            <div style="background: #18181b; border-left: 4px solid #10b981; border-radius: 0 8px 8px 0; padding: 15px; margin-top: 15px;">
+                                <strong style="color: #10b981;">🏢 Real-World Example:</strong>
+                                <p style="margin-top: 10px; color: #a1a1aa;">
+                                    ${escapeHtml((section.realWorldExample || section.real_world_example).scenario || '')}
+                                </p>
+                                ${(section.realWorldExample || section.real_world_example).company ? `
+                                    <p style="margin-top: 5px; font-size: 0.9rem; color: #71717a;">
+                                        Company: ${escapeHtml((section.realWorldExample || section.real_world_example).company)}
+                                    </p>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                        
+                        ${knowledgeCheck ? (window.AdaptiveLearning 
+                            ? window.AdaptiveLearning.renderKnowledgeCheck(knowledgeCheck, sectionId, sectionIndex)
+                            : '') : ''}
                     </div>
-                `).join('') : ''}
+                `}).join('') : ''}
                 
                 ${lessonContent.keyPoints ? `
                     <div class="lesson-section">
@@ -2506,6 +2678,15 @@ This knowledge is critical for protecting organizational assets.`
     
     APP.state.currentLesson = lessonId;
     APP.state.currentView = 'lesson-viewer';
+    
+    // Initialize knowledge checks if module is available
+    if (window.AdaptiveLearning && lessonContent.sections) {
+        window.AdaptiveLearning.initKnowledgeChecks({
+            ...lesson,
+            content: lessonContent
+        });
+        window.AdaptiveLearning.updateKnowledgeCheckProgress();
+    }
 }
 
 // New function to mark complete and go to next
@@ -2646,7 +2827,7 @@ async function startSimulation_OLD(simId) {
             showSimulationStep();
         }
     } else {
-        // Use basic v28 display
+        // Use basic v30 display
         showSimulationStep();
     }
 }
@@ -2893,22 +3074,54 @@ function showAllRemediation() {
 
 function startRemediation(remId) {
     const remediation = ALL_REMEDIATION.find(r => r.id === remId);
-    if (!remediation) return;
+    if (!remediation) {
+        console.error('Remediation not found:', remId);
+        return;
+    }
     
     const content = document.getElementById('content');
+    const hasRichContent = remediation.decisionPoints && remediation.decisionPoints.length > 0;
+    const focusAreas = Array.isArray(remediation.focus) ? remediation.focus.join(', ') : (remediation.focus || '');
+    
+    // If we have rich content (decision points from external JSON), start interactive remediation
+    if (hasRichContent) {
+        startInteractiveRemediation(remediation);
+        return;
+    }
+    
+    // Otherwise show basic remediation overview
     content.innerHTML = `
         <div class="container">
             <button class="back-btn" onclick="showAllRemediation()">← Back</button>
             
             <div class="simulation-container">
-                <h1>🔧 ${remediation.title}</h1>
-                ${remediation.focus ? `<p style="color: #71717a;">Focus Areas: ${remediation.focus}</p>` : ''}
+                <h1>🔧 ${escapeHtml(remediation.title)}</h1>
+                ${focusAreas ? `<p style="color: #71717a;">Focus Areas: ${escapeHtml(focusAreas)}</p>` : ''}
+                
+                ${remediation.overview ? `
+                    <div style="background: #18181b; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                        <h3 style="color: #6366f1;">Scenario Overview</h3>
+                        <p style="margin-top: 10px;">${escapeHtml(remediation.overview.situation || '')}</p>
+                        ${remediation.overview.your_role ? `<p style="color: #a1a1aa; margin-top: 10px;"><strong>Your Role:</strong> ${escapeHtml(remediation.overview.your_role)}</p>` : ''}
+                        ${remediation.overview.mission ? `<p style="color: #a1a1aa; margin-top: 10px;"><strong>Mission:</strong> ${escapeHtml(remediation.overview.mission)}</p>` : ''}
+                    </div>
+                ` : ''}
+                
+                ${remediation.companyContext ? `
+                    <div style="background: #27272a; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                        <h3>Company Context</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <div><strong>Company:</strong> ${escapeHtml(remediation.companyContext.name || 'N/A')}</div>
+                            <div><strong>Industry:</strong> ${escapeHtml(remediation.companyContext.industry || 'N/A')}</div>
+                            <div><strong>Size:</strong> ${escapeHtml(remediation.companyContext.size || 'N/A')}</div>
+                        </div>
+                    </div>
+                ` : ''}
                 
                 <div style="margin-top: 20px;">
                     <div class="simulation-step">
                         <h3>Remediation Overview</h3>
-                        <p>This targeted remediation scenario helps you strengthen weak areas and reinforce key concepts. 
-                        Based on quiz performance and identified knowledge gaps, this module provides focused practice.</p>
+                        <p>${escapeHtml(remediation.remediationFocus || 'This targeted remediation scenario helps you strengthen weak areas and reinforce key concepts. Based on quiz performance and identified knowledge gaps, this module provides focused practice.')}</p>
                     </div>
                     
                     <div class="simulation-step" style="margin-top: 20px;">
@@ -2922,31 +3135,24 @@ function startRemediation(remId) {
                         </ul>
                     </div>
                     
-                    <div style="background: #27272a; border-radius: 8px; padding: 20px; margin: 20px 0;">
-                        <h3>Practice Activities</h3>
-                        <ul style="margin-left: 20px; line-height: 2;">
-                            <li>📖 Review fundamental concepts</li>
-                            <li>✍️ Work through practice problems</li>
-                            <li>🎯 Apply knowledge to scenarios</li>
-                            <li>📝 Test understanding with questions</li>
-                            <li>🔄 Reinforce through repetition</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="simulation-step" style="margin-top: 20px;">
-                        <h3>Key Learning Points</h3>
-                        <p style="color: #a1a1aa;">
-                        ${remediation.focus ? 
-                            `This remediation specifically addresses: ${remediation.focus}. 
-                            Focus on understanding not just the 'what' but the 'why' behind each concept.` :
-                            `Focus on understanding the core principles and their practical applications. 
-                            Remember that Security+ tests both theoretical knowledge and practical judgment.`
-                        }
-                        </p>
-                    </div>
+                    ${remediation.artifacts && remediation.artifacts.length > 0 ? `
+                        <div style="background: #1e1e2e; border: 1px solid #6366f1; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                            <h3 style="color: #6366f1;">📚 Reference Materials Available</h3>
+                            <div style="margin-top: 15px;">
+                                ${remediation.artifacts.map(art => `
+                                    <div style="background: #27272a; border-radius: 6px; padding: 15px; margin-bottom: 10px;">
+                                        <strong>${escapeHtml(art.title || 'Reference')}</strong>
+                                        <p style="color: #a1a1aa; font-size: 0.9rem; margin-top: 5px;">
+                                            ${escapeHtml(art.type || 'guide')} - Available during remediation
+                                        </p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
                     
                     <div style="text-align: center; margin-top: 30px;">
-                        <button class="btn btn-primary" onclick="completeRemediation('${remId}')">
+                        <button class="btn btn-primary" onclick="completeRemediation('${escapeHtml(remId)}')">
                             Complete Remediation →
                         </button>
                     </div>
@@ -2954,6 +3160,204 @@ function startRemediation(remId) {
             </div>
         </div>
     `;
+}
+
+// Interactive remediation with decision points
+function startInteractiveRemediation(remediation) {
+    APP.state.currentRemediation = remediation;
+    APP.state.remediationIndex = 0;
+    APP.state.remediationScore = 0;
+    APP.state.remediationHistory = [];
+    
+    showRemediationDecisionPoint();
+}
+
+function showRemediationDecisionPoint() {
+    const remediation = APP.state.currentRemediation;
+    if (!remediation || !remediation.decisionPoints) {
+        completeRemediation(remediation?.id);
+        return;
+    }
+    
+    const dp = remediation.decisionPoints[APP.state.remediationIndex];
+    if (!dp) {
+        showRemediationResults();
+        return;
+    }
+    
+    const content = document.getElementById('content');
+    const currentNum = APP.state.remediationIndex + 1;
+    const totalDPs = remediation.decisionPoints.length;
+    
+    content.innerHTML = `
+        <div class="container">
+            <div class="simulation-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: #f59e0b;">🔧 ${escapeHtml(remediation.title)}</h2>
+                    <span style="color: #a1a1aa;">Question ${currentNum} of ${totalDPs}</span>
+                </div>
+                
+                <div style="background: #27272a; border-radius: 8px; padding: 4px; margin-bottom: 20px;">
+                    <div style="background: linear-gradient(to right, #f59e0b, #ef4444); 
+                                width: ${(currentNum / totalDPs) * 100}%; 
+                                height: 8px; border-radius: 4px; transition: width 0.3s;">
+                    </div>
+                </div>
+                
+                <div class="simulation-step">
+                    <h3>${escapeHtml(dp.title || 'Decision Point')}</h3>
+                    <p style="margin-top: 15px; line-height: 1.8;">${escapeHtml(dp.context || dp.question || '')}</p>
+                    ${dp.question && dp.context ? `<p style="margin-top: 15px; font-weight: bold; color: #6366f1;">${escapeHtml(dp.question)}</p>` : ''}
+                </div>
+                
+                <div id="remediation-options" style="margin-top: 20px;">
+                    ${dp.options.map((opt, idx) => `
+                        <div class="quiz-option" onclick="selectRemediationOption('${escapeHtml(opt.id)}')" 
+                             data-option="${escapeHtml(opt.id)}" style="cursor: pointer;">
+                            <span style="margin-right: 15px; font-weight: bold;">${opt.id.toUpperCase()}.</span>
+                            ${escapeHtml(opt.text)}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div id="remediation-feedback" style="display: none;"></div>
+                
+                <div style="margin-top: 30px; display: flex; justify-content: space-between;">
+                    <button class="btn" onclick="showAllRemediation()">Exit</button>
+                    <button class="btn btn-primary" id="rem-submit-btn" onclick="submitRemediationAnswer()" disabled>
+                        Submit Answer
+                    </button>
+                    <button class="btn btn-primary" id="rem-next-btn" onclick="nextRemediationQuestion()" style="display: none;">
+                        Next Question →
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    APP.state.selectedRemediationOption = null;
+}
+
+function selectRemediationOption(optionId) {
+    document.querySelectorAll('#remediation-options .quiz-option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    
+    const selected = document.querySelector(`[data-option="${optionId}"]`);
+    if (selected) {
+        selected.classList.add('selected');
+    }
+    
+    APP.state.selectedRemediationOption = optionId;
+    document.getElementById('rem-submit-btn').disabled = false;
+}
+
+function submitRemediationAnswer() {
+    if (!APP.state.selectedRemediationOption) return;
+    
+    const remediation = APP.state.currentRemediation;
+    const dp = remediation.decisionPoints[APP.state.remediationIndex];
+    const selected = dp.options.find(o => o.id === APP.state.selectedRemediationOption);
+    
+    if (!selected) return;
+    
+    const isCorrect = selected.isCorrect || selected.is_correct;
+    const points = selected.points || (isCorrect ? 25 : 5);
+    APP.state.remediationScore += points;
+    
+    // Record in history
+    APP.state.remediationHistory.push({
+        questionIndex: APP.state.remediationIndex,
+        selectedOption: selected.id,
+        isCorrect: isCorrect,
+        points: points
+    });
+    
+    // Disable options
+    document.querySelectorAll('#remediation-options .quiz-option').forEach(opt => {
+        opt.classList.add('disabled');
+        opt.onclick = null;
+        
+        const optId = opt.getAttribute('data-option');
+        const option = dp.options.find(o => o.id === optId);
+        if (option) {
+            if (option.isCorrect || option.is_correct) {
+                opt.classList.add('correct');
+            } else if (optId === APP.state.selectedRemediationOption && !isCorrect) {
+                opt.classList.add('incorrect');
+            }
+        }
+    });
+    
+    // Show feedback
+    const feedbackDiv = document.getElementById('remediation-feedback');
+    feedbackDiv.style.display = 'block';
+    feedbackDiv.innerHTML = `
+        <div class="quiz-feedback ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}">
+            <strong>${isCorrect ? '✅ Correct!' : '❌ Incorrect'}</strong><br>
+            ${escapeHtml(selected.feedback || 'Review this concept for better understanding.')}
+            ${selected.consequence ? `<br><em style="color: #a1a1aa;">Consequence: ${escapeHtml(selected.consequence)}</em>` : ''}
+        </div>
+    `;
+    
+    // Switch buttons
+    document.getElementById('rem-submit-btn').style.display = 'none';
+    document.getElementById('rem-next-btn').style.display = 'block';
+}
+
+function nextRemediationQuestion() {
+    APP.state.remediationIndex++;
+    APP.state.selectedRemediationOption = null;
+    showRemediationDecisionPoint();
+}
+
+function showRemediationResults() {
+    const remediation = APP.state.currentRemediation;
+    const totalDPs = remediation.decisionPoints.length;
+    const correctCount = APP.state.remediationHistory.filter(h => h.isCorrect).length;
+    const percentage = Math.round((correctCount / totalDPs) * 100);
+    const passed = percentage >= 70;
+    
+    const content = document.getElementById('content');
+    content.innerHTML = `
+        <div class="container">
+            <div class="quiz-container" style="text-align: center;">
+                <h1>${passed ? '🎉 Remediation Complete!' : '📚 Keep Practicing!'}</h1>
+                
+                <div style="font-size: 4rem; margin: 30px 0; color: ${passed ? '#10b981' : '#f59e0b'};">
+                    ${percentage}%
+                </div>
+                
+                <p style="font-size: 1.2rem; margin-bottom: 20px;">
+                    You got ${correctCount} out of ${totalDPs} questions correct
+                </p>
+                
+                <p style="color: #a1a1aa; margin-bottom: 30px;">
+                    ${passed 
+                        ? 'Great progress! You\'ve strengthened your understanding of these concepts.' 
+                        : 'Consider reviewing the lesson materials and trying again.'}
+                </p>
+                
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="startRemediation('${escapeHtml(remediation.id)}')">
+                        Try Again
+                    </button>
+                    <button class="btn" onclick="showAllRemediation()">
+                        All Remediation
+                    </button>
+                    <button class="btn" onclick="showDashboard()">
+                        Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Mark as complete if passed
+    if (passed && !APP.progress.completedRemediation.includes(remediation.id)) {
+        APP.progress.completedRemediation.push(remediation.id);
+        saveProgress();
+    }
 }
 
 function completeRemediation(remId) {
@@ -2967,12 +3371,51 @@ function completeRemediation(remId) {
 function showAllPBQs() {
     const content = document.getElementById('content');
     
+    // List of interactive PBQ IDs (ones that have full scenarios in PBQ_SCENARIOS)
+    const interactivePBQs = [
+        // Domain 1 (6 PBQs)
+        'PBQ-D1-001', 'PBQ-D1-002', 'PBQ-D1-003', 'PBQ-D1-004', 'PBQ-D1-005', 'PBQ-D1-006',
+        // Domain 2 (6 PBQs)
+        'PBQ-D2-001', 'PBQ-D2-002', 'PBQ-D2-003', 'PBQ-D2-004', 'PBQ-D2-005', 'PBQ-D2-006',
+        // Domain 3 (6 PBQs)
+        'PBQ-D3-001', 'PBQ-D3-002', 'PBQ-D3-003', 'PBQ-D3-004', 'PBQ-D3-005', 'PBQ-D3-006',
+        // Domain 4 (6 PBQs)
+        'PBQ-D4-001', 'PBQ-D4-002', 'PBQ-D4-003', 'PBQ-D4-004', 'PBQ-D4-005', 'PBQ-D4-006',
+        // Domain 5 (6 PBQs)
+        'PBQ-D5-001', 'PBQ-D5-002', 'PBQ-D5-003', 'PBQ-D5-004', 'PBQ-D5-005', 'PBQ-D5-006'
+    ];
+    
+    const interactiveCount = interactivePBQs.length;
+    
     content.innerHTML = `
         <div class="container">
             <button class="back-btn" onclick="showDashboard()">← Back</button>
             
-            <h1 class="page-title">🖥️ All ${ALL_PBQS.length} Performance-Based Questions</h1>
-            <p class="page-subtitle">Hands-on exam simulations</p>
+            <h1 class="page-title">🖥️ Performance-Based Questions</h1>
+            <p class="page-subtitle">Hands-on exam simulations - just like the real CompTIA exam</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 25px 0;">
+                <div style="background: linear-gradient(135deg, #064e3b, #065f46); padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold;">${interactiveCount}</div>
+                    <div style="color: #a1a1aa;">Interactive PBQs</div>
+                </div>
+                <div style="background: #18181b; padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold;">${ALL_PBQS.length}</div>
+                    <div style="color: #a1a1aa;">Total PBQs</div>
+                </div>
+                <div style="background: #18181b; padding: 20px; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold;">${APP.progress.completedPBQs.length}</div>
+                    <div style="color: #a1a1aa;">Completed</div>
+                </div>
+            </div>
+            
+            <div style="background: linear-gradient(135deg, #1e1b4b, #312e81); border: 1px solid #6366f1; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+                <h3 style="color: #a5b4fc; margin-bottom: 10px;">🎯 Interactive PBQs Available!</h3>
+                <p style="color: #c7d2fe; line-height: 1.6;">
+                    PBQs marked with <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">INTERACTIVE</span> 
+                    feature full drag-drop, click-to-identify, configuration, matching, and analysis interfaces - just like the real Security+ exam!
+                </p>
+            </div>
             
             ${DOMAINS.map(domain => {
                 const domainPBQs = ALL_PBQS.filter(p => p.domain === domain.id);
@@ -2980,23 +3423,28 @@ function showAllPBQs() {
                 
                 return `
                     <h2 style="margin-top: 30px; color: ${domain.color};">
-                        ${domain.icon} Domain ${domain.id} (${domainPBQs.length} PBQs)
+                        ${domain.icon} Domain ${domain.id}: ${domain.name}
                     </h2>
                     <div class="lesson-grid">
                         ${domainPBQs.map(pbq => {
                             const isCompleted = APP.progress.completedPBQs.includes(pbq.id);
+                            const isInteractive = interactivePBQs.includes(pbq.id);
                             return `
                                 <div class="lesson-card ${isCompleted ? 'completed' : ''}" 
+                                     style="${isInteractive ? 'border-color: #10b981; background: linear-gradient(135deg, #18181b, #1a2e1a);' : ''}"
                                      onclick="startPBQ('${pbq.id}')">
                                     <div>
-                                        <div style="font-weight: bold;">${pbq.title}</div>
+                                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                            <span style="font-weight: bold;">${escapeHtml(pbq.title)}</span>
+                                            ${isInteractive ? '<span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">INTERACTIVE</span>' : ''}
+                                        </div>
                                         <div style="color: #71717a; font-size: 0.9rem; margin-top: 5px;">
-                                            Type: ${pbq.type}
-                                            • <span class="difficulty-badge difficulty-${pbq.difficulty}">${pbq.difficulty}</span>
+                                            Type: ${escapeHtml(pbq.type)}
+                                            • <span class="difficulty-badge difficulty-${pbq.difficulty}">${escapeHtml(pbq.difficulty)}</span>
                                         </div>
                                     </div>
-                                    <button class="btn ${isCompleted ? 'btn-success' : 'btn-primary'}">
-                                        ${isCompleted ? '✅ Review' : 'Start →'}
+                                    <button class="btn ${isCompleted ? 'btn-success' : isInteractive ? 'btn-primary' : ''}">
+                                        ${isCompleted ? '✅ Review' : isInteractive ? 'Start →' : 'Preview'}
                                     </button>
                                 </div>
                             `;
@@ -3012,174 +3460,63 @@ function showAllPBQs() {
 }
 
 function startPBQ(pbqId) {
+    // Use the interactive PBQ Engine if available and has this scenario
+    if (window.PBQEngine && window.PBQ_SCENARIOS && window.PBQ_SCENARIOS[pbqId]) {
+        console.log(`🎯 Starting interactive PBQ: ${pbqId}`);
+        window.PBQEngine.start(pbqId);
+        return;
+    }
+    
+    // Fall back to basic PBQ display for scenarios not yet in the engine
     const pbq = ALL_PBQS.find(p => p.id === pbqId);
     if (!pbq) return;
     
     const content = document.getElementById('content');
-    
-    // Generate type-specific content
-    const pbqTypeContent = {
-        'drag-drop': {
-            title: 'Drag and Drop Configuration',
-            description: 'Arrange items in the correct order or match them to appropriate categories.',
-            interface: `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
-                    <div>
-                        <h4>Available Items:</h4>
-                        <div class="drop-zone" style="min-height: 200px; background: #27272a;">
-                            <div class="drag-item">Security Control A</div>
-                            <div class="drag-item">Security Control B</div>
-                            <div class="drag-item">Security Control C</div>
-                            <div class="drag-item">Security Control D</div>
-                        </div>
-                    </div>
-                    <div>
-                        <h4>Target Configuration:</h4>
-                        <div class="drop-zone" style="min-height: 200px;">
-                            <p style="color: #71717a; text-align: center; padding: 20px;">
-                                Drag items here in the correct order
-                            </p>
-                        </div>
-                    </div>
-                </div>`
-        },
-        'hotspot': {
-            title: 'Identify Security Issues',
-            description: 'Click on areas of concern in the network diagram or interface.',
-            interface: `
-                <div style="background: #27272a; border-radius: 8px; padding: 40px; text-align: center; min-height: 300px; position: relative;">
-                    <div style="border: 2px solid #3f3f46; border-radius: 8px; padding: 20px; margin: 20px auto; max-width: 400px;">
-                        <h4>Network Topology</h4>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px;">
-                            <div style="background: #18181b; padding: 10px; border-radius: 4px;">Internet</div>
-                            <div style="background: #18181b; padding: 10px; border-radius: 4px;">Firewall</div>
-                            <div style="background: #18181b; padding: 10px; border-radius: 4px;">DMZ</div>
-                            <div style="background: #18181b; padding: 10px; border-radius: 4px;">Router</div>
-                            <div style="background: #18181b; padding: 10px; border-radius: 4px;">Switch</div>
-                            <div style="background: #18181b; padding: 10px; border-radius: 4px;">Servers</div>
-                        </div>
-                    </div>
-                    <p style="color: #71717a; margin-top: 20px;">
-                        Click on vulnerable points in the network topology above.
-                    </p>
-                </div>`
-        },
-        'configuration': {
-            title: 'Configure Security Settings',
-            description: 'Set the appropriate values for security configuration.',
-            interface: `
-                <div style="background: #27272a; border-radius: 8px; padding: 20px;">
-                    <h4>Security Configuration Panel</h4>
-                    <div style="margin-top: 20px; display: grid; gap: 15px;">
-                        <div>
-                            <label>Password Minimum Length: </label>
-                            <input type="number" value="8" min="6" max="32" style="background: #18181b; color: white; padding: 5px; border-radius: 4px; border: 1px solid #3f3f46;">
-                        </div>
-                        <div>
-                            <label>Account Lockout Threshold: </label>
-                            <input type="number" value="3" min="1" max="10" style="background: #18181b; color: white; padding: 5px; border-radius: 4px; border: 1px solid #3f3f46;"> attempts
-                        </div>
-                        <div>
-                            <label>Session Timeout: </label>
-                            <input type="number" value="15" min="5" max="60" style="background: #18181b; color: white; padding: 5px; border-radius: 4px; border: 1px solid #3f3f46;"> minutes
-                        </div>
-                        <div>
-                            <label>Password Complexity: </label>
-                            <div style="margin-top: 5px;">
-                                <input type="checkbox" checked> Uppercase Letters
-                                <input type="checkbox" checked> Lowercase Letters
-                                <input type="checkbox"> Numbers
-                                <input type="checkbox"> Special Characters
-                            </div>
-                        </div>
-                    </div>
-                </div>`
-        },
-        'matching': {
-            title: 'Match Security Concepts',
-            description: 'Connect related items by matching them correctly.',
-            interface: `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 20px;">
-                    <div>
-                        <h4>Terms:</h4>
-                        <div style="display: grid; gap: 10px;">
-                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">1. Confidentiality</div>
-                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">2. Integrity</div>
-                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">3. Availability</div>
-                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">4. Non-repudiation</div>
-                        </div>
-                    </div>
-                    <div>
-                        <h4>Definitions:</h4>
-                        <div style="display: grid; gap: 10px;">
-                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">A. Ensures data accuracy</div>
-                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">B. Prevents denial of actions</div>
-                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">C. Ensures authorized access</div>
-                            <div style="background: #27272a; padding: 10px; border-radius: 4px;">D. Protects information privacy</div>
-                        </div>
-                    </div>
-                </div>`
-        },
-        'simulation': {
-            title: 'Interactive Security Simulation',
-            description: 'Navigate through a realistic security scenario.',
-            interface: `
-                <div style="background: #27272a; border-radius: 8px; padding: 20px;">
-                    <h4>Incident Response Simulation</h4>
-                    <div style="margin-top: 20px;">
-                        <div class="simulation-step">
-                            <p><strong>Alert:</strong> Suspicious network activity detected on Server-DB-01</p>
-                            <p style="margin-top: 10px;">What is your immediate action?</p>
-                            <div style="display: grid; gap: 10px; margin-top: 15px;">
-                                <button class="btn">Isolate the affected system</button>
-                                <button class="btn">Gather more information</button>
-                                <button class="btn">Notify management</button>
-                                <button class="btn">Begin forensic imaging</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`
-        }
-    };
-    
-    // Get content for this PBQ type, or use a default
-    const typeContent = pbqTypeContent[pbq.type] || pbqTypeContent['simulation'];
     
     content.innerHTML = `
         <div class="container">
             <button class="back-btn" onclick="showAllPBQs()">← Back</button>
             
             <div class="pbq-container">
-                <h1>🖥️ ${pbq.title}</h1>
+                <h1>🖥️ ${escapeHtml(pbq.title)}</h1>
                 <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-                    <span>Type: ${pbq.type}</span>
-                    <span class="difficulty-badge difficulty-${pbq.difficulty}">${pbq.difficulty}</span>
+                    <span>Type: ${escapeHtml(pbq.type)}</span>
+                    <span class="difficulty-badge difficulty-${pbq.difficulty}">${escapeHtml(pbq.difficulty)}</span>
                 </div>
                 
-                <div class="pbq-scenario">
-                    <h3>Scenario</h3>
-                    <p>${pbq.scenario || `You are tasked with ${typeContent.description} This Performance-Based Question tests your practical knowledge of security concepts and your ability to apply them in real-world situations.`}</p>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <h3>${typeContent.title}</h3>
-                    ${typeContent.interface}
-                </div>
-                
-                <div style="background: #1e1e2e; border-left: 4px solid #6366f1; padding: 15px; margin-top: 20px;">
-                    <p style="color: #a1a1aa;">
-                        <strong>Instructions:</strong> In the actual exam, you would interact with this interface to demonstrate your knowledge. 
-                        ${pbq.type === 'drag-drop' ? 'Drag items to arrange them correctly.' :
-                          pbq.type === 'hotspot' ? 'Click on the areas that represent security concerns.' :
-                          pbq.type === 'configuration' ? 'Configure the settings according to best practices.' :
-                          pbq.type === 'matching' ? 'Match each term with its correct definition.' :
-                          'Complete the simulation by making appropriate security decisions.'}
-                    </p>
+                <div class="pbq-scenario" style="background: #18181b; border-left: 4px solid #f59e0b; padding: 20px; border-radius: 0 8px 8px 0;">
+                    <h3 style="color: #10b981;">✅ All 30 Interactive PBQs Available!</h3>
+                    <p style="margin-top: 15px;">All Performance-Based Questions are now fully interactive.</p>
+                    <p style="margin-top: 10px; color: #a1a1aa;">PBQ types include:</p>
+                    <ul style="margin: 15px 0 0 20px; line-height: 1.8; columns: 2;">
+                        <li>Firewall Rule Configuration</li>
+                        <li>Access Control Setup</li>
+                        <li>MFA Configuration</li>
+                        <li>Encryption Matching</li>
+                        <li>Zero Trust Architecture</li>
+                        <li>Physical Security Audit</li>
+                        <li>Network Attack Vectors</li>
+                        <li>Phishing Email Analysis</li>
+                        <li>Malware Classification</li>
+                        <li>Incident Timeline</li>
+                        <li>Vulnerability Prioritization</li>
+                        <li>Cloud Security Config</li>
+                        <li>Cryptography Matching</li>
+                        <li>Wireless Security Audit</li>
+                        <li>SIEM Log Analysis</li>
+                        <li>Incident Response Steps</li>
+                        <li>Digital Forensics</li>
+                        <li>IAM Configuration</li>
+                        <li>Risk Assessment Matrix</li>
+                        <li>Compliance Mapping</li>
+                        <li>Vendor Risk Assessment</li>
+                        <li>Policy Development</li>
+                    </ul>
                 </div>
                 
                 <div style="margin-top: 30px; text-align: center;">
-                    <button class="btn btn-primary" onclick="completePBQ('${pbq.id}')">
-                        Submit Answer →
+                    <button class="btn btn-primary" onclick="showAllPBQs()">
+                        ← View All PBQs
                     </button>
                 </div>
             </div>
@@ -3241,8 +3578,21 @@ function showQuizMenu() {
 }
 
 function startDomainQuiz(domainId) {
-    const domainQuestions = ACTUAL_QUESTIONS.filter(q => q.domain === domainId);
-    const quizQuestions = domainQuestions.slice(0, 10);
+    let quizQuestions;
+    
+    // Use adaptive selection if available
+    if (window.AdaptiveLearning) {
+        quizQuestions = window.AdaptiveLearning.selectAdaptiveQuestions(
+            ACTUAL_QUESTIONS, 
+            10, 
+            domainId
+        );
+        console.log(`📊 Starting adaptive Domain ${domainId} quiz with ${quizQuestions.length} questions`);
+    } else {
+        // Fallback to basic selection
+        const domainQuestions = ACTUAL_QUESTIONS.filter(q => q.domain === domainId);
+        quizQuestions = domainQuestions.sort(() => Math.random() - 0.5).slice(0, 10);
+    }
     
     if (quizQuestions.length === 0) {
         alert('No questions available for this domain');
@@ -3253,16 +3603,32 @@ function startDomainQuiz(domainId) {
     APP.state.currentQuestionIndex = 0;
     APP.state.score = 0;
     APP.state.quizActive = true;
+    APP.state.currentQuizDomain = domainId;
     
     showQuizQuestion();
 }
 
 function startRandomQuiz() {
-    const shuffled = [...ACTUAL_QUESTIONS].sort(() => Math.random() - 0.5);
-    APP.state.currentQuizQuestions = shuffled.slice(0, 10);
+    let quizQuestions;
+    
+    // Use adaptive selection if available
+    if (window.AdaptiveLearning) {
+        quizQuestions = window.AdaptiveLearning.selectAdaptiveQuestions(
+            ACTUAL_QUESTIONS, 
+            10, 
+            null // All domains
+        );
+        console.log(`📊 Starting adaptive random quiz with ${quizQuestions.length} questions`);
+    } else {
+        // Fallback to basic random selection
+        quizQuestions = [...ACTUAL_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 10);
+    }
+    
+    APP.state.currentQuizQuestions = quizQuestions;
     APP.state.currentQuestionIndex = 0;
     APP.state.score = 0;
     APP.state.quizActive = true;
+    APP.state.currentQuizDomain = null;
     
     showQuizQuestion();
 }
@@ -3681,33 +4047,45 @@ function showPracticeExam() {
 }
 
 function startFullExam() {
-    // Create exam with proper distribution
-    const examQuestions = [];
+    let examQuestions;
     
-    DOMAINS.forEach(domain => {
-        const domainQuestions = ACTUAL_QUESTIONS.filter(q => q.domain === domain.id);
-        const numQuestions = Math.round(domain.weight * 90);
-        const selected = domainQuestions
-            .sort(() => Math.random() - 0.5)
-            .slice(0, Math.min(numQuestions, domainQuestions.length));
-        examQuestions.push(...selected);
-    });
-    
-    // Ensure we have 90 questions
-    while (examQuestions.length < 90 && examQuestions.length < ACTUAL_QUESTIONS.length) {
-        const randomQ = ACTUAL_QUESTIONS[Math.floor(Math.random() * ACTUAL_QUESTIONS.length)];
-        if (!examQuestions.includes(randomQ)) {
-            examQuestions.push(randomQ);
+    // Use adaptive exam generation if available
+    if (window.AdaptiveLearning) {
+        examQuestions = window.AdaptiveLearning.generateAdaptivePracticeExam(ACTUAL_QUESTIONS, 90);
+        console.log(`📊 Starting adaptive practice exam with ${examQuestions.length} questions`);
+        console.log(`   Weak areas get increased representation`);
+    } else {
+        // Fallback to basic distribution
+        examQuestions = [];
+        
+        DOMAINS.forEach(domain => {
+            const domainQuestions = ACTUAL_QUESTIONS.filter(q => q.domain === domain.id);
+            const numQuestions = Math.round(domain.weight * 90);
+            const selected = domainQuestions
+                .sort(() => Math.random() - 0.5)
+                .slice(0, Math.min(numQuestions, domainQuestions.length));
+            examQuestions.push(...selected);
+        });
+        
+        // Ensure we have 90 questions
+        while (examQuestions.length < 90 && examQuestions.length < ACTUAL_QUESTIONS.length) {
+            const randomQ = ACTUAL_QUESTIONS[Math.floor(Math.random() * ACTUAL_QUESTIONS.length)];
+            if (!examQuestions.includes(randomQ)) {
+                examQuestions.push(randomQ);
+            }
         }
+        
+        examQuestions = examQuestions.sort(() => Math.random() - 0.5);
     }
     
-    APP.state.currentQuizQuestions = examQuestions.sort(() => Math.random() - 0.5);
+    APP.state.currentQuizQuestions = examQuestions;
     APP.state.currentQuestionIndex = 0;
     APP.state.score = 0;
     APP.state.quizActive = true;
     APP.state.isFullExam = true;
     APP.state.examTimeRemaining = 90 * 60; // 90 minutes in seconds
     APP.state.examStartTime = Date.now();
+    APP.state.currentQuizDomain = null;
     
     // Start exam timer
     startExamTimer();
@@ -3848,7 +4226,7 @@ function markLessonComplete(lessonId) {
 
 function saveProgress() {
     try {
-        localStorage.setItem('securityPlusProgress_v29', JSON.stringify(APP.progress));
+        localStorage.setItem('securityPlusProgress_v32', JSON.stringify(APP.progress));
         console.log('Progress saved');
     } catch (e) {
         console.error('Failed to save progress:', e);
@@ -3857,7 +4235,18 @@ function saveProgress() {
 
 function loadProgress() {
     try {
-        const saved = localStorage.getItem('securityPlusProgress_v29');
+        // Try loading v32 first, then fall back to v29 for migration
+        let saved = localStorage.getItem('securityPlusProgress_v32');
+        
+        // Migrate from v29 if v32 doesn't exist
+        if (!saved) {
+            saved = localStorage.getItem('securityPlusProgress_v29');
+            if (saved) {
+                console.log('Migrating progress from v29 to v32');
+                localStorage.setItem('securityPlusProgress_v32', saved);
+            }
+        }
+        
         if (saved) {
             const parsed = JSON.parse(saved);
             // Merge saved progress with default
@@ -3871,6 +4260,116 @@ function loadProgress() {
     } catch (e) {
         console.error('Failed to load progress:', e);
     }
+}
+
+/**
+ * Export all progress and notes as downloadable JSON
+ */
+function exportAllData() {
+    const exportData = {
+        exportDate: new Date().toISOString(),
+        version: 'v32',
+        progress: APP.progress,
+        notes: window.NotesSystem ? window.NotesSystem.getAllNotes() : []
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `security-plus-progress-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    if (window.showNotification) {
+        showNotification('Progress exported!', 'success');
+    } else {
+        alert('Progress exported!');
+    }
+}
+
+/**
+ * Import progress from JSON file
+ */
+function importAllData(jsonString) {
+    try {
+        const imported = JSON.parse(jsonString);
+        
+        // Import progress
+        if (imported.progress) {
+            Object.keys(imported.progress).forEach(key => {
+                if (APP.progress.hasOwnProperty(key)) {
+                    APP.progress[key] = imported.progress[key];
+                }
+            });
+            saveProgress();
+        }
+        
+        // Import notes if NotesSystem is available
+        if (imported.notes && window.NotesSystem) {
+            const notesObj = {};
+            imported.notes.forEach(note => {
+                notesObj[note.id] = note;
+            });
+            window.NotesSystem.importNotes(JSON.stringify(notesObj), true);
+        }
+        
+        if (window.showNotification) {
+            showNotification('Data imported successfully!', 'success');
+        } else {
+            alert('Data imported successfully!');
+        }
+        
+        // Refresh the dashboard
+        showDashboard();
+        return true;
+    } catch (e) {
+        console.error('Failed to import data:', e);
+        if (window.showNotification) {
+            showNotification('Failed to import data', 'error');
+        } else {
+            alert('Failed to import data');
+        }
+        return false;
+    }
+}
+
+/**
+ * Clear all progress (with confirmation)
+ */
+function clearAllProgress() {
+    if (!confirm('Are you sure you want to clear ALL progress? This cannot be undone.')) {
+        return;
+    }
+    
+    if (!confirm('This will delete all your quiz scores, completed lessons, simulations, and PBQs. Continue?')) {
+        return;
+    }
+    
+    // Reset progress to defaults
+    APP.progress = {
+        completedQuestions: [],
+        flaggedQuestions: [],
+        wrongAnswers: [],
+        completedLessons: [],
+        completedSimulations: [],
+        completedRemediation: [],
+        completedPBQs: [],
+        domainScores: {1: [], 2: [], 3: [], 4: [], 5: []},
+        practiceExamScores: [],
+        weakAreas: [],
+        lastActivity: null
+    };
+    
+    saveProgress();
+    
+    if (window.showNotification) {
+        showNotification('All progress cleared', 'info');
+    }
+    
+    showDashboard();
 }
 
 function updateNavigation() {
@@ -3904,7 +4403,7 @@ function updateNavigation() {
 
 function initApp() {
     console.log('════════════════════════════════════════');
-    console.log('🚀 INITIALIZING SECURITY+ v29 COMPLETE');
+    console.log('🚀 INITIALIZING SECURITY+ v31');
     console.log('   Full External JSON Integration');
     console.log('   All Content Fully Functional');
     console.log('════════════════════════════════════════');
@@ -4026,16 +4525,22 @@ async function loadExternalContent() {
         if (data.simulations.length > 0) {
             // Store simulation data for use by enhanced-simulations.js
             data.simulations.forEach(sim => {
-                SIMULATION_DATA[sim.id] = sim;
-                APP.content.simulationData[sim.id] = sim;
+                // Ensure both property names are available (snake_case and camelCase)
+                const normalizedSim = {
+                    ...sim,
+                    decisionPoints: sim.decisionPoints || sim.decision_points || [],
+                    decision_points: sim.decision_points || sim.decisionPoints || []
+                };
+                
+                SIMULATION_DATA[sim.id] = normalizedSim;
+                APP.content.simulationData[sim.id] = normalizedSim;
                 
                 // Update ALL_SIMULATIONS entry
                 const existingIndex = ALL_SIMULATIONS.findIndex(s => s.id === sim.id);
                 if (existingIndex >= 0) {
                     ALL_SIMULATIONS[existingIndex] = {
                         ...ALL_SIMULATIONS[existingIndex],
-                        ...sim,
-                        decisionPoints: sim.decisionPoints
+                        ...normalizedSim
                     };
                 }
             });
@@ -4095,6 +4600,12 @@ const globalFunctions = {
     completeSimulation,
     showAllRemediation,
     startRemediation,
+    startInteractiveRemediation,
+    showRemediationDecisionPoint,
+    selectRemediationOption,
+    submitRemediationAnswer,
+    nextRemediationQuestion,
+    showRemediationResults,
     completeRemediation,
     showAllPBQs,
     startPBQ,
@@ -4112,6 +4623,10 @@ const globalFunctions = {
     filterGlossary,
     showPracticeExam,
     startFullExam,
+    startExamTimer,
+    stopExamTimer,
+    updateExamTimerDisplay,
+    endExamTimeUp,
     showDomainLessons,
     showDomainSimulations,
     showDomainRemediation,
@@ -4123,6 +4638,9 @@ const globalFunctions = {
     getNextLesson,
     saveProgress,
     loadProgress,
+    exportAllData,
+    importAllData,
+    clearAllProgress,
     updateNavigation
 };
 
@@ -4135,7 +4653,7 @@ Object.keys(globalFunctions).forEach(key => {
 // STARTUP SEQUENCE
 // ============================================
 
-console.log('Starting Security+ Platform v28...');
+console.log('Starting Security+ Platform v32...');
 
 // Start immediately if DOM is ready
 if (document.readyState === 'loading') {
@@ -4177,8 +4695,8 @@ function testDataFolderSetup() {
 }
 
 // Final confirmation
-console.log('✅ Security+ v29 COMPLETE loaded successfully');
+console.log('✅ Security+ v31 loaded successfully');
 console.log('📊 260 decision points across 26 simulations');
-console.log('🎯 All v28 features preserved + enhanced simulations');
+console.log('🎯 All v30 features preserved + enhanced simulations');
 console.log('💯 Ready for professional Security+ training!');
 console.log('🧪 Run testDataFolderSetup() to verify data/simulations.json');

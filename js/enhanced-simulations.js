@@ -49,27 +49,38 @@ async function startSimulation(simId) {
 
 // Load or generate enhanced simulation data with 10 decision points
 async function loadEnhancedSimulationData(simId, simInfo) {
-    // Check cache first
+    // Check cache first (this is where data-loader.js puts the content)
     if (APP.content.simulationData && APP.content.simulationData[simId]) {
-        console.log(`Using cached data for ${simId}`);
-        return APP.content.simulationData[simId];
+        console.log(`✅ Using cached data for ${simId} (loaded from external JSON)`);
+        const cached = APP.content.simulationData[simId];
+        
+        // Convert external JSON format to expected format if needed
+        if (cached.decision_points || cached.decisionPoints) {
+            return {
+                ...cached,
+                decision_points: cached.decision_points || cached.decisionPoints
+            };
+        }
+        return cached;
     }
     
-    // Try to load from JSON file (production)
+    // Try to load from data folder (fallback if data-loader didn't load it)
     if (typeof SIMULATION_FILE_MAP !== 'undefined' && SIMULATION_FILE_MAP[simId]) {
         try {
-            const response = await fetch(`/simulations/${SIMULATION_FILE_MAP[simId]}`);
+            const response = await fetch(`data/${SIMULATION_FILE_MAP[simId]}`);
             if (response.ok) {
                 const jsonData = await response.json();
                 APP.content.simulationData[simId] = jsonData;
+                console.log(`✅ Loaded ${simId} from data folder`);
                 return jsonData;
             }
         } catch (error) {
-            console.log('Could not load JSON file, generating mock data');
+            console.log('Could not load JSON file from data folder, generating mock data');
         }
     }
     
     // Generate comprehensive mock data with 10 decision points
+    console.log(`⚠️ Generating mock data for ${simId} (external JSON not loaded)`);
     const mockData = generateEnhancedSimulationData(simId, simInfo);
     APP.content.simulationData[simId] = mockData;
     return mockData;
@@ -402,11 +413,12 @@ function showEnhancedSimulationIntro() {
             <div class="simulation-container" style="max-width: 1000px; margin: 0 auto;">
                 <div style="text-align: center; margin-bottom: 30px;">
                     <h1>${escapeHtml(sim.title)}</h1>
-                    <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; color: #71717a;">
+                    <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; color: #71717a; align-items: center; flex-wrap: wrap;">
                         <span>📍 Domain ${sim.domain}</span>
                         <span>⏱️ ${sim.time_estimate_minutes} minutes</span>
                         <span>🎯 ${escapeHtml(sim.difficulty)}</span>
                         <span>📊 10 Decision Points</span>
+                        ${window.NotesSystem ? window.NotesSystem.renderNoteButton('simulation', sim.id, sim.title) : ''}
                     </div>
                 </div>
                 
