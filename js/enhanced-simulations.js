@@ -406,11 +406,14 @@ function showEnhancedSimulationIntro() {
     const sim = APP.state.currentSimulation;
     const content = document.getElementById('content');
     
+    // Scroll to top when entering simulation
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     content.innerHTML = `
         <div class="container">
             <button class="back-btn" onclick="showAllSimulations()">← Back to Simulations</button>
             
-            <div class="simulation-container" style="max-width: 1000px; margin: 0 auto;">
+            <div class="simulation-container" >
                 <div style="text-align: center; margin-bottom: 30px;">
                     <h1>${escapeHtml(sim.title)}</h1>
                     <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; color: #71717a; align-items: center; flex-wrap: wrap;">
@@ -533,6 +536,9 @@ function showEnhancedDecision() {
         return;
     }
     
+    // Scroll to top when navigating to new decision
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     // Reset state for new decision
     APP.state.selectedDecision = null;
     APP.state.decisionLocked = false;
@@ -542,7 +548,7 @@ function showEnhancedDecision() {
         <div class="container">
             <button class="back-btn" onclick="confirmExitSimulation()">← Exit Simulation</button>
             
-            <div class="simulation-container" style="max-width: 1000px; margin: 0 auto;">
+            <div class="simulation-container" >
                 <!-- Progress Bar -->
                 <div style="margin-bottom: 25px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #71717a;">
@@ -932,6 +938,9 @@ function showEnhancedResults() {
     const percentage = Math.round((score / maxScore) * 100);
     const passed = score >= sim.scoring.passing_score;
     
+    // Scroll to top when showing results
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     // Calculate time spent
     const timeSpent = Math.round((Date.now() - APP.state.simulationStartTime) / 60000);
     
@@ -966,7 +975,7 @@ function showEnhancedResults() {
     const content = document.getElementById('content');
     content.innerHTML = `
         <div class="container">
-            <div class="simulation-container" style="max-width: 1000px; margin: 0 auto;">
+            <div class="simulation-container" >
                 <div style="text-align: center; margin-bottom: 40px;">
                     <h1 style="font-size: 2.5rem;">🎉 Simulation Complete!</h1>
                     <h2 style="color: #6366f1; margin-top: 10px;">${sim.title}</h2>

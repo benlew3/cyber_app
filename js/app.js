@@ -1554,9 +1554,9 @@ function injectStyles() {
         
         /* Container */
         .container {
-            max-width: 1400px;
+            max-width: 1800px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 20px 40px;
         }
         
         /* Typography */
@@ -1656,11 +1656,8 @@ function injectStyles() {
         .lesson-viewer {
             background: #141416;
             border-radius: 16px;
-            padding: 40px;
+            padding: 48px 56px;
             margin-top: 24px;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
         }
         
         /* Lesson Header */
@@ -2295,11 +2292,8 @@ function injectStyles() {
         .quiz-container {
             background: #18181b;
             border-radius: 12px;
-            padding: 30px;
+            padding: 40px 48px;
             margin-top: 20px;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
         }
         
         .quiz-header {
@@ -2414,11 +2408,8 @@ function injectStyles() {
         .simulation-container {
             background: #18181b;
             border-radius: 12px;
-            padding: 30px;
+            padding: 40px 48px;
             margin-top: 20px;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
         }
         
         .simulation-step {
@@ -2693,6 +2684,7 @@ function createHeader() {
 
 function showDashboard() {
     console.log('Showing dashboard...');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     
     const content = document.getElementById('content');
     if (!content) return;
@@ -2914,6 +2906,7 @@ function showDashboard() {
 }
 
 function showDomain(domainId) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const content = document.getElementById('content');
     const domain = DOMAINS.find(d => d.id === domainId);
     if (!domain) return;
@@ -2968,6 +2961,7 @@ function showDomain(domainId) {
 }
 
 function showAllLessons() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const content = document.getElementById('content');
     
     content.innerHTML = `
@@ -3290,6 +3284,9 @@ This knowledge is critical for protecting organizational assets.`
     APP.state.currentLesson = lessonId;
     APP.state.currentView = 'lesson-viewer';
     
+    // Scroll to top of page when navigating to lesson
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     // Initialize knowledge checks if module is available
     if (window.AdaptiveLearning && lessonContent.sections) {
         window.AdaptiveLearning.initKnowledgeChecks({
@@ -3310,6 +3307,7 @@ function markLessonCompleteAndNext(currentLessonId, nextLessonId) {
 }
 
 function showAllSimulations() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const content = document.getElementById('content');
     
     content.innerHTML = `
@@ -3636,6 +3634,7 @@ function completeSimulation(simId) {
 }
 
 function showAllRemediation() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const content = document.getElementById('content');
     
     content.innerHTML = `
@@ -3784,6 +3783,7 @@ function startInteractiveRemediation(remediation) {
 }
 
 function showRemediationDecisionPoint() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const remediation = APP.state.currentRemediation;
     if (!remediation || !remediation.decisionPoints) {
         completeRemediation(remediation?.id);
@@ -3923,6 +3923,7 @@ function nextRemediationQuestion() {
 }
 
 function showRemediationResults() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const remediation = APP.state.currentRemediation;
     const totalDPs = remediation.decisionPoints.length;
     const correctCount = APP.state.remediationHistory.filter(h => h.isCorrect).length;
@@ -3980,6 +3981,7 @@ function completeRemediation(remId) {
 }
 
 function showAllPBQs() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const content = document.getElementById('content');
     
     // List of interactive PBQ IDs (ones that have full scenarios in PBQ_SCENARIOS)
@@ -4148,6 +4150,7 @@ function completePBQ(pbqId) {
 }
 
 function showQuizMenu() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const content = document.getElementById('content');
     
     content.innerHTML = `
@@ -4249,6 +4252,7 @@ function startLessonQuiz(domainId) {
 }
 
 function showQuizQuestion() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const content = document.getElementById('content');
     const question = APP.state.currentQuizQuestions[APP.state.currentQuestionIndex];
     
@@ -4404,6 +4408,7 @@ function nextQuizQuestion() {
 }
 
 function showQuizResults() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     // Stop exam timer if running
     stopExamTimer();
     
@@ -4543,6 +4548,7 @@ function showQuizResults() {
 }
 
 function showGlossary() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const content = document.getElementById('content');
     const terms = Object.entries(APP.content.glossary).sort((a, b) => a[0].localeCompare(b[0]));
     
@@ -4594,6 +4600,7 @@ function filterGlossary(searchTerm) {
 }
 
 function showPracticeExam() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const content = document.getElementById('content');
     
     content.innerHTML = `
@@ -4779,6 +4786,7 @@ function showDomainPBQs(domainId) {
 }
 
 function showFilteredContent(type, items, domainId) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const domain = DOMAINS.find(d => d.id === domainId);
     const content = document.getElementById('content');
     

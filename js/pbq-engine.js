@@ -1320,6 +1320,9 @@ Effective security programs track metrics across all categories for balanced rep
 
         // Start a PBQ
         start(pbqId) {
+            // Scroll to top when starting PBQ
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
             const scenario = this.getScenario(pbqId);
             if (!scenario) {
                 // Fall back to generic PBQ from ALL_PBQS
