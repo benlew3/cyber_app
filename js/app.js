@@ -2786,46 +2786,9 @@ function showDashboard() {
     content.innerHTML = `
         <div class="container">
             <h1 class="page-title">🛡️ Security+ Training Platform v32</h1>
-            <p style="color: #71717a; margin-bottom: 30px;">Adaptive Learning + Interactive PBQs + Knowledge Checks</p>
             <p class="page-subtitle">CompTIA Security+ SY0-701 - Complete Training System</p>
             
-            ${analyticsHtml}
-            ${weakAreasHtml}
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">${completedLessons}/${totalLessons}</div>
-                    <div class="stat-label">Lessons</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${completedSims}/${totalSims}</div>
-                    <div class="stat-label">Simulations</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${completedRem}/${totalRem}</div>
-                    <div class="stat-label">Remediation</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${completedPBQs}/${totalPBQs}</div>
-                    <div class="stat-label">PBQs</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${totalQuestions}</div>
-                    <div class="stat-label">Questions</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${totalGlossary}+</div>
-                    <div class="stat-label">Terms</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${totalProgress}%</div>
-                    <div class="stat-label">Progress</div>
-                </div>
-            </div>
-            
-            ${recommendationsHtml}
-            
-            <h2 style="margin-top: 40px;">Select Your Learning Path:</h2>
+            <h2 style="margin-top: 20px;">Select Your Learning Path:</h2>
             
             <div class="domain-grid">
                 ${DOMAINS.map(domain => {
@@ -2867,9 +2830,47 @@ function showDashboard() {
                 </div>
             </div>
             
+            <!-- Progress & Analytics Section -->
+            <h2 style="margin-top: 50px; color: #a1a1aa;">📊 Your Progress</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">${completedLessons}/${totalLessons}</div>
+                    <div class="stat-label">Lessons</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${completedSims}/${totalSims}</div>
+                    <div class="stat-label">Simulations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${completedRem}/${totalRem}</div>
+                    <div class="stat-label">Remediation</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${completedPBQs}/${totalPBQs}</div>
+                    <div class="stat-label">PBQs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${totalQuestions}</div>
+                    <div class="stat-label">Questions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${totalGlossary}+</div>
+                    <div class="stat-label">Terms</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${totalProgress}%</div>
+                    <div class="stat-label">Progress</div>
+                </div>
+            </div>
+            
+            ${analyticsHtml}
+            ${weakAreasHtml}
+            ${recommendationsHtml}
+            
             <!-- Data Management -->
             <div style="background: #18181b; border-radius: 12px; padding: 20px; margin-top: 30px;">
-                <h3 style="margin: 0 0 15px 0; color: #a1a1aa;">📊 Data Management</h3>
+                <h3 style="margin: 0 0 15px 0; color: #a1a1aa;">⚙️ Data Management</h3>
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                     <button class="btn" onclick="exportAllData()">
                         📤 Export Progress
@@ -2886,17 +2887,6 @@ function showDashboard() {
                 </div>
                 <input type="file" id="import-file-input" accept=".json" style="display: none;"
                        onchange="if(this.files[0]){ const r = new FileReader(); r.onload = (e) => importAllData(e.target.result); r.readAsText(this.files[0]); }">
-            </div>
-            
-            <div class="success-message">
-                <p style="color: #10b981; font-weight: bold;">✅ Platform Loaded Successfully!</p>
-                <p style="color: #a1a1aa; margin-top: 10px;">
-                    All ${totalLessons} lessons, ${totalSims} simulations, ${totalRem} remediation scenarios, 
-                    ${totalPBQs} PBQs, ${totalQuestions} questions, and ${totalGlossary}+ glossary terms are ready.
-                </p>
-                <p style="color: #6366f1; margin-top: 5px; font-size: 0.9rem;">
-                    🧠 Adaptive learning adjusts question selection based on your performance
-                </p>
             </div>
         </div>
     `;
