@@ -1233,7 +1233,118 @@
             font-size: 0.85rem;
         }
         
-        @media (max-width: 768px) {
+        /* Notes Responsive Styles */
+        @media (max-width: 480px) {
+            .note-modal-overlay {
+                padding: 10px;
+            }
+            
+            .note-modal {
+                width: 100%;
+                max-width: 100%;
+                max-height: 95vh;
+                border-radius: 12px;
+            }
+            
+            .note-modal-header {
+                padding: 16px;
+            }
+            
+            .note-modal-header h3 {
+                font-size: 1.1rem;
+            }
+            
+            .note-modal-close {
+                width: 36px;
+                height: 36px;
+                font-size: 1.5rem;
+            }
+            
+            .note-modal-body {
+                padding: 16px;
+            }
+            
+            .note-input,
+            .note-textarea,
+            .notes-search-input {
+                padding: 14px;
+                font-size: 1rem;
+            }
+            
+            .note-textarea {
+                min-height: 150px;
+            }
+            
+            .note-modal-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .note-modal-actions .btn {
+                width: 100%;
+                min-height: 48px;
+            }
+            
+            .notes-toolbar {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .notes-search {
+                width: 100%;
+            }
+            
+            .notes-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+            
+            .notes-actions .btn {
+                width: 100%;
+                min-height: 44px;
+            }
+            
+            .notes-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .note-card {
+                padding: 16px;
+            }
+            
+            .note-card-header h4 {
+                font-size: 1rem;
+            }
+            
+            .note-card-actions {
+                flex-direction: row;
+                gap: 8px;
+            }
+            
+            .note-card-actions .btn {
+                flex: 1;
+                min-height: 40px;
+                padding: 8px;
+            }
+            
+            .note-filters {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .note-filter-btn {
+                width: 100%;
+                min-height: 40px;
+            }
+        }
+        
+        @media (min-width: 481px) and (max-width: 768px) {
+            .note-modal {
+                width: 90%;
+                max-height: 90vh;
+            }
+            
             .notes-toolbar {
                 flex-direction: column;
             }
@@ -1250,9 +1361,17 @@
             .notes-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .note-modal {
-                max-height: 90vh;
+        }
+        
+        /* Touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            .note-card,
+            .note-filter-btn,
+            .note-modal-actions .btn {
+                min-height: 44px;
+                -webkit-user-select: none;
+                user-select: none;
+                -webkit-tap-highlight-color: transparent;
             }
         }
     `;

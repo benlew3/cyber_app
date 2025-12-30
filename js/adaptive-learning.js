@@ -932,7 +932,66 @@
             color: #a1a1aa;
         }
         
-        @media (max-width: 768px) {
+        /* Adaptive Learning Responsive Styles */
+        @media (max-width: 480px) {
+            .recommendation-card {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 16px;
+                gap: 12px;
+            }
+            
+            .recommendation-card .btn {
+                width: 100%;
+                min-height: 44px;
+            }
+            
+            .kc-container {
+                padding: 16px;
+                margin: 16px 0;
+            }
+            
+            .kc-question {
+                font-size: 1rem;
+            }
+            
+            .kc-option {
+                padding: 14px;
+                min-height: 48px;
+                font-size: 0.95rem;
+            }
+            
+            .kc-feedback {
+                padding: 14px;
+                font-size: 0.95rem;
+            }
+            
+            .analytics-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px;
+            }
+            
+            .analytics-card {
+                padding: 14px;
+            }
+            
+            .analytics-value {
+                font-size: 1.4rem;
+            }
+            
+            .readiness-badge {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .kc-progress {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+        }
+        
+        @media (min-width: 481px) and (max-width: 768px) {
             .recommendation-card {
                 flex-direction: column;
                 align-items: flex-start;
@@ -940,6 +999,26 @@
             
             .kc-option {
                 padding: 12px;
+            }
+            
+            .analytics-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+        
+        /* Touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            .kc-option,
+            .recommendation-card .btn {
+                min-height: 48px;
+                -webkit-user-select: none;
+                user-select: none;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            .kc-option:active:not(.answered) {
+                transform: scale(0.99);
+                opacity: 0.9;
             }
         }
     `;

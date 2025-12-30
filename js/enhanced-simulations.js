@@ -697,6 +697,116 @@ function addEnhancedStyles() {
                 border-color: #f59e0b !important;
                 background: linear-gradient(135deg, #78350f, #92400e) !important;
             }
+            
+            /* Simulation Responsive Styles */
+            @media (max-width: 480px) {
+                .simulation-container {
+                    padding: 16px !important;
+                }
+                
+                .simulation-container h1 {
+                    font-size: 1.2rem !important;
+                }
+                
+                .simulation-container h2 {
+                    font-size: 1.1rem !important;
+                }
+                
+                .simulation-container h3 {
+                    font-size: 1rem !important;
+                }
+                
+                .enhanced-option {
+                    padding: 16px !important;
+                    min-height: 60px;
+                }
+                
+                .enhanced-option p {
+                    font-size: 0.95rem !important;
+                }
+                
+                /* Score grid on intro */
+                .simulation-container [style*="grid-template-columns: repeat(auto-fit"] {
+                    grid-template-columns: 1fr !important;
+                    gap: 16px !important;
+                }
+                
+                /* Scoring display */
+                .simulation-container [style*="font-size: 2rem"] {
+                    font-size: 1.5rem !important;
+                }
+                
+                /* Progress bar area */
+                .simulation-container [style*="display: flex"][style*="justify-content: space-between"] {
+                    flex-direction: column;
+                    gap: 8px;
+                    text-align: center;
+                }
+                
+                /* Decision buttons */
+                .simulation-container .btn {
+                    width: 100%;
+                    min-height: 48px;
+                    margin-top: 8px;
+                }
+                
+                /* Hint buttons */
+                .simulation-container [style*="gap: 10px"] {
+                    flex-direction: column;
+                }
+                
+                /* Results page */
+                .simulation-container [style*="text-align: center"] h1 {
+                    font-size: 1.5rem !important;
+                }
+                
+                /* Key terms */
+                .simulation-container [style*="flex-wrap: wrap"] {
+                    gap: 8px !important;
+                }
+                
+                .simulation-container [style*="background: #27272a"][style*="padding: 8px"] {
+                    padding: 10px 12px !important;
+                    font-size: 0.85rem !important;
+                }
+            }
+            
+            @media (min-width: 481px) and (max-width: 768px) {
+                .simulation-container {
+                    padding: 24px !important;
+                }
+                
+                .simulation-container h1 {
+                    font-size: 1.4rem !important;
+                }
+                
+                .enhanced-option {
+                    padding: 18px !important;
+                }
+                
+                .simulation-container [style*="grid-template-columns: repeat(auto-fit"] {
+                    grid-template-columns: repeat(2, 1fr) !important;
+                }
+            }
+            
+            /* Touch devices */
+            @media (hover: none) and (pointer: coarse) {
+                .enhanced-option {
+                    min-height: 60px;
+                    -webkit-user-select: none;
+                    user-select: none;
+                    -webkit-tap-highlight-color: transparent;
+                }
+                
+                .enhanced-option:hover:not(.locked) {
+                    transform: none !important;
+                }
+                
+                .enhanced-option:active:not(.locked) {
+                    transform: scale(0.99) !important;
+                    opacity: 0.95;
+                }
+            }
         `;
         document.head.appendChild(style);
     }

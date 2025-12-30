@@ -3435,20 +3435,250 @@ Effective security programs track metrics across all categories for balanced rep
             color: #a1a1aa;
         }
         
-        @media (max-width: 768px) {
+        /* ====================================
+           PBQ RESPONSIVE STYLES
+           ==================================== */
+        
+        /* Mobile Phones */
+        @media (max-width: 480px) {
+            .pbq-header {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+            
+            .pbq-header h1 {
+                font-size: 1.2rem;
+            }
+            
+            .pbq-timer {
+                font-size: 1.2rem;
+            }
+            
+            .pbq-scenario {
+                padding: 16px;
+                font-size: 0.95rem;
+            }
+            
+            /* Drag and Drop */
             .drag-drop-container,
-            .email-analysis-container,
+            .zones-drag-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .drag-items-area,
+            .drop-target-area,
+            .zones-items,
+            .zones-grid {
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .drag-item,
+            .drop-zone,
+            .zone-item {
+                padding: 14px 12px;
+                font-size: 0.9rem;
+                min-height: 48px;
+                touch-action: manipulation;
+            }
+            
+            .ordered-slot {
+                min-height: 52px;
+                padding: 12px;
+            }
+            
+            /* Configuration */
+            .config-panel {
+                padding: 16px;
+            }
+            
+            .config-field {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                padding: 14px;
+            }
+            
+            .config-input,
+            .config-select {
+                width: 100%;
+                min-width: auto;
+                padding: 12px;
+                font-size: 1rem;
+            }
+            
+            /* Matching */
             .matching-container {
+                flex-direction: column;
+                gap: 30px;
+                padding: 16px;
+            }
+            
+            .matching-left,
+            .matching-right {
+                width: 100%;
+            }
+            
+            .matching-item,
+            .matching-target {
+                padding: 14px;
+                font-size: 0.9rem;
+                min-height: 48px;
+            }
+            
+            /* Analysis */
+            .analysis-questions {
+                padding: 16px;
+            }
+            
+            .analysis-question {
+                padding: 14px;
+            }
+            
+            .analysis-options label {
+                padding: 12px;
+                font-size: 0.9rem;
+                min-height: 44px;
+            }
+            
+            /* Hotspot */
+            .hotspot-svg {
+                max-width: 100%;
+                height: auto;
+            }
+            
+            .hotspot-instructions {
+                font-size: 0.9rem;
+                padding: 12px;
+            }
+            
+            /* Matrix */
+            .matrix-table {
+                font-size: 0.8rem;
+            }
+            
+            .matrix-table th,
+            .matrix-table td {
+                padding: 8px 6px;
+            }
+            
+            .matrix-select {
+                padding: 8px;
+                font-size: 0.85rem;
+                min-width: 60px;
+            }
+            
+            /* Risk Row */
+            .risk-row {
                 grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .risk-cell {
+                padding: 12px;
+            }
+            
+            /* Log entries */
+            .log-container {
+                overflow-x: auto;
+            }
+            
+            .log-header,
+            .log-entry {
+                font-size: 0.7rem;
+                min-width: 500px;
+            }
+            
+            /* Email analysis */
+            .email-analysis-container {
+                flex-direction: column;
+            }
+            
+            .email-display {
+                font-size: 0.85rem;
+            }
+            
+            /* Results */
+            .pbq-results {
+                padding: 16px;
+            }
+            
+            .score-display {
+                padding: 20px;
+            }
+            
+            .score-display h2 {
+                font-size: 2rem;
+            }
+            
+            /* Buttons */
+            .pbq-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .pbq-actions .btn {
+                width: 100%;
+                min-height: 48px;
+            }
+        }
+        
+        /* Tablets */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .pbq-header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .drag-drop-container,
+            .zones-drag-container {
+                flex-direction: column;
+                gap: 24px;
+            }
+            
+            .config-field {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .config-input,
+            .config-select {
+                min-width: 180px;
+            }
+            
+            .matching-container {
+                gap: 60px;
+            }
+            
+            .matrix-table {
+                font-size: 0.9rem;
             }
             
             .risk-row {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        /* Touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            .drag-item,
+            .drop-zone,
+            .matching-item,
+            .matching-target,
+            .analysis-options label,
+            .zone-item {
+                min-height: 48px;
+                cursor: pointer;
+                -webkit-user-select: none;
+                user-select: none;
+                -webkit-tap-highlight-color: transparent;
             }
             
-            .log-header, .log-entry {
-                font-size: 0.75rem;
-                grid-template-columns: 60px 80px 140px 80px 1fr;
+            .drag-item:active,
+            .matching-item:active {
+                transform: scale(0.98);
+                opacity: 0.9;
             }
         }
     `;
