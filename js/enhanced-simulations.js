@@ -418,7 +418,6 @@ function showEnhancedSimulationIntro() {
                     <h1>${escapeHtml(sim.title)}</h1>
                     <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; color: #71717a; align-items: center; flex-wrap: wrap;">
                         <span>📍 Domain ${sim.domain}</span>
-                        <span>⏱️ ${sim.time_estimate_minutes} minutes</span>
                         <span>🎯 ${escapeHtml(sim.difficulty)}</span>
                         <span>📊 10 Decision Points</span>
                         ${window.NotesSystem ? window.NotesSystem.renderNoteButton('simulation', sim.id, sim.title) : ''}
@@ -516,9 +515,6 @@ function showEnhancedSimulationIntro() {
                             style="padding: 15px 50px; font-size: 1.2rem;">
                         Begin Simulation →
                     </button>
-                    <p style="color: #71717a; margin-top: 15px;">
-                        ⏱️ Estimated time: ${sim.time_estimate_minutes} minutes for thoughtful completion
-                    </p>
                 </div>
             </div>
         </div>
@@ -571,7 +567,6 @@ function showEnhancedDecision() {
                     <div style="display: flex; gap: 15px; color: #71717a;">
                         <span>🎯 Domain ${sim.domain}</span>
                         <span>⚡ ${25 - (APP.state.simulationHintsUsed * 2)} points available</span>
-                        <span>⏱️ ~5 minutes</span>
                     </div>
                 </div>
                 

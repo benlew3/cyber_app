@@ -242,7 +242,15 @@ function quickBlockIP(ip) {
 }
 
 function editRule(ruleId) {
-    alert(`Edit rule ${ruleId} - Feature coming soon`);
+    const newAction = prompt(`Edit rule ${ruleId}:\nEnter new action (ALLOW or DENY):`, 'DENY');
+    if (newAction && (newAction.toUpperCase() === 'ALLOW' || newAction.toUpperCase() === 'DENY')) {
+        alert(`✅ Rule ${ruleId} updated to ${newAction.toUpperCase()}`);
+        if (window.simEngine) {
+            window.simEngine.recordAction('edit_rule', { ruleId, newAction: newAction.toUpperCase() });
+        }
+    } else if (newAction) {
+        alert('Invalid action. Please enter ALLOW or DENY.');
+    }
 }
 
 function toggleRule(ruleId) {

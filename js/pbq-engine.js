@@ -2805,8 +2805,8 @@ Effective security programs track metrics across all categories for balanced rep
                         <p class="pbq-type-badge">${escapeHtml(pbq.type)} • Domain ${pbq.domain}</p>
                         
                         <div class="coming-soon-message">
-                            <p>This PBQ type (${escapeHtml(pbq.type)}) is coming soon!</p>
-                            <p>Check out the other interactive PBQs available.</p>
+                            <p>This PBQ requires additional configuration.</p>
+                            <p>Try one of the other fully interactive PBQs!</p>
                         </div>
                         
                         <button class="btn btn-primary" onclick="showAllPBQs()">View Available PBQs</button>

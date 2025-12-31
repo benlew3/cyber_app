@@ -169,9 +169,6 @@ function showBriefingStage(stage) {
                             style="padding: 15px 40px; font-size: 1.1rem;">
                         Begin Investigation →
                     </button>
-                    <p style="color: #71717a; margin-top: 15px;">
-                        ⏱️ Estimated time: ${stage.duration || '20-30 minutes'}
-                    </p>
                 </div>
             </div>
         </div>
