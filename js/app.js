@@ -2119,9 +2119,16 @@ function injectStyles() {
             margin-bottom: 32px;
         }
         
-        .intro-section p {
-            margin: 0;
+        .intro-section p,
+        .intro-section .content-para {
+            margin: 0 0 16px 0;
             font-size: 1.05rem;
+            line-height: 1.75;
+        }
+        
+        .intro-section p:last-child,
+        .intro-section .content-para:last-child {
+            margin-bottom: 0;
         }
         
         /* Bottom Navigation */
@@ -2335,12 +2342,19 @@ function injectStyles() {
             font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 12px;
         }
         
-        .real-world-box p {
+        .real-world-box p,
+        .real-world-box .content-para {
             margin-top: 12px;
             line-height: 1.75;
             color: #d1d5db;
+        }
+        
+        .real-world-box .content-para:first-of-type {
+            margin-top: 0;
         }
         
         .real-world-box .company-name {
@@ -2348,6 +2362,46 @@ function injectStyles() {
             color: #71717a;
             font-style: italic;
             margin-top: 8px;
+        }
+        
+        /* Section subheadings (italic with colon) */
+        .section-subheading {
+            display: block;
+            color: #a5b4fc;
+            font-weight: 600;
+            font-style: normal;
+            margin-top: 24px;
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+        
+        .lesson-content em {
+            color: #c4b5fd;
+            font-style: italic;
+        }
+        
+        /* Ensure proper block flow in lesson content */
+        .lesson-content {
+            display: block;
+            width: 100%;
+            clear: both;
+        }
+        
+        .lesson-content > * {
+            display: block;
+            clear: both;
+        }
+        
+        .lesson-content .content-para {
+            display: block;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .lesson-content .content-list {
+            display: block;
+            width: 100%;
+            margin: 16px 0 24px 0;
         }
         
         /* Summary list at end of lessons */
@@ -3848,7 +3902,7 @@ This knowledge is critical for protecting organizational assets.`
                 
                 ${lessonContent.introduction ? `
                     <div class="intro-section">
-                        <p>${formatContent(lessonContent.introduction)}</p>
+                        ${formatContent(lessonContent.introduction)}
                     </div>
                 ` : ''}
                 
@@ -3899,7 +3953,7 @@ This knowledge is critical for protecting organizational assets.`
                         ${section.realWorldExample || section.real_world_example ? `
                             <div class="real-world-box">
                                 <strong>🏢 Real-World Example</strong>
-                                <p>${formatContent((section.realWorldExample || section.real_world_example).scenario || '')}</p>
+                                ${formatContent((section.realWorldExample || section.real_world_example).scenario || '')}
                                 ${(section.realWorldExample || section.real_world_example).company ? `
                                     <p class="company-name">
                                         Company: ${escapeHtml((section.realWorldExample || section.real_world_example).company)}
