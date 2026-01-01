@@ -47,62 +47,90 @@ function formatContent(content) {
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong class="definition-term">$1</strong>');
     html = html.replace(/__([^_]+)__/g, '<strong class="definition-term">$1</strong>');
     
+    // === ITALIC TEXT ===
+    // *text* (single asterisks) → <em> for section subheadings
+    html = html.replace(/\*([^*\n]+)\*:/g, '<em class="section-subheading">$1:</em>');
+    html = html.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+    
     // === INLINE CODE ===
     // `code` → styled code element
-    html = html.replace(/`([^`]+)`/g, 
-        '<code class="inline-code">$1</code>');
+    html = html.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
     
     // === CODE BLOCKS ===
     // ```code``` → pre block
     html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, function(match, lang, code) {
-        return `<pre class="code-block"><code>${code.trim()}</code></pre>`;
+        return `</p><pre class="code-block"><code>${code.trim()}</code></pre><p class="content-para">`;
     });
     
-    // === LISTS ===
-    // Process bullet points: lines starting with • or -
-    // Group consecutive bullet points into proper <ul> lists
+    // === PROCESS CONTENT LINE BY LINE ===
+    // Split into lines and process lists properly
     const lines = html.split('\n');
+    let result = [];
     let inList = false;
-    let processedLines = [];
+    let inParagraph = false;
+    let paragraphContent = [];
+    
+    function flushParagraph() {
+        if (paragraphContent.length > 0) {
+            const text = paragraphContent.join('<br>').trim();
+            if (text) {
+                result.push(`<p class="content-para">${text}</p>`);
+            }
+            paragraphContent = [];
+        }
+        inParagraph = false;
+    }
     
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
         const bulletMatch = line.match(/^[•\-]\s*(.+)$/);
+        const isEmptyLine = line === '';
         
         if (bulletMatch) {
+            // Starting or continuing a list
             if (!inList) {
-                processedLines.push('<ul class="content-list">');
+                flushParagraph();
+                result.push('<ul class="content-list">');
                 inList = true;
             }
-            processedLines.push(`<li>${bulletMatch[1]}</li>`);
-        } else {
+            result.push(`<li>${bulletMatch[1]}</li>`);
+        } else if (isEmptyLine) {
+            // Empty line - end current list or paragraph
             if (inList) {
-                processedLines.push('</ul>');
+                result.push('</ul>');
+                inList = false;
+            } else if (paragraphContent.length > 0) {
+                flushParagraph();
+            }
+        } else {
+            // Regular text line
+            if (inList) {
+                // End the list first
+                result.push('</ul>');
                 inList = false;
             }
-            processedLines.push(line);
+            paragraphContent.push(line);
+            inParagraph = true;
         }
     }
+    
+    // Close any remaining list
     if (inList) {
-        processedLines.push('</ul>');
+        result.push('</ul>');
     }
-    html = processedLines.join('\n');
     
-    // === PARAGRAPHS ===
-    // Double line breaks → new paragraph
-    html = html.replace(/\n\n+/g, '</p><p class="content-para">');
+    // Flush any remaining paragraph content
+    flushParagraph();
     
-    // Single line breaks within paragraphs
-    html = html.replace(/\n/g, '<br>');
+    // Join and clean up
+    html = result.join('\n');
     
     // Clean up empty paragraphs
     html = html.replace(/<p class="content-para"><\/p>/g, '');
-    html = html.replace(/<p class="content-para"><br>/g, '<p class="content-para">');
+    html = html.replace(/<p class="content-para">\s*<\/p>/g, '');
     
-    // Wrap in paragraph if not already
-    if (!html.startsWith('<ul') && !html.startsWith('<pre') && !html.startsWith('<p')) {
-        html = '<p class="content-para">' + html + '</p>';
-    }
+    // If somehow we end up with nothing, return empty
+    if (!html.trim()) return '';
     
     return html;
 }
