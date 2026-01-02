@@ -3426,6 +3426,7 @@ function createHeader() {
             <button class="nav-btn" onclick="showAllPBQs()">🖥️ PBQs</button>
             <button class="nav-btn" onclick="showQuizMenu()">📝 Quiz</button>
             <button class="nav-btn" onclick="showGlossary()">📖 Glossary</button>
+            <button class="nav-btn" onclick="showCareerQuiz()">🎯 Career Quiz</button>
             <button class="nav-btn" onclick="showPracticeExam()">📋 Exam</button>
             <button class="nav-btn" onclick="NotesSystem.showAllNotes()">🗒️ Notes</button>
         </nav>
@@ -5343,6 +5344,37 @@ function filterGlossary(searchTerm) {
     }
 }
 
+function showCareerQuiz() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const content = document.getElementById('content');
+    
+    content.innerHTML = `
+        <div class="container">
+            <button class="back-btn" onclick="showDashboard()">← Back</button>
+            <div id="career-quiz-root"></div>
+        </div>
+    `;
+    
+    // Mount the React Career Quiz component
+    if (window.React && window.ReactDOM && window.CybersecurityCareerQuiz) {
+        const root = ReactDOM.createRoot(document.getElementById('career-quiz-root'));
+        root.render(React.createElement(window.CybersecurityCareerQuiz));
+    } else {
+        document.getElementById('career-quiz-root').innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+                <h2 style="color: #f4f4f5; margin-bottom: 16px;">🎯 Career Quiz</h2>
+                <p style="color: #a1a1aa;">Loading career assessment...</p>
+                <p style="color: #71717a; font-size: 0.875rem; margin-top: 12px;">
+                    If this doesn't load, please refresh the page.
+                </p>
+            </div>
+        `;
+    }
+    
+    APP.state.currentView = 'career-quiz';
+    updateNavigation();
+}
+
 function showPracticeExam() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const content = document.getElementById('content');
@@ -5984,6 +6016,7 @@ const globalFunctions = {
     showQuizResults,
     showGlossary,
     filterGlossary,
+    showCareerQuiz,
     showPracticeExam,
     startFullExam,
     startExamTimer,
