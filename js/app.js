@@ -5351,25 +5351,70 @@ function showCareerQuiz() {
     content.innerHTML = `
         <div class="container">
             <button class="back-btn" onclick="showDashboard()">← Back</button>
-            <div id="career-quiz-root"></div>
+            <div id="career-quiz-root">
+                <div style="text-align: center; padding: 60px 40px;">
+                    <h2 style="color: #f4f4f5; margin-bottom: 16px;">🎯 Career Quiz</h2>
+                    <p style="color: #a1a1aa;">Loading career assessment...</p>
+                    <div style="margin-top: 20px;">
+                        <div class="loading-spinner" style="width: 40px; height: 40px; border: 3px solid #27272a; border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    </div>
+                    <p style="color: #71717a; font-size: 0.875rem; margin-top: 20px;">
+                        If this takes more than a few seconds, please refresh the page.
+                    </p>
+                </div>
+            </div>
         </div>
+        <style>
+            @keyframes spin { to { transform: rotate(360deg); } }
+        </style>
     `;
     
-    // Mount the React Career Quiz component
-    if (window.React && window.ReactDOM && window.CybersecurityCareerQuiz) {
-        const root = ReactDOM.createRoot(document.getElementById('career-quiz-root'));
-        root.render(React.createElement(window.CybersecurityCareerQuiz));
-    } else {
-        document.getElementById('career-quiz-root').innerHTML = `
-            <div style="text-align: center; padding: 40px;">
-                <h2 style="color: #f4f4f5; margin-bottom: 16px;">🎯 Career Quiz</h2>
-                <p style="color: #a1a1aa;">Loading career assessment...</p>
-                <p style="color: #71717a; font-size: 0.875rem; margin-top: 12px;">
-                    If this doesn't load, please refresh the page.
-                </p>
-            </div>
-        `;
+    // Try to mount React component with retries (Babel compiles async)
+    let attempts = 0;
+    const maxAttempts = 20; // Try for up to 4 seconds
+    
+    function tryMountReact() {
+        attempts++;
+        
+        if (window.React && window.ReactDOM && window.CybersecurityCareerQuiz) {
+            try {
+                const rootEl = document.getElementById('career-quiz-root');
+                if (rootEl) {
+                    const root = ReactDOM.createRoot(rootEl);
+                    root.render(React.createElement(window.CybersecurityCareerQuiz));
+                    console.log('✅ Career Quiz mounted successfully');
+                }
+            } catch (err) {
+                console.error('Error mounting Career Quiz:', err);
+                showCareerQuizError(err.message);
+            }
+        } else if (attempts < maxAttempts) {
+            // Retry after 200ms
+            setTimeout(tryMountReact, 200);
+        } else {
+            // Give up after max attempts
+            showCareerQuizError('React components failed to load. Please refresh the page.');
+        }
     }
+    
+    function showCareerQuizError(message) {
+        const rootEl = document.getElementById('career-quiz-root');
+        if (rootEl) {
+            rootEl.innerHTML = `
+                <div style="text-align: center; padding: 60px 40px;">
+                    <h2 style="color: #f4f4f5; margin-bottom: 16px;">🎯 Career Quiz</h2>
+                    <p style="color: #ef4444; margin-bottom: 12px;">Failed to load</p>
+                    <p style="color: #71717a; font-size: 0.875rem;">${message}</p>
+                    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 24px; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                        Refresh Page
+                    </button>
+                </div>
+            `;
+        }
+    }
+    
+    // Start trying to mount
+    setTimeout(tryMountReact, 100);
     
     APP.state.currentView = 'career-quiz';
     updateNavigation();

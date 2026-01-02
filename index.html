@@ -230,6 +230,53 @@
     <!-- 9. ELEGANT UI SYSTEM (Theme Toggle & Enhancements) -->
     <script src="js/elegant_ui_system.js"></script>
     
+    <!-- 10. REACT FOR CAREER QUIZ -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- 11. CAREER QUIZ LOADER - Manually fetch and compile JSX -->
+    <script>
+        (function loadCareerQuiz() {
+            console.log('Loading Career Quiz...');
+            
+            fetch('js/career-quiz.jsx')
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch career-quiz.jsx: ' + response.status);
+                    }
+                    return response.text();
+                })
+                .then(function(jsxCode) {
+                    console.log('Career Quiz JSX loaded, compiling with Babel...');
+                    
+                    // Compile JSX with Babel
+                    var compiledCode = Babel.transform(jsxCode, {
+                        presets: ['react']
+                    }).code;
+                    
+                    // Execute the compiled code
+                    var script = document.createElement('script');
+                    script.textContent = compiledCode;
+                    document.body.appendChild(script);
+                    
+                    console.log('✅ Career Quiz compiled and loaded');
+                    
+                    // Verify it loaded
+                    setTimeout(function() {
+                        if (window.CybersecurityCareerQuiz) {
+                            console.log('✅ CybersecurityCareerQuiz component is available');
+                        } else {
+                            console.error('❌ CybersecurityCareerQuiz not found after compilation');
+                        }
+                    }, 100);
+                })
+                .catch(function(error) {
+                    console.error('❌ Failed to load Career Quiz:', error);
+                });
+        })();
+    </script>
+    
     <!-- Fallback if app.js fails to load -->
     <script>
         // Check if app.js loaded after a short delay
