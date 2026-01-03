@@ -1374,6 +1374,145 @@
                 -webkit-tap-highlight-color: transparent;
             }
         }
+        
+        /* ================================================
+           LIGHT MODE FOR NOTES SYSTEM
+           ================================================ */
+        
+        [data-theme="light"] .note-btn {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #475569 !important;
+        }
+        
+        [data-theme="light"] .note-btn:hover {
+            background: #f8fafc !important;
+            border-color: #6366f1 !important;
+            color: #4f46e5 !important;
+        }
+        
+        [data-theme="light"] .note-btn.has-notes {
+            background: #eef2ff !important;
+            border-color: #6366f1 !important;
+            color: #4f46e5 !important;
+        }
+        
+        [data-theme="light"] .note-modal-overlay {
+            background: rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        [data-theme="light"] .note-modal {
+            background: #ffffff !important;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        [data-theme="light"] .note-modal-header {
+            background: #ffffff !important;
+            border-bottom-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .note-modal-header h2 {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .note-modal-close {
+            color: #64748b !important;
+        }
+        
+        [data-theme="light"] .note-modal-close:hover {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .note-modal-body {
+            background: #ffffff !important;
+        }
+        
+        [data-theme="light"] .note-form-group label {
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .note-input,
+        [data-theme="light"] .note-textarea {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .note-input:focus,
+        [data-theme="light"] .note-textarea:focus {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+        }
+        
+        [data-theme="light"] .note-input::placeholder,
+        [data-theme="light"] .note-textarea::placeholder {
+            color: #94a3b8 !important;
+        }
+        
+        [data-theme="light"] .note-card {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .note-card:hover {
+            background: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+        }
+        
+        [data-theme="light"] .note-card-header h4 {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .note-card-content {
+            color: #475569 !important;
+        }
+        
+        [data-theme="light"] .note-card-meta {
+            color: #94a3b8 !important;
+        }
+        
+        [data-theme="light"] .note-action-btn {
+            color: #64748b !important;
+        }
+        
+        [data-theme="light"] .note-action-btn:hover {
+            color: #4f46e5 !important;
+            background: #f1f5f9 !important;
+        }
+        
+        [data-theme="light"] .note-modal-actions {
+            background: #f8fafc !important;
+            border-top-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .note-filter-btn {
+            background: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+            color: #475569 !important;
+        }
+        
+        [data-theme="light"] .note-filter-btn:hover,
+        [data-theme="light"] .note-filter-btn.active {
+            background: #dbeafe !important;
+            border-color: #3b82f6 !important;
+            color: #1e40af !important;
+        }
+        
+        [data-theme="light"] .notes-empty {
+            color: #64748b !important;
+        }
+        
+        [data-theme="light"] .notes-container {
+            background: transparent !important;
+        }
+        
+        [data-theme="light"] .notes-page-header h1 {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .notes-page-header p {
+            color: #64748b !important;
+        }
     `;
     document.head.appendChild(notesStyles);
     

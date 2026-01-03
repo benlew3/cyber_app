@@ -3936,6 +3936,102 @@ Effective security programs track metrics across all categories for balanced rep
             background: #f1f5f9 !important;
             color: #475569 !important;
         }
+        
+        /* Panel Backgrounds - Critical for Light Mode */
+        [data-theme="light"] .drag-source-panel,
+        [data-theme="light"] .drag-target-panel,
+        [data-theme="light"] .zones-source-panel,
+        [data-theme="light"] .zones-target-panel {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .drag-source-panel h3,
+        [data-theme="light"] .drag-target-panel h3,
+        [data-theme="light"] .zones-source-panel h3,
+        [data-theme="light"] .zones-target-panel h3 {
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .drag-item-list {
+            background: transparent !important;
+        }
+        
+        [data-theme="light"] .drop-placeholder {
+            color: #64748b !important;
+        }
+        
+        [data-theme="light"] .zone-category {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .zone-category h4 {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .zone-drop-area {
+            background: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+        }
+        
+        [data-theme="light"] .zone-drop-area.drag-over {
+            background: #dbeafe !important;
+            border-color: #3b82f6 !important;
+        }
+        
+        /* Sequence ordering styles */
+        [data-theme="light"] .sequence-container {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .sequence-slot {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .sequence-slot.drag-over {
+            background: #dbeafe !important;
+            border-color: #3b82f6 !important;
+        }
+        
+        [data-theme="light"] .sequence-number {
+            background: #e2e8f0 !important;
+            color: #475569 !important;
+        }
+        
+        /* Matching styles */
+        [data-theme="light"] .matching-container {
+            background: #ffffff !important;
+        }
+        
+        [data-theme="light"] .matching-left,
+        [data-theme="light"] .matching-right {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .matching-left h4,
+        [data-theme="light"] .matching-right h4 {
+            color: #334155 !important;
+        }
+        
+        /* General dark backgrounds override */
+        [data-theme="light"] [style*="background: #18181b"],
+        [data-theme="light"] [style*="background:#18181b"] {
+            background: #ffffff !important;
+        }
+        
+        [data-theme="light"] [style*="background: #27272a"],
+        [data-theme="light"] [style*="background:#27272a"] {
+            background: #f8fafc !important;
+        }
+        
+        [data-theme="light"] [style*="border: 2px dashed #3f3f46"],
+        [data-theme="light"] [style*="border:2px dashed #3f3f46"] {
+            border-color: #cbd5e1 !important;
+        }
     `;
     document.head.appendChild(pbqStyles);
 
