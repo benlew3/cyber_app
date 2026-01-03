@@ -3681,6 +3681,261 @@ Effective security programs track metrics across all categories for balanced rep
                 opacity: 0.9;
             }
         }
+        
+        /* ================================================
+           LIGHT MODE OVERRIDES FOR PBQ
+           ================================================ */
+        
+        [data-theme="light"] .pbq-header {
+            background: #ffffff !important;
+            border-bottom-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .pbq-header h1 {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .pbq-timer-container {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .pbq-timer {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .pbq-scenario {
+            background: #fffbeb !important;
+            border-left-color: #f59e0b !important;
+        }
+        
+        [data-theme="light"] .pbq-scenario p {
+            color: #92400e !important;
+        }
+        
+        [data-theme="light"] .pbq-instructions {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .pbq-workspace {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .drag-item,
+        [data-theme="light"] .matching-item {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .drag-item:hover,
+        [data-theme="light"] .matching-item:hover {
+            background: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+        }
+        
+        [data-theme="light"] .drag-item.dragging,
+        [data-theme="light"] .matching-item.selected {
+            background: #dbeafe !important;
+            border-color: #3b82f6 !important;
+        }
+        
+        [data-theme="light"] .drag-item.correct,
+        [data-theme="light"] .matching-item.correct {
+            background: #dcfce7 !important;
+            border-color: #22c55e !important;
+        }
+        
+        [data-theme="light"] .drag-item.incorrect,
+        [data-theme="light"] .matching-item.incorrect {
+            background: #fee2e2 !important;
+            border-color: #ef4444 !important;
+        }
+        
+        [data-theme="light"] .drop-zone {
+            background: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+        }
+        
+        [data-theme="light"] .drop-zone.drag-over {
+            background: #dbeafe !important;
+            border-color: #3b82f6 !important;
+        }
+        
+        [data-theme="light"] .drop-zone.correct {
+            background: #dcfce7 !important;
+            border-color: #22c55e !important;
+        }
+        
+        [data-theme="light"] .drop-zone.incorrect {
+            background: #fee2e2 !important;
+            border-color: #ef4444 !important;
+        }
+        
+        [data-theme="light"] .zone-label {
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .zone-item {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .zone-item:hover {
+            background: #f1f5f9 !important;
+        }
+        
+        [data-theme="light"] .pbq-results {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .pbq-results h2 {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .pbq-results p {
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .result-item {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .result-item.correct {
+            background: #f0fdf4 !important;
+            border-color: #86efac !important;
+        }
+        
+        [data-theme="light"] .result-item.incorrect {
+            background: #fef2f2 !important;
+            border-color: #fecaca !important;
+        }
+        
+        [data-theme="light"] .pbq-actions {
+            background: #f8fafc !important;
+            border-top-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .category-section {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .category-title {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .sequence-container {
+            background: #f8fafc !important;
+        }
+        
+        [data-theme="light"] .sequence-item {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .sequence-item:hover {
+            background: #f8fafc !important;
+        }
+        
+        [data-theme="light"] .rule-row {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .rule-row:hover {
+            background: #f1f5f9 !important;
+        }
+        
+        [data-theme="light"] .option-select {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .email-panel {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .email-header {
+            background: #f8fafc !important;
+            border-bottom-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .email-header-value {
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .email-body {
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .indicator-item {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .indicator-item:hover {
+            background: #f1f5f9 !important;
+        }
+        
+        [data-theme="light"] .indicator-item.selected {
+            background: #dbeafe !important;
+            border-color: #3b82f6 !important;
+        }
+        
+        [data-theme="light"] .log-entry {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .config-panel {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .config-option {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .config-option:hover {
+            background: #f8fafc !important;
+        }
+        
+        [data-theme="light"] .config-option.selected {
+            background: #dbeafe !important;
+            border-color: #3b82f6 !important;
+        }
+        
+        [data-theme="light"] .matrix-cell {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .matrix-cell:hover {
+            background: #f8fafc !important;
+        }
+        
+        [data-theme="light"] .pbq-placeholder {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .pbq-type-badge {
+            background: #f1f5f9 !important;
+            color: #475569 !important;
+        }
     `;
     document.head.appendChild(pbqStyles);
 

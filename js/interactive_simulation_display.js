@@ -63,6 +63,9 @@ function showSimulationStage() {
         case 'briefing':
             showBriefingStage(stage);
             break;
+        case 'decision':
+            showDecisionStage(stage);
+            break;
         case 'visual_analysis':
             showVisualStage(stage);
             break;
@@ -182,6 +185,240 @@ function showBriefingStage(stage) {
         </style>
     `;
 }
+
+// Decision Point Stage - Handle decision_points from JSON
+function showDecisionStage(stage) {
+    const sim = simEngine.currentSimulation;
+    const content = document.getElementById('content');
+    
+    // Helper to safely escape
+    const escape = typeof escapeHtml === 'function' ? escapeHtml : (s) => s || '';
+    
+    // Format situation text with line breaks
+    const formattedSituation = (stage.situation || '').replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+    
+    content.innerHTML = `
+        <div class="container">
+            <button class="back-btn" onclick="confirmExitSimulation()">← Exit Simulation</button>
+            
+            <div class="simulation-container decision-stage" style="max-width: 900px; margin: 0 auto;">
+                <!-- Progress Bar -->
+                ${createProgressBar()}
+                
+                <div class="decision-card" style="background: #18181b; border-radius: 12px; padding: 30px; margin-top: 20px;">
+                    <h2 style="color: #fafafa; margin-bottom: 20px;">
+                        ${escape(stage.title)}
+                    </h2>
+                    
+                    <!-- Situation -->
+                    <div class="situation-box" style="background: #27272a; border-left: 4px solid #6366f1; 
+                                padding: 20px; border-radius: 0 8px 8px 0; margin-bottom: 25px;">
+                        <div style="color: #a1a1aa; line-height: 1.8;">
+                            ${formattedSituation}
+                        </div>
+                    </div>
+                    
+                    <!-- Question -->
+                    <h3 style="color: #fafafa; margin-bottom: 20px;">
+                        ${escape(stage.question || 'What do you do?')}
+                    </h3>
+                    
+                    <!-- Options -->
+                    <div class="decision-options" id="decision-options">
+                        ${(stage.options || []).map((opt, index) => `
+                            <button class="decision-option" onclick="selectDecisionOption('${opt.id || index}')"
+                                    data-option-id="${opt.id || index}"
+                                    style="display: block; width: 100%; text-align: left; padding: 15px 20px;
+                                           background: #27272a; border: 2px solid #3f3f46; border-radius: 8px;
+                                           color: #fafafa; cursor: pointer; margin-bottom: 10px;
+                                           transition: all 0.2s;">
+                                <span style="display: inline-block; width: 30px; height: 30px; 
+                                             background: #3f3f46; border-radius: 50%; text-align: center;
+                                             line-height: 30px; margin-right: 15px; font-weight: bold;">
+                                    ${String.fromCharCode(65 + index)}
+                                </span>
+                                ${escape(opt.text)}
+                            </button>
+                        `).join('')}
+                    </div>
+                    
+                    <!-- Feedback area (hidden initially) -->
+                    <div id="decision-feedback" style="display: none; margin-top: 20px;"></div>
+                    
+                    <!-- Key Terms (if available) -->
+                    ${stage.key_terms && stage.key_terms.length > 0 ? `
+                        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #3f3f46;">
+                            <h4 style="color: #71717a; font-size: 0.9rem; margin-bottom: 10px;">
+                                📚 Key Terms in This Scenario
+                            </h4>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                ${stage.key_terms.map(term => `
+                                    <span style="background: #27272a; color: #a1a1aa; padding: 4px 10px;
+                                                 border-radius: 4px; font-size: 0.85rem;">
+                                        ${escape(term)}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            .decision-option:hover {
+                border-color: #6366f1 !important;
+                background: #2d2d35 !important;
+            }
+            .decision-option.selected {
+                border-color: #6366f1 !important;
+                background: #1e1e2e !important;
+            }
+            .decision-option.correct {
+                border-color: #10b981 !important;
+                background: #064e3b !important;
+            }
+            .decision-option.incorrect {
+                border-color: #ef4444 !important;
+                background: #7f1d1d !important;
+            }
+            .decision-option.disabled {
+                pointer-events: none;
+                opacity: 0.7;
+            }
+            
+            /* Light mode overrides */
+            [data-theme="light"] .decision-card {
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0;
+            }
+            [data-theme="light"] .decision-card h2,
+            [data-theme="light"] .decision-card h3 {
+                color: #0f172a !important;
+            }
+            [data-theme="light"] .situation-box {
+                background: #f8fafc !important;
+            }
+            [data-theme="light"] .situation-box div {
+                color: #475569 !important;
+            }
+            [data-theme="light"] .decision-option {
+                background: #f8fafc !important;
+                border-color: #e2e8f0 !important;
+                color: #334155 !important;
+            }
+            [data-theme="light"] .decision-option:hover {
+                background: #f1f5f9 !important;
+                border-color: #6366f1 !important;
+            }
+            [data-theme="light"] .decision-option.selected {
+                background: #dbeafe !important;
+                border-color: #3b82f6 !important;
+            }
+            [data-theme="light"] .decision-option.correct {
+                background: #dcfce7 !important;
+                border-color: #22c55e !important;
+            }
+            [data-theme="light"] .decision-option.incorrect {
+                background: #fee2e2 !important;
+                border-color: #ef4444 !important;
+            }
+            [data-theme="light"] .decision-option span {
+                background: #e2e8f0 !important;
+                color: #334155 !important;
+            }
+        </style>
+    `;
+}
+
+// Handle decision option selection
+window.selectDecisionOption = function(optionId) {
+    const stage = simEngine.getCurrentStage();
+    const option = stage.options.find(o => (o.id || String(stage.options.indexOf(o))) === String(optionId));
+    
+    if (!option) return;
+    
+    // Disable all options
+    document.querySelectorAll('.decision-option').forEach(btn => {
+        btn.classList.add('disabled');
+    });
+    
+    // Mark selected option
+    const selectedBtn = document.querySelector(`[data-option-id="${optionId}"]`);
+    if (selectedBtn) {
+        selectedBtn.classList.add('selected');
+        
+        // Add correct/incorrect class
+        if (option.is_optimal) {
+            selectedBtn.classList.add('correct');
+        } else {
+            selectedBtn.classList.add('incorrect');
+            // Show correct answer
+            stage.options.forEach((opt, idx) => {
+                if (opt.is_optimal) {
+                    const correctBtn = document.querySelector(`[data-option-id="${opt.id || idx}"]`);
+                    if (correctBtn) correctBtn.classList.add('correct');
+                }
+            });
+        }
+    }
+    
+    // Calculate points
+    const points = option.points || (option.is_optimal ? 25 : 5);
+    simEngine.score += points;
+    
+    // Record action
+    simEngine.userActions.push({
+        stage: simEngine.currentStage,
+        optionSelected: optionId,
+        isOptimal: option.is_optimal,
+        points: points
+    });
+    
+    // Show feedback
+    const feedbackDiv = document.getElementById('decision-feedback');
+    if (feedbackDiv) {
+        const escape = typeof escapeHtml === 'function' ? escapeHtml : (s) => s || '';
+        feedbackDiv.innerHTML = `
+            <div style="background: ${option.is_optimal ? '#064e3b' : '#7f1d1d'}; 
+                        border: 1px solid ${option.is_optimal ? '#10b981' : '#ef4444'};
+                        border-radius: 8px; padding: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <span style="font-size: 1.5rem;">${option.is_optimal ? '✅' : '❌'}</span>
+                    <strong style="color: ${option.is_optimal ? '#10b981' : '#fca5a5'};">
+                        ${option.is_optimal ? 'Excellent Choice!' : 'Not Optimal'}
+                    </strong>
+                    <span style="color: #a1a1aa; margin-left: auto;">+${points} points</span>
+                </div>
+                <p style="color: #fafafa; line-height: 1.7; margin-bottom: 15px;">
+                    ${escape(option.feedback || '')}
+                </p>
+                ${option.learning_note ? `
+                    <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 6px; margin-top: 10px;">
+                        <strong style="color: #93c5fd;">💡 Key Learning:</strong>
+                        <span style="color: #e2e8f0;"> ${escape(option.learning_note)}</span>
+                    </div>
+                ` : ''}
+                <button class="btn btn-primary" onclick="proceedToNextStage()" 
+                        style="margin-top: 20px; padding: 12px 30px;">
+                    Continue →
+                </button>
+            </div>
+        `;
+        feedbackDiv.style.display = 'block';
+        
+        // Add light mode styles for feedback
+        if (document.documentElement.getAttribute('data-theme') === 'light') {
+            const feedbackBox = feedbackDiv.querySelector('div');
+            if (feedbackBox) {
+                feedbackBox.style.background = option.is_optimal ? '#f0fdf4' : '#fef2f2';
+                feedbackBox.style.borderColor = option.is_optimal ? '#22c55e' : '#ef4444';
+                const textP = feedbackBox.querySelector('p');
+                if (textP) textP.style.color = '#334155';
+            }
+        }
+    }
+};
 
 // Stage 2: Visual Analysis
 function showVisualStage(stage) {

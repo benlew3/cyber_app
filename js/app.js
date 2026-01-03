@@ -434,37 +434,50 @@ const SIMULATION_FILE_MAP = {
 
 // Load simulations from your data folder
 async function loadSimulationsFromDataFolder() {
-    console.log('📂 Loading simulations from data/simulations.json...');
+    console.log('📂 Loading simulations from individual JSON files...');
     
+    // First try loading combined file (if it exists)
     try {
         const response = await fetch('./data/simulations.json');
-        const data = await response.json();
-        
-        // Store simulations for quick access
-        if (Array.isArray(data)) {
-            console.log(`Found ${data.length} simulations in array format`);
-            data.forEach(sim => {
-                const id = sim.id || sim.simulation_id || sim.scenario_id;
-                if (id) SIMULATION_DATA[id] = sim;
-            });
-        } else if (data.simulations) {
-            console.log(`Found ${data.simulations.length} simulations in simulations property`);
-            data.simulations.forEach(sim => {
-                const id = sim.id || sim.simulation_id || sim.scenario_id;
-                if (id) SIMULATION_DATA[id] = sim;
-            });
-        } else {
-            console.log('Found simulations in object format');
-            SIMULATION_DATA = data;
+        if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data)) {
+                data.forEach(sim => {
+                    const id = sim.id || sim.simulation_id || sim.scenario_id;
+                    if (id) SIMULATION_DATA[id] = sim;
+                });
+                console.log('✅ Loaded from combined simulations.json');
+                return true;
+            }
         }
-        
-        console.log('✅ Loaded simulations:', Object.keys(SIMULATION_DATA).slice(0, 5).join(', ') + '...');
-        return true;
-    } catch (error) {
-        console.error('❌ Error loading simulations.json:', error);
-        console.log('Will use generated mock data as fallback');
-        return false;
+    } catch (e) {
+        console.log('No combined simulations.json, loading individual files...');
     }
+    
+    // Load from individual files using SIMULATION_FILE_MAP
+    let loadedCount = 0;
+    for (const [simId, fileName] of Object.entries(SIMULATION_FILE_MAP)) {
+        try {
+            const response = await fetch(`./data/${fileName}`);
+            if (response.ok) {
+                const simData = await response.json();
+                // Normalize the ID
+                simData.id = simId;
+                SIMULATION_DATA[simId] = simData;
+                loadedCount++;
+            }
+        } catch (e) {
+            console.warn(`Could not load ${fileName}:`, e.message);
+        }
+    }
+    
+    if (loadedCount > 0) {
+        console.log(`✅ Loaded ${loadedCount} simulations from individual files`);
+        return true;
+    }
+    
+    console.log('Will use generated mock data as fallback');
+    return false;
 }
 
 // ALL 25 SIMULATIONS with scenarios (26 total with duplicate D2-SIM-001)
@@ -3375,6 +3388,324 @@ function injectStyles() {
                 transition-duration: 0.01ms !important;
             }
         }
+        
+        /* ================================================
+           LIGHT MODE OVERRIDES
+           ================================================ */
+        
+        [data-theme="light"] body {
+            background: #f8fafc !important;
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .header-bar {
+            background: #ffffff !important;
+            border-bottom-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .container {
+            background: transparent !important;
+        }
+        
+        [data-theme="light"] .page-title {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .card,
+        [data-theme="light"] .domain-card,
+        [data-theme="light"] .stat-card,
+        [data-theme="light"] .content-card {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .card:hover,
+        [data-theme="light"] .domain-card:hover {
+            background: #f8fafc !important;
+        }
+        
+        /* Quiz options - Light Mode */
+        [data-theme="light"] .quiz-option {
+            background: #ffffff !important;
+            border: 2px solid #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .quiz-option:hover:not(.disabled) {
+            border-color: #cbd5e1 !important;
+            background: #f8fafc !important;
+        }
+        
+        [data-theme="light"] .quiz-option.selected {
+            border-color: #3b82f6 !important;
+            background: #dbeafe !important;
+            color: #1e40af !important;
+        }
+        
+        [data-theme="light"] .quiz-option.correct {
+            border-color: #22c55e !important;
+            background: #dcfce7 !important;
+            color: #166534 !important;
+        }
+        
+        [data-theme="light"] .quiz-option.incorrect {
+            border-color: #ef4444 !important;
+            background: #fee2e2 !important;
+            color: #991b1b !important;
+        }
+        
+        [data-theme="light"] .feedback-correct {
+            background: #f0fdf4 !important;
+            border-color: #22c55e !important;
+            color: #166534 !important;
+        }
+        
+        [data-theme="light"] .feedback-incorrect {
+            background: #fef2f2 !important;
+            border-color: #ef4444 !important;
+            color: #991b1b !important;
+        }
+        
+        /* Simulation Container - Light Mode */
+        [data-theme="light"] .simulation-container {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0;
+        }
+        
+        [data-theme="light"] .simulation-step {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0;
+        }
+        
+        [data-theme="light"] .simulation-options .quiz-option {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        
+        /* PBQ - Light Mode */
+        [data-theme="light"] .pbq-container {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0;
+        }
+        
+        [data-theme="light"] .pbq-scenario {
+            background: #fffbeb !important;
+            border-left-color: #f59e0b !important;
+            color: #92400e !important;
+        }
+        
+        [data-theme="light"] .drag-item {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .drag-item:hover {
+            background: #f8fafc !important;
+        }
+        
+        [data-theme="light"] .drop-zone {
+            border-color: #cbd5e1 !important;
+            background: #fafafa !important;
+        }
+        
+        [data-theme="light"] .drop-zone.active {
+            border-color: #6366f1 !important;
+            background: rgba(99, 102, 241, 0.08) !important;
+        }
+        
+        /* Exam Readiness - Light Mode */
+        [data-theme="light"] .exam-readiness-panel {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0;
+        }
+        
+        [data-theme="light"] .exam-readiness-title {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .exam-readiness-subtitle {
+            color: #64748b !important;
+        }
+        
+        /* Recommendations Panel - Light Mode */
+        [data-theme="light"] .recommendations-panel {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0;
+        }
+        
+        [data-theme="light"] .recommendations-panel h3 {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .recommendation-card {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .recommendation-card.priority-low {
+            background: #f0fdf4 !important;
+        }
+        
+        [data-theme="light"] .recommendation-card.priority-medium {
+            background: #fffbeb !important;
+        }
+        
+        [data-theme="light"] .recommendation-card.priority-high {
+            background: #fef2f2 !important;
+        }
+        
+        [data-theme="light"] .rec-title {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .rec-description {
+            color: #475569 !important;
+        }
+        
+        /* Analytics - Light Mode */
+        [data-theme="light"] .analytics-card {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0;
+        }
+        
+        [data-theme="light"] .analytics-label {
+            color: #64748b !important;
+        }
+        
+        /* Weak Areas - Light Mode */
+        [data-theme="light"] .weak-areas-panel {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2) !important;
+            border-color: #fca5a5 !important;
+        }
+        
+        [data-theme="light"] .weak-areas-title {
+            color: #991b1b !important;
+        }
+        
+        [data-theme="light"] .weak-areas-subtitle {
+            color: #7f1d1d !important;
+        }
+        
+        /* Glossary - Light Mode */
+        [data-theme="light"] .glossary-search {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #334155 !important;
+        }
+        
+        [data-theme="light"] .glossary-item {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .glossary-term {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] .glossary-definition {
+            color: #475569 !important;
+        }
+        
+        /* Notes Modal - Light Mode */
+        [data-theme="light"] .notes-modal-content {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .note-card {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        /* Buttons - Light Mode */
+        [data-theme="light"] .btn {
+            background: #f1f5f9 !important;
+            color: #334155 !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .btn:hover {
+            background: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .btn-primary {
+            background: #4f46e5 !important;
+            color: #ffffff !important;
+            border-color: #4f46e5 !important;
+        }
+        
+        [data-theme="light"] .btn-primary:hover {
+            background: #4338ca !important;
+        }
+        
+        /* Navigation - Light Mode */
+        [data-theme="light"] .nav-btn {
+            color: #475569 !important;
+        }
+        
+        [data-theme="light"] .nav-btn:hover,
+        [data-theme="light"] .nav-btn.active {
+            color: #0f172a !important;
+            background: #f1f5f9 !important;
+        }
+        
+        /* Back Button - Light Mode */
+        [data-theme="light"] .back-btn {
+            color: #475569 !important;
+        }
+        
+        [data-theme="light"] .back-btn:hover {
+            color: #0f172a !important;
+        }
+        
+        /* Text Colors Override - Light Mode */
+        [data-theme="light"] h1, 
+        [data-theme="light"] h2, 
+        [data-theme="light"] h3 {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] p {
+            color: #334155 !important;
+        }
+        
+        /* Fix inline styles - Light Mode */
+        [data-theme="light"] [style*="background: #18181b"],
+        [data-theme="light"] [style*="background:#18181b"],
+        [data-theme="light"] [style*="background: #09090b"],
+        [data-theme="light"] [style*="background:#09090b"] {
+            background: #ffffff !important;
+        }
+        
+        [data-theme="light"] [style*="background: #27272a"],
+        [data-theme="light"] [style*="background:#27272a"],
+        [data-theme="light"] [style*="background: #1e1e2e"],
+        [data-theme="light"] [style*="background:#1e1e2e"] {
+            background: #f8fafc !important;
+        }
+        
+        [data-theme="light"] [style*="color: #fafafa"],
+        [data-theme="light"] [style*="color:#fafafa"],
+        [data-theme="light"] [style*="color: #f4f4f5"],
+        [data-theme="light"] [style*="color:#f4f4f5"] {
+            color: #0f172a !important;
+        }
+        
+        [data-theme="light"] [style*="color: #a1a1aa"],
+        [data-theme="light"] [style*="color:#a1a1aa"],
+        [data-theme="light"] [style*="color: #71717a"],
+        [data-theme="light"] [style*="color:#71717a"] {
+            color: #64748b !important;
+        }
+        
+        [data-theme="light"] [style*="border-color: #27272a"],
+        [data-theme="light"] [style*="border-color:#27272a"],
+        [data-theme="light"] [style*="border: 1px solid #27272a"],
+        [data-theme="light"] [style*="border: 1px solid #3f3f46"] {
+            border-color: #e2e8f0 !important;
+        }
     `;
     document.head.appendChild(style);
     console.log('✅ Styles injected');
@@ -3479,15 +3810,15 @@ function showDashboard() {
                               analytics.readiness.score >= 50 ? 'progress' : 'starting';
         
         analyticsHtml = `
-            <div style="background: linear-gradient(135deg, #18181b, #27272a); border-radius: 12px; padding: 25px; margin: 30px 0;">
+            <div class="exam-readiness-panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
                     <div>
-                        <h3 style="margin: 0 0 10px 0;">🎯 Exam Readiness</h3>
-                        <p style="color: #a1a1aa; margin: 0;">Based on your quiz performance and content completion</p>
+                        <h3 class="exam-readiness-title">🎯 Exam Readiness</h3>
+                        <p class="exam-readiness-subtitle">Based on your quiz performance and content completion</p>
                     </div>
                     <div style="text-align: center;">
                         <span class="readiness-badge ${readinessClass}">${analytics.readiness.status}</span>
-                        <div style="font-size: 2rem; font-weight: bold; margin-top: 10px; color: ${
+                        <div class="readiness-score" style="color: ${
                             readinessClass === 'ready' ? '#10b981' : 
                             readinessClass === 'almost' ? '#f59e0b' : '#6366f1'
                         };">${analytics.readiness.score}%</div>
@@ -3501,7 +3832,7 @@ function showDashboard() {
                             <div class="analytics-label">Questions Answered</div>
                         </div>
                         <div class="analytics-card">
-                            <div class="analytics-value" style="color: #10b981;">${analytics.overall.accuracy}%</div>
+                            <div class="analytics-value accuracy-value">${analytics.overall.accuracy}%</div>
                             <div class="analytics-label">Accuracy</div>
                         </div>
                         <div class="analytics-card">
@@ -3517,17 +3848,16 @@ function showDashboard() {
         const weakAreas = APP.progress.weakAreas || [];
         if (weakAreas.length > 0) {
             weakAreasHtml = `
-                <div style="background: linear-gradient(135deg, #7f1d1d, #991b1b); border: 1px solid #ef4444; border-radius: 12px; padding: 20px; margin: 20px 0;">
-                    <h3 style="color: #fca5a5; margin: 0 0 10px 0;">⚠️ Weak Areas Detected</h3>
-                    <p style="color: #fecaca; margin: 0 0 15px 0;">
+                <div class="weak-areas-panel">
+                    <h3 class="weak-areas-title">⚠️ Weak Areas Detected</h3>
+                    <p class="weak-areas-subtitle">
                         Focus your study on these domains to improve your exam readiness:
                     </p>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div class="weak-areas-buttons">
                         ${weakAreas.map(domain => {
                             const domainInfo = DOMAINS.find(d => d.id === domain);
                             return domainInfo ? `
-                                <button class="btn" onclick="showDomainLessons(${domain})" 
-                                        style="background: rgba(0,0,0,0.3); border-color: #ef4444;">
+                                <button class="btn weak-area-btn" onclick="showDomainLessons(${domain})">
                                     ${domainInfo.icon} Domain ${domain}: ${domainInfo.name}
                                 </button>
                             ` : '';

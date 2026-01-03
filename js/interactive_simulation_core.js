@@ -32,12 +32,92 @@ class InteractiveSimulationEngine {
         this.score = 0;
         this.startTime = Date.now();
         
-        // Ensure simulation has stages
+        // Handle different data formats - convert decision_points to stages if needed
         if (!simData.stages) {
-            simData.stages = this.generateDefaultStages(simData);
+            if (simData.decision_points && simData.decision_points.length > 0) {
+                // Convert decision_points format to stages format
+                simData.stages = this.convertDecisionPointsToStages(simData);
+            } else if (simData.steps && simData.steps.length > 0) {
+                // Convert old steps format
+                simData.stages = this.convertStepsToStages(simData);
+            } else {
+                // Generate default stages
+                simData.stages = this.generateDefaultStages(simData);
+            }
         }
         
         return true;
+    }
+
+    // Convert decision_points format (from JSON files) to interactive stages
+    convertDecisionPointsToStages(simData) {
+        const stages = [];
+        
+        // Add briefing stage
+        stages.push({
+            type: 'briefing',
+            title: simData.title || 'Security Scenario Briefing',
+            content: simData.scenario_introduction || simData.scenario || 'A security situation requires your attention.',
+            organization: simData.organization,
+            learning_objectives: simData.learning_objectives,
+            duration: '2-3 minutes'
+        });
+        
+        // Convert each decision point to an interactive stage
+        simData.decision_points.forEach((dp, index) => {
+            stages.push({
+                type: 'decision',
+                title: dp.title || `Decision Point ${index + 1}`,
+                situation: dp.situation,
+                question: dp.question || 'What do you do?',
+                options: dp.options,
+                key_terms: dp.key_terms,
+                duration: '3-5 minutes'
+            });
+        });
+        
+        // Add summary/report stage
+        stages.push({
+            type: 'report',
+            title: 'Scenario Summary',
+            content: 'Review your decisions and their outcomes',
+            summary_points: simData.summary_points,
+            duration: '2 minutes'
+        });
+        
+        return stages;
+    }
+
+    // Convert old steps format to stages
+    convertStepsToStages(simData) {
+        const stages = [];
+        
+        // Add briefing
+        stages.push({
+            type: 'briefing',
+            title: simData.title || 'Security Scenario',
+            content: simData.scenario || 'A security situation requires your attention.',
+            duration: '2 minutes'
+        });
+        
+        // Convert steps to decision stages
+        simData.steps.forEach((step, index) => {
+            stages.push({
+                type: 'decision',
+                title: `Step ${index + 1}`,
+                situation: step.situation,
+                question: step.question,
+                options: step.options.map(opt => ({
+                    id: opt.id || String.fromCharCode(97 + step.options.indexOf(opt)),
+                    text: opt.text,
+                    is_optimal: opt.correct,
+                    feedback: opt.feedback || (opt.correct ? 'Correct!' : 'Not the best choice.'),
+                    points: opt.points || (opt.correct ? 25 : 5)
+                }))
+            });
+        });
+        
+        return stages;
     }
 
     generateDefaultStages(simData) {
