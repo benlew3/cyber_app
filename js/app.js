@@ -1,12 +1,12 @@
-// Security+ Platform v32 - Full v30 Functionality + Professional Simulations
-// Combines ALL v30 features with enhanced simulation system from v29
+// Security+ Platform v33 - Complete Training Platform
+// Full functionality with enhanced simulations, light/dark mode, and comprehensive content
 // 41 lessons (with navigation), 26 simulations (260 decision points), 15 remediation, 
 // 250 questions, 30 PBQs, 300+ glossary terms, practice exam
 // 
 // v29 KEY ENHANCEMENT: Each simulation now has 10 comprehensive decision points
 // matching the actual JSON files (1000+ lines each) for professional training
 
-console.log('🚀 Security+ v31 - All v30 Features + 260 Decision Points!');
+console.log('🚀 Security+ v33 - Complete Training Platform!');
 
 // ============================================
 // IMMEDIATE LOADING FIX & ERROR PREVENTION
@@ -1764,7 +1764,7 @@ function injectStyles() {
     if (existingStyles) existingStyles.remove();
     
     const style = document.createElement('style');
-    style.setAttribute('data-app-styles', 'v27');
+    style.setAttribute('data-app-styles', 'v33');
     style.textContent = `
         /* Reset and Base */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -3747,7 +3747,7 @@ function createHeader() {
     header.innerHTML = `
         <div class="header-brand">
             <span>🛡️</span>
-            <span>Security+ v29 Complete</span>
+            <span>Security+ v33</span>
         </div>
         <nav class="header-nav">
             <button class="nav-btn" onclick="showDashboard()">🏠 Dashboard</button>
@@ -3873,7 +3873,7 @@ function showDashboard() {
     
     content.innerHTML = `
         <div class="container">
-            <h1 class="page-title">🛡️ Security+ Training Platform v32</h1>
+            <h1 class="page-title">🛡️ Security+ Training Platform v33</h1>
             <p class="page-subtitle">CompTIA Security+ SY0-701 - Complete Training System</p>
             
             <h2 style="margin-top: 20px;">Select Your Learning Path:</h2>
@@ -5996,7 +5996,7 @@ function markLessonComplete(lessonId) {
 
 function saveProgress() {
     try {
-        localStorage.setItem('securityPlusProgress_v32', JSON.stringify(APP.progress));
+        localStorage.setItem('securityPlusProgress_v33', JSON.stringify(APP.progress));
         console.log('Progress saved');
     } catch (e) {
         console.error('Failed to save progress:', e);
@@ -6005,15 +6005,24 @@ function saveProgress() {
 
 function loadProgress() {
     try {
-        // Try loading v32 first, then fall back to v29 for migration
-        let saved = localStorage.getItem('securityPlusProgress_v32');
+        // Try loading v33 first, then fall back to v32 for migration
+        let saved = localStorage.getItem('securityPlusProgress_v33');
         
-        // Migrate from v29 if v32 doesn't exist
+        // Migrate from v32 if v33 doesn't exist
+        if (!saved) {
+            saved = localStorage.getItem('securityPlusProgress_v32');
+            if (saved) {
+                console.log('Migrating progress from v32 to v33');
+                localStorage.setItem('securityPlusProgress_v33', saved);
+            }
+        }
+        
+        // Migrate from v29 if still nothing
         if (!saved) {
             saved = localStorage.getItem('securityPlusProgress_v29');
             if (saved) {
-                console.log('Migrating progress from v29 to v32');
-                localStorage.setItem('securityPlusProgress_v32', saved);
+                console.log('Migrating progress from v29 to v33');
+                localStorage.setItem('securityPlusProgress_v33', saved);
             }
         }
         
@@ -6466,7 +6475,7 @@ function testDataFolderSetup() {
 }
 
 // Final confirmation
-console.log('✅ Security+ v31 loaded successfully');
+console.log('✅ Security+ v33 loaded successfully');
 console.log('📊 260 decision points across 26 simulations');
 console.log('🎯 All v30 features preserved + enhanced simulations');
 console.log('💯 Ready for professional Security+ training!');

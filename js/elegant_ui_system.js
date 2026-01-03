@@ -615,7 +615,7 @@
                 originalSaveProgress();
             } else if (window.APP) {
                 // Fallback save logic
-                localStorage.setItem('securityPlusProgress_v29', JSON.stringify(window.APP.progress));
+                localStorage.setItem('securityPlusProgress_v33', JSON.stringify(window.APP.progress));
             }
             
             // Show notification
