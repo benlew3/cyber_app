@@ -3,406 +3,477 @@
   "domain": 2,
   "title": "Mitigation Techniques",
   "objectives_covered": ["2.5"],
-  "estimated_duration": "45-55 minutes",
+  "estimated_duration": "80-95 minutes (Core: 45 min, Deep Dives: 35-50 min)",
   "difficulty": "intermediate",
   "prerequisites": ["D2-LESSON-009"],
+  "version": "2.0-enhanced",
 
   "introduction": {
-    "hook": "In March 2021, Microsoft disclosed four zero-day vulnerabilities in Exchange Server that were being actively exploited. With no patch available initially, organizations had to rely on mitigation techniques: URL rewriting rules to block exploitation, network segmentation to limit attacker access, and enhanced monitoring to detect compromise. Those who implemented mitigations quickly survived; those who waited for patches often found themselves already breached. Mitigation techniques are your emergency toolkitâ€”the controls you deploy when vulnerabilities exist but perfect solutions aren't yet possible.",
+    "hook": "In March 2021, Microsoft disclosed four zero-day vulnerabilities in Exchange Server being actively exploited. With no patch available initially, organizations relied on mitigation techniques: URL rewriting rules to block exploitation, network segmentation to limit access, and enhanced monitoring to detect compromise. Those who implemented mitigations quickly survived; those who waited often found themselves already breached. Mitigation techniques are your emergency toolkit.",
+    
     "learning_goals": [
-      "Apply network-based mitigations including segmentation, isolation, and access control",
-      "Implement endpoint mitigations including application control and hardening",
+      "Apply network-based mitigations including segmentation and isolation",
+      "Implement endpoint mitigations including application control",
       "Deploy compensating controls when primary controls are unavailable",
-      "Understand deception technologies as active defense measures",
-      "Select appropriate mitigations based on threat type and environment"
+      "Select appropriate mitigations based on threat type",
+      "Implement containment strategies during incidents"
     ],
-    "why_it_matters": "You can't always patch immediately, and attackers won't wait. Mitigation techniques reduce risk when vulnerabilities exist, contain breaches when prevention fails, and buy time for permanent solutions. Security professionals constantly implement mitigationsâ€”from firewall rules blocking exploit attempts to network segmentation containing compromised systems. The Security+ exam tests your ability to select appropriate mitigations for various scenarios. Expect 5-7 questions on mitigation strategies and compensating controls."
+    
+    "why_it_matters": "You can't always patch immediately, and attackers won't wait. Mitigation techniques reduce risk when vulnerabilities exist and contain breaches when prevention fails. Expect 5-7 Security+ questions on mitigation strategies.",
+    
+    "career_relevance": {
+      "soc_analyst": "You'll implement emergency mitigations when new threats emerge—firewall rules, IOC blocks, and containment actions. Speed matters when stopping active attacks.",
+      "incident_responder": "Containment is a critical IR phase. You'll isolate compromised systems, block attacker infrastructure, and implement temporary controls to stop bleeding.",
+      "grc_analyst": "You'll evaluate compensating controls when primary controls aren't feasible, documenting risk acceptance and mitigation effectiveness.",
+      "penetration_tester": "Understanding mitigations helps you assess their effectiveness and identify bypass techniques during assessments.",
+      "security_engineer": "You'll design segmentation architectures, implement ACLs, and build automated containment playbooks."
+    }
+  },
+
+  "linux_fundamentals": {
+    "why_it_matters": "Implementing network mitigations often requires firewall and network configuration commands.",
+    
+    "essential_commands": {
+      "firewall_rules": [
+        {
+          "command": "iptables",
+          "purpose": "Linux firewall rules",
+          "examples": [
+            "iptables -A INPUT -s 192.168.1.100 -j DROP           # Block IP",
+            "iptables -A INPUT -p tcp --dport 445 -j DROP         # Block SMB",
+            "iptables -A OUTPUT -p tcp --dport 4444 -j DROP       # Block common C2 port",
+            "iptables -L -n                                        # List rules"
+          ]
+        },
+        {
+          "command": "ufw",
+          "purpose": "Simplified firewall management",
+          "examples": [
+            "ufw deny from 192.168.1.100                           # Block IP",
+            "ufw deny out 4444                                     # Block outbound port",
+            "ufw status numbered                                   # List rules"
+          ]
+        }
+      ],
+      "network_isolation": [
+        {
+          "command": "ip / ifconfig",
+          "purpose": "Network interface management",
+          "examples": [
+            "ip link set eth0 down                                 # Disable interface",
+            "ip addr del 192.168.1.100/24 dev eth0                # Remove IP"
+          ]
+        }
+      ]
+    }
   },
 
   "sections": [
     {
       "section_id": "D2-L010-S01",
       "title": "Network-Based Mitigations",
-      "content": "Network controls provide essential mitigations by controlling traffic flow, isolating systems, and blocking attack vectors at the network level.\n\n**Network Segmentation**\n\n*Purpose*\n- Divide network into security zones\n- Limit lateral movement\n- Contain breaches\n- Enable focused monitoring\n- Support compliance requirements\n\n*Segmentation Methods*\n\n*VLANs (Virtual LANs)*\n- Logical network separation\n- Layer 2 isolation\n- Requires router/firewall between VLANs\n- Cost-effective starting point\n\n*Physical Segmentation*\n- Completely separate networks\n- Air gaps for critical systems\n- Highest security\n- Most expensive\n\n*Software-Defined Segmentation*\n- Micro-segmentation\n- Zero trust implementation\n- Granular workload isolation\n- Policy-based enforcement\n\n**Network Isolation**\n\n*Quarantine Networks*\n- Isolate suspicious/compromised systems\n- Limit communication\n- Enable investigation\n- Prevent spread\n\n*DMZ (Demilitarized Zone)*\n- Public-facing services\n- Isolated from internal network\n- Dual firewall architecture\n- Limited internal access\n\n*Air Gap*\n- Complete network isolation\n- No network connectivity\n- Physical transfer required\n- Highest security for critical systems\n\n**Access Control Lists (ACLs)**\n\n*Firewall Rules*\n- Explicit allow/deny decisions\n- Source/destination IP filtering\n- Port and protocol restrictions\n- Default deny principle\n\n*Common Mitigations*\n- Block known malicious IPs\n- Restrict outbound connections\n- Limit lateral movement ports\n- Segment management traffic\n\n**Network-Based Attack Mitigations**\n\n*DDoS Mitigation*\n- Rate limiting\n- Traffic scrubbing\n- CDN and anycast\n- Upstream filtering\n\n*Man-in-the-Middle Mitigation*\n- Encryption (TLS everywhere)\n- Certificate pinning\n- 802.1X port authentication\n- Dynamic ARP Inspection\n\n**Egress Filtering**\n\n*Concept*\n- Control outbound traffic\n- Block C2 communication\n- Prevent data exfiltration\n- Often neglected vs. ingress\n\n*Implementation*\n- Proxy all web traffic\n- Restrict direct internet access\n- Block unauthorized protocols\n- DNS filtering\n- Monitor anomalies",
-
+      "estimated_time": "15 minutes",
+      
+      "content": {
+        "overview": "Network controls provide essential mitigations by controlling traffic flow, isolating systems, and blocking attack vectors.",
+        
+        "network_segmentation": {
+          "purpose": [
+            "Divide network into security zones",
+            "Limit lateral movement",
+            "Contain breaches",
+            "Enable focused monitoring"
+          ],
+          "methods": [
+            {
+              "method": "VLANs",
+              "description": "Logical network separation at Layer 2",
+              "pros": ["Cost-effective", "Flexible", "Easy to implement"],
+              "cons": ["Can be bypassed if misconfigured", "Requires inter-VLAN routing control"],
+              "key": "Must have firewall/ACL between VLANs"
+            },
+            {
+              "method": "Physical Segmentation",
+              "description": "Completely separate network infrastructure",
+              "pros": ["Highest security", "True isolation"],
+              "cons": ["Expensive", "Complex management"],
+              "use_case": "Critical systems, air-gapped environments"
+            },
+            {
+              "method": "Micro-segmentation",
+              "description": "Granular workload-level isolation",
+              "pros": ["Fine-grained control", "Zero Trust aligned"],
+              "cons": ["Complex implementation", "Requires automation"],
+              "use_case": "Data centers, cloud environments"
+            }
+          ]
+        },
+        
+        "network_isolation": [
+          {
+            "type": "DMZ (Demilitarized Zone)",
+            "purpose": "Isolate public-facing services from internal network",
+            "architecture": "Dual firewall—internet-DMZ-internal",
+            "services": ["Web servers", "Email gateways", "VPN endpoints"]
+          },
+          {
+            "type": "Quarantine Network",
+            "purpose": "Isolate suspicious or compromised systems",
+            "use": "Investigation without allowing spread"
+          },
+          {
+            "type": "Air Gap",
+            "purpose": "Complete network isolation",
+            "use": "Critical infrastructure, classified systems",
+            "limitation": "Data transfer requires physical media"
+          }
+        ],
+        
+        "access_control_lists": {
+          "description": "Firewall rules controlling traffic flow",
+          "principle": "Default deny—only allow what's explicitly required",
+          "common_mitigations": [
+            "Block known malicious IPs",
+            "Restrict lateral movement ports (445, 3389, 22)",
+            "Limit outbound connections",
+            "Segment management traffic"
+          ]
+        },
+        
+        "egress_filtering": {
+          "description": "Control outbound traffic",
+          "importance": "Often neglected but critical for blocking C2 and exfiltration",
+          "implementations": [
+            "Proxy all web traffic",
+            "Block direct internet access",
+            "DNS filtering",
+            "Restrict unauthorized protocols"
+          ]
+        },
+        
+        "visualization": {
+          "type": "ascii_diagram",
+          "title": "Network Segmentation Impact",
+          "diagram": [
+            "╔══════════════════════════════════════════════════════════════════════════════╗",
+            "║              RANSOMWARE SPREAD: FLAT vs SEGMENTED NETWORK                    ║",
+            "╠══════════════════════════════════════════════════════════════════════════════╣",
+            "║                                                                               ║",
+            "║   FLAT NETWORK (No Segmentation)     SEGMENTED NETWORK                       ║",
+            "║   ══════════════════════════════     ════════════════                       ║",
+            "║                                                                               ║",
+            "║   ┌─────────────────────────┐        ┌─────────────────────────┐            ║",
+            "║   │ [X] [X] [X] [X] [X]     │        │ VLAN 10: Users         │            ║",
+            "║   │ [X] [X] [X] [X] [X]     │        │ [X] [○] [○] [○] [○]    │ ←Firewall  ║",
+            "║   │ [X] [X] [X] [X] [X]     │        ├─────────────────────────┤            ║",
+            "║   │ [X] [X] [X] [X] [X]     │        │ VLAN 20: Servers       │            ║",
+            "║   │ [X] [X] [X] [X] [X]     │        │ [○] [○] [○] [○] [○]    │ ←Protected ║",
+            "║   └─────────────────────────┘        └─────────────────────────┘            ║",
+            "║                                                                               ║",
+            "║   Result: 25 systems encrypted       Result: 1 system encrypted             ║",
+            "║   Recovery: 3 weeks                  Recovery: 2 hours                       ║",
+            "║                                                                               ║",
+            "║   [X] = Encrypted    [○] = Protected                                        ║",
+            "║                                                                               ║",
+            "╚══════════════════════════════════════════════════════════════════════════════╝"
+          ]
+        }
+      },
+      
       "key_points": [
         "Network segmentation limits lateral movement and contains breaches",
-        "VLANs provide logical separation; air gap provides physical isolation",
+        "VLANs require firewall/ACL between them for security",
         "DMZ isolates public-facing services from internal network",
-        "Egress filtering blocks C2 and data exfiltration (often neglected)",
-        "Default deny on ACLsâ€”only allow what's explicitly required"
+        "Egress filtering blocks C2 and exfiltration (often neglected)",
+        "Default deny on ACLs—only allow what's required"
       ],
-
-      "real_world_example": {
-        "scenario": "Network segmentation contains ransomware",
-        "company": "Pinnacle Financial Services",
-        "application": "Ransomware entered Pinnacle's network via phishing but segmentation limited damage: INFECTION (workstation in general user VLAN encrypted), ATTEMPTED SPREAD (ransomware tried SMB propagation to other systems), SEGMENTATION EFFECT (firewall rules between VLANs blocked SMBâ€”only allowed specific business applications), CONTAINED (ransomware encrypted 1 workstation instead of spreading to 500), RECOVERY (restored single workstation from backup in 2 hours). Without segmentation, same attack at similar company encrypted 400 systems and took 3 weeks to recover. Lesson: segment even internal networks."
-      },
-
+      
       "exam_tips": [
-        "Network segmentation = divide network to limit lateral movement",
-        "DMZ = isolated zone for public-facing services",
-        "Air gap = complete network isolation (physical separation)",
-        "Egress filtering controls outbound traffic (blocks C2, exfiltration)",
-        "802.1X provides port-based network access control"
+        "Segmentation = divide network into zones",
+        "DMZ = public services isolated from internal",
+        "Air gap = complete physical isolation",
+        "Egress filtering = control outbound traffic",
+        "Default deny = block everything not explicitly allowed"
       ],
-
+      
       "glossary_terms": [
         {
           "term": "Network Segmentation",
-          "definition": "Dividing a network into separate zones with controlled access between them to limit the spread of attacks and contain breaches.",
-          "exam_note": "Divides network. Limits lateral movement. VLANs, firewalls. Defense in depth."
+          "definition": "Dividing a network into smaller zones to limit lateral movement and contain breaches.",
+          "exam_note": "Can use VLANs, firewalls, or physical separation."
         },
         {
-          "term": "DMZ (Demilitarized Zone)",
-          "definition": "A network segment that sits between the external internet and internal network, hosting public-facing services while protecting internal resources.",
-          "exam_note": "Public-facing services. Dual firewall. Isolates from internal. Buffer zone."
-        },
-        {
-          "term": "Air Gap",
-          "definition": "A security measure where a computer or network is physically isolated from unsecured networks, with no network connectivity.",
-          "exam_note": "Complete physical isolation. No network connection. Highest security. Critical systems."
+          "term": "DMZ",
+          "definition": "Demilitarized Zone - network segment for public-facing services isolated from internal network.",
+          "exam_note": "Typically uses dual firewall architecture."
         },
         {
           "term": "Egress Filtering",
-          "definition": "Controlling and filtering outbound network traffic to prevent unauthorized data transfer and command-and-control communications.",
-          "exam_note": "Outbound traffic control. Blocks C2 and exfiltration. Often neglected vs. ingress."
+          "definition": "Controlling outbound network traffic to prevent data exfiltration and C2 communication.",
+          "exam_note": "Often neglected but critical for containing compromises."
         }
-      ],
-
-      "knowledge_check": {
-        "question": "After a workstation is compromised, the attacker attempts to spread to other systems using SMB. The attack fails because firewalls between network segments block SMB traffic. This is an example of:",
-        "options": [
-          "Egress filtering blocking outbound traffic",
-          "Network segmentation preventing lateral movement",
-          "Air gap isolation",
-          "DDoS mitigation rate limiting"
-        ],
-        "correct": 1,
-        "explanation": "This is network segmentation preventing lateral movement. By dividing the network into segments with firewalls controlling traffic between them, SMB-based spreading is blocked even though it works within a segment. Egress filtering controls outbound internet traffic. Air gap would mean no network connection at all. DDoS mitigation handles volumetric attacks."
-      }
+      ]
     },
+
     {
       "section_id": "D2-L010-S02",
       "title": "Endpoint and Application Mitigations",
-      "content": "Endpoint mitigations protect individual systems through controls that prevent exploitation, detect attacks, and limit damage.\n\n**Application Security Mitigations**\n\n*Input Validation*\n- Validate all input server-side\n- Whitelist allowed characters\n- Reject malformed input\n- Sanitize before use\n\n*Output Encoding*\n- Encode data for output context\n- Prevent XSS attacks\n- HTML, JavaScript, URL encoding\n- Context-aware encoding\n\n*Parameterized Queries*\n- Prevent SQL injection\n- Separate code from data\n- Use prepared statements\n- Never concatenate user input\n\n**Web Application Firewall (WAF)**\n\n*Function*\n- Inspect HTTP traffic\n- Block known attack patterns\n- Virtual patching\n- Layer 7 protection\n\n*Capabilities*\n- SQL injection blocking\n- XSS prevention\n- OWASP Top 10 coverage\n- Custom rules\n- Rate limiting\n\n*Limitations*\n- Can be bypassed with encoding\n- False positives possible\n- Requires tuning\n- Not replacement for secure code\n\n**Endpoint Protection**\n\n*Antivirus/Anti-malware*\n- Signature-based detection\n- Heuristic analysis\n- Real-time protection\n- Regular updates required\n\n*EDR (Endpoint Detection and Response)*\n- Behavioral detection\n- Continuous monitoring\n- Forensic capabilities\n- Automated response\n- Threat hunting support\n\n*Host-Based IPS*\n- Block exploit attempts\n- Memory protection\n- Buffer overflow prevention\n- Signature and behavioral\n\n**Memory Protection**\n\n*DEP (Data Execution Prevention)*\n- Prevents code execution in data areas\n- Blocks some buffer overflow exploits\n- Hardware and software enforcement\n\n*ASLR (Address Space Layout Randomization)*\n- Randomizes memory addresses\n- Makes exploitation harder\n- Defeats hardcoded addresses\n\n*Control Flow Guard (CFG)*\n- Validates indirect calls\n- Prevents ROP attacks\n- Compiler-based protection\n\n**Application Control**\n\n*Whitelisting*\n- Only approved applications execute\n- Blocks unknown malware\n- Requires maintenance\n- Strong protection\n\n*Blacklisting*\n- Block known bad applications\n- Reactive approach\n- Easier to maintain\n- Weaker protection",
-
-      "key_points": [
-        "WAF provides virtual patching and blocks common web attacks (SQLi, XSS)",
-        "EDR provides behavioral detection and automated response beyond basic AV",
-        "DEP prevents code execution in data regions (buffer overflow mitigation)",
-        "ASLR randomizes memory addresses making exploitation harder",
-        "Application whitelisting (default deny) is stronger than blacklisting (default allow)"
-      ],
-
-      "real_world_example": {
-        "scenario": "WAF virtual patching protects during patch cycle",
-        "company": "MedCare Health Systems",
-        "application": "A critical SQL injection vulnerability was discovered in MedCare's patient portal: VULNERABILITY (SQLi in search function, CVSS 9.8), CONSTRAINT (patch required code changes and testingâ€”estimated 2 weeks), MITIGATION (WAF rules deployed within 2 hours blocking SQLi patterns), MONITORING (WAF logs reviewed for exploitation attempts), DETECTION (12 blocked SQLi attempts in first 24 hours), REMEDIATION (permanent code fix deployed after 10 days), FOLLOW-UP (WAF rules maintained as defense in depth). The WAF bought 10 days of protection during which the vulnerability was actively being targeted. Lesson: WAF enables quick response while permanent fixes are developed."
-      },
-
-      "exam_tips": [
-        "WAF = Web Application Firewall (Layer 7, HTTP inspection, virtual patching)",
-        "DEP = Data Execution Prevention (no execute in data areas)",
-        "ASLR = Address Space Layout Randomization (randomize memory)",
-        "EDR = behavioral + monitoring + response (beyond basic AV)",
-        "Whitelisting stronger than blacklisting (default deny vs. default allow)"
-      ],
-
-      "glossary_terms": [
-        {
-          "term": "Web Application Firewall (WAF)",
-          "definition": "A security control that monitors and filters HTTP/HTTPS traffic to web applications, blocking attacks like SQL injection and cross-site scripting.",
-          "exam_note": "Layer 7 protection. Virtual patching. Blocks SQLi, XSS. Not replacement for secure code."
-        },
-        {
-          "term": "DEP",
-          "definition": "Data Execution Preventionâ€”a security feature that marks memory regions as non-executable to prevent code injection attacks.",
-          "exam_note": "Prevents execute in data areas. Buffer overflow mitigation. Hardware/software."
-        },
-        {
-          "term": "ASLR",
-          "definition": "Address Space Layout Randomizationâ€”a technique that randomizes memory addresses to make exploitation of vulnerabilities more difficult.",
-          "exam_note": "Randomizes memory layout. Defeats hardcoded addresses. Makes exploitation harder."
-        },
-        {
-          "term": "Virtual Patching",
-          "definition": "Using security controls like WAF rules to block exploitation of a vulnerability without modifying the vulnerable application.",
-          "exam_note": "Block exploit without code change. WAF provides this. Temporary until real patch."
-        }
-      ],
-
-      "knowledge_check": {
-        "question": "A vulnerability is discovered in a web application, but the development team needs two weeks to develop and test a fix. To protect the application immediately, the security team deploys WAF rules that block the specific attack patterns. This approach is called:",
-        "options": [
-          "Application hardening because it secures the application",
-          "Virtual patching because it blocks exploitation without changing the application",
-          "Input validation because it checks user input",
-          "Code review because it examines the code"
+      "estimated_time": "12 minutes",
+      
+      "content": {
+        "overview": "Endpoint controls provide host-level protection that complements network mitigations.",
+        
+        "endpoint_mitigations": [
+          {
+            "control": "Application Control / Whitelisting",
+            "description": "Only allow approved applications to run",
+            "effectiveness": "Very high—blocks unknown malware",
+            "challenge": "Operational complexity",
+            "tools": ["Windows AppLocker", "SRP", "Third-party solutions"]
+          },
+          {
+            "control": "Host-Based Firewall",
+            "description": "Control network traffic at endpoint level",
+            "benefits": ["Defense in depth", "Protects mobile devices", "Granular control"],
+            "examples": ["Windows Firewall", "iptables", "ufw"]
+          },
+          {
+            "control": "Disable Unnecessary Services",
+            "description": "Reduce attack surface by removing unneeded functionality",
+            "examples": ["Print Spooler on non-print systems", "Remote Desktop if not needed"]
+          },
+          {
+            "control": "EDR/Endpoint Protection",
+            "description": "Real-time monitoring and response capability",
+            "capabilities": ["Behavioral detection", "Isolation", "Forensics"]
+          }
         ],
-        "correct": 1,
-        "explanation": "This is virtual patchingâ€”using security controls (like WAF rules) to block exploitation of a vulnerability without modifying the vulnerable application code. The WAF acts as if the application were patched by blocking the attack vectors. This provides protection while the actual patch is being developed."
+        
+        "application_mitigations": [
+          {
+            "control": "Web Application Firewall (WAF)",
+            "description": "Filter malicious web requests",
+            "protects_against": ["SQL injection", "XSS", "OWASP Top 10"]
+          },
+          {
+            "control": "Input Validation",
+            "description": "Sanitize all user input",
+            "principle": "Never trust user input"
+          },
+          {
+            "control": "Secure Configuration",
+            "description": "Apply hardening to applications",
+            "actions": ["Disable debug modes", "Remove default content", "Enable logging"]
+          }
+        ],
+        
+        "compensating_controls": {
+          "definition": "Alternative controls when primary controls aren't possible",
+          "when_needed": [
+            "Patch not available",
+            "System can't be patched (legacy)",
+            "Business constraint prevents primary control"
+          ],
+          "examples": [
+            {"situation": "Can't patch vulnerable server", "compensating": "Network isolation + enhanced monitoring"},
+            {"situation": "Can't disable SMB", "compensating": "Restrict to necessary IPs + monitor for abuse"},
+            {"situation": "Legacy system can't encrypt", "compensating": "Network encryption (VPN/TLS) + segmentation"}
+          ],
+          "documentation": "Must document: risk, compensating control, residual risk, review date"
+        }
+      },
+      
+      "key_points": [
+        "Application whitelisting is highly effective but operationally complex",
+        "Host-based firewall provides defense in depth",
+        "WAF protects web applications from common attacks",
+        "Compensating controls are alternatives when primary controls aren't possible",
+        "Document compensating controls with risk acceptance"
+      ],
+      
+      "exam_tips": [
+        "Application whitelisting = only approved apps can run",
+        "Compensating control = alternative when primary not possible",
+        "WAF = protects web apps from SQL injection, XSS",
+        "Host firewall = defense in depth at endpoint",
+        "Always document compensating controls"
+      ],
+      
+      "knowledge_check": {
+        "question": "A critical legacy system cannot be patched due to vendor support issues, but it contains sensitive data. What is the BEST approach?",
+        "options": [
+          "Accept the risk since patching isn't possible",
+          "Take the system offline immediately",
+          "Implement compensating controls and document the risk",
+          "Replace the system immediately regardless of cost"
+        ],
+        "correct": 2,
+        "explanation": "Implement compensating controls (network isolation, enhanced monitoring, restricted access) and document the risk with management approval. This addresses the risk while maintaining business operations. Simply accepting risk without controls is inadequate. Taking offline or immediate replacement may not be feasible."
       }
     },
+
     {
       "section_id": "D2-L010-S03",
-      "title": "Compensating Controls",
-      "content": "Compensating controls provide alternative protection when primary controls cannot be implemented, maintaining security despite constraints.\n\n**When Compensating Controls Are Needed**\n\n*Technical Constraints*\n- Legacy systems can't be patched\n- No vendor support available\n- Patch breaks functionality\n- Hardware limitations\n\n*Business Constraints*\n- Change window unavailable\n- Critical system can't have downtime\n- Budget limitations\n- Regulatory requirements conflict\n\n*Time Constraints*\n- Zero-day with no patch\n- Emergency response needed\n- Bridge until permanent fix\n\n**Types of Compensating Controls**\n\n*Network-Based*\n- Isolate vulnerable systems\n- Restrict network access\n- Add IPS signatures\n- Monitor traffic closely\n\n*Host-Based*\n- Application whitelisting\n- Enhanced monitoring\n- Disable vulnerable features\n- Restrict user access\n\n*Administrative*\n- Additional manual reviews\n- Increased audit frequency\n- Enhanced logging\n- User training\n\n**Compensating Control Requirements**\n\n*PCI DSS Example*\n- Must meet intent of original requirement\n- Provide similar protection level\n- Be commensurate with risk\n- Must be documented\n- Reviewed periodically\n\n*Documentation Requirements*\n- Original requirement not met\n- Reason control can't be implemented\n- Compensating control description\n- How it addresses the risk\n- Validation method\n- Expiration/review date\n\n**Layered Compensating Controls**\n\n*Concept*\n- Single compensating control may be insufficient\n- Layer multiple controls\n- Address risk from multiple angles\n- Defense in depth\n\n*Example: Unpatachable Legacy System*\n- Network isolation (can't spread)\n- IPS monitoring (detect exploits)\n- Enhanced logging (record activity)\n- Application whitelisting (prevent unauthorized execution)\n- Regular vulnerability scanning (verify exposure)\n\n**Compensating Control Pitfalls**\n\n*Common Mistakes*\n- Treating as permanent solution\n- Insufficient documentation\n- No review/expiration\n- Control doesn't actually address risk\n- Forgetting to remove after fix\n\n*Best Practices*\n- Set expiration date\n- Regular effectiveness review\n- Document thoroughly\n- Plan for permanent solution\n- Track in risk register",
-
-      "key_points": [
-        "Compensating controls provide alternative protection when primary controls unavailable",
-        "Required when: can't patch, no vendor support, zero-day, business constraints",
-        "Must meet intent of original requirement and provide similar protection",
-        "Layer multiple compensating controls for defense in depth",
-        "Set expiration dates and plan for permanent solutions"
-      ],
-
-      "real_world_example": {
-        "scenario": "Layered compensating controls for legacy system",
-        "company": "Coastal Community Bank",
-        "application": "Coastal has a legacy loan processing system running unsupported Windows Server 2008: SITUATION (critical business function, can't be patched, replacement project 18 months out), COMPENSATING CONTROLS IMPLEMENTED (network isolationâ€”dedicated VLAN with strict firewall rules, IPS with custom signatures for Windows vulnerabilities, application whitelistingâ€”only loan application can run, enhanced logging to SIEM, weekly vulnerability scans, physical access restrictions), DOCUMENTATION (risk register entry, compensating control assessment document, quarterly review scheduled), MONITORING (24/7 monitoring for anomalies, monthly security review). Auditors accepted compensating controls as sufficient given the layered approach. System protected until replacement."
-      },
-
-      "exam_tips": [
-        "Compensating controls = alternative when primary control unavailable",
-        "Must provide equivalent/similar level of protection",
-        "Layer multiple controls for defense in depth",
-        "Document: what, why, how long, review date",
-        "Not permanent solutionsâ€”plan for actual remediation"
-      ],
-
-      "glossary_terms": [
-        {
-          "term": "Compensating Control",
-          "definition": "An alternative security measure implemented when a primary security control cannot be used, providing equivalent protection against a risk.",
-          "exam_note": "Alternative protection. When primary unavailable. Must be equivalent. Documented."
-        },
-        {
-          "term": "Risk Acceptance",
-          "definition": "A formal decision to accept residual risk when mitigation is not feasible or cost-effective, typically requiring management approval.",
-          "exam_note": "Accept the risk. Business owner approval. Documented. Regular review."
-        },
-        {
-          "term": "Defense in Depth",
-          "definition": "A security strategy that layers multiple controls so that if one fails, others continue to provide protection.",
-          "exam_note": "Multiple layers. No single point of failure. Applies to compensating controls."
-        }
-      ],
-
-      "knowledge_check": {
-        "question": "A legacy system running an unsupported operating system cannot be patched for a critical vulnerability. The security team implements network isolation, IPS monitoring, application whitelisting, and enhanced logging. These measures are collectively known as:",
-        "options": [
-          "Virtual patching because they address the vulnerability",
-          "Compensating controls because they provide alternative protection",
-          "Defense in depth because there are multiple layers",
-          "Risk acceptance because the vulnerability remains"
+      "title": "Incident Containment",
+      "estimated_time": "12 minutes",
+      
+      "content": {
+        "overview": "During active incidents, containment mitigations stop the attack from spreading while preserving evidence.",
+        
+        "containment_strategies": [
+          {
+            "strategy": "Network Isolation",
+            "actions": [
+              "Disconnect compromised system from network",
+              "Block at switch port or VLAN",
+              "Maintain power for forensics"
+            ],
+            "consideration": "Balance containment vs evidence preservation"
+          },
+          {
+            "strategy": "Account Disabling",
+            "actions": [
+              "Disable compromised accounts",
+              "Reset passwords",
+              "Revoke sessions/tokens"
+            ],
+            "consideration": "May alert attacker; coordinate timing"
+          },
+          {
+            "strategy": "Firewall Blocks",
+            "actions": [
+              "Block attacker IPs at perimeter",
+              "Block C2 domains in DNS",
+              "Block malicious file hashes at endpoint"
+            ],
+            "note": "Quick to implement, can block ongoing attack"
+          },
+          {
+            "strategy": "Service/Application Shutdown",
+            "actions": [
+              "Take vulnerable service offline",
+              "Disable exploited feature"
+            ],
+            "consideration": "Business impact vs security"
+          }
         ],
-        "correct": 1,
-        "explanation": "These are compensating controlsâ€”alternative security measures implemented because the primary control (patching) cannot be used. While defense in depth (multiple layers) is part of the approach, the specific term for alternatives when primary controls are unavailable is 'compensating controls.' Virtual patching typically refers specifically to WAF/IPS rules. Risk acceptance would mean accepting the risk without additional controls."
-      }
-    },
-    {
-      "section_id": "D2-L010-S04",
-      "title": "Deception Technologies",
-      "content": "Deception technologies create fake assets and environments to detect, analyze, and respond to attackers who interact with them.\n\n**Honeypots**\n\n*Definition*\n- Decoy systems designed to attract attackers\n- Appear valuable but contain no real data\n- Any interaction is suspicious by design\n- Provide early warning and intelligence\n\n*Types*\n\n*Low-Interaction Honeypots*\n- Simulate services/vulnerabilities\n- Limited interaction capability\n- Easier to deploy and maintain\n- Detects automated attacks and scans\n\n*High-Interaction Honeypots*\n- Full operating systems and services\n- Allow deeper attacker engagement\n- More intelligence gathered\n- Higher risk if compromised\n- More maintenance required\n\n*Production vs. Research*\n- Production: Detect attacks on real networks\n- Research: Study attacker techniques\n\n**Honeynets**\n\n*Definition*\n- Networks of honeypots\n- Simulate complete network environment\n- Track attacker lateral movement\n- Understand attack patterns\n\n**Honeyfiles and Honeytokens**\n\n*Honeyfiles*\n- Fake documents/data files\n- Placed in sensitive directories\n- Access triggers alert\n- 'passwords.xlsx' on file server\n\n*Honeytokens*\n- Fake credentials or data\n- Embedded in databases, config files\n- Any use indicates compromise\n- Fake AWS keys, database records\n\n*Examples*\n- Fake admin account that alerts on login\n- Canary credit card number in database\n- Fake AWS credentials that trigger alarm\n- Decoy documents with tracking\n\n**DNS Sinkholes**\n\n*Concept*\n- Redirect DNS queries for malicious domains\n- Points to controlled server instead of C2\n- Breaks C2 communication\n- Identifies infected systems\n\n*Uses*\n- Block known malware C2 domains\n- Identify infected internal systems\n- Disrupt botnet communication\n- Intelligence gathering\n\n**Deception Platforms**\n\n*Modern Solutions*\n- Automated decoy deployment\n- Realistic fake assets\n- Integration with security tools\n- Attack path analysis\n- Attacker behavior tracking\n\n*Components*\n- Fake servers and workstations\n- Decoy credentials\n- Fake data and files\n- Breadcrumbs leading to honeypots",
-
-      "key_points": [
-        "Honeypots are decoy systems; any interaction indicates potential attack",
-        "Low-interaction honeypots simulate services; high-interaction are full systems",
-        "Honeytokens are fake credentials/dataâ€”use indicates compromise",
-        "DNS sinkholes redirect malicious domain queries to controlled servers",
-        "Deception provides early warning with low false positive rates"
-      ],
-
-      "real_world_example": {
-        "scenario": "Honeytokens detect insider threat",
-        "company": "NexaTech Solutions",
-        "application": "NexaTech deployed honeytokens throughout their environment: DEPLOYMENT (fake 'Executive Salaries.xlsx' files on file servers, decoy AWS credentials in config repositories, fake admin accounts in Active Directory), DETECTION (alert triggered when someone accessed the fake salary file on HR share), INVESTIGATION (user had no business accessing HR files, access occurred at 2 AM), FINDINGS (employee was copying sensitive files to external storage, preparing to leave for competitor), ACTION (legal hold on user, prevented data theft of actual sensitive information). The honeytokens detected insider threat that other controls missed because the access appeared 'legitimate'â€”just unauthorized."
-      },
-
-      "exam_tips": [
-        "Honeypot = decoy system; any interaction is suspicious",
-        "Low-interaction = simulated services; High-interaction = full system",
-        "Honeytoken = fake credential/data; use indicates compromise",
-        "DNS sinkhole = redirect malicious DNS to controlled server",
-        "Deception has low false positives (any interaction is suspicious)"
-      ],
-
-      "glossary_terms": [
-        {
-          "term": "Honeypot",
-          "definition": "A decoy system designed to attract attackers, appearing valuable but containing no real data, where any interaction indicates potential malicious activity.",
-          "exam_note": "Decoy system. Any interaction suspicious. Low vs. high interaction. Early warning."
+        
+        "containment_considerations": {
+          "preserve_evidence": [
+            "Don't power off if possible (preserves memory)",
+            "Document actions taken",
+            "Capture volatile data first",
+            "Maintain chain of custody"
+          ],
+          "attacker_awareness": [
+            "Containment may alert attacker",
+            "Attacker may have backup access",
+            "Coordinate containment actions",
+            "Execute rapidly once started"
+          ]
         },
-        {
-          "term": "Honeytoken",
-          "definition": "Fake credentials, data, or other artifacts planted in systems that generate alerts when accessed or used, indicating potential compromise.",
-          "exam_note": "Fake credentials/data. Use = compromise indicator. Very low false positive."
-        },
-        {
-          "term": "Honeynet",
-          "definition": "A network of honeypots designed to simulate a complete network environment for studying attacker behavior and lateral movement patterns.",
-          "exam_note": "Network of honeypots. Tracks lateral movement. More comprehensive than single honeypot."
-        },
-        {
-          "term": "DNS Sinkhole",
-          "definition": "A DNS server that returns false information for specific domains, redirecting traffic from malicious domains to controlled servers.",
-          "exam_note": "Redirects malicious DNS. Breaks C2. Identifies infected systems."
+        
+        "deception_as_mitigation": {
+          "description": "Active defense using decoys",
+          "techniques": [
+            {"technique": "Honeypots", "purpose": "Attract and detect attackers"},
+            {"technique": "Honeytokens", "purpose": "Detect credential theft"},
+            {"technique": "Deceptive content", "purpose": "Mislead attackers, waste time"}
+          ],
+          "benefit": "Near-zero false positives—legitimate users don't interact with decoys"
         }
-      ],
-
-      "knowledge_check": {
-        "question": "A security team plants fake AWS credentials in a code repository. When someone uses these credentials to access AWS, an alert is generated. This security measure is called a:",
-        "options": [
-          "Honeypot because it's a decoy system",
-          "Honeytoken because it's fake credentials that trigger alerts on use",
-          "DNS sinkhole because it involves network detection",
-          "Canary because it provides early warning"
-        ],
-        "correct": 1,
-        "explanation": "This is a honeytokenâ€”fake credentials or data that generate alerts when used. Unlike honeypots (decoy systems), honeytokens are smaller artifacts like credentials, database records, or files. Any use of a honeytoken indicates potential compromise because legitimate users would never use fake credentials. 'Canary' is sometimes used informally but honeytoken is the proper term."
-      }
-    },
-    {
-      "section_id": "D2-L010-S05",
-      "title": "Selecting and Implementing Mitigations",
-      "content": "Effective mitigation requires selecting appropriate controls based on the threat, environment, and available resources, then implementing them systematically.\n\n**Mitigation Selection Criteria**\n\n*Threat Analysis*\n- What attack are we mitigating?\n- What is the attack vector?\n- What is the impact if successful?\n- Is it being actively exploited?\n\n*Environment Factors*\n- What systems are affected?\n- What are the constraints?\n- What resources are available?\n- What is the risk tolerance?\n\n*Control Effectiveness*\n- Does it actually address the threat?\n- What's the coverage?\n- Are there bypasses?\n- What's the false positive rate?\n\n**Mitigation by Attack Type**\n\n*Malware/Ransomware*\n- Application whitelisting\n- Email filtering\n- Network segmentation\n- Endpoint protection\n- User training\n- Offline backups\n\n*Phishing*\n- Email security gateway\n- URL filtering\n- MFA (reduces impact)\n- Security awareness training\n- External email banners\n\n*Web Application Attacks*\n- WAF deployment\n- Input validation\n- Output encoding\n- Secure coding practices\n- Regular testing\n\n*Insider Threats*\n- Least privilege\n- Activity monitoring\n- DLP (Data Loss Prevention)\n- Honeytokens\n- Separation of duties\n\n**Implementation Best Practices**\n\n*Testing*\n- Test in non-production first\n- Verify functionality not broken\n- Check for performance impact\n- Validate detection capability\n\n*Rollout*\n- Staged deployment\n- Monitor for issues\n- Have rollback plan\n- Document changes\n\n*Validation*\n- Verify mitigation is working\n- Test against actual attack\n- Check for bypasses\n- Regular reassessment\n\n**Mitigation Lifecycle**\n\n*Immediate Response*\n- Emergency mitigations\n- Quick implementation\n- May not be perfect\n- Focus on reducing risk\n\n*Short-Term*\n- Refined mitigations\n- Better tuned controls\n- Reduced false positives\n- Improved coverage\n\n*Long-Term*\n- Permanent solutions\n- Address root cause\n- Remove temporary mitigations\n- Lessons learned\n\n**Measuring Effectiveness**\n\n*Metrics*\n- Attacks blocked\n- Detection rate\n- False positive rate\n- Time to detect/respond\n- Business impact",
-
-      "key_points": [
-        "Select mitigations based on threat, environment, and resources",
-        "Different attacks need different mitigations (ransomware vs. phishing vs. web attacks)",
-        "Test mitigations before production deployment; have rollback plan",
-        "Mitigations have lifecycle: emergency â†’ refined â†’ permanent solution",
-        "Measure effectiveness: attacks blocked, detection rate, false positives"
-      ],
-
-      "real_world_example": {
-        "scenario": "Systematic mitigation of Exchange zero-day",
-        "company": "GlobalRetail Inc.",
-        "application": "When Microsoft Exchange zero-days (ProxyLogon) were disclosed in March 2021, GlobalRetail responded with layered mitigations: IMMEDIATE (implemented Microsoft's URL rewrite rules within 4 hoursâ€”blocked exploitation path), SHORT-TERM (restricted Exchange internet access to VPN users only, enhanced monitoring for IOCs, blocked suspicious IPs), DETECTION (scanned for webshells and known IOCsâ€”found none), PATCH (tested emergency patch in lab, deployed to production within 48 hours of release), VALIDATION (verified patch applied, removed URL rewrite mitigations, maintained enhanced monitoring), LESSONS LEARNED (improved emergency patching process, added more network restrictions). Layered approach provided protection at each stage."
       },
-
-      "exam_tips": [
-        "Match mitigations to attack type (ransomware â†’ whitelisting, backups)",
-        "Test before production; have rollback plan",
-        "Mitigations are temporaryâ€”plan for permanent fix",
-        "Layer mitigations for defense in depth",
-        "Measure effectiveness: blocks, detection rate, false positives"
+      
+      "key_points": [
+        "Containment stops spread while preserving evidence",
+        "Network isolation is primary containment action",
+        "Don't power off—preserve volatile memory evidence",
+        "Coordinate containment actions—execute rapidly once started",
+        "Deception (honeypots) provides high-fidelity detection"
       ],
-
-      "glossary_terms": [
-        {
-          "term": "Defense in Depth",
-          "definition": "A security strategy that implements multiple layers of controls so that if one fails, others continue to provide protection.",
-          "exam_note": "Multiple layers. No single point of failure. Compensates for control failures."
-        },
-        {
-          "term": "Data Loss Prevention (DLP)",
-          "definition": "Technologies and processes designed to detect and prevent unauthorized transmission of sensitive data outside the organization.",
-          "exam_note": "Prevents data exfiltration. Content inspection. Network and endpoint. Insider threat mitigation."
-        },
-        {
-          "term": "Security Awareness Training",
-          "definition": "Programs designed to educate users about security threats, policies, and best practices to reduce human-related security risks.",
-          "exam_note": "User education. Phishing defense. Human layer control. Ongoing process."
+      
+      "career_callout": {
+        "role": "Incident Responder",
+        "note": "Containment is where seconds count. Have playbooks ready: which switch ports to disable, which firewall rules to add, which accounts to lock. Practice your containment procedures before you need them. Know your network architecture so you can isolate quickly."
+      },
+      
+      "deep_dive": {
+        "title": "Building a Containment Playbook",
+        "estimated_time": "15 minutes",
+        "content": {
+          "description": "Essential containment actions for common scenarios.",
+          
+          "playbook_examples": {
+            "ransomware": [
+              "1. Isolate affected systems (disconnect network, don't power off)",
+              "2. Block lateral movement ports (445, 3389) organization-wide",
+              "3. Disable compromised accounts",
+              "4. Block known ransomware C2 domains/IPs",
+              "5. Snapshot/backup unaffected systems",
+              "6. Activate backup restoration procedures"
+            ],
+            "compromised_account": [
+              "1. Disable account immediately",
+              "2. Revoke all active sessions/tokens",
+              "3. Review recent activity logs",
+              "4. Check for persistence (forwarding rules, delegations)",
+              "5. Reset password with new strong password",
+              "6. Review systems account had access to"
+            ],
+            "c2_communication_detected": [
+              "1. Block C2 domain/IP at firewall and DNS",
+              "2. Identify all systems communicating with C2",
+              "3. Isolate affected systems",
+              "4. Search for malware/persistence",
+              "5. Check for data exfiltration",
+              "6. Determine initial access vector"
+            ]
+          }
         }
-      ],
-
-      "knowledge_check": {
-        "question": "A zero-day vulnerability is actively exploited but no patch is available. The security team implements URL rewriting rules to block the exploit, restricts internet access, and enhances monitoring. What should they do when the vendor releases a patch?",
-        "options": [
-          "Keep all mitigations in place permanently for additional protection",
-          "Test and deploy the patch, then evaluate which temporary mitigations to remove",
-          "Remove all mitigations immediately since the patch fixes the issue",
-          "Wait to deploy the patch until it's been available for 30 days"
-        ],
-        "correct": 1,
-        "explanation": "The correct approach is to test and deploy the patch (which provides the permanent fix), then evaluate which temporary mitigations to remove. Some mitigations may be worth keeping as defense in depth, but others should be removed to reduce complexity. Keeping all mitigations forever adds maintenance burden. Removing mitigations before patching leaves systems vulnerable. Waiting 30 days for an actively exploited vulnerability is too risky."
-      }
+      },
+      
+      "exam_tips": [
+        "Containment priority = stop spread while preserving evidence",
+        "Don't power off—preserve volatile memory",
+        "Honeypot = decoy system to detect attackers",
+        "Honeytoken = fake credential that alerts when used",
+        "Execute containment rapidly once decision made"
+      ]
     }
   ],
 
-  "hands_on_activity": {
-    "title": "Mitigation Strategy Development",
-    "objective": "Develop comprehensive mitigation strategies for various attack scenarios",
-    "scenario": "You're the security architect at Apex Consulting Group. Develop mitigation strategies for the following scenarios.",
-    "steps": [
-      "Step 1: Scenario A - Critical SQLi vulnerability in production web application:\n   - Patch requires 2 weeks of development\n   - Application is business-critical\n   - Design immediate, short-term, and long-term mitigations",
-      "Step 2: Scenario B - Ransomware has been detected in the environment:\n   - 5 workstations encrypted so far\n   - Spreading via SMB\n   - Design containment and prevention mitigations",
-      "Step 3: Scenario C - Legacy SCADA system running Windows XP:\n   - Controls manufacturing equipment\n   - Cannot be patched or replaced for 2 years\n   - Design compensating controls with documentation",
-      "Step 4: Scenario D - Increased phishing attacks targeting executives:\n   - 3 successful compromises in past month\n   - Attackers are well-researched (spear phishing)\n   - Design technical and administrative mitigations",
-      "Step 5: For each scenario, document:\n   - Threat analysis\n   - Mitigation options considered\n   - Recommended mitigations with rationale\n   - Implementation plan\n   - Success metrics",
-      "Step 6: Create a deception plan incorporating:\n   - Honeypot deployment strategy\n   - Honeytoken placement\n   - Monitoring and alerting",
-      "Step 7: Design a mitigation effectiveness dashboard"
-    ],
-    "expected_outcome": "Comprehensive mitigation strategies for four scenarios including documentation, implementation plans, and success metrics.",
-    "reflection_questions": [
-      "When is a compensating control preferable to accepting risk?",
-      "How do you balance mitigation effectiveness against operational impact?",
-      "Why should mitigations be viewed as temporary rather than permanent?"
-    ]
-  },
-
-  "what_would_you_do": {
-    "scenario": "You're the security manager at Pinnacle Financial Services. A new critical vulnerability (CVSS 9.8) has been announced affecting your internet-facing applications. The vendor says a patch will be available in 5-7 days. Your WAF vendor has released a virtual patch rule within hours. Some on your team want to wait for the official patch rather than deploy the WAF rule because 'WAF rules can be bypassed.'",
-    "context": "The application processes financial transactions 24/7. The vulnerability is actively exploited in the wild. Your WAF is well-tuned with low false positive rates. The official patch will require a maintenance window.",
-    "question": "How do you approach this situation?",
-    "options": [
-      {
-        "id": "a",
-        "text": "Wait for the official patch since WAF rules can be bypassed and might cause false positives",
-        "is_best": false,
-        "feedback": "Waiting 5-7 days while a critical vulnerability is actively exploited is unacceptable risk. Yes, WAF rules can potentially be bypassed, but they significantly raise the bar for attackers. Doing nothing guarantees exposure to a known, exploited vulnerability.",
-        "consequences": "5-7 days of exposure to active exploitation. High likelihood of compromise. False positive concern is valid but manageable. The perfect shouldn't be the enemy of the good."
-      },
-      {
-        "id": "b",
-        "text": "Deploy the WAF rule immediately, monitor closely, and deploy the official patch when available",
-        "is_best": true,
-        "feedback": "This is the correct approachâ€”defense in depth. The WAF rule provides immediate protection against known exploitation, even if not perfect. Close monitoring catches issues. When the patch is available, deploy it for permanent fix. This layers protections appropriately.",
-        "consequences": "Immediate risk reduction via WAF. Monitoring catches any bypass attempts or false positives. Patch provides permanent fix when available. Multiple layers of protection."
-      },
-      {
-        "id": "c",
-        "text": "Take the application offline until the patch is available",
-        "is_best": false,
-        "feedback": "Taking a 24/7 financial transaction application offline for 5-7 days would cause massive business disruption. The WAF rule provides a reasonable interim protection. This response is disproportionate when effective mitigations exist.",
-        "consequences": "5-7 days of no transaction processing. Massive business impact. Customer complaints. Revenue loss. Extreme response when mitigations are available."
-      },
-      {
-        "id": "d",
-        "text": "Deploy the WAF rule but disable logging to prevent false positive alerts from overwhelming the SOC",
-        "is_best": false,
-        "feedback": "Disabling logging when deploying a new WAF rule is exactly wrong. You need logging to detect if attackers are trying to bypass the rule, to identify any false positives, and to validate the rule is working. Monitoring is essential during mitigation deployment.",
-        "consequences": "No visibility into WAF effectiveness. Can't detect bypass attempts. Can't identify false positives. Blindly trusting the rule without verification."
-      }
-    ],
-    "key_lesson": "When facing actively exploited vulnerabilities, implement available mitigations immediately rather than waiting for perfect solutions. WAF virtual patching, while not perfect, significantly reduces risk during the patch gap. Layer your defensesâ€”the WAF rule protects now, and the patch provides permanent fix later. Always monitor newly deployed mitigations to verify effectiveness and catch issues."
-  },
-
   "summary": {
     "key_takeaways": [
-      "Network segmentation limits lateral movement; egress filtering blocks C2/exfiltration",
-      "WAF provides virtual patching for web vulnerabilities during patch gap",
-      "DEP prevents execute in data; ASLR randomizes memory; both harden against exploits",
-      "Compensating controls provide alternative protection when primary controls unavailable",
-      "Honeypots/honeytokens detect attackers; any interaction is suspicious",
-      "Select mitigations based on threat type, environment, and available resources"
+      "Network segmentation limits lateral movement and contains breaches",
+      "Default deny on ACLs—only allow what's required",
+      "Egress filtering blocks C2 and exfiltration (often neglected)",
+      "Application whitelisting is effective but operationally complex",
+      "Compensating controls are alternatives when primary controls aren't possible",
+      "Containment stops spread while preserving evidence",
+      "Don't power off compromised systems—preserve volatile memory"
     ],
+    
     "exam_essentials": [
-      "Network segmentation = divide network, limit lateral movement",
-      "DMZ = isolated zone for public-facing services",
-      "WAF = virtual patching, blocks SQLi/XSS (not replacement for secure code)",
-      "Compensating control = alternative when primary unavailable (must be equivalent)",
-      "Honeypot = decoy system; Honeytoken = fake credential/data",
-      "DNS sinkhole = redirect malicious DNS to controlled server"
+      "Segmentation vs isolation vs air gap",
+      "DMZ purpose and architecture",
+      "Compensating control definition and use",
+      "Containment priorities",
+      "Egress filtering importance"
     ],
-    "connection_to_next": "Mitigations protect against specific attacks, but understanding how attackers think and operate helps us anticipate threats. The next lesson explores attack frameworks and methodologiesâ€”including the Cyber Kill Chain, MITRE ATT&CK, and the Diamond Modelâ€”that describe how attacks progress and how we can disrupt them."
+    
+    "skills_gained": [
+      "Implement firewall rules for containment",
+      "Design network segmentation",
+      "Select appropriate mitigations for scenarios",
+      "Build containment playbooks"
+    ],
+    
+    "connection_to_next": "Mitigations address specific threats. The next lesson covers Attack Frameworks—structured methodologies like MITRE ATT&CK and the Cyber Kill Chain that help understand and defend against the full attack lifecycle."
   },
 
   "related_content": {
     "simulations": ["D2-SIM-003"],
-    "remediation": ["D2-REM-002"],
+    "remediation": ["D2-REM-003"],
     "next_lesson": "D2-LESSON-011",
     "previous_lesson": "D2-LESSON-009"
   }

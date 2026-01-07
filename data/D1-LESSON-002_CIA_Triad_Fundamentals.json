@@ -1,422 +1,721 @@
 {
   "lesson_id": "D1-LESSON-002",
   "domain": 1,
-  "title": "CIA Triad and Security Fundamentals",
+  "title": "CIA Triad Fundamentals",
   "objectives_covered": ["1.2"],
-  "estimated_duration": "35-45 minutes",
+  "estimated_duration": "45-55 minutes",
   "difficulty": "beginner",
   "prerequisites": ["D1-LESSON-001"],
 
   "introduction": {
-    "hook": "Every security decision you'll ever makeâ€”whether choosing a firewall, designing an authentication system, or responding to an incidentâ€”ultimately comes down to protecting three things: keeping secrets secret, ensuring data hasn't been tampered with, and making sure systems are accessible when needed. These three pillarsâ€”Confidentiality, Integrity, and Availabilityâ€”form the foundation of information security. Miss any one of them, and your security program has a critical gap.",
+    "hook": "In 2017, Equifax suffered a breach exposing 147 million people's personal data - a catastrophic failure of CONFIDENTIALITY. In 2020, SolarWinds attackers modified legitimate software updates with malware - a devastating attack on INTEGRITY. In 2021, a ransomware attack shut down Colonial Pipeline for six days - a critical loss of AVAILABILITY. Every major security incident maps back to one of these three principles. Understanding the CIA Triad isn't just academic - it's how security professionals think about, communicate, and prioritize protection.",
     "learning_goals": [
-      "Apply the CIA Triad to analyze security scenarios and identify protection gaps",
-      "Distinguish between confidentiality, integrity, and availability controls",
-      "Explain non-repudiation and its role in security and legal contexts",
-      "Implement the AAA framework (Authentication, Authorization, Accounting) in access control scenarios",
-      "Recognize how Security+ exam questions test CIA Triad concepts"
+      "Define and differentiate confidentiality, integrity, and availability",
+      "Identify threats specific to each CIA component",
+      "Select appropriate controls to protect each principle",
+      "Recognize CIA triad applications in real-world scenarios",
+      "Balance competing CIA requirements based on business context"
     ],
-    "why_it_matters": "The CIA Triad isn't just theoryâ€”it's the lens through which security professionals view every problem. When a SOC analyst triages an alert, they're assessing CIA impact. When a security engineer designs a system, they're ensuring CIA across all components. When an auditor evaluates controls, they're mapping them to CIA objectives. Understanding these fundamentals is essential for your exam and your career."
+    "why_it_matters": "The CIA Triad is the foundation of all security decision-making. When you assess risk, you're evaluating threats to CIA. When you select controls, you're protecting CIA. When you respond to incidents, you're restoring CIA. Every security framework, standard, and best practice maps back to these three principles. On the exam, expect 4-6 questions directly testing your understanding of CIA concepts and their application.",
+    "career_relevance": {
+      "soc_analyst": "You'll classify incidents by which CIA principle was compromised and prioritize response accordingly",
+      "incident_responder": "Your reports will document which CIA principles were impacted and recommend controls to protect them",
+      "grc_analyst": "You'll map compliance requirements to CIA principles and assess control coverage",
+      "penetration_tester": "Your findings will be categorized by CIA impact - helps clients understand severity",
+      "security_engineer": "You'll design systems that balance all three principles based on business requirements"
+    }
+  },
+
+  "linux_fundamentals": {
+    "why_linux": "Linux systems must protect confidentiality, integrity, and availability just like any other system. Understanding how Linux implements CIA protections is essential.",
+    "essential_commands_this_lesson": [
+      {
+        "command": "chmod 600 sensitive_file.txt",
+        "purpose": "Protect CONFIDENTIALITY - restrict file access",
+        "example_output": "(no output on success)"
+      },
+      {
+        "command": "sha256sum important_file.txt",
+        "purpose": "Verify INTEGRITY - generate hash for comparison",
+        "example_output": "a3b8f2c9d... important_file.txt"
+      },
+      {
+        "command": "sudo systemctl status nginx",
+        "purpose": "Check AVAILABILITY - verify service is running",
+        "example_output": "Active: active (running)"
+      },
+      {
+        "command": "gpg --encrypt --recipient user@email.com file.txt",
+        "purpose": "Protect CONFIDENTIALITY - encrypt file",
+        "example_output": "Creates file.txt.gpg"
+      }
+    ]
   },
 
   "sections": [
     {
       "section_id": "D1-L002-S01",
       "title": "Confidentiality: Keeping Secrets Secret",
-      "content": "Confidentiality ensures that information is accessible only to authorized individuals, entities, or processes. It's about preventing unauthorized disclosureâ€”keeping secrets from those who shouldn't have them.\n\n**Why Confidentiality Matters**\nConfidentiality breaches can result in:\n- Identity theft from exposed personal data\n- Competitive disadvantage from leaked trade secrets\n- Regulatory penalties from disclosed protected information\n- Reputational damage and loss of customer trust\n- National security implications for classified data\n\n**Threats to Confidentiality**\n\n*Technical Threats:*\n- Network eavesdropping and packet sniffing\n- Man-in-the-middle attacks\n- SQL injection exposing database contents\n- Malware exfiltrating data\n- Insecure storage exposing data at rest\n\n*Human Threats:*\n- Social engineering extracting information\n- Insider threats sharing data inappropriately\n- Shoulder surfing viewing screens\n- Dumpster diving recovering discarded documents\n- Accidental disclosure (email to wrong recipient)\n\n**Controls for Confidentiality**\n\n*Encryption*\nThe primary technical control for confidentiality. Encryption transforms readable data (plaintext) into unreadable form (ciphertext) that can only be reversed with the proper key.\n- **Data at rest**: Full-disk encryption, database encryption, file-level encryption\n- **Data in transit**: TLS/SSL, VPN, secure email (S/MIME, PGP)\n- **Data in use**: Emerging technologies like homomorphic encryption\n\n*Access Controls*\nLimiting who can access information based on authorization:\n- Role-Based Access Control (RBAC)\n- Mandatory Access Control (MAC)\n- Discretionary Access Control (DAC)\n- Attribute-Based Access Control (ABAC)\n\n*Data Classification*\nCategorizing data by sensitivity level to apply appropriate protections:\n- Government: Unclassified, Confidential, Secret, Top Secret\n- Commercial: Public, Internal, Confidential, Restricted\n\n*Physical Security*\nPreventing physical access to confidential information:\n- Locked file cabinets and secure rooms\n- Screen privacy filters\n- Clean desk policies\n- Secure document disposal (shredding)\n\n**Data States and Confidentiality**\nConfidentiality must be maintained across all data states:\n- **At rest**: Stored data (databases, files, backups)\n- **In transit**: Moving data (network traffic, email)\n- **In use**: Actively processed data (in memory, on screen)",
+      "content": "Confidentiality ensures that information is accessible only to those authorized to access it. When confidentiality fails, sensitive data is exposed to unauthorized parties.\n\n**What Confidentiality Protects**\n- Personal Identifiable Information (PII): Names, SSNs, addresses\n- Protected Health Information (PHI): Medical records, diagnoses\n- Financial data: Credit cards, bank accounts, transactions\n- Intellectual property: Trade secrets, source code, designs\n- Credentials: Passwords, API keys, certificates\n- Business sensitive: Strategic plans, merger info, pricing\n\n**Threats to Confidentiality**\n\n1. **Unauthorized Access**\n   - Hackers gaining system access\n   - Insiders accessing data beyond their role\n   - Credential theft and misuse\n\n2. **Data Breaches**\n   - Database compromises\n   - File server intrusions\n   - Cloud storage misconfigurations\n\n3. **Eavesdropping**\n   - Network traffic interception\n   - Man-in-the-middle attacks\n   - Shoulder surfing\n\n4. **Social Engineering**\n   - Phishing for credentials\n   - Pretexting for information\n   - Tailgating into secure areas\n\n5. **Improper Disposal**\n   - Unwiped hard drives\n   - Documents in trash\n   - Unsecured decommissioned equipment\n\n**Controls for Confidentiality**\n\n**Encryption**: The primary technical control\n- Data at rest: Full disk encryption, database encryption\n- Data in transit: TLS/SSL, VPNs, HTTPS\n- Data in use: Emerging technologies like homomorphic encryption\n\n**Access Controls**: Limiting who can access what\n- Role-Based Access Control (RBAC)\n- Least privilege implementation\n- Need-to-know restrictions\n\n**Data Classification**: Knowing what to protect\n- Public, Internal, Confidential, Restricted\n- Handling requirements by classification\n- Labeling and marking\n\n**Physical Security**: Protecting physical access\n- Locked server rooms\n- Clean desk policies\n- Secure disposal procedures",
 
       "key_points": [
         "Confidentiality prevents unauthorized disclosure of information",
         "Encryption is the primary technical control for confidentiality",
-        "Access controls limit who can view information based on authorization",
-        "Data classification determines appropriate protection levels",
-        "Confidentiality must be maintained in all data states: at rest, in transit, in use"
+        "Access controls implement least privilege and need-to-know",
+        "Data classification identifies what needs protection and how much",
+        "Threats include breaches, eavesdropping, social engineering, and improper disposal"
       ],
 
       "real_world_example": {
-        "scenario": "Protecting patient health information in a hospital",
+        "scenario": "Healthcare data breach from cloud misconfiguration",
         "company": "MedCare Health Systems",
-        "application": "MedCare implements multiple confidentiality controls: ENCRYPTION (AES-256 for patient records at rest, TLS 1.3 for data in transit between facilities), ACCESS CONTROLS (role-based access so nurses see only their patients' records, physicians have broader access within their specialty), DATA CLASSIFICATION (PHI marked as Restricted, requiring specific handling procedures), PHYSICAL (privacy screens on workstations in patient areas, badge access to medical records rooms). When a billing contractor needs access, they receive minimum necessary information under a business associate agreementâ€”not full medical records."
+        "application": "A developer at MedCare accidentally configured an AWS S3 bucket containing patient records as publicly accessible. Within 48 hours, security researchers discovered 2.3 million patient records exposed - names, diagnoses, prescriptions, and insurance IDs. The breach cost $4.2M in fines, $8M in legal settlements, and immeasurable reputation damage. ROOT CAUSE: No data classification program, no cloud security review process, no detective controls monitoring for public buckets."
+      },
+
+      "career_callout": {
+        "role": "SOC Analyst",
+        "insight": "When you detect a potential data exfiltration alert - unusual outbound traffic, large file transfers, or cloud storage uploads - you're responding to a confidentiality threat. Your initial triage should identify what data might have been exposed and its classification level. This determines escalation urgency."
       },
 
       "exam_tips": [
-        "Encryption protects CONFIDENTIALITY; hashing protects INTEGRITYâ€”don't confuse them",
-        "When a question mentions 'preventing unauthorized access to data,' think confidentiality",
-        "Data classification is a CONFIDENTIALITY controlâ€”it determines who can access what",
-        "Steganography (hiding data within other data) is a confidentiality technique"
+        "Encryption protects CONFIDENTIALITY (making data unreadable)",
+        "Hashing primarily protects INTEGRITY (not confidentiality - hashes are one-way)",
+        "Access controls protect confidentiality by limiting WHO can see data",
+        "Data classification is a MANAGERIAL control that enables confidentiality",
+        "Social engineering attacks often target confidentiality (stealing credentials/info)"
       ],
 
       "glossary_terms": [
         {
           "term": "Confidentiality",
-          "definition": "The security principle ensuring that information is accessible only to authorized individuals, entities, or processes, preventing unauthorized disclosure.",
-          "exam_note": "First letter of CIA. Think 'keeping secrets secret' or 'preventing unauthorized disclosure.'"
-        },
-        {
-          "term": "Data at Rest",
-          "definition": "Data that is stored in databases, file systems, or other storage media and is not actively being transmitted or processed.",
-          "exam_note": "Protected by encryption like full-disk encryption (FDE) or database encryption."
-        },
-        {
-          "term": "Data in Transit",
-          "definition": "Data that is actively moving across a network or between systems, including data being transmitted over the internet, local networks, or between applications.",
-          "exam_note": "Protected by TLS, VPNs, and secure protocols. Also called 'data in motion.'"
+          "definition": "The security principle ensuring that information is accessible only to authorized individuals, entities, or processes.",
+          "exam_note": "Protecting secrets. Encryption is primary control. Breaches = confidentiality failures."
         },
         {
           "term": "Data Classification",
-          "definition": "The process of categorizing data based on its sensitivity level to determine appropriate handling, storage, and protection requirements.",
-          "exam_note": "Know government levels (Unclassified â†’ Top Secret) and that classification drives protection requirements."
+          "definition": "The process of categorizing data based on its sensitivity and the impact of unauthorized disclosure, determining appropriate handling requirements.",
+          "exam_note": "Enables proper protection. Common levels: Public, Internal, Confidential, Restricted."
+        },
+        {
+          "term": "Encryption",
+          "definition": "The process of converting readable data (plaintext) into an unreadable format (ciphertext) using an algorithm and key.",
+          "exam_note": "Primary confidentiality control. At rest, in transit, in use. Requires key management."
         }
       ],
 
       "knowledge_check": {
-        "question": "A company discovers that an attacker intercepted and read emails between executives discussing a planned acquisition. Which element of the CIA Triad was PRIMARILY compromised?",
+        "question": "A company discovers that a former employee downloaded customer contact lists before leaving. No financial data or passwords were taken, but thousands of customer names, emails, and phone numbers were copied. Which CIA principle was primarily violated?",
         "options": [
-          "Integrity, because the attacker may have modified the emails",
-          "Availability, because the emails were delayed during interception",
-          "Confidentiality, because unauthorized access to the email content occurred",
-          "Non-repudiation, because the executives can't prove they sent the emails"
+          "Integrity because the data was copied without authorization",
+          "Availability because customers can no longer trust the company",
+          "Confidentiality because customer data was disclosed to an unauthorized party",
+          "Non-repudiation because the employee denied taking the data"
         ],
         "correct": 2,
-        "explanation": "Confidentiality was compromised because unauthorized access to the email content occurred. The attacker READ the emailsâ€”this is unauthorized disclosure. There's no indication the emails were modified (integrity) or that email service was disrupted (availability). Non-repudiation relates to proving actions occurred, which isn't the issue here."
+        "explanation": "This is a CONFIDENTIALITY violation - information was disclosed to someone unauthorized to access it (the former employee had no business need for customer data after leaving). The data wasn't modified (integrity) and remained available (availability). Non-repudiation isn't part of the CIA triad."
       }
     },
     {
       "section_id": "D1-L002-S02",
-      "title": "Integrity: Ensuring Trustworthy Data",
-      "content": "Integrity ensures that data remains accurate, complete, and unaltered except by authorized processes. It's about trusting that what you're seeing is what was intendedâ€”that data hasn't been tampered with.\n\n**Why Integrity Matters**\nIntegrity violations can result in:\n- Financial fraud from altered transaction records\n- Medical errors from modified patient data\n- System compromise from tampered configurations\n- Legal issues from modified evidence or logs\n- Decision-making based on corrupted data\n\n**Threats to Integrity**\n\n*Intentional Modification:*\n- Attackers altering data to commit fraud\n- Malware modifying system files\n- SQL injection changing database records\n- Man-in-the-middle attacks altering communications\n- Insider threats manipulating data\n\n*Unintentional Modification:*\n- Hardware failures corrupting storage\n- Software bugs causing data corruption\n- Transmission errors altering data in transit\n- Human error during data entry\n- Power failures during write operations\n\n**Controls for Integrity**\n\n*Hashing*\nHash functions create fixed-size 'fingerprints' of data. Any change to the dataâ€”even one bitâ€”produces a completely different hash.\n- **MD5**: 128-bit hash, considered weak, still used for checksums\n- **SHA-1**: 160-bit hash, deprecated for security use\n- **SHA-256/SHA-3**: Current standards for cryptographic hashing\n\nUse cases:\n- File integrity verification (did this download correctly?)\n- Password storage (store hash, not password)\n- Digital forensics (prove evidence wasn't altered)\n- Change detection (file integrity monitoring)\n\n*Digital Signatures*\nCombine hashing with asymmetric encryption to prove both integrity AND origin:\n1. Sender hashes the message\n2. Sender encrypts hash with their PRIVATE key (creates signature)\n3. Receiver decrypts signature with sender's PUBLIC key\n4. Receiver hashes message and compares to decrypted hash\n5. Match = integrity verified AND sender authenticated\n\n*Message Authentication Codes (MAC)*\nSimilar to digital signatures but use symmetric keys. HMAC (Hash-based MAC) is commonly used in protocols.\n\n*Input Validation*\nPreventing integrity violations at the source by validating data before accepting it:\n- Type checking (is this really a number?)\n- Range checking (is this value within acceptable bounds?)\n- Format validation (does this match expected patterns?)\n- Sanitization (removing potentially harmful characters)\n\n*Version Control and Audit Trails*\nTracking changes to detect and reverse unauthorized modifications:\n- Document version history\n- Database transaction logs\n- Configuration management systems\n- Change audit trails\n\n**Integrity vs. Confidentiality: Key Distinction**\n- **Confidentiality**: Was the data SEEN by unauthorized parties?\n- **Integrity**: Was the data CHANGED by unauthorized parties?\n\nEncryption protects confidentiality. Hashing protects integrity. They're different tools for different purposes, though often used together.",
+      "title": "Integrity: Trust What You See",
+      "content": "Integrity ensures that data remains accurate, consistent, and unmodified except by authorized processes. When integrity fails, you can't trust that data is accurate.\n\n**What Integrity Protects**\n- Data accuracy: Financial records, medical data, inventory\n- System configuration: Settings, policies, baselines\n- Software authenticity: Code, updates, patches\n- Transaction validity: Orders, transfers, approvals\n- Audit trails: Logs, records, evidence\n\n**Types of Integrity**\n\n**Data Integrity**\n- Accuracy of information content\n- Protection from unauthorized modification\n- Detection of accidental changes\n\n**System Integrity**\n- Correct operation of systems\n- Unmodified configurations\n- Trusted system state\n\n**Source Integrity (Authenticity)**\n- Data comes from claimed source\n- Messages are from stated sender\n- Software is from legitimate developer\n\n**Threats to Integrity**\n\n1. **Unauthorized Modification**\n   - Attackers altering database records\n   - Malware modifying system files\n   - Insiders changing logs\n\n2. **Man-in-the-Middle Attacks**\n   - Intercepting and altering communications\n   - Modifying transactions in transit\n   - Injecting malicious content\n\n3. **Malware**\n   - Trojans modifying files\n   - Ransomware encrypting (destroying integrity)\n   - Rootkits hiding changes\n\n4. **Supply Chain Attacks**\n   - Compromised software updates\n   - Backdoored hardware\n   - Modified open-source libraries\n\n5. **Accidental Changes**\n   - User errors\n   - Application bugs\n   - Hardware failures\n\n**Controls for Integrity**\n\n**Hashing**: Detecting modifications\n- MD5, SHA-256, SHA-3\n- File integrity monitoring\n- Download verification\n\n**Digital Signatures**: Verifying source and integrity\n- Code signing\n- Email signing (S/MIME, PGP)\n- Document signing\n\n**Access Controls**: Preventing unauthorized changes\n- Write permissions\n- Change management processes\n- Separation of duties\n\n**Version Control**: Tracking and reverting changes\n- Git for code\n- Configuration management\n- Database transaction logs\n\n**Input Validation**: Preventing invalid data\n- Application-level checks\n- Database constraints\n- Format verification",
 
       "key_points": [
-        "Integrity ensures data is accurate, complete, and unaltered except by authorized processes",
-        "Hashing creates fingerprints that detect any modification to data",
-        "Digital signatures prove both integrity AND authenticity (who sent it)",
-        "Input validation prevents integrity violations at the point of data entry",
-        "Encryption protects confidentiality; hashing protects integrityâ€”different purposes"
+        "Integrity ensures data accuracy and prevents unauthorized modification",
+        "Hashing detects changes but doesn't prevent them",
+        "Digital signatures verify both integrity AND authenticity (source)",
+        "Supply chain attacks compromise integrity of software and hardware",
+        "Version control enables detection and reversal of changes"
       ],
 
       "real_world_example": {
-        "scenario": "Ensuring integrity of software downloads",
-        "company": "NexaTech Solutions",
-        "application": "NexaTech publishes enterprise software with integrity controls at every stage: SOURCE CODE (Git repository with signed commits, code reviews required), BUILD PROCESS (automated builds on hardened servers, build artifacts signed with company certificate), DISTRIBUTION (SHA-256 hashes published alongside downloads, downloads served over HTTPS), INSTALLATION (installer verifies digital signature before running, file integrity monitoring after installation). When a customer downloads software, they can verify the published hash matches their download, confirming the file wasn't tampered with in transit. The digital signature proves it came from NexaTech, not an imposter."
+        "scenario": "SolarWinds supply chain attack",
+        "company": "SolarWinds (affecting thousands of customers)",
+        "application": "In 2020, attackers compromised SolarWinds' build process, injecting malicious code into the Orion software update. Because the update was signed by SolarWinds (legitimate signature), 18,000 organizations installed the backdoor. INTEGRITY FAILURE: The software's integrity was compromised at the source. Traditional integrity controls (checking the signature) passed because the attack happened before signing. LESSON: Integrity controls must cover the entire supply chain, not just the final product."
+      },
+
+      "career_callout": {
+        "role": "Incident Responder",
+        "insight": "When investigating a compromise, one of your first questions is 'what was modified?' You'll use file integrity monitoring (FIM) alerts, compare systems against known-good baselines, and examine logs for unauthorized changes. Understanding integrity helps you identify the scope of an incident and what needs to be restored from trusted sources."
+      },
+
+      "visualization": {
+        "type": "ascii_diagram",
+        "title": "Integrity Control Flow",
+        "diagram": [
+          "   SENDER                                    RECEIVER",
+          "   ======                                    ========",
+          "                                                     ",
+          "   Original     Hash        Transmit     Hash        ",
+          "   Message  --> Algorithm   ========>    Algorithm   ",
+          "      |            |                         |       ",
+          "      |            v                         v       ",
+          "      |        HASH VALUE                HASH VALUE  ",
+          "      |            |                         |       ",
+          "      |            |        Compare          |       ",
+          "      |            +--------> ? <------------+       ",
+          "      |                       |                      ",
+          "      |                       v                      ",
+          "      |              MATCH = Integrity OK            ",
+          "      |              MISMATCH = Modified!            ",
+          "      |                                              ",
+          "      +--- Digital Signature adds AUTHENTICITY ---+  ",
+          "          (proves WHO sent it, not just integrity)   "
+        ]
       },
 
       "exam_tips": [
-        "HASHING = INTEGRITY. If a question asks about detecting unauthorized changes, think hashing.",
-        "Digital signatures provide integrity AND authentication/non-repudiation (unlike hashing alone)",
-        "Know the hash algorithms: MD5 (weak), SHA-1 (deprecated), SHA-256/SHA-3 (current standards)",
-        "File integrity monitoring (FIM) is a detective control for integrity",
-        "If data is modified in transit, that's an integrity violation (even if also a confidentiality issue)"
+        "Hashing = integrity verification (detects changes)",
+        "Digital signatures = integrity + authenticity (detects changes AND verifies sender)",
+        "Encryption = confidentiality (not primarily integrity)",
+        "Supply chain attacks are integrity attacks at the source",
+        "File Integrity Monitoring (FIM) is a key detective control for integrity"
       ],
 
       "glossary_terms": [
         {
           "term": "Integrity",
-          "definition": "The security principle ensuring that data remains accurate, complete, and unaltered except by authorized modification through proper channels.",
-          "exam_note": "Second letter of CIA. Think 'data hasn't been tampered with' or 'trustworthy data.'"
+          "definition": "The security principle ensuring that data remains accurate, consistent, and unmodified except by authorized users and processes.",
+          "exam_note": "Trust data accuracy. Hashing detects changes. Digital signatures verify source."
         },
         {
-          "term": "Hash Function",
-          "definition": "A one-way mathematical function that converts input data of any size into a fixed-size output (hash value), where any change to input produces a completely different hash.",
-          "exam_note": "Hashing is ONE-WAY (can't reverse it). Used for integrity verification and password storage."
+          "term": "Hashing",
+          "definition": "A one-way cryptographic function that produces a fixed-size output (hash) from any input, used to verify data integrity.",
+          "exam_note": "NOT encryption (one-way, can't reverse). MD5 (weak), SHA-256 (strong). Same input = same hash."
         },
         {
           "term": "Digital Signature",
-          "definition": "A cryptographic technique that uses the sender's private key to create a unique signature proving both the integrity of a message and the identity of the sender.",
-          "exam_note": "Provides INTEGRITY + AUTHENTICATION + NON-REPUDIATION. Sign with private key, verify with public key."
+          "definition": "A cryptographic technique that verifies both the integrity of a message and the identity of the sender using asymmetric cryptography.",
+          "exam_note": "Provides integrity AND authenticity. Uses private key to sign, public key to verify."
         },
         {
           "term": "File Integrity Monitoring (FIM)",
-          "definition": "A security control that detects changes to files by comparing current hash values against known-good baselines, alerting on unauthorized modifications.",
-          "exam_note": "Detective control for integrity. Tripwire is a classic FIM example."
+          "definition": "A security control that monitors and detects changes to critical system files, configurations, and content.",
+          "exam_note": "Detective control for integrity. Compares current state to baseline. Alerts on changes."
         }
       ],
 
       "knowledge_check": {
-        "question": "A system administrator needs to verify that a configuration file hasn't been modified since it was last approved. Which control is MOST appropriate?",
+        "question": "An attacker intercepts a wire transfer request and changes the destination account number before it reaches the bank. The bank processes the modified transfer. Which CIA principle was primarily violated?",
         "options": [
-          "Encrypt the file with AES-256 to prevent unauthorized viewing",
-          "Compare the file's current hash against the known-good baseline hash",
-          "Store the file on a server with strong access controls",
-          "Create a backup copy of the file for comparison"
+          "Confidentiality because the attacker saw the transfer details",
+          "Integrity because the transfer data was modified without authorization",
+          "Availability because the legitimate recipient didn't receive funds",
+          "Authentication because the attacker pretended to be the sender"
         ],
         "correct": 1,
-        "explanation": "Comparing the current hash to a known-good baseline detects any modifications to the file, verifying integrity. Encryption protects confidentiality, not integrity detection. Access controls prevent unauthorized access but don't detect if changes occurred through authorized accounts. Backup comparison could work but is less efficient and reliable than cryptographic hashing, which detects even single-bit changes."
+        "explanation": "This is primarily an INTEGRITY violation - the data was modified in transit. While confidentiality was also compromised (attacker saw the data) and the outcome affected availability of funds, the attack mechanism was modification of data (integrity). Digital signatures on transactions would have detected this modification."
       }
     },
     {
       "section_id": "D1-L002-S03",
-      "title": "Availability: Ensuring Access When Needed",
-      "content": "Availability ensures that systems, data, and resources are accessible to authorized users when needed. It's about uptime, reliability, and resilienceâ€”making sure technology works when people need it.\n\n**Why Availability Matters**\nAvailability failures can result in:\n- Revenue loss from e-commerce downtime\n- Patient safety risks from unavailable medical systems\n- Productivity loss from inaccessible business applications\n- Contractual penalties from SLA violations\n- Reputational damage from unreliable services\n\n**Threats to Availability**\n\n*Intentional Attacks:*\n- Denial of Service (DoS) and Distributed DoS (DDoS)\n- Ransomware encrypting systems and data\n- Physical destruction of infrastructure\n- Sabotage by insiders or attackers\n- Resource exhaustion attacks\n\n*Unintentional Failures:*\n- Hardware failures (disk crashes, power supply failures)\n- Software bugs causing crashes\n- Network outages\n- Natural disasters (floods, fires, earthquakes)\n- Human error (misconfigurations, accidental deletions)\n- Capacity issues (resource exhaustion from legitimate use)\n\n**Controls for Availability**\n\n*Redundancy*\nEliminating single points of failure by duplicating critical components:\n- **Server redundancy**: Clustering, load balancing, failover\n- **Storage redundancy**: RAID arrays, SAN replication\n- **Network redundancy**: Multiple ISPs, redundant paths\n- **Power redundancy**: UPS, generators, dual power supplies\n- **Geographic redundancy**: Multiple data centers, disaster recovery sites\n\n*Fault Tolerance*\nDesigning systems to continue operating despite component failures:\n- RAID (Redundant Array of Independent Disks)\n- Hot/warm/cold standby systems\n- Automatic failover mechanisms\n- Self-healing systems\n\n*Backups*\nCreating copies of data for recovery:\n- **Full backup**: Complete copy of all data\n- **Incremental backup**: Only data changed since last backup\n- **Differential backup**: Data changed since last full backup\n- **3-2-1 rule**: 3 copies, 2 different media types, 1 offsite\n\n*Disaster Recovery*\nPlanning and preparing for major disruptions:\n- Recovery Time Objective (RTO): Maximum acceptable downtime\n- Recovery Point Objective (RPO): Maximum acceptable data loss\n- Hot site: Fully equipped, ready immediately\n- Warm site: Partially equipped, ready in hours/days\n- Cold site: Basic facilities, ready in days/weeks\n\n*DoS/DDoS Protection*\n- Rate limiting and traffic shaping\n- Content Delivery Networks (CDN)\n- DDoS mitigation services\n- Anycast routing\n- Over-provisioning capacity\n\n**Balancing the Triad**\nSecurity controls sometimes create tension between CIA elements:\n- Strong access controls (confidentiality) can reduce availability if too restrictive\n- Encryption (confidentiality) adds processing overhead, potentially affecting availability\n- Redundancy (availability) creates more copies of data to protect (confidentiality challenge)\n\nEffective security design balances all three elements based on business requirements.",
+      "title": "Availability: Access When Needed",
+      "content": "Availability ensures that systems and data are accessible to authorized users when needed. When availability fails, business operations stop.\n\n**What Availability Protects**\n- System uptime: Servers, applications, services\n- Data accessibility: Files, databases, records\n- Network connectivity: Communications, transactions\n- Business operations: Everything that depends on IT\n\n**Measuring Availability**\n\n**Uptime Percentages (The 'Nines')**\n- 99% = 3.65 days downtime/year\n- 99.9% (three nines) = 8.76 hours/year\n- 99.99% (four nines) = 52.56 minutes/year\n- 99.999% (five nines) = 5.26 minutes/year\n\n**Key Metrics**\n- MTBF (Mean Time Between Failures): How often failures occur\n- MTTR (Mean Time To Repair): How long to fix failures\n- RTO (Recovery Time Objective): Maximum acceptable downtime\n- RPO (Recovery Point Objective): Maximum acceptable data loss\n\n**Threats to Availability**\n\n1. **Denial of Service (DoS/DDoS)**\n   - Overwhelming resources\n   - Exhausting bandwidth\n   - Application-layer attacks\n\n2. **Ransomware**\n   - Encrypting data (making it unavailable)\n   - Locking systems\n   - Threatening deletion\n\n3. **Hardware Failures**\n   - Disk crashes\n   - Power supply failures\n   - Network equipment failures\n\n4. **Natural Disasters**\n   - Floods, fires, earthquakes\n   - Power outages\n   - Building damage\n\n5. **Human Error**\n   - Accidental deletion\n   - Misconfiguration\n   - Maintenance mistakes\n\n**Controls for Availability**\n\n**Redundancy**: Eliminating single points of failure\n- RAID for disk redundancy\n- Clustered servers\n- Redundant network paths\n- Geographic distribution\n\n**Backups**: Enabling recovery\n- Full, incremental, differential\n- Offsite and cloud backup\n- Regular testing\n\n**Failover Systems**: Automatic recovery\n- Hot, warm, cold sites\n- Load balancers\n- Automatic failover\n\n**DDoS Protection**: Preventing resource exhaustion\n- Traffic scrubbing\n- CDN distribution\n- Rate limiting\n\n**Disaster Recovery Planning**: Documented recovery\n- Recovery procedures\n- Testing and exercises\n- Communication plans",
 
       "key_points": [
-        "Availability ensures systems and data are accessible when authorized users need them",
-        "Redundancy eliminates single points of failure across servers, storage, network, and power",
-        "Fault tolerance allows systems to continue operating despite component failures",
-        "Backups provide data recovery capability (know full, incremental, differential)",
-        "RTO (acceptable downtime) and RPO (acceptable data loss) drive disaster recovery planning"
+        "Availability ensures authorized access to systems and data when needed",
+        "Uptime is measured in 'nines' - each nine significantly reduces allowed downtime",
+        "MTBF, MTTR, RTO, and RPO are key availability metrics",
+        "Redundancy eliminates single points of failure",
+        "Backups enable recovery but must be tested regularly"
       ],
 
       "real_world_example": {
-        "scenario": "Ensuring availability for an e-commerce platform during peak shopping season",
-        "company": "GlobalRetail Inc.",
-        "application": "GlobalRetail implements comprehensive availability controls for Black Friday: REDUNDANCY (load-balanced web servers across three availability zones, database replication with automatic failover), CAPACITY (auto-scaling groups that add servers during traffic spikes, CDN caching static content at edge locations worldwide), DDoS PROTECTION (cloud-based DDoS mitigation service, rate limiting on API endpoints), BACKUPS (continuous database replication with 5-minute RPO, tested recovery procedures), MONITORING (real-time dashboards tracking response times, automatic alerts when thresholds exceeded). During last year's Black Friday, a DDoS attack was automatically mitigated, and a database failover occurred seamlesslyâ€”customers experienced no interruption despite both incidents."
+        "scenario": "Colonial Pipeline ransomware shutdown",
+        "company": "Colonial Pipeline",
+        "application": "In May 2021, ransomware forced Colonial Pipeline to shut down 5,500 miles of pipeline supplying 45% of East Coast fuel. While the attackers targeted billing systems (not operational technology), the company shut down operations for six days to prevent spread. IMPACT: Gas shortages across Southeast US, panic buying, national emergency declaration. AVAILABILITY FAILURE: Even systems not directly attacked became unavailable due to caution. LESSON: Availability planning must consider dependencies and cascading failures."
+      },
+
+      "career_callout": {
+        "role": "Security Engineer",
+        "insight": "You'll design systems with specific availability requirements - five nines for critical financial systems, three nines for internal apps. Understanding RTO/RPO helps you select appropriate backup and failover solutions. When availability requirements conflict with budget, you'll help leadership understand the true cost of downtime."
+      },
+
+      "visualization": {
+        "type": "ascii_diagram",
+        "title": "The Availability Nines",
+        "diagram": [
+          "+------------+------------------+------------------------+",
+          "| Uptime %   | Downtime/Year    | Example Use Case       |",
+          "+------------+------------------+------------------------+",
+          "| 99%        | 3.65 days        | Internal tools         |",
+          "| 99.9%      | 8.76 hours       | Business applications  |",
+          "| 99.99%     | 52.56 minutes    | E-commerce platforms   |",
+          "| 99.999%    | 5.26 minutes     | Financial trading      |",
+          "| 99.9999%   | 31.5 seconds     | Emergency services     |",
+          "+------------+------------------+------------------------+",
+          "",
+          "Each additional 'nine' typically 10x the cost!"
+        ]
       },
 
       "exam_tips": [
-        "Know RAID levels: RAID 0 (striping, no redundancy), RAID 1 (mirroring), RAID 5 (striping with parity), RAID 10 (mirrored stripes)",
-        "RTO = how long can you be down; RPO = how much data can you lose",
-        "Hot site = immediate failover; Warm site = hours; Cold site = days/weeks",
-        "DoS attacks availability, not confidentiality or integrity (unless combined with other attacks)",
-        "Full/Incremental/Differential backup questions: think about what's backed up and restoration process"
+        "Know the availability nines and what each represents",
+        "RTO = how long can we be down; RPO = how much data can we lose",
+        "RAID provides availability (redundancy), not backup (recovery from deletion)",
+        "DDoS attacks target AVAILABILITY",
+        "Ransomware attacks AVAILABILITY (and confidentiality if data exfiltrated)"
       ],
 
       "glossary_terms": [
         {
           "term": "Availability",
-          "definition": "The security principle ensuring that systems, data, and resources are accessible and operational for authorized users when needed.",
-          "exam_note": "Third letter of CIA. Think 'systems work when needed' or 'uptime and accessibility.'"
+          "definition": "The security principle ensuring that systems and data are accessible to authorized users when needed.",
+          "exam_note": "Access when needed. Redundancy prevents failures. Backups enable recovery."
         },
         {
-          "term": "Recovery Time Objective (RTO)",
-          "definition": "The maximum acceptable duration of time that a system, application, or service can be offline following a disaster or disruption.",
-          "exam_note": "RTO answers 'how long can we be down?' Drives investment in failover and recovery capabilities."
+          "term": "RTO (Recovery Time Objective)",
+          "definition": "The maximum acceptable length of time that a system can be offline after a failure or disaster.",
+          "exam_note": "How long can we be down? Drives failover/recovery solution selection."
         },
         {
-          "term": "Recovery Point Objective (RPO)",
-          "definition": "The maximum acceptable amount of data loss measured in time, representing the point in time to which data must be recovered after a disruption.",
-          "exam_note": "RPO answers 'how much data can we lose?' Drives backup frequency (e.g., 1-hour RPO = hourly backups)."
+          "term": "RPO (Recovery Point Objective)",
+          "definition": "The maximum acceptable amount of data loss measured in time, determining backup frequency.",
+          "exam_note": "How much data can we lose? Drives backup frequency. 1-hour RPO = hourly backups."
         },
         {
-          "term": "Fault Tolerance",
-          "definition": "The ability of a system to continue normal operation despite the failure of one or more components.",
-          "exam_note": "Goes beyond redundancyâ€”fault-tolerant systems AUTOMATICALLY continue operating without intervention."
+          "term": "MTTR (Mean Time To Repair)",
+          "definition": "The average time required to repair a failed component or system.",
+          "exam_note": "How long to fix? Lower MTTR = better availability. Automation reduces MTTR."
         }
       ],
 
       "knowledge_check": {
-        "question": "A company's RTO is 4 hours and RPO is 1 hour. Their database server fails at 3:00 PM and the last backup was at 2:00 PM. Based on their objectives, which statement is correct?",
+        "question": "A hospital's electronic health record system must be available 99.99% of the time to support patient care. The IT team is selecting a backup solution. If their RTO is 15 minutes and RPO is 1 hour, which backup approach is most appropriate?",
         "options": [
-          "They must restore service by 7:00 PM and can accept losing data back to 2:00 PM",
-          "They must restore service by 4:00 PM and can accept losing data back to 2:00 PM",
-          "They must restore service by 7:00 PM and must recover all data up to 3:00 PM",
-          "They must restore service within 1 hour and can lose up to 4 hours of data"
+          "Daily full backups with weekly offsite rotation",
+          "Real-time replication with automatic failover to a hot site",
+          "Hourly incremental backups with same-day restoration capability",
+          "Monthly full backups stored in a secure vault"
         ],
-        "correct": 0,
-        "explanation": "RTO of 4 hours means service must be restored within 4 hours of failure (3:00 PM + 4 hours = 7:00 PM). RPO of 1 hour means they can accept up to 1 hour of data loss, so losing data back to 2:00 PM (1 hour before failure) is within acceptable limits. The RPO determines backup frequency, not recovery deadlineâ€”that's the RTO."
+        "correct": 1,
+        "explanation": "With 99.99% uptime (only 52 minutes downtime/year allowed) and a 15-minute RTO, they need automatic failover - there's no time for manual restoration. Real-time replication meets the 1-hour RPO (actually exceeds it with near-zero data loss). Daily or monthly backups can't meet a 15-minute RTO, and hourly backups can't support only 52 minutes annual downtime with manual recovery."
       }
     },
     {
       "section_id": "D1-L002-S04",
-      "title": "Non-Repudiation: Proving Actions Occurred",
-      "content": "Non-repudiation prevents individuals from denying actions they performed. It provides undeniable proof that a specific action was taken by a specific entity at a specific timeâ€”essential for legal accountability and audit trails.\n\n**Why Non-Repudiation Matters**\nNon-repudiation is critical for:\n- Legal contracts and agreements (proving someone signed)\n- Financial transactions (proving someone authorized a transfer)\n- Audit trails (proving who did what and when)\n- Incident investigation (proving attacker actions)\n- Regulatory compliance (demonstrating accountability)\n\n**Non-Repudiation vs. Authentication**\n- **Authentication**: Verifies identity at a point in time ('Are you who you claim to be?')\n- **Non-repudiation**: Provides proof that can be verified later ('You can't deny you did this')\n\nAuthentication alone isn't non-repudiation. Someone could claim their password was stolen or shared. Non-repudiation requires stronger proof.\n\n**Achieving Non-Repudiation**\n\n*Digital Signatures*\nThe primary technical mechanism for non-repudiation:\n1. User signs with their PRIVATE key (only they should possess)\n2. Signature can be verified with their PUBLIC key\n3. If signature is valid, that specific private key was used\n4. Private key holder cannot deny signing (assuming key wasn't compromised)\n\n*Certificate Authorities and PKI*\nPublic Key Infrastructure (PKI) binds identities to public keys:\n- Certificate Authority (CA) verifies identity before issuing certificate\n- Certificate contains public key and identity information\n- Certificates can be validated against CA\n- Revocation mechanisms (CRL, OCSP) handle compromised certificates\n\n*Timestamps*\nProving WHEN an action occurred:\n- Trusted timestamping services\n- Cryptographically signed timestamps\n- Blockchain timestamps (immutable record of timing)\n\n*Audit Logs*\nRecording WHO did WHAT and WHEN:\n- Tamper-evident logging (chained hashes)\n- Centralized log collection (SIEM)\n- Write-once storage media\n- Log integrity verification\n\n**Non-Repudiation in Practice**\n\n*Email*\n- S/MIME and PGP provide digital signatures\n- Signing proves sender identity and message integrity\n- Recipient can prove specific sender sent specific content\n\n*Documents*\n- Digital document signing (DocuSign, Adobe Sign)\n- Certificates identify signers\n- Timestamps prove when signing occurred\n\n*Transactions*\n- Transaction logs with digital signatures\n- Multi-party authorization for high-value actions\n- Cryptographic proof of authorization\n\n**Limitations of Non-Repudiation**\n\nNon-repudiation can be challenged if:\n- Private key was stolen or compromised\n- Signature was coerced\n- System generating signatures was compromised\n- Identity verification at certificate issuance was flawed\n\nStrong non-repudiation requires protecting private keys and ensuring proper certificate issuance procedures.",
+      "title": "Balancing the CIA Triad",
+      "content": "The three principles of CIA often create tension - strengthening one can weaken others. Security professionals must balance these competing requirements based on business needs.\n\n**CIA Conflicts**\n\n**Confidentiality vs. Availability**\n- Strong encryption can slow systems (reduce availability)\n- Complex access controls can lock out legitimate users\n- Security measures that require manual approval delay access\n- Example: MFA adds security but can lock users out if they lose their phone\n\n**Integrity vs. Availability**\n- Strict change controls slow down operations\n- Extensive validation checks add latency\n- Requiring approvals before changes delays response\n- Example: Requiring three approvals for firewall changes slows incident response\n\n**Confidentiality vs. Integrity**\n- Encryption can make integrity verification harder\n- Strong access controls may prevent audit access\n- Generally less conflict between these two\n\n**Finding the Right Balance**\n\n**Know Your Business Requirements**\n- What data/systems are most critical?\n- What's the cost of downtime vs. breach?\n- What does compliance require?\n- What do customers expect?\n\n**Different Systems, Different Priorities**\n\n*E-commerce Site*:\n- Availability is CRITICAL (downtime = lost revenue)\n- Confidentiality is HIGH (customer data)\n- Integrity is HIGH (transactions must be accurate)\n\n*Healthcare Records*:\n- Confidentiality is CRITICAL (patient privacy, HIPAA)\n- Integrity is CRITICAL (wrong data = wrong treatment)\n- Availability is HIGH (but can have brief downtime)\n\n*Public Website*:\n- Availability is HIGH (brand visibility)\n- Integrity is MEDIUM (defacement embarrassing but not catastrophic)\n- Confidentiality is LOW (public information)\n\n**Making Trade-off Decisions**\n\n1. Identify stakeholder requirements\n2. Assess risk for each CIA component\n3. Understand regulatory requirements\n4. Evaluate business impact of failures\n5. Document decisions and rationale\n6. Implement appropriate controls\n7. Monitor and adjust as needed",
 
       "key_points": [
-        "Non-repudiation prevents denial of actions by providing undeniable proof",
-        "Digital signatures are the primary mechanism for technical non-repudiation",
-        "PKI and Certificate Authorities bind identities to public keys for verification",
-        "Non-repudiation requires more than authenticationâ€”it requires proof that stands up later",
-        "Audit logs and timestamps support non-repudiation by recording who did what and when"
+        "CIA principles often conflict - strengthening one can weaken others",
+        "Different systems have different CIA priority orders",
+        "Balance decisions should be based on business requirements and risk",
+        "Trade-offs must be documented and approved by stakeholders",
+        "The 'right' balance depends on context and regulatory requirements"
       ],
 
       "real_world_example": {
-        "scenario": "Implementing non-repudiation for financial transactions",
-        "company": "Coastal Community Bank",
-        "application": "Coastal Community Bank implements non-repudiation for wire transfers: DIGITAL SIGNATURES (all wire transfer requests must be digitally signed using employee's smart card containing their private key), CERTIFICATE AUTHORITY (bank operates internal CA that issues certificates after in-person identity verification), TIMESTAMPS (all transactions receive cryptographic timestamps from trusted timestamping service), AUDIT LOGS (complete transaction history with tamper-evident logging, stored on WORM media). When a $500,000 wire transfer was disputed, the bank produced the digital signature proving the specific employee authorized it, the timestamp proving when, and the audit trail showing all approvals. The employee couldn't claim they didn't authorize itâ€”the cryptographic proof was undeniable."
+        "scenario": "Balancing CIA for a trading platform",
+        "company": "Pinnacle Financial Services",
+        "application": "Pinnacle's trading platform required careful CIA balance: AVAILABILITY (Primary) - Traders need instant access; milliseconds matter. System designed for 99.999% uptime with multiple redundant paths. INTEGRITY (Critical) - Trades must execute accurately. Every transaction logged, verified, and auditable. Checksums on all data. CONFIDENTIALITY (High) - Client positions are sensitive but secondary to execution. Encryption used everywhere but optimized to minimize latency. TRADE-OFF DECISION: Chose slightly weaker encryption algorithm (still secure) to reduce latency by 3ms. Documented and approved by risk committee."
+      },
+
+      "career_callout": {
+        "role": "GRC Analyst",
+        "insight": "You'll often mediate CIA trade-off discussions. When IT wants to lock down systems (confidentiality) and business wants easy access (availability), you help find the balance by quantifying risks. Your risk assessments translate technical security into business terms that leadership understands."
       },
 
       "exam_tips": [
-        "Non-repudiation is about PROVING actions, not encrypting dataâ€”different from confidentiality",
-        "Digital signatures provide non-repudiation; encryption alone does NOT",
-        "Private key signatures = non-repudiation (only key holder could sign)",
-        "Shared passwords/keys CANNOT provide non-repudiation (anyone with key could have acted)",
-        "Questions about 'proving someone sent a message' or 'denying they performed an action' = non-repudiation"
+        "Know that CIA components can conflict with each other",
+        "Questions may present scenarios asking which CIA principle should be PRIORITIZED",
+        "Healthcare scenarios often prioritize confidentiality (HIPAA)",
+        "Financial trading scenarios often prioritize availability (downtime = lost money)",
+        "The 'best' answer considers business context, not just technical security"
       ],
 
       "glossary_terms": [
         {
-          "term": "Non-Repudiation",
-          "definition": "A security service ensuring that an individual cannot deny having performed a particular action, providing undeniable proof of the action's occurrence.",
-          "exam_note": "Key distinction from authentication: non-repudiation provides PROOF that holds up later. Digital signatures are the primary mechanism."
+          "term": "CIA Trade-off",
+          "definition": "The process of balancing competing security requirements when strengthening one CIA principle may weaken another.",
+          "exam_note": "Context matters. Business requirements drive priorities. Document decisions."
         },
         {
-          "term": "Digital Certificate",
-          "definition": "An electronic document issued by a Certificate Authority that binds a public key to an identity, enabling verification of the key holder's identity.",
-          "exam_note": "Certificates enable non-repudiation by proving who owns which public key. Know the role of CAs in issuing certificates."
-        },
-        {
-          "term": "Certificate Authority (CA)",
-          "definition": "A trusted entity that issues digital certificates, verifying the identity of certificate requesters and binding their identity to a public key.",
-          "exam_note": "CAs are the trust anchors in PKI. Compromised CA = major security incident."
-        },
-        {
-          "term": "Public Key Infrastructure (PKI)",
-          "definition": "A framework of policies, processes, and technologies used to create, manage, distribute, use, store, and revoke digital certificates.",
-          "exam_note": "PKI enables non-repudiation at scale. Components include CAs, certificates, revocation mechanisms (CRL, OCSP)."
+          "term": "Business Impact Analysis (BIA)",
+          "definition": "A process that identifies critical business functions and the impact of their disruption, informing CIA priority decisions.",
+          "exam_note": "Helps determine which CIA principle matters most for each system."
         }
       ],
 
       "knowledge_check": {
-        "question": "An employee claims they didn't authorize a large purchase order, despite records showing it was submitted from their account. Which control would provide the STRONGEST evidence they DID authorize it?",
+        "question": "A hospital is implementing a new system for tracking controlled substance medications. Regulations require detailed audit trails of all access, and patient safety depends on accurate inventory. Nurses complain that the new system is slower than paper. Which CIA priority order is most appropriate?",
         "options": [
-          "Audit logs showing the purchase order was submitted from their workstation",
-          "Multi-factor authentication records showing they logged in before the submission",
-          "A digital signature on the purchase order created with their private key",
-          "Video surveillance showing them at their desk when the order was submitted"
+          "Availability first (nurses need quick access for patient care)",
+          "Confidentiality first (controlled substances are sensitive)",
+          "Integrity first (accurate tracking prevents diversion and ensures patient safety)",
+          "All three are equal (no priority needed)"
         ],
         "correct": 2,
-        "explanation": "A digital signature created with the employee's private key provides non-repudiationâ€”cryptographic proof that their specific private key was used. Audit logs could be disputed (someone else used their computer). MFA proves login but not who submitted the specific order. Video shows presence but not the specific action. Only the digital signature creates undeniable cryptographic proof tied to their identity."
+        "explanation": "For controlled substance tracking, INTEGRITY is paramount - inaccurate records could mean drugs are diverted (stolen) or patients receive wrong doses. Regulations require accurate audit trails (integrity). While availability matters for workflow, some delay is acceptable if it ensures accuracy. Confidentiality matters but is secondary to ensuring the right drugs go to the right patients."
       }
     },
     {
       "section_id": "D1-L002-S05",
-      "title": "AAA Framework: Authentication, Authorization, and Accounting",
-      "content": "The AAA framework provides a systematic approach to access control: verifying identity (Authentication), determining permissions (Authorization), and tracking activity (Accounting). These three functions work together to control and monitor access to resources.\n\n**Authentication: Who Are You?**\nAuthentication verifies the claimed identity of a user, device, or process. It answers: 'Are you who you claim to be?'\n\n*Authentication Factors:*\n- **Something you know**: Password, PIN, security questions\n- **Something you have**: Smart card, token, phone\n- **Something you are**: Fingerprint, retina, voice\n- **Somewhere you are**: Location, IP address, GPS coordinates\n- **Something you do**: Typing pattern, gait, behavior\n\n*Multi-Factor Authentication (MFA):*\nUsing two or more DIFFERENT factors. Critical distinction: two passwords is NOT MFA (both are 'something you know'). True MFA combines factors from different categories.\n\nExamples:\n- Password + SMS code (know + have)\n- Smart card + PIN (have + know)\n- Fingerprint + token (are + have)\n\n**Authorization: What Can You Do?**\nAuthorization determines what authenticated users are permitted to access. It answers: 'What are you allowed to do?'\n\nAuthorization happens AFTER authenticationâ€”you must prove your identity before the system can determine your permissions.\n\n*Authorization Models:*\n- **Discretionary Access Control (DAC)**: Owner determines access\n- **Mandatory Access Control (MAC)**: System-enforced based on labels\n- **Role-Based Access Control (RBAC)**: Permissions based on job function\n- **Attribute-Based Access Control (ABAC)**: Dynamic rules based on attributes\n\n*Principle of Least Privilege:*\nUsers should have only the minimum permissions necessary to perform their job functions. No more, no less.\n\n**Accounting: What Did You Do?**\nAccounting tracks and records user activities for audit, billing, or security purposes. It answers: 'What actions were taken?'\n\n*Accounting Functions:*\n- Session tracking (login/logout times)\n- Resource usage (bandwidth, storage, compute)\n- Actions performed (files accessed, commands executed)\n- Changes made (configurations altered, data modified)\n\n*Security Uses:*\n- Forensic investigation after incidents\n- Compliance audit evidence\n- User behavior analytics\n- Billing and chargeback\n\n**AAA Protocols**\n\n*RADIUS (Remote Authentication Dial-In User Service):*\n- Combines authentication and authorization in Access-Accept\n- Separate accounting messages\n- UDP-based (ports 1812/1813)\n- Encrypts only passwords, not entire session\n\n*TACACS+ (Terminal Access Controller Access-Control System Plus):*\n- Separates authentication, authorization, and accounting\n- TCP-based (port 49)\n- Encrypts entire packet\n- More flexible and granular than RADIUS\n\n*Common Usage:*\n- RADIUS: Common for network access (VPN, WiFi)\n- TACACS+: Common for device administration (routers, switches)",
+      "title": "CIA in Practice: Applying the Framework",
+      "content": "Understanding how to apply CIA thinking in real scenarios prepares you for both the exam and professional security work.\n\n**CIA Analysis Process**\n\n1. **Identify the Asset**: What are we protecting?\n2. **Assess CIA Requirements**: How important is each principle?\n3. **Identify Threats**: What could compromise each principle?\n4. **Select Controls**: What protects each principle?\n5. **Evaluate Trade-offs**: Are there conflicts to resolve?\n6. **Document and Monitor**: Track decisions and effectiveness\n\n**Mapping Controls to CIA**\n\n**Confidentiality Controls**\n- Encryption (primary)\n- Access controls\n- Data classification\n- Physical security\n- Clean desk policy\n\n**Integrity Controls**\n- Hashing (primary for detection)\n- Digital signatures (authenticity + integrity)\n- Input validation\n- Version control\n- Change management\n\n**Availability Controls**\n- Redundancy (primary)\n- Backups\n- Load balancing\n- DDoS protection\n- Disaster recovery\n\n**Extended Security Concepts**\n\nBeyond CIA, security professionals use additional concepts:\n\n**Authentication**: Proving identity (who you are)\n**Authorization**: Permissions after authentication (what you can do)\n**Accounting**: Logging actions (what you did)\n- Together called AAA (Triple-A)\n\n**Non-Repudiation**: Cannot deny an action\n- Achieved through digital signatures\n- Important for transactions and legal matters\n\n**Privacy**: Control over personal information\n- Related to but distinct from confidentiality\n- Focus on individual rights and consent\n\n**CIA and Incident Response**\n\nWhen incidents occur, classify by CIA impact:\n- \"We had a confidentiality breach\" = data exposure\n- \"We had an integrity incident\" = data modification\n- \"We had an availability incident\" = system outage\n\nThis classification helps:\n- Prioritize response (what's the business impact?)\n- Select appropriate response actions\n- Communicate clearly with stakeholders\n- Track metrics by incident type",
 
       "key_points": [
-        "Authentication verifies identity (who you are)",
-        "Authorization determines permissions (what you can do)",
-        "Accounting tracks activities (what you did)",
-        "MFA requires factors from DIFFERENT categories (password + SMS, not two passwords)",
-        "RADIUS is UDP-based; TACACS+ is TCP-based and encrypts the entire session"
+        "Apply systematic CIA analysis to any security scenario",
+        "Know which controls map to which CIA principles",
+        "AAA (Authentication, Authorization, Accounting) extends CIA concepts",
+        "Non-repudiation prevents denial of actions (digital signatures)",
+        "Classify incidents by CIA impact for clear communication"
       ],
 
       "real_world_example": {
-        "scenario": "Implementing AAA for corporate network access",
-        "company": "Apex Consulting Group",
-        "application": "Apex implements the full AAA framework: AUTHENTICATION (employees authenticate using username/password plus authenticator app token for MFA), AUTHORIZATION (RBAC assigns permissions based on department and roleâ€”consultants access client project folders, HR accesses personnel files, finance accesses financial systems), ACCOUNTING (all access logged centrally, including login times, files accessed, and actions taken). When an employee's laptop was stolen and used to access the network, accounting logs showed access from an unusual location at 3 AM. TACACS+ administration of network devices meant the attacker couldn't access infrastructure management. Investigation used accounting data to determine exactly what the attacker accessed."
+        "scenario": "CIA analysis for new customer portal",
+        "company": "GlobalRetail Inc.",
+        "application": "When GlobalRetail built their customer portal, security performed CIA analysis: CONFIDENTIALITY - Customer PII, payment info, order history. Controls: TLS encryption, tokenized payment data, RBAC limiting employee access, data masking in non-production. INTEGRITY - Order accuracy, pricing, inventory. Controls: Database constraints, transaction logging, input validation, code signing for deployments. AVAILABILITY - 99.9% uptime required during business hours. Controls: Multi-AZ deployment, auto-scaling, DDoS protection, hourly backups. TRADE-OFF: Chose cached product pages (slightly stale data) for performance over real-time inventory (accepted small integrity risk for availability gain)."
+      },
+
+      "career_callout": {
+        "role": "Penetration Tester",
+        "insight": "Your penetration test reports should categorize findings by CIA impact. A SQL injection vulnerability might enable data theft (confidentiality), data modification (integrity), or database destruction (availability). Framing findings in CIA terms helps clients understand and prioritize remediation."
+      },
+
+      "visualization": {
+        "type": "ascii_diagram",
+        "title": "CIA Controls Mapping",
+        "diagram": [
+          "+------------------+------------------+------------------+",
+          "| CONFIDENTIALITY  |    INTEGRITY     |  AVAILABILITY    |",
+          "+------------------+------------------+------------------+",
+          "| Encryption       | Hashing          | Redundancy       |",
+          "| Access Controls  | Digital Sigs     | Backups          |",
+          "| Classification   | Input Validation | Load Balancing   |",
+          "| Physical Security| Version Control  | DDoS Protection  |",
+          "| Data Masking     | Change Mgmt      | Failover         |",
+          "| Clean Desk       | Audit Trails     | DR Planning      |",
+          "+------------------+------------------+------------------+",
+          "",
+          "          SUPPORTING CONCEPTS (AAA + Non-Repudiation)",
+          "     +------------------------------------------------+",
+          "     | Authentication | Authorization | Accounting    |",
+          "     | (Who are you?) | (What can do?)| (What did?)   |",
+          "     +------------------------------------------------+",
+          "     | Non-Repudiation: Cannot deny actions (digital  |",
+          "     | signatures provide proof of origin/integrity)  |",
+          "     +------------------------------------------------+"
+        ]
       },
 
       "exam_tips": [
-        "AAA order matters: Authentication THEN Authorization THEN Accounting",
-        "Two passwords is NOT MFAâ€”factors must be from different categories",
-        "RADIUS uses UDP, encrypts only password; TACACS+ uses TCP, encrypts entire packet",
-        "Least privilege is an authorization conceptâ€”minimum necessary permissions",
-        "Questions asking 'what did the user access?' = Accounting"
+        "AAA = Authentication, Authorization, Accounting",
+        "Non-repudiation is achieved through digital signatures",
+        "Know which controls primarily protect which CIA principle",
+        "Incident classification by CIA helps communicate impact",
+        "Privacy is related to but distinct from confidentiality"
       ],
 
       "glossary_terms": [
         {
-          "term": "Authentication",
-          "definition": "The process of verifying the claimed identity of a user, device, or process before granting access to resources.",
-          "exam_note": "First A in AAA. Must happen before authorization. MFA combines multiple factor types."
+          "term": "AAA (Authentication, Authorization, Accounting)",
+          "definition": "A security framework combining identity verification (authentication), permission management (authorization), and activity logging (accounting).",
+          "exam_note": "Often implemented together. RADIUS and TACACS+ are AAA protocols."
         },
         {
-          "term": "Authorization",
-          "definition": "The process of determining what permissions and access rights an authenticated entity has to specific resources.",
-          "exam_note": "Second A in AAA. Happens AFTER authentication. Implements least privilege principle."
+          "term": "Non-Repudiation",
+          "definition": "A security property ensuring that an entity cannot deny having performed an action, typically achieved through digital signatures.",
+          "exam_note": "Cannot deny sending a message or making a transaction. Digital signatures provide this."
         },
         {
-          "term": "Accounting",
-          "definition": "The process of tracking and recording user activities, resource usage, and access events for audit, billing, or security purposes.",
-          "exam_note": "Third A in AAA. Provides audit trails for forensics and compliance."
-        },
-        {
-          "term": "Multi-Factor Authentication (MFA)",
-          "definition": "An authentication method requiring two or more verification factors from different categories (knowledge, possession, inherence, location, behavior).",
-          "exam_note": "CRITICAL: Two items from the SAME category (like two passwords) is NOT MFA."
-        },
-        {
-          "term": "TACACS+",
-          "definition": "A TCP-based AAA protocol that separates authentication, authorization, and accounting functions and encrypts the entire packet payload.",
-          "exam_note": "Cisco-developed. More secure than RADIUS. Common for network device administration."
+          "term": "Privacy",
+          "definition": "The right of individuals to control how their personal information is collected, used, and shared.",
+          "exam_note": "Related to confidentiality but focuses on individual rights and consent, not just data protection."
         }
       ],
 
       "knowledge_check": {
-        "question": "A user logs in with their username and password, then uses a fingerprint scanner. After authentication, the system checks their group membership to determine which network shares they can access. Finally, their file access is logged for compliance purposes. Which sequence correctly describes this process?",
+        "question": "A user sends a digitally signed email to their bank authorizing a wire transfer. After the transfer is completed, they claim they never sent the email. The bank can prove they did because of the digital signature. Which security property does this demonstrate?",
         "options": [
-          "Accounting â†’ Authentication â†’ Authorization",
-          "Authorization â†’ Authentication â†’ Accounting",
-          "Authentication â†’ Authorization â†’ Accounting",
-          "Authentication â†’ Accounting â†’ Authorization"
+          "Confidentiality because the email was encrypted",
+          "Integrity because the email wasn't modified",
+          "Availability because the email was delivered",
+          "Non-repudiation because the sender cannot deny sending the signed message"
         ],
-        "correct": 2,
-        "explanation": "The AAA sequence is Authentication (verify identity with password + fingerprint), then Authorization (determine permissions based on group membership), then Accounting (log file access for compliance). This order is fundamentalâ€”you must know WHO someone is before determining WHAT they can do, and you track WHAT THEY DID for audit purposes."
+        "correct": 3,
+        "explanation": "This is NON-REPUDIATION - the digital signature proves the sender authorized the message, preventing them from denying (repudiating) it later. While digital signatures also provide integrity (proving the message wasn't modified), the scenario specifically asks about proving the sender sent it, which is non-repudiation."
       }
     }
   ],
 
-  "hands_on_activity": {
-    "title": "CIA Triad Analysis Exercise",
-    "objective": "Apply CIA Triad concepts to analyze real-world security scenarios",
-    "scenario": "You're conducting a security assessment for Pinnacle Financial Services. They're launching a new online banking platform that will handle account transfers, display account balances, and store customer documents.",
-    "steps": [
-      "Step 1: Identify five confidentiality risks for the online banking platform and one control for each",
-      "Step 2: Identify five integrity risks and appropriate controls for each",
-      "Step 3: Identify five availability risks and appropriate controls for each",
-      "Step 4: Identify two scenarios where non-repudiation is essential and how you'd implement it",
-      "Step 5: Design the AAA implementation: what authentication factors, authorization model, and accounting logs would you recommend?",
-      "Step 6: Identify three points where CIA elements might conflict and how you'd balance them"
+  "deep_dive": {
+    "title": "Hands-On Lab: Implementing CIA Controls on Linux",
+    "introduction": "Practice implementing controls that protect each CIA principle on a Linux system.",
+    "prerequisites": [
+      "Linux VM (Ubuntu 22.04 LTS recommended)",
+      "Sudo access",
+      "OpenSSL installed"
     ],
-    "expected_outcome": "A comprehensive CIA Triad assessment with identified risks, recommended controls, non-repudiation design, AAA implementation plan, and conflict resolution strategies.",
+    "labs": [
+      {
+        "lab_id": "LAB-002-1",
+        "title": "Lab 1: Protecting Confidentiality with Encryption",
+        "objective": "Encrypt sensitive files using GPG",
+        "estimated_time": "15 minutes",
+        "steps": [
+          {
+            "step": 1,
+            "instruction": "Create a sensitive file",
+            "command": "echo 'SECRET: API_KEY=sk-abc123xyz789' > ~/secret.txt",
+            "expected_output": "(no output)",
+            "explanation": "This represents sensitive data that needs confidentiality protection"
+          },
+          {
+            "step": 2,
+            "instruction": "Generate a GPG key pair (if you don't have one)",
+            "command": "gpg --gen-key",
+            "expected_output": "(follow prompts - enter name, email, passphrase)",
+            "explanation": "Creates public/private key pair for asymmetric encryption"
+          },
+          {
+            "step": 3,
+            "instruction": "Encrypt the file",
+            "command": "gpg --encrypt --recipient your@email.com ~/secret.txt",
+            "expected_output": "(creates secret.txt.gpg)",
+            "explanation": "File is now encrypted - confidentiality protected"
+          },
+          {
+            "step": 4,
+            "instruction": "Verify encryption (try to read encrypted file)",
+            "command": "cat ~/secret.txt.gpg",
+            "expected_output": "(garbled binary data)",
+            "explanation": "Encrypted content is unreadable without the key"
+          },
+          {
+            "step": 5,
+            "instruction": "Decrypt the file",
+            "command": "gpg --decrypt ~/secret.txt.gpg",
+            "expected_output": "SECRET: API_KEY=sk-abc123xyz789",
+            "explanation": "With the private key, you can recover the original content"
+          },
+          {
+            "step": 6,
+            "instruction": "Securely delete the plaintext file",
+            "command": "shred -u ~/secret.txt",
+            "expected_output": "(no output)",
+            "explanation": "shred overwrites the file before deletion, preventing recovery"
+          }
+        ],
+        "control_mapping": {
+          "principle": "Confidentiality",
+          "control_type": "Technical/Preventive",
+          "frameworks": ["CIS Control 3.11", "NIST 800-53 SC-13"]
+        }
+      },
+      {
+        "lab_id": "LAB-002-2",
+        "title": "Lab 2: Verifying Integrity with Hashing",
+        "objective": "Use hashing to verify file integrity",
+        "estimated_time": "10 minutes",
+        "steps": [
+          {
+            "step": 1,
+            "instruction": "Create a configuration file",
+            "command": "echo 'max_connections=100' > ~/config.txt",
+            "expected_output": "(no output)",
+            "explanation": "This represents a critical configuration file"
+          },
+          {
+            "step": 2,
+            "instruction": "Generate SHA-256 hash (baseline)",
+            "command": "sha256sum ~/config.txt > ~/config.txt.sha256",
+            "expected_output": "(no output - creates hash file)",
+            "explanation": "This hash represents the known-good state"
+          },
+          {
+            "step": 3,
+            "instruction": "View the hash",
+            "command": "cat ~/config.txt.sha256",
+            "expected_output": "abc123... config.txt (your hash will differ)",
+            "explanation": "This is the baseline hash to compare against"
+          },
+          {
+            "step": 4,
+            "instruction": "Verify integrity (should pass)",
+            "command": "sha256sum -c ~/config.txt.sha256",
+            "expected_output": "config.txt: OK",
+            "explanation": "File matches the baseline - integrity verified"
+          },
+          {
+            "step": 5,
+            "instruction": "Simulate unauthorized modification",
+            "command": "echo 'max_connections=999' > ~/config.txt",
+            "expected_output": "(no output)",
+            "explanation": "An attacker might change configuration values"
+          },
+          {
+            "step": 6,
+            "instruction": "Verify integrity again (should fail)",
+            "command": "sha256sum -c ~/config.txt.sha256",
+            "expected_output": "config.txt: FAILED\nsha256sum: WARNING: 1 computed checksum did NOT match",
+            "explanation": "Hash mismatch indicates the file was modified - integrity compromised"
+          }
+        ],
+        "control_mapping": {
+          "principle": "Integrity",
+          "control_type": "Technical/Detective",
+          "frameworks": ["CIS Control 3.14", "NIST 800-53 SI-7"]
+        }
+      },
+      {
+        "lab_id": "LAB-002-3",
+        "title": "Lab 3: Testing Availability with Service Monitoring",
+        "objective": "Monitor service availability and test recovery",
+        "estimated_time": "15 minutes",
+        "steps": [
+          {
+            "step": 1,
+            "instruction": "Install a web server for testing",
+            "command": "sudo apt update && sudo apt install -y nginx",
+            "expected_output": "(installation output)",
+            "explanation": "nginx will be our test service for availability monitoring"
+          },
+          {
+            "step": 2,
+            "instruction": "Check service status",
+            "command": "sudo systemctl status nginx",
+            "expected_output": "Active: active (running)",
+            "explanation": "Service is available - availability control working"
+          },
+          {
+            "step": 3,
+            "instruction": "Test HTTP availability",
+            "command": "curl -I http://localhost",
+            "expected_output": "HTTP/1.1 200 OK",
+            "explanation": "HTTP 200 confirms the service is responding"
+          },
+          {
+            "step": 4,
+            "instruction": "Simulate service failure",
+            "command": "sudo systemctl stop nginx",
+            "expected_output": "(no output)",
+            "explanation": "Simulating an availability incident"
+          },
+          {
+            "step": 5,
+            "instruction": "Verify service is down",
+            "command": "curl -I http://localhost 2>&1 | head -1",
+            "expected_output": "curl: (7) Failed to connect",
+            "explanation": "Service unavailable - availability compromised"
+          },
+          {
+            "step": 6,
+            "instruction": "Restore availability",
+            "command": "sudo systemctl start nginx && sudo systemctl status nginx",
+            "expected_output": "Active: active (running)",
+            "explanation": "Service restored - availability recovered"
+          }
+        ],
+        "control_mapping": {
+          "principle": "Availability",
+          "control_type": "Technical/Corrective",
+          "frameworks": ["CIS Control 11.1", "NIST 800-53 CP-2"]
+        }
+      }
+    ]
+  },
+
+  "practice_platforms": {
+    "title": "Where to Practice CIA Concepts",
+    "platforms": [
+      {
+        "name": "TryHackMe",
+        "url": "https://tryhackme.com",
+        "relevant_rooms": ["Intro to Cryptography", "Linux Fundamentals", "Hashing"]
+      },
+      {
+        "name": "CryptoHack",
+        "url": "https://cryptohack.org",
+        "best_for": "Deep dive into cryptography for confidentiality/integrity"
+      },
+      {
+        "name": "OverTheWire: Bandit",
+        "url": "https://overthewire.org/wargames/bandit/",
+        "best_for": "Linux security fundamentals, file permissions"
+      }
+    ]
+  },
+
+  "hands_on_activity": {
+    "title": "CIA Impact Assessment",
+    "objective": "Analyze a scenario and assess CIA impacts",
+    "scenario": "A mid-sized hospital has the following systems: Electronic Health Records (EHR), Patient Billing System, Public Website, Internal Email, and Medical Device Network (IV pumps, monitors). For each system, rank the CIA priorities and justify your reasoning.",
+    "steps": [
+      "List each system",
+      "Rank CIA (1=highest, 3=lowest) for each",
+      "Identify the top threat to each CIA component",
+      "Recommend one key control for the highest-priority principle",
+      "Document any trade-offs required"
+    ],
+    "expected_outcome": "A matrix showing CIA priorities for each system with justified reasoning",
     "reflection_questions": [
-      "Which element of the CIA Triad was most challenging to protect? Why?",
-      "How would the analysis differ for a healthcare organization vs. a financial institution?",
-      "What happens if you focus too heavily on one CIA element at the expense of others?"
+      "Did any system have equal priorities for all three principles?",
+      "How did regulatory requirements (HIPAA) influence your decisions?",
+      "What happens if you optimize for one principle at the expense of others?",
+      "How would priorities change in an emergency (natural disaster)?"
     ]
   },
 
   "what_would_you_do": {
-    "scenario": "You're the security manager at MedCare Health Systems. A physician calls urgentlyâ€”they need immediate access to a patient's records for an emergency procedure, but the authentication system is down for maintenance. The patient could die without the procedure.",
-    "context": "HIPAA requires protecting patient data confidentiality, but it also has provisions for emergencies. Your authentication system will be back online in 45 minutes. There's a 'break glass' procedure that bypasses normal authentication but triggers immediate audit review. The procedure hasn't been used before.",
-    "question": "How do you handle this situation?",
+    "scenario": "The Encryption Debate",
+    "context": "You're the security manager at a financial services firm. The development team wants to implement end-to-end encryption for all customer communications, which would prevent even internal security teams from monitoring for fraud or compliance violations. The compliance team is concerned this violates regulatory requirements for transaction monitoring.",
+    "question": "How do you balance confidentiality (customer privacy) with integrity monitoring (fraud detection)?",
     "options": [
       {
         "id": "a",
-        "text": "Deny access until the authentication system is back onlineâ€”HIPAA compliance must be maintained",
+        "text": "Implement full end-to-end encryption - customer privacy is paramount",
         "is_best": false,
-        "feedback": "While protecting confidentiality is important, patient safety takes priority. HIPAA actually includes provisions for emergencies. Denying access that could save a life is not the intent of privacy regulations.",
-        "consequences": "Patient could die or suffer permanent harm. Organization faces potential liability for prioritizing process over patient care. This is not what HIPAA intends."
+        "feedback": "While this maximizes confidentiality, it prevents the company from meeting regulatory obligations for fraud monitoring. Regulators could impose significant fines.",
+        "consequences": "Six months later, a fraud scheme goes undetected because monitoring couldn't see encrypted communications. Regulatory audit finds compliance gaps."
       },
       {
         "id": "b",
-        "text": "Grant access using the 'break glass' procedure, document everything, and initiate immediate audit review",
-        "is_best": true,
-        "feedback": "This is the correct approach. 'Break glass' procedures exist exactly for these situationsâ€”they balance the need for emergency access with maintaining accountability through enhanced logging and mandatory review. HIPAA's treatment exception allows access for emergency care.",
-        "consequences": "Patient receives needed care. Access is documented and reviewed per procedure. Audit trail maintains accountability. This balances all requirements appropriately."
+        "text": "No encryption - security team needs full visibility for monitoring",
+        "is_best": false,
+        "feedback": "This fails basic confidentiality requirements. Customer data in transit would be vulnerable, potentially violating data protection regulations.",
+        "consequences": "A man-in-the-middle attack exposes thousands of customer transactions. Data breach notification required."
       },
       {
         "id": "c",
-        "text": "Give the physician your credentials to access the system",
-        "is_best": false,
-        "feedback": "Sharing credentials violates security policies and destroys non-repudiation. Actions taken under your credentials become your responsibility. This also doesn't address the underlying issue if your authentication is also affected.",
-        "consequences": "You're personally liable for any actions taken. Non-repudiation is lost. Policy violation on your record. This is never an acceptable solution."
+        "text": "Implement encryption with compliant key escrow allowing authorized monitoring under documented procedures",
+        "is_best": true,
+        "feedback": "This balances confidentiality (data encrypted in transit) with integrity monitoring (authorized access for fraud detection). Documented procedures ensure accountability.",
+        "consequences": "Customer data is protected, fraud monitoring continues, and regulatory requirements are met. Clear audit trail shows authorized access only."
       },
       {
         "id": "d",
-        "text": "Escalate to the CIO and wait for their decision",
+        "text": "Let the compliance team and development team work it out themselves",
         "is_best": false,
-        "feedback": "While escalation might seem appropriate, patient emergencies don't wait for executive decisions. The break glass procedure exists for empowering immediate action. Escalation delays could cost the patient's life.",
-        "consequences": "Delay could result in patient harm or death. The procedure exists to enable frontline decision-making in emergencies. Escalation is appropriate for policy questions, not life-threatening emergencies."
+        "feedback": "Abdicating the decision leaves the organization in limbo and doesn't address the fundamental security architecture question.",
+        "consequences": "Months of debate with no resolution. Meanwhile, neither encryption nor proper monitoring is implemented."
       }
     ],
-    "key_lesson": "Security controls must balance all three CIA elements while supporting the organization's mission. In healthcare, patient safety can override normal confidentiality controls in true emergenciesâ€”but only with proper accountability measures like break glass procedures, documentation, and audit review. The goal is enabling emergency access while maintaining audit trails and reviewing every instance."
+    "key_lesson": "Real-world security requires balancing competing principles. The 'right' answer usually involves finding solutions that address multiple requirements rather than maximizing one at the expense of others. Document decisions and get stakeholder buy-in."
   },
 
   "summary": {
     "key_takeaways": [
-      "The CIA Triad (Confidentiality, Integrity, Availability) forms the foundation of all security decisions",
-      "Confidentiality prevents unauthorized disclosureâ€”encryption is the primary control",
-      "Integrity ensures data hasn't been tampered withâ€”hashing and digital signatures are key controls",
-      "Availability ensures systems work when neededâ€”redundancy, backups, and fault tolerance are critical",
-      "Non-repudiation provides undeniable proof of actionsâ€”digital signatures enable this",
-      "AAA (Authentication, Authorization, Accounting) controls and tracks access to resources"
+      "Confidentiality protects data from unauthorized disclosure - encryption is the primary control",
+      "Integrity ensures data accuracy and prevents unauthorized modification - hashing and digital signatures are key controls",
+      "Availability ensures systems are accessible when needed - redundancy and backups are essential",
+      "CIA principles often conflict - security professionals must balance based on business requirements",
+      "Classify incidents by CIA impact for clear communication and appropriate response"
     ],
     "exam_essentials": [
-      "Encryption = Confidentiality; Hashing = Integrity (don't confuse them!)",
-      "RTO = maximum downtime; RPO = maximum data loss",
-      "Digital signatures provide integrity + authentication + non-repudiation",
-      "MFA requires factors from DIFFERENT categories (two passwords is NOT MFA)",
-      "RADIUS = UDP, encrypts password only; TACACS+ = TCP, encrypts entire packet",
-      "AAA sequence: Authentication THEN Authorization THEN Accounting"
+      "Know controls that map to each CIA principle",
+      "Understand CIA trade-offs and how to prioritize based on context",
+      "Hashing = integrity; Encryption = confidentiality; Redundancy = availability",
+      "Digital signatures provide both integrity AND authenticity",
+      "AAA = Authentication, Authorization, Accounting; Non-repudiation = can't deny actions"
     ],
-    "connection_to_next": "Now that you understand the fundamental security concepts that all controls protect, the next lesson dives deeper into authentication methods and factorsâ€”the critical first step in the AAA framework that determines who can access your protected resources."
+    "connection_to_next": "The CIA Triad tells us WHAT to protect. The next lesson covers Authentication Methods - HOW we verify identity before granting access to confidential data and systems."
   },
 
   "related_content": {
-    "simulations": ["D1-SIM-002"],
-    "remediation": ["D1-REM-001"],
-    "next_lesson": "D1-LESSON-003",
-    "previous_lesson": "D1-LESSON-001"
+    "simulations": ["D1-SIM-002_Security_Concepts"],
+    "remediation": ["D1-REM-001_Policy_Fundamentals"],
+    "next_lesson": "D1-LESSON-003_Authentication_Methods",
+    "previous_lesson": "D1-LESSON-001_Security_Controls_Fundamentals"
   }
 }
