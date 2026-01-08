@@ -596,60 +596,236 @@
     function renderCoreConcepts(concepts, sectionId) {
         return `
             <div class="core-concepts">
-                ${concepts.map((concept, cIndex) => `
-                    <div class="concept-card collapsible" data-expanded="${cIndex === 0 ? 'true' : 'false'}">
-                        <button class="collapsible-header concept-header" onclick="toggleCollapsible(this)">
-                            <h3>${escapeHtml(concept.concept)}</h3>
-                            <span class="collapse-icon">${cIndex === 0 ? '▼' : '▶'}</span>
-                        </button>
-                        <div class="collapsible-content concept-content">
-                            <p class="concept-definition">${escapeHtml(concept.definition || '')}</p>
-                            
-                            ${concept.how_it_works ? `
-                                <div class="how-it-works">
-                                    <h4>How It Works</h4>
-                                    <p>${escapeHtml(concept.how_it_works.mechanism || '')}</p>
-                                    ${concept.how_it_works.example_flow ? `
-                                        <div class="example-flow">
-                                            <strong>Example Flow:</strong>
-                                            <div class="flow-diagram">
-                                                ${renderFlowDiagram(concept.how_it_works.example_flow)}
-                                            </div>
-                                        </div>
-                                    ` : ''}
+                ${concepts.map((concept, cIndex) => {
+                    // Check if concept has any content beyond just the name
+                    const hasContent = checkConceptHasContent(concept);
+                    
+                    if (!hasContent) {
+                        // Just render as a simple label, not collapsible
+                        return `
+                            <div class="concept-card concept-simple">
+                                <div class="concept-header-simple">
+                                    <h3>${escapeHtml(concept.concept || concept.name || 'Concept')}</h3>
                                 </div>
-                            ` : ''}
-                            
-                            ${concept.examples && concept.examples.length > 0 ? `
-                                <div class="examples-grid">
-                                    <h4>Examples</h4>
-                                    <div class="examples-list">
-                                        ${concept.examples.map(ex => `
-                                            <div class="example-item">
-                                                <strong>${escapeHtml(ex.control || ex.name || '')}</strong>
-                                                <p>${escapeHtml(ex.function || ex.description || '')}</p>
-                                                ${ex.implementation ? `<span class="impl-note">${escapeHtml(ex.implementation)}</span>` : ''}
-                                            </div>
+                            </div>
+                        `;
+                    }
+                    
+                    return `
+                        <div class="concept-card collapsible" data-expanded="${cIndex === 0 ? 'true' : 'false'}">
+                            <button class="collapsible-header concept-header" onclick="toggleCollapsible(this)">
+                                <h3>${escapeHtml(concept.concept || concept.name || 'Concept')}</h3>
+                                <span class="collapse-icon">${cIndex === 0 ? '▼' : '▶'}</span>
+                            </button>
+                            <div class="collapsible-content concept-content">
+                                ${renderConceptContent(concept)}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+    
+    function checkConceptHasContent(concept) {
+        // Check if concept has any meaningful content
+        const skipKeys = ['concept', 'name', 'id', 'section_id'];
+        for (const key of Object.keys(concept)) {
+            if (skipKeys.includes(key)) continue;
+            const val = concept[key];
+            if (val !== null && val !== undefined && val !== '') {
+                if (typeof val === 'string' && val.trim() !== '') return true;
+                if (typeof val === 'object') return true;
+            }
+        }
+        return false;
+    }
+    
+    function renderConceptContent(concept) {
+        let html = '';
+        const skipKeys = ['concept', 'name', 'id', 'section_id'];
+        
+        // First, handle known structured fields
+        if (concept.definition) {
+            html += `<p class="concept-definition">${escapeHtml(concept.definition)}</p>`;
+        }
+        
+        if (concept.how_it_works) {
+            html += `
+                <div class="how-it-works">
+                    <h4>How It Works</h4>
+                    <p>${escapeHtml(concept.how_it_works.mechanism || concept.how_it_works)}</p>
+                    ${concept.how_it_works.example_flow ? `
+                        <div class="example-flow">
+                            <strong>Example Flow:</strong>
+                            <div class="flow-diagram">
+                                ${renderFlowDiagram(concept.how_it_works.example_flow)}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        if (concept.examples && Array.isArray(concept.examples) && concept.examples.length > 0) {
+            html += `
+                <div class="examples-grid">
+                    <h4>Examples</h4>
+                    <div class="examples-list">
+                        ${concept.examples.map(ex => `
+                            <div class="example-item">
+                                <strong>${escapeHtml(ex.control || ex.name || ex.example || '')}</strong>
+                                <p>${escapeHtml(ex.function || ex.description || '')}</p>
+                                ${ex.implementation ? `<span class="impl-note">${escapeHtml(ex.implementation)}</span>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (concept.what_would_happen_if) {
+            html += `
+                <div class="what-if-box">
+                    <h4>⚠️ What Would Happen If...</h4>
+                    <p class="what-if-scenario">${escapeHtml(concept.what_would_happen_if.scenario || '')}</p>
+                    <p class="what-if-consequence">${escapeHtml(concept.what_would_happen_if.consequence || '')}</p>
+                    ${concept.what_would_happen_if.real_example ? `
+                        <div class="real-example">
+                            <strong>Real Example:</strong> ${escapeHtml(concept.what_would_happen_if.real_example)}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        // Now handle any other fields dynamically
+        const handledKeys = ['concept', 'name', 'id', 'section_id', 'definition', 'how_it_works', 'examples', 'what_would_happen_if'];
+        
+        for (const [key, value] of Object.entries(concept)) {
+            if (handledKeys.includes(key)) continue;
+            if (value === null || value === undefined || value === '') continue;
+            
+            const formattedKey = formatKeyName(key);
+            
+            if (typeof value === 'string') {
+                html += `
+                    <div class="concept-field">
+                        <strong>${formattedKey}:</strong>
+                        <span>${escapeHtml(value)}</span>
+                    </div>
+                `;
+            } else if (Array.isArray(value)) {
+                html += renderArrayField(formattedKey, value);
+            } else if (typeof value === 'object') {
+                html += renderObjectField(formattedKey, value);
+            }
+        }
+        
+        return html || '<p class="no-content">No additional details available.</p>';
+    }
+    
+    function formatKeyName(key) {
+        // Convert snake_case or camelCase to Title Case
+        return key
+            .replace(/_/g, ' ')
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, str => str.toUpperCase())
+            .trim();
+    }
+    
+    function renderArrayField(label, arr) {
+        if (!arr || arr.length === 0) return '';
+        
+        // Check if array contains objects or primitives
+        const firstItem = arr[0];
+        
+        if (typeof firstItem === 'string') {
+            return `
+                <div class="concept-field array-field">
+                    <strong>${label}:</strong>
+                    <ul class="simple-list">
+                        ${arr.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        } else if (typeof firstItem === 'object') {
+            // Render as a table or list of cards
+            const keys = Object.keys(firstItem);
+            
+            if (keys.length <= 4) {
+                // Render as table
+                return `
+                    <div class="concept-field table-field">
+                        <strong>${label}:</strong>
+                        <table class="concept-table">
+                            <thead>
+                                <tr>${keys.map(k => `<th>${formatKeyName(k)}</th>`).join('')}</tr>
+                            </thead>
+                            <tbody>
+                                ${arr.map(item => `
+                                    <tr>${keys.map(k => `<td>${escapeHtml(item[k] || '')}</td>`).join('')}</tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                // Render as cards
+                return `
+                    <div class="concept-field cards-field">
+                        <strong>${label}:</strong>
+                        <div class="mini-cards">
+                            ${arr.map(item => `
+                                <div class="mini-card">
+                                    ${Object.entries(item).map(([k, v]) => `
+                                        <div class="mini-card-row">
+                                            <span class="mini-label">${formatKeyName(k)}:</span>
+                                            <span class="mini-value">${escapeHtml(v || '')}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        return '';
+    }
+    
+    function renderObjectField(label, obj) {
+        if (!obj || Object.keys(obj).length === 0) return '';
+        
+        return `
+            <div class="concept-field object-field">
+                <strong>${label}:</strong>
+                <div class="object-content">
+                    ${Object.entries(obj).map(([k, v]) => {
+                        if (typeof v === 'object' && v !== null) {
+                            if (Array.isArray(v)) {
+                                return renderArrayField(formatKeyName(k), v);
+                            }
+                            return `
+                                <div class="nested-object">
+                                    <span class="nested-label">${formatKeyName(k)}:</span>
+                                    <div class="nested-values">
+                                        ${Object.entries(v).map(([nk, nv]) => `
+                                            <span class="nested-item"><em>${formatKeyName(nk)}:</em> ${escapeHtml(nv || '')}</span>
                                         `).join('')}
                                     </div>
                                 </div>
-                            ` : ''}
-                            
-                            ${concept.what_would_happen_if ? `
-                                <div class="what-if-box">
-                                    <h4>⚠️ What Would Happen If...</h4>
-                                    <p class="what-if-scenario">${escapeHtml(concept.what_would_happen_if.scenario || '')}</p>
-                                    <p class="what-if-consequence">${escapeHtml(concept.what_would_happen_if.consequence || '')}</p>
-                                    ${concept.what_would_happen_if.real_example ? `
-                                        <div class="real-example">
-                                            <strong>Real Example:</strong> ${escapeHtml(concept.what_would_happen_if.real_example)}
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                `).join('')}
+                            `;
+                        }
+                        return `
+                            <div class="object-row">
+                                <span class="obj-label">${formatKeyName(k)}:</span>
+                                <span class="obj-value">${escapeHtml(v || '')}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
             </div>
         `;
     }
@@ -1645,28 +1821,35 @@
                 color: #10b981;
             }
             
-            /* Difficulty badges in lesson header */
-            .meta-item.difficulty-beginner,
-            .meta-item.difficulty-intermediate,
+            /* Difficulty badges in lesson header - combined for specificity */
+            .meta-item.difficulty-beginner {
+                display: inline-block;
+                padding: 4px 10px;
+                border-radius: 4px;
+                font-weight: 600;
+                font-size: 0.8rem;
+                background: #10b981;
+                color: #ffffff !important;
+            }
+            
+            .meta-item.difficulty-intermediate {
+                display: inline-block;
+                padding: 4px 10px;
+                border-radius: 4px;
+                font-weight: 600;
+                font-size: 0.8rem;
+                background: #f59e0b;
+                color: #ffffff !important;
+            }
+            
             .meta-item.difficulty-advanced {
                 display: inline-block;
                 padding: 4px 10px;
                 border-radius: 4px;
                 font-weight: 600;
                 font-size: 0.8rem;
-            }
-            
-            .difficulty-beginner { 
-                background: #10b981; 
-                color: white !important; 
-            }
-            .difficulty-intermediate { 
-                background: #f59e0b; 
-                color: white !important; 
-            }
-            .difficulty-advanced { 
-                background: #ef4444; 
-                color: white !important; 
+                background: #ef4444;
+                color: #ffffff !important;
             }
             
             /* Career Relevance Bar */
@@ -1855,6 +2038,189 @@
                 background: rgba(99, 102, 241, 0.05);
                 border-left: 3px solid #6366f1;
                 border-radius: 4px;
+            }
+            
+            /* Simple concept (no dropdown) */
+            .concept-simple {
+                background: #18181b;
+                border: 1px solid #27272a;
+                border-radius: 8px;
+                margin-bottom: 15px;
+            }
+            
+            .concept-header-simple {
+                padding: 15px;
+            }
+            
+            .concept-header-simple h3 {
+                margin: 0;
+                color: #fafafa;
+                font-size: 1rem;
+            }
+            
+            /* Dynamic concept fields */
+            .concept-field {
+                margin: 15px 0;
+                padding: 12px 15px;
+                background: #1f1f23;
+                border-radius: 8px;
+                border-left: 3px solid #3f3f46;
+            }
+            
+            .concept-field > strong {
+                display: block;
+                color: #a1a1aa;
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 8px;
+            }
+            
+            .concept-field > span {
+                color: #e4e4e7;
+                line-height: 1.6;
+            }
+            
+            /* Simple list */
+            .simple-list {
+                margin: 0;
+                padding-left: 20px;
+                color: #e4e4e7;
+            }
+            
+            .simple-list li {
+                margin: 5px 0;
+            }
+            
+            /* Concept table */
+            .concept-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+                font-size: 0.9rem;
+            }
+            
+            .concept-table th {
+                background: #27272a;
+                color: #a1a1aa;
+                padding: 10px 12px;
+                text-align: left;
+                font-weight: 600;
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            
+            .concept-table td {
+                padding: 10px 12px;
+                border-bottom: 1px solid #27272a;
+                color: #e4e4e7;
+            }
+            
+            .concept-table tr:last-child td {
+                border-bottom: none;
+            }
+            
+            .concept-table tr:hover td {
+                background: rgba(99, 102, 241, 0.05);
+            }
+            
+            /* Mini cards for array items */
+            .mini-cards {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 12px;
+                margin-top: 10px;
+            }
+            
+            .mini-card {
+                background: #18181b;
+                border: 1px solid #27272a;
+                border-radius: 8px;
+                padding: 12px;
+            }
+            
+            .mini-card-row {
+                margin: 6px 0;
+            }
+            
+            .mini-label {
+                color: #71717a;
+                font-size: 0.8rem;
+            }
+            
+            .mini-value {
+                color: #e4e4e7;
+                display: block;
+                margin-top: 2px;
+            }
+            
+            /* Object content */
+            .object-content {
+                margin-top: 10px;
+            }
+            
+            .object-row {
+                display: flex;
+                gap: 10px;
+                padding: 8px 0;
+                border-bottom: 1px solid #27272a;
+            }
+            
+            .object-row:last-child {
+                border-bottom: none;
+            }
+            
+            .obj-label {
+                color: #71717a;
+                min-width: 120px;
+                font-size: 0.9rem;
+            }
+            
+            .obj-value {
+                color: #e4e4e7;
+                flex: 1;
+            }
+            
+            /* Nested objects */
+            .nested-object {
+                padding: 10px 0;
+                border-bottom: 1px solid #27272a;
+            }
+            
+            .nested-object:last-child {
+                border-bottom: none;
+            }
+            
+            .nested-label {
+                color: #a1a1aa;
+                font-weight: 600;
+                display: block;
+                margin-bottom: 8px;
+            }
+            
+            .nested-values {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+            
+            .nested-item {
+                color: #e4e4e7;
+                font-size: 0.9rem;
+            }
+            
+            .nested-item em {
+                color: #71717a;
+                font-style: normal;
+            }
+            
+            /* No content message */
+            .no-content {
+                color: #71717a;
+                font-style: italic;
+                text-align: center;
+                padding: 20px;
             }
             
             .how-it-works {
@@ -3234,6 +3600,62 @@
             [data-theme="light"] .concept-definition {
                 background: rgba(99, 102, 241, 0.05);
                 color: #334155;
+            }
+            
+            [data-theme="light"] .concept-simple {
+                background: #ffffff;
+                border-color: #e2e8f0;
+            }
+            
+            [data-theme="light"] .concept-header-simple h3 {
+                color: #0f172a;
+            }
+            
+            [data-theme="light"] .concept-field {
+                background: #f8fafc;
+                border-left-color: #cbd5e1;
+            }
+            
+            [data-theme="light"] .concept-field > strong {
+                color: #64748b;
+            }
+            
+            [data-theme="light"] .concept-field > span,
+            [data-theme="light"] .simple-list,
+            [data-theme="light"] .obj-value,
+            [data-theme="light"] .mini-value,
+            [data-theme="light"] .nested-item {
+                color: #334155;
+            }
+            
+            [data-theme="light"] .concept-table th {
+                background: #f1f5f9;
+                color: #64748b;
+            }
+            
+            [data-theme="light"] .concept-table td {
+                border-bottom-color: #e2e8f0;
+                color: #334155;
+            }
+            
+            [data-theme="light"] .concept-table tr:hover td {
+                background: rgba(99, 102, 241, 0.05);
+            }
+            
+            [data-theme="light"] .mini-card {
+                background: #ffffff;
+                border-color: #e2e8f0;
+            }
+            
+            [data-theme="light"] .object-row,
+            [data-theme="light"] .nested-object {
+                border-bottom-color: #e2e8f0;
+            }
+            
+            [data-theme="light"] .obj-label,
+            [data-theme="light"] .mini-label,
+            [data-theme="light"] .nested-item em {
+                color: #64748b;
             }
             
             [data-theme="light"] .how-it-works,
