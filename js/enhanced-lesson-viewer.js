@@ -334,9 +334,12 @@
                 
                 ${intro.why_it_matters ? `
                     <div class="why-matters-box collapsible" data-expanded="false">
-                        <button class="collapsible-header" onclick="toggleCollapsible(this)">
-                            <h3>💡 Why This Matters</h3>
-                            <span class="collapse-icon">▼</span>
+                        <button class="collapsible-header why-matters-header" onclick="toggleCollapsible(this)">
+                            <div class="header-left">
+                                <h3>💡 Why This Matters</h3>
+                                <span class="expand-hint">Click to expand</span>
+                            </div>
+                            <span class="collapse-icon">▶</span>
                         </button>
                         <div class="collapsible-content">
                             ${intro.why_it_matters.career_impact ? `
@@ -1642,9 +1645,29 @@
                 color: #10b981;
             }
             
-            .difficulty-beginner { color: #10b981; }
-            .difficulty-intermediate { color: #f59e0b; }
-            .difficulty-advanced { color: #ef4444; }
+            /* Difficulty badges in lesson header */
+            .meta-item.difficulty-beginner,
+            .meta-item.difficulty-intermediate,
+            .meta-item.difficulty-advanced {
+                display: inline-block;
+                padding: 4px 10px;
+                border-radius: 4px;
+                font-weight: 600;
+                font-size: 0.8rem;
+            }
+            
+            .difficulty-beginner { 
+                background: #10b981; 
+                color: white !important; 
+            }
+            .difficulty-intermediate { 
+                background: #f59e0b; 
+                color: white !important; 
+            }
+            .difficulty-advanced { 
+                background: #ef4444; 
+                color: white !important; 
+            }
             
             /* Career Relevance Bar */
             .career-relevance-bar {
@@ -1771,6 +1794,36 @@
             .collapse-icon {
                 color: #71717a;
                 transition: transform 0.2s;
+            }
+            
+            /* Why It Matters special styling */
+            .why-matters-header {
+                background: linear-gradient(135deg, #27272a, #1f1f23);
+                border: 1px solid #3f3f46;
+                transition: all 0.2s;
+            }
+            
+            .why-matters-header:hover {
+                border-color: #6366f1;
+                background: linear-gradient(135deg, #2d2d35, #252530);
+            }
+            
+            .header-left {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            
+            .expand-hint {
+                font-size: 0.75rem;
+                color: #6366f1;
+                font-weight: normal;
+                opacity: 0.8;
+            }
+            
+            .collapsible[data-expanded="true"] .expand-hint {
+                display: none;
             }
             
             .collapsible[data-expanded="false"] .collapsible-content {
@@ -3022,10 +3075,34 @@
                 
                 .skill-tree-visual {
                     flex-direction: column;
+                    align-items: center;
+                }
+                
+                .tree-column {
+                    width: 100%;
+                    max-width: 300px;
+                    text-align: center;
+                }
+                
+                .tree-column h4 {
+                    text-align: center;
+                }
+                
+                .tree-node {
+                    text-align: center;
                 }
                 
                 .tree-arrow {
                     transform: rotate(90deg);
+                    margin: 10px 0;
+                }
+                
+                .cross-domain-grid {
+                    grid-template-columns: 1fr;
+                }
+                
+                .builds-toward-list {
+                    justify-content: center;
                 }
             }
             
@@ -3134,6 +3211,20 @@
             [data-theme="light"] .collapsible-header {
                 background: #f1f5f9;
                 color: #0f172a;
+            }
+            
+            [data-theme="light"] .why-matters-header {
+                background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+                border-color: #cbd5e1;
+            }
+            
+            [data-theme="light"] .why-matters-header:hover {
+                border-color: #6366f1;
+                background: linear-gradient(135deg, #e2e8f0, #d1d5db);
+            }
+            
+            [data-theme="light"] .expand-hint {
+                color: #6366f1;
             }
             
             [data-theme="light"] .collapsible-content {
