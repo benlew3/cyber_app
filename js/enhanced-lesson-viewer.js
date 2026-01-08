@@ -137,9 +137,6 @@
                             ${lesson.objectives_covered ? `
                                 <span class="meta-item">📍 Objectives: ${lesson.objectives_covered.join(', ')}</span>
                             ` : ''}
-                            ${lesson.estimated_duration ? `
-                                <span class="meta-item">⏱️ ${lesson.estimated_duration}</span>
-                            ` : ''}
                             ${lesson.difficulty ? `
                                 <span class="meta-item difficulty-${lesson.difficulty}">
                                     ${lesson.difficulty.toUpperCase()}
@@ -536,9 +533,6 @@
                             <span class="section-number">${index + 1}</span>
                             ${escapeHtml(section.title)}
                         </h2>
-                        ${section.estimated_time ? `
-                            <span class="section-time">⏱️ ${section.estimated_time}</span>
-                        ` : ''}
                     </div>
                     
                     ${renderSectionContent(section, sectionId, index)}
