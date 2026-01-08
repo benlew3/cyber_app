@@ -2910,6 +2910,40 @@ function injectStyles() {
         .difficulty-intermediate { background: #f59e0b; color: white; }
         .difficulty-advanced { background: #ef4444; color: white; }
         
+        /* Filter Buttons (Tools page) */
+        .filter-btn {
+            padding: 8px 16px;
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            border-radius: 6px;
+            color: #a1a1aa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn:hover {
+            border-color: #6366f1;
+            color: #fafafa;
+        }
+        
+        .filter-btn.active {
+            background: #6366f1;
+            border-color: #6366f1;
+            color: white;
+        }
+        
+        /* Tool cards hover effect */
+        .tool-card:hover {
+            border-color: #6366f1 !important;
+            transform: translateY(-2px);
+        }
+        
+        /* Resource cards hover */
+        .resource-card:hover {
+            border-color: #6366f1 !important;
+            transform: translateY(-2px);
+        }
+        
         /* Success Message */
         .success-message {
             background: #064e3b;
@@ -3706,6 +3740,46 @@ function injectStyles() {
         [data-theme="light"] [style*="border: 1px solid #3f3f46"] {
             border-color: #e2e8f0 !important;
         }
+        
+        /* Light mode - Filter buttons */
+        [data-theme="light"] .filter-btn {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+            color: #64748b;
+        }
+        
+        [data-theme="light"] .filter-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+        
+        [data-theme="light"] .filter-btn.active {
+            background: #6366f1;
+            color: white;
+        }
+        
+        /* Light mode - Tool cards */
+        [data-theme="light"] .tool-card,
+        [data-theme="light"] .distro-card,
+        [data-theme="light"] .resource-card {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        /* Light mode - Linux setup */
+        [data-theme="light"] .linux-section {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+        }
+        
+        [data-theme="light"] .linux-section h2 {
+            color: inherit !important;
+        }
+        
+        [data-theme="light"] .step,
+        [data-theme="light"] .commands-grid > div {
+            background: #f8fafc !important;
+        }
     `;
     document.head.appendChild(style);
     console.log('✅ Styles injected');
@@ -3757,6 +3831,8 @@ function createHeader() {
             <button class="nav-btn" onclick="showAllPBQs()">🖥️ PBQs</button>
             <button class="nav-btn" onclick="showQuizMenu()">📝 Quiz</button>
             <button class="nav-btn" onclick="showGlossary()">📖 Glossary</button>
+            <button class="nav-btn" onclick="showSecurityTools()">🛠️ Tools</button>
+            <button class="nav-btn" onclick="showLinuxSetup()">🐧 Linux</button>
             <button class="nav-btn" onclick="showCareerQuiz()">🎯 Career Quiz</button>
             <button class="nav-btn" onclick="showPracticeExam()">📋 Exam</button>
             <button class="nav-btn" onclick="NotesSystem.showAllNotes()">🗒️ Notes</button>
@@ -5685,6 +5761,381 @@ function filterGlossary(searchTerm) {
     }
 }
 
+// ============================================
+// SECURITY TOOLS PAGE
+// ============================================
+
+function showSecurityTools() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const content = document.getElementById('content');
+    
+    // Collect tools from all loaded lesson data
+    const toolsByCategory = {
+        'SIEM & Log Analysis': [
+            { name: 'Splunk', type: 'Commercial', url: 'https://www.splunk.com/', description: 'Enterprise SIEM platform for log analysis and security monitoring', roles: ['SOC Analyst', 'Security Engineer'] },
+            { name: 'Microsoft Sentinel', type: 'Commercial', url: 'https://azure.microsoft.com/en-us/products/microsoft-sentinel', description: 'Cloud-native SIEM with AI-powered analytics', roles: ['SOC Analyst', 'Security Engineer'] },
+            { name: 'QRadar', type: 'Commercial', url: 'https://www.ibm.com/qradar', description: 'IBM enterprise SIEM solution', roles: ['SOC Analyst'] },
+            { name: 'Elastic Security', type: 'Open Source', url: 'https://www.elastic.co/security', description: 'Free and open SIEM built on Elasticsearch', roles: ['SOC Analyst', 'Security Engineer'] },
+            { name: 'Wazuh', type: 'Open Source', url: 'https://wazuh.com/', description: 'Free open source security monitoring platform', roles: ['SOC Analyst', 'Security Engineer'] }
+        ],
+        'Endpoint Detection & Response (EDR)': [
+            { name: 'CrowdStrike Falcon', type: 'Commercial', url: 'https://www.crowdstrike.com/', description: 'Cloud-native endpoint protection platform', roles: ['SOC Analyst', 'Incident Responder'] },
+            { name: 'SentinelOne', type: 'Commercial', url: 'https://www.sentinelone.com/', description: 'Autonomous endpoint security platform', roles: ['SOC Analyst', 'Incident Responder'] },
+            { name: 'Carbon Black', type: 'Commercial', url: 'https://www.vmware.com/products/carbon-black-cloud.html', description: 'VMware endpoint protection and EDR', roles: ['SOC Analyst', 'Incident Responder'] },
+            { name: 'Microsoft Defender for Endpoint', type: 'Commercial', url: 'https://www.microsoft.com/en-us/security/business/endpoint-security/microsoft-defender-endpoint', description: 'Enterprise endpoint protection', roles: ['SOC Analyst', 'Security Engineer'] },
+            { name: 'Velociraptor', type: 'Open Source', url: 'https://docs.velociraptor.app/', description: 'Digital forensics and incident response tool', roles: ['Incident Responder', 'Forensics'] }
+        ],
+        'Network Security & IDS/IPS': [
+            { name: 'Snort', type: 'Open Source', url: 'https://www.snort.org/', description: 'Network intrusion detection system', roles: ['SOC Analyst', 'Security Engineer'] },
+            { name: 'Suricata', type: 'Open Source', url: 'https://suricata.io/', description: 'High performance network IDS/IPS', roles: ['SOC Analyst', 'Security Engineer'] },
+            { name: 'Zeek (Bro)', type: 'Open Source', url: 'https://zeek.org/', description: 'Network analysis framework', roles: ['SOC Analyst', 'Security Engineer'] },
+            { name: 'Wireshark', type: 'Open Source', url: 'https://www.wireshark.org/', description: 'Network protocol analyzer', roles: ['SOC Analyst', 'Incident Responder', 'Pen Tester'] },
+            { name: 'pfSense', type: 'Open Source', url: 'https://www.pfsense.org/', description: 'Open source firewall/router', roles: ['Security Engineer'] }
+        ],
+        'Vulnerability Scanning': [
+            { name: 'Nessus', type: 'Commercial', url: 'https://www.tenable.com/products/nessus', description: 'Vulnerability assessment scanner', roles: ['Security Engineer', 'Pen Tester'] },
+            { name: 'OpenVAS', type: 'Open Source', url: 'https://www.openvas.org/', description: 'Open source vulnerability scanner', roles: ['Security Engineer', 'Pen Tester'] },
+            { name: 'Qualys', type: 'Commercial', url: 'https://www.qualys.com/', description: 'Cloud-based vulnerability management', roles: ['Security Engineer', 'GRC Analyst'] },
+            { name: 'Nmap', type: 'Open Source', url: 'https://nmap.org/', description: 'Network discovery and security auditing', roles: ['Security Engineer', 'Pen Tester'] },
+            { name: 'Nuclei', type: 'Open Source', url: 'https://nuclei.projectdiscovery.io/', description: 'Fast vulnerability scanner', roles: ['Security Engineer', 'Pen Tester'] }
+        ],
+        'Penetration Testing': [
+            { name: 'Metasploit', type: 'Open Source', url: 'https://www.metasploit.com/', description: 'Penetration testing framework', roles: ['Pen Tester'] },
+            { name: 'Burp Suite', type: 'Commercial/Free', url: 'https://portswigger.net/burp', description: 'Web application security testing', roles: ['Pen Tester', 'Security Engineer'] },
+            { name: 'OWASP ZAP', type: 'Open Source', url: 'https://www.zaproxy.org/', description: 'Web app security scanner', roles: ['Pen Tester', 'Security Engineer'] },
+            { name: 'Kali Linux', type: 'Open Source', url: 'https://www.kali.org/', description: 'Penetration testing OS', roles: ['Pen Tester'] },
+            { name: 'Cobalt Strike', type: 'Commercial', url: 'https://www.cobaltstrike.com/', description: 'Adversary simulation platform', roles: ['Pen Tester', 'Red Team'] }
+        ],
+        'GRC & Compliance': [
+            { name: 'ServiceNow GRC', type: 'Commercial', url: 'https://www.servicenow.com/products/governance-risk-and-compliance.html', description: 'Enterprise GRC platform', roles: ['GRC Analyst'] },
+            { name: 'RSA Archer', type: 'Commercial', url: 'https://www.archerirm.com/', description: 'Integrated risk management', roles: ['GRC Analyst'] },
+            { name: 'OneTrust', type: 'Commercial', url: 'https://www.onetrust.com/', description: 'Privacy and compliance platform', roles: ['GRC Analyst'] },
+            { name: 'SimpleRisk', type: 'Open Source', url: 'https://www.simplerisk.com/', description: 'Free risk management tool', roles: ['GRC Analyst', 'Security Engineer'] },
+            { name: 'Eramba', type: 'Open Source', url: 'https://www.eramba.org/', description: 'Community GRC platform', roles: ['GRC Analyst'] }
+        ],
+        'Digital Forensics': [
+            { name: 'Autopsy', type: 'Open Source', url: 'https://www.autopsy.com/', description: 'Digital forensics platform', roles: ['Incident Responder', 'Forensics'] },
+            { name: 'FTK (Forensic Toolkit)', type: 'Commercial', url: 'https://www.exterro.com/ftk-imager', description: 'Computer forensics software', roles: ['Forensics'] },
+            { name: 'Volatility', type: 'Open Source', url: 'https://www.volatilityfoundation.org/', description: 'Memory forensics framework', roles: ['Incident Responder', 'Forensics'] },
+            { name: 'SANS SIFT Workstation', type: 'Open Source', url: 'https://www.sans.org/tools/sift-workstation/', description: 'Forensic workstation VM', roles: ['Incident Responder', 'Forensics'] },
+            { name: 'Eric Zimmermans Tools', type: 'Open Source', url: 'https://ericzimmerman.github.io/', description: 'Windows forensic tools collection', roles: ['Incident Responder', 'Forensics'] }
+        ],
+        'Password & Credential Tools': [
+            { name: 'Hashcat', type: 'Open Source', url: 'https://hashcat.net/hashcat/', description: 'Password recovery tool', roles: ['Pen Tester'] },
+            { name: 'John the Ripper', type: 'Open Source', url: 'https://www.openwall.com/john/', description: 'Password cracker', roles: ['Pen Tester'] },
+            { name: 'CyberArk', type: 'Commercial', url: 'https://www.cyberark.com/', description: 'Privileged access management', roles: ['Security Engineer'] },
+            { name: 'HashiCorp Vault', type: 'Open Source', url: 'https://www.vaultproject.io/', description: 'Secrets management', roles: ['Security Engineer'] },
+            { name: 'Bitwarden', type: 'Open Source', url: 'https://bitwarden.com/', description: 'Password manager', roles: ['All'] }
+        ]
+    };
+    
+    content.innerHTML = `
+        <div class="container">
+            <button class="back-btn" onclick="showDashboard()">← Back</button>
+            
+            <h1 class="page-title">🛠️ Security Tools Reference</h1>
+            <p class="page-subtitle">Essential tools for cybersecurity professionals - organized by category</p>
+            
+            <div class="tools-filter" style="margin-bottom: 30px;">
+                <input type="text" id="tools-search" placeholder="Search tools..." 
+                       style="width: 100%; max-width: 400px; padding: 12px 16px; background: #27272a; border: 1px solid #3f3f46; border-radius: 8px; color: #fafafa; font-size: 1rem;"
+                       oninput="filterTools(this.value)">
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="filter-btn active" onclick="filterToolsByType('all')">All</button>
+                    <button class="filter-btn" onclick="filterToolsByType('Open Source')">Open Source</button>
+                    <button class="filter-btn" onclick="filterToolsByType('Commercial')">Commercial</button>
+                </div>
+            </div>
+            
+            <div id="tools-container">
+                ${Object.entries(toolsByCategory).map(([category, tools]) => `
+                    <div class="tools-category" data-category="${category}">
+                        <h2 style="color: #6366f1; margin-bottom: 20px; font-size: 1.3rem;">
+                            ${getCategoryIcon(category)} ${category}
+                        </h2>
+                        <div class="tools-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-bottom: 40px;">
+                            ${tools.map(tool => `
+                                <div class="tool-card" data-type="${tool.type}" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 20px; transition: all 0.2s;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                        <h3 style="color: #fafafa; font-size: 1.1rem; margin: 0;">${tool.name}</h3>
+                                        <span style="padding: 4px 10px; background: ${tool.type === 'Open Source' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(99, 102, 241, 0.2)'}; color: ${tool.type === 'Open Source' ? '#10b981' : '#6366f1'}; border-radius: 4px; font-size: 0.75rem;">${tool.type}</span>
+                                    </div>
+                                    <p style="color: #a1a1aa; font-size: 0.9rem; margin-bottom: 15px; line-height: 1.5;">${tool.description}</p>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px;">
+                                        ${tool.roles.map(role => `<span style="padding: 3px 8px; background: #27272a; border-radius: 4px; font-size: 0.75rem; color: #71717a;">${role}</span>`).join('')}
+                                    </div>
+                                    <a href="${tool.url}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 6px; color: #6366f1; text-decoration: none; font-size: 0.9rem;">
+                                        Visit Website →
+                                    </a>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    
+    APP.state.currentView = 'tools';
+}
+
+function getCategoryIcon(category) {
+    const icons = {
+        'SIEM & Log Analysis': '📊',
+        'Endpoint Detection & Response (EDR)': '🖥️',
+        'Network Security & IDS/IPS': '🌐',
+        'Vulnerability Scanning': '🔍',
+        'Penetration Testing': '🎯',
+        'GRC & Compliance': '📋',
+        'Digital Forensics': '🔬',
+        'Password & Credential Tools': '🔐'
+    };
+    return icons[category] || '🛠️';
+}
+
+function filterTools(searchTerm) {
+    const cards = document.querySelectorAll('.tool-card');
+    const categories = document.querySelectorAll('.tools-category');
+    searchTerm = searchTerm.toLowerCase();
+    
+    cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(searchTerm) ? 'block' : 'none';
+    });
+    
+    // Hide empty categories
+    categories.forEach(cat => {
+        const visibleCards = cat.querySelectorAll('.tool-card[style*="display: block"], .tool-card:not([style*="display: none"])');
+        const hasVisibleCards = Array.from(cat.querySelectorAll('.tool-card')).some(card => card.style.display !== 'none');
+        cat.style.display = hasVisibleCards ? 'block' : 'none';
+    });
+}
+
+function filterToolsByType(type) {
+    const cards = document.querySelectorAll('.tool-card');
+    const buttons = document.querySelectorAll('.filter-btn');
+    
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    cards.forEach(card => {
+        if (type === 'all' || card.dataset.type === type || card.dataset.type.includes(type)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// ============================================
+// LINUX SETUP PAGE
+// ============================================
+
+function showLinuxSetup() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const content = document.getElementById('content');
+    
+    content.innerHTML = `
+        <div class="container">
+            <button class="back-btn" onclick="showDashboard()">← Back</button>
+            
+            <h1 class="page-title">🐧 Linux for Security Professionals</h1>
+            <p class="page-subtitle">Essential Linux skills and setup guides for cybersecurity work</p>
+            
+            <div class="linux-sections">
+                <!-- Getting Started -->
+                <div class="linux-section" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 25px; margin-bottom: 25px;">
+                    <h2 style="color: #10b981; margin-bottom: 20px;">🚀 Getting Started</h2>
+                    
+                    <div class="distro-cards" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
+                        <div class="distro-card" style="background: #27272a; border-radius: 8px; padding: 20px;">
+                            <h3 style="color: #fafafa; margin-bottom: 10px;">Kali Linux</h3>
+                            <p style="color: #a1a1aa; font-size: 0.9rem; margin-bottom: 15px;">The most popular penetration testing distribution. Pre-loaded with security tools.</p>
+                            <a href="https://www.kali.org/get-kali/" target="_blank" style="color: #6366f1;">Download →</a>
+                        </div>
+                        <div class="distro-card" style="background: #27272a; border-radius: 8px; padding: 20px;">
+                            <h3 style="color: #fafafa; margin-bottom: 10px;">Ubuntu Server</h3>
+                            <p style="color: #a1a1aa; font-size: 0.9rem; margin-bottom: 15px;">Enterprise-grade server OS. Great for learning server administration.</p>
+                            <a href="https://ubuntu.com/download/server" target="_blank" style="color: #6366f1;">Download →</a>
+                        </div>
+                        <div class="distro-card" style="background: #27272a; border-radius: 8px; padding: 20px;">
+                            <h3 style="color: #fafafa; margin-bottom: 10px;">Parrot Security</h3>
+                            <p style="color: #a1a1aa; font-size: 0.9rem; margin-bottom: 15px;">Security-focused OS with privacy tools. Alternative to Kali.</p>
+                            <a href="https://www.parrotsec.org/" target="_blank" style="color: #6366f1;">Download →</a>
+                        </div>
+                        <div class="distro-card" style="background: #27272a; border-radius: 8px; padding: 20px;">
+                            <h3 style="color: #fafafa; margin-bottom: 10px;">SANS SIFT Workstation</h3>
+                            <p style="color: #a1a1aa; font-size: 0.9rem; margin-bottom: 15px;">Forensic workstation with pre-installed incident response tools.</p>
+                            <a href="https://www.sans.org/tools/sift-workstation/" target="_blank" style="color: #6366f1;">Download →</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Essential Commands -->
+                <div class="linux-section" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 25px; margin-bottom: 25px;">
+                    <h2 style="color: #f59e0b; margin-bottom: 20px;">⌨️ Essential Commands</h2>
+                    
+                    <div class="command-categories">
+                        <div class="command-category" style="margin-bottom: 25px;">
+                            <h3 style="color: #fafafa; font-size: 1rem; margin-bottom: 15px;">📁 File System</h3>
+                            <div class="commands-grid" style="display: grid; gap: 10px;">
+                                ${renderCommand('ls -la', 'List all files with details')}
+                                ${renderCommand('cd /path/to/dir', 'Change directory')}
+                                ${renderCommand('pwd', 'Print working directory')}
+                                ${renderCommand('find / -name "filename"', 'Find files by name')}
+                                ${renderCommand('grep -r "pattern" /path', 'Search for text in files')}
+                                ${renderCommand('chmod 755 file', 'Change file permissions')}
+                                ${renderCommand('chown user:group file', 'Change file ownership')}
+                            </div>
+                        </div>
+                        
+                        <div class="command-category" style="margin-bottom: 25px;">
+                            <h3 style="color: #fafafa; font-size: 1rem; margin-bottom: 15px;">🌐 Networking</h3>
+                            <div class="commands-grid" style="display: grid; gap: 10px;">
+                                ${renderCommand('ip addr', 'Show network interfaces')}
+                                ${renderCommand('netstat -tulpn', 'Show listening ports')}
+                                ${renderCommand('ss -tulpn', 'Modern socket statistics')}
+                                ${renderCommand('nmap -sV target', 'Scan target for services')}
+                                ${renderCommand('tcpdump -i eth0', 'Capture network traffic')}
+                                ${renderCommand('curl -I https://example.com', 'HTTP headers only')}
+                                ${renderCommand('dig example.com', 'DNS lookup')}
+                            </div>
+                        </div>
+                        
+                        <div class="command-category" style="margin-bottom: 25px;">
+                            <h3 style="color: #fafafa; font-size: 1rem; margin-bottom: 15px;">👥 User Management</h3>
+                            <div class="commands-grid" style="display: grid; gap: 10px;">
+                                ${renderCommand('whoami', 'Current user')}
+                                ${renderCommand('id', 'User ID and groups')}
+                                ${renderCommand('sudo -l', 'List sudo permissions')}
+                                ${renderCommand('cat /etc/passwd', 'View user accounts')}
+                                ${renderCommand('cat /etc/shadow', 'View password hashes (root)')}
+                                ${renderCommand('last', 'Show login history')}
+                                ${renderCommand('w', 'Show logged in users')}
+                            </div>
+                        </div>
+                        
+                        <div class="command-category" style="margin-bottom: 25px;">
+                            <h3 style="color: #fafafa; font-size: 1rem; margin-bottom: 15px;">🔍 Process & System</h3>
+                            <div class="commands-grid" style="display: grid; gap: 10px;">
+                                ${renderCommand('ps aux', 'List all processes')}
+                                ${renderCommand('top / htop', 'Interactive process viewer')}
+                                ${renderCommand('systemctl status service', 'Check service status')}
+                                ${renderCommand('journalctl -xe', 'View system logs')}
+                                ${renderCommand('dmesg', 'Kernel ring buffer')}
+                                ${renderCommand('df -h', 'Disk space usage')}
+                                ${renderCommand('free -h', 'Memory usage')}
+                            </div>
+                        </div>
+                        
+                        <div class="command-category">
+                            <h3 style="color: #fafafa; font-size: 1rem; margin-bottom: 15px;">🔐 Security</h3>
+                            <div class="commands-grid" style="display: grid; gap: 10px;">
+                                ${renderCommand('iptables -L', 'List firewall rules')}
+                                ${renderCommand('ufw status', 'Ubuntu firewall status')}
+                                ${renderCommand('fail2ban-client status', 'View banned IPs')}
+                                ${renderCommand('openssl s_client -connect host:443', 'Test SSL/TLS')}
+                                ${renderCommand('ssh-keygen -t ed25519', 'Generate SSH key')}
+                                ${renderCommand('gpg --gen-key', 'Generate GPG key')}
+                                ${renderCommand('sha256sum file', 'Calculate file hash')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- VM Setup Guide -->
+                <div class="linux-section" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 25px; margin-bottom: 25px;">
+                    <h2 style="color: #6366f1; margin-bottom: 20px;">💻 VM Setup Guide</h2>
+                    
+                    <div class="setup-steps">
+                        <div class="step" style="display: flex; gap: 15px; margin-bottom: 20px; padding: 15px; background: #27272a; border-radius: 8px;">
+                            <span style="width: 32px; height: 32px; background: #6366f1; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">1</span>
+                            <div>
+                                <h4 style="color: #fafafa; margin-bottom: 5px;">Download VirtualBox or VMware</h4>
+                                <p style="color: #a1a1aa; font-size: 0.9rem;">
+                                    <a href="https://www.virtualbox.org/" target="_blank" style="color: #6366f1;">VirtualBox (Free)</a> or 
+                                    <a href="https://www.vmware.com/products/workstation-player.html" target="_blank" style="color: #6366f1;">VMware Player (Free)</a>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="step" style="display: flex; gap: 15px; margin-bottom: 20px; padding: 15px; background: #27272a; border-radius: 8px;">
+                            <span style="width: 32px; height: 32px; background: #6366f1; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">2</span>
+                            <div>
+                                <h4 style="color: #fafafa; margin-bottom: 5px;">Download Kali Linux ISO</h4>
+                                <p style="color: #a1a1aa; font-size: 0.9rem;">Get the installer image from <a href="https://www.kali.org/get-kali/#kali-installer-images" target="_blank" style="color: #6366f1;">kali.org</a>. Choose 64-bit installer.</p>
+                            </div>
+                        </div>
+                        <div class="step" style="display: flex; gap: 15px; margin-bottom: 20px; padding: 15px; background: #27272a; border-radius: 8px;">
+                            <span style="width: 32px; height: 32px; background: #6366f1; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">3</span>
+                            <div>
+                                <h4 style="color: #fafafa; margin-bottom: 5px;">Create New VM</h4>
+                                <p style="color: #a1a1aa; font-size: 0.9rem;">Settings: 4GB RAM minimum, 80GB disk, 2 CPU cores. Type: Linux, Version: Debian 64-bit.</p>
+                            </div>
+                        </div>
+                        <div class="step" style="display: flex; gap: 15px; margin-bottom: 20px; padding: 15px; background: #27272a; border-radius: 8px;">
+                            <span style="width: 32px; height: 32px; background: #6366f1; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">4</span>
+                            <div>
+                                <h4 style="color: #fafafa; margin-bottom: 5px;">Install & Update</h4>
+                                <p style="color: #a1a1aa; font-size: 0.9rem;">Boot from ISO, follow installer. After install: <code style="background: #18181b; padding: 2px 6px; border-radius: 4px;">sudo apt update && sudo apt upgrade -y</code></p>
+                            </div>
+                        </div>
+                        <div class="step" style="display: flex; gap: 15px; padding: 15px; background: #27272a; border-radius: 8px;">
+                            <span style="width: 32px; height: 32px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">✓</span>
+                            <div>
+                                <h4 style="color: #fafafa; margin-bottom: 5px;">Ready to Learn!</h4>
+                                <p style="color: #a1a1aa; font-size: 0.9rem;">Take snapshots before experimenting. Use NAT networking for safety.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Learning Resources -->
+                <div class="linux-section" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 25px;">
+                    <h2 style="color: #8b5cf6; margin-bottom: 20px;">📚 Learning Resources</h2>
+                    
+                    <div class="resources-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
+                        <a href="https://overthewire.org/wargames/bandit/" target="_blank" class="resource-card" style="display: block; background: #27272a; border-radius: 8px; padding: 20px; text-decoration: none; transition: all 0.2s;">
+                            <h4 style="color: #fafafa; margin-bottom: 8px;">OverTheWire: Bandit</h4>
+                            <p style="color: #a1a1aa; font-size: 0.85rem;">Learn Linux basics through a wargame. Perfect for beginners.</p>
+                        </a>
+                        <a href="https://linuxjourney.com/" target="_blank" class="resource-card" style="display: block; background: #27272a; border-radius: 8px; padding: 20px; text-decoration: none; transition: all 0.2s;">
+                            <h4 style="color: #fafafa; margin-bottom: 8px;">Linux Journey</h4>
+                            <p style="color: #a1a1aa; font-size: 0.85rem;">Free, self-paced Linux education with interactive lessons.</p>
+                        </a>
+                        <a href="https://tryhackme.com/path/outline/linuxfundamentals" target="_blank" class="resource-card" style="display: block; background: #27272a; border-radius: 8px; padding: 20px; text-decoration: none; transition: all 0.2s;">
+                            <h4 style="color: #fafafa; margin-bottom: 8px;">TryHackMe Linux</h4>
+                            <p style="color: #a1a1aa; font-size: 0.85rem;">Hands-on Linux learning path with virtual environments.</p>
+                        </a>
+                        <a href="https://www.cybrary.it/" target="_blank" class="resource-card" style="display: block; background: #27272a; border-radius: 8px; padding: 20px; text-decoration: none; transition: all 0.2s;">
+                            <h4 style="color: #fafafa; margin-bottom: 8px;">Cybrary</h4>
+                            <p style="color: #a1a1aa; font-size: 0.85rem;">Free cybersecurity courses including Linux administration.</p>
+                        </a>
+                        <a href="https://www.youtube.com/c/NetworkChuck" target="_blank" class="resource-card" style="display: block; background: #27272a; border-radius: 8px; padding: 20px; text-decoration: none; transition: all 0.2s;">
+                            <h4 style="color: #fafafa; margin-bottom: 8px;">NetworkChuck (YouTube)</h4>
+                            <p style="color: #a1a1aa; font-size: 0.85rem;">Engaging Linux and networking tutorials on YouTube.</p>
+                        </a>
+                        <a href="https://explainshell.com/" target="_blank" class="resource-card" style="display: block; background: #27272a; border-radius: 8px; padding: 20px; text-decoration: none; transition: all 0.2s;">
+                            <h4 style="color: #fafafa; margin-bottom: 8px;">ExplainShell</h4>
+                            <p style="color: #a1a1aa; font-size: 0.85rem;">Paste any command to get a detailed explanation.</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    APP.state.currentView = 'linux';
+}
+
+function renderCommand(cmd, desc) {
+    return `
+        <div style="display: flex; gap: 15px; align-items: center; padding: 10px; background: #1f1f23; border-radius: 6px;">
+            <code style="background: #27272a; padding: 6px 12px; border-radius: 4px; color: #10b981; font-family: monospace; white-space: nowrap;">${cmd}</code>
+            <span style="color: #a1a1aa; font-size: 0.85rem;">${desc}</span>
+        </div>
+    `;
+}
+
 function showCareerQuiz() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const content = document.getElementById('content');
@@ -5965,20 +6416,35 @@ function showFilteredContent(type, items, domainId) {
         <div class="container">
             <button class="back-btn" onclick="showDomain(${domainId})">← Back to Domain ${domainId}</button>
             
-            <h1 class="page-title">
-                ${config.icon} Domain ${domainId} ${config.title}
+            <h1 class="page-title" style="color: ${domain.color}">
+                ${domain.icon} Domain ${domainId}: ${domain.name}
             </h1>
-            <p class="page-subtitle">${domain.name}</p>
+            <p class="page-subtitle">${config.icon} ${items.length} ${config.title}</p>
             
             <div class="lesson-grid">
-                ${items.map(item => `
-                    <div class="lesson-card" onclick="${config.clickFunc}('${item.id}')">
-                        <div>
-                            <div style="font-weight: bold;">${item.title}</div>
+                ${items.map(item => {
+                    const isCompleted = type === 'lessons' 
+                        ? APP.progress.completedLessons.includes(item.id)
+                        : type === 'simulations'
+                        ? APP.progress.completedSimulations.includes(item.id)
+                        : false;
+                    
+                    return `
+                        <div class="lesson-card ${isCompleted ? 'completed' : ''}" 
+                             onclick="${config.clickFunc}('${item.id}')">
+                            <div>
+                                <div style="font-weight: bold;">${escapeHtml(item.title)}</div>
+                                <div style="color: #71717a; font-size: 0.9rem; margin-top: 5px;">
+                                    ${item.objectives ? `Objectives: ${item.objectives.join(', ')}` : ''}
+                                    ${item.difficulty ? ` • <span class="difficulty-badge difficulty-${item.difficulty}">${item.difficulty}</span>` : ''}
+                                </div>
+                            </div>
+                            <button class="btn ${isCompleted ? 'btn-success' : 'btn-primary'}">
+                                ${isCompleted ? '✅ Review' : 'Start →'}
+                            </button>
                         </div>
-                        <button class="btn btn-primary">Start →</button>
-                    </div>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
         </div>
     `;
@@ -6411,6 +6877,12 @@ const globalFunctions = {
     showQuizResults,
     showGlossary,
     filterGlossary,
+    showSecurityTools,
+    filterTools,
+    filterToolsByType,
+    getCategoryIcon,
+    showLinuxSetup,
+    renderCommand,
     showCareerQuiz,
     showPracticeExam,
     startFullExam,
