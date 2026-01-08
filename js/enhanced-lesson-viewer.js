@@ -413,6 +413,26 @@
         
         const st = lesson.skill_tree;
         
+        // Helper to get prerequisite display info
+        const getPrereqInfo = (p) => {
+            if (typeof p === 'string') {
+                return { id: p, title: p };
+            } else if (typeof p === 'object' && p !== null) {
+                return { 
+                    id: p.lesson_id || p.id || '', 
+                    title: p.title || p.lesson_id || p.id || 'Prerequisite'
+                };
+            }
+            return { id: '', title: '' };
+        };
+        
+        // Filter out empty prerequisites
+        const validPrereqs = (st.prerequisites || []).filter(p => {
+            if (typeof p === 'string') return p.trim() !== '';
+            if (typeof p === 'object' && p !== null) return p.lesson_id || p.id || p.title;
+            return false;
+        });
+        
         return `
             <section class="lesson-section skill-tree-section" id="section-skill-tree">
                 <div class="collapsible" data-expanded="true">
@@ -422,15 +442,18 @@
                     </button>
                     <div class="collapsible-content">
                         <div class="skill-tree-visual">
-                            <!-- Prerequisites -->
-                            ${st.prerequisites && st.prerequisites.length > 0 ? `
+                            <!-- Prerequisites - Only show if there are valid ones -->
+                            ${validPrereqs.length > 0 ? `
                                 <div class="tree-column prereqs">
                                     <h4>Prerequisites</h4>
-                                    ${st.prerequisites.map(p => `
-                                        <div class="tree-node prereq" onclick="showEnhancedLesson('${p}')">
-                                            ${escapeHtml(p)}
-                                        </div>
-                                    `).join('')}
+                                    ${validPrereqs.map(p => {
+                                        const info = getPrereqInfo(p);
+                                        return `
+                                            <div class="tree-node prereq" onclick="showEnhancedLesson('${info.id}')">
+                                                ${escapeHtml(info.title)}
+                                            </div>
+                                        `;
+                                    }).join('')}
                                 </div>
                                 <div class="tree-arrow">→</div>
                             ` : ''}
@@ -450,9 +473,9 @@
                                 <div class="tree-column unlocks">
                                     <h4>Unlocks</h4>
                                     ${st.unlocks.map(u => `
-                                        <div class="tree-node unlock" onclick="showEnhancedLesson('${u.lesson_id}')" 
+                                        <div class="tree-node unlock" onclick="showEnhancedLesson('${u.lesson_id || u.id || ''}')" 
                                              title="${escapeHtml(u.connection || '')}">
-                                            <span class="node-title">${escapeHtml(u.title)}</span>
+                                            <span class="node-title">${escapeHtml(u.title || u.lesson_id || '')}</span>
                                             <span class="node-hint">${escapeHtml(u.connection || '')}</span>
                                         </div>
                                     `).join('')}
