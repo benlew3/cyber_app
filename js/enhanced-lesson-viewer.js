@@ -342,43 +342,31 @@
                             <span class="collapse-icon">▶</span>
                         </button>
                         <div class="collapsible-content">
-                            ${intro.why_it_matters.career_impact ? `
+                            ${typeof intro.why_it_matters === 'string' ? `
                                 <div class="matter-item">
-                                    <strong>Career Impact:</strong>
-                                    <p>${escapeHtml(intro.why_it_matters.career_impact)}</p>
+                                    <p>${escapeHtml(intro.why_it_matters)}</p>
                                 </div>
-                            ` : ''}
-                            ${intro.why_it_matters.real_world_connection ? `
-                                <div class="matter-item">
-                                    <strong>Real-World Connection:</strong>
-                                    <p>${escapeHtml(intro.why_it_matters.real_world_connection)}</p>
-                                </div>
-                            ` : ''}
-                            ${intro.why_it_matters.exam_relevance ? `
-                                <div class="matter-item">
-                                    <strong>Exam Relevance:</strong>
-                                    <p>${escapeHtml(intro.why_it_matters.exam_relevance)}</p>
-                                </div>
-                            ` : ''}
+                            ` : `
+                                ${intro.why_it_matters.career_impact ? `
+                                    <div class="matter-item">
+                                        <strong>Career Impact:</strong>
+                                        <p>${escapeHtml(intro.why_it_matters.career_impact)}</p>
+                                    </div>
+                                ` : ''}
+                                ${intro.why_it_matters.real_world_connection ? `
+                                    <div class="matter-item">
+                                        <strong>Real-World Connection:</strong>
+                                        <p>${escapeHtml(intro.why_it_matters.real_world_connection)}</p>
+                                    </div>
+                                ` : ''}
+                                ${intro.why_it_matters.exam_relevance ? `
+                                    <div class="matter-item">
+                                        <strong>Exam Relevance:</strong>
+                                        <p>${escapeHtml(intro.why_it_matters.exam_relevance)}</p>
+                                    </div>
+                                ` : ''}
+                            `}
                         </div>
-                    </div>
-                ` : ''}
-                
-                ${intro.exam_weight ? `
-                    <div class="exam-weight-box">
-                        <h4>📊 Exam Weight</h4>
-                        <div class="exam-weight-content">
-                            <span class="weight-domain">${escapeHtml(intro.exam_weight.domain || '')}</span>
-                            <span class="weight-questions">${escapeHtml(intro.exam_weight.estimated_questions || '')}</span>
-                        </div>
-                        ${intro.exam_weight.high_yield_topics ? `
-                            <div class="high-yield-topics">
-                                <strong>High-Yield Topics:</strong>
-                                <ul>
-                                    ${intro.exam_weight.high_yield_topics.map(t => `<li>${escapeHtml(t)}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
                     </div>
                 ` : ''}
             </section>
@@ -393,17 +381,39 @@
         if (!lesson.skill_tree) return '';
         
         const unlocks = lesson.skill_tree.unlocks || [];
+        if (unlocks.length === 0) return '';
+        
+        // Helper to get unlock info
+        const getUnlockInfo = (u) => {
+            if (typeof u === 'string') {
+                const lessonData = window.ALL_LESSONS ? window.ALL_LESSONS.find(l => l.id === u) : null;
+                return { id: u, title: lessonData ? lessonData.title : u };
+            } else if (typeof u === 'object' && u !== null) {
+                return { id: u.lesson_id || u.id || '', title: u.title || u.lesson_id || '' };
+            }
+            return { id: '', title: '' };
+        };
+        
+        const validUnlocks = unlocks
+            .filter(u => {
+                if (typeof u === 'string') return u.trim() !== '';
+                if (typeof u === 'object' && u !== null) return u.lesson_id || u.id || u.title;
+                return false;
+            })
+            .map(u => getUnlockInfo(u));
+        
+        if (validUnlocks.length === 0) return '';
         
         return `
             <div class="skill-tree-mini">
                 <div class="mini-title">This Unlocks</div>
-                ${unlocks.slice(0, 2).map(u => `
-                    <div class="mini-unlock" onclick="showEnhancedLesson('${u.lesson_id}')">
+                ${validUnlocks.slice(0, 2).map(info => `
+                    <div class="mini-unlock" onclick="showEnhancedLesson('${info.id}')">
                         <span class="mini-icon">→</span>
-                        <span class="mini-text">${escapeHtml(u.title)}</span>
+                        <span class="mini-text">${escapeHtml(info.title)}</span>
                     </div>
                 `).join('')}
-                ${unlocks.length > 2 ? `<div class="mini-more">+${unlocks.length - 2} more</div>` : ''}
+                ${validUnlocks.length > 2 ? `<div class="mini-more">+${validUnlocks.length - 2} more</div>` : ''}
             </div>
         `;
     }
@@ -413,25 +423,43 @@
         
         const st = lesson.skill_tree;
         
-        // Helper to get prerequisite display info
-        const getPrereqInfo = (p) => {
-            if (typeof p === 'string') {
-                return { id: p, title: p };
-            } else if (typeof p === 'object' && p !== null) {
+        // Helper to get prerequisite/unlock display info
+        const getNodeInfo = (node) => {
+            if (typeof node === 'string') {
+                // Look up the title from ALL_LESSONS if available
+                const lessonData = window.ALL_LESSONS ? window.ALL_LESSONS.find(l => l.id === node) : null;
                 return { 
-                    id: p.lesson_id || p.id || '', 
-                    title: p.title || p.lesson_id || p.id || 'Prerequisite'
+                    id: node, 
+                    title: lessonData ? lessonData.title : node,
+                    connection: ''
+                };
+            } else if (typeof node === 'object' && node !== null) {
+                return { 
+                    id: node.lesson_id || node.id || '', 
+                    title: node.title || node.lesson_id || node.id || '',
+                    connection: node.connection || node.why_needed || ''
                 };
             }
-            return { id: '', title: '' };
+            return { id: '', title: '', connection: '' };
         };
         
-        // Filter out empty prerequisites
-        const validPrereqs = (st.prerequisites || []).filter(p => {
-            if (typeof p === 'string') return p.trim() !== '';
-            if (typeof p === 'object' && p !== null) return p.lesson_id || p.id || p.title;
-            return false;
-        });
+        // Filter and process prerequisites
+        const validPrereqs = (st.prerequisites || [])
+            .filter(p => {
+                if (typeof p === 'string') return p.trim() !== '';
+                if (typeof p === 'object' && p !== null) return p.lesson_id || p.id || p.title;
+                return false;
+            })
+            .map(p => getNodeInfo(p));
+        
+        // Filter and process unlocks
+        const validUnlocks = (st.unlocks || [])
+            .filter(u => {
+                if (typeof u === 'string') return u.trim() !== '';
+                if (typeof u === 'object' && u !== null) return u.lesson_id || u.id || u.title;
+                return false;
+            })
+            .map(u => getNodeInfo(u));
         
         return `
             <section class="lesson-section skill-tree-section" id="section-skill-tree">
@@ -446,14 +474,12 @@
                             ${validPrereqs.length > 0 ? `
                                 <div class="tree-column prereqs">
                                     <h4>Prerequisites</h4>
-                                    ${validPrereqs.map(p => {
-                                        const info = getPrereqInfo(p);
-                                        return `
-                                            <div class="tree-node prereq" onclick="showEnhancedLesson('${info.id}')">
-                                                ${escapeHtml(info.title)}
-                                            </div>
-                                        `;
-                                    }).join('')}
+                                    ${validPrereqs.map(info => `
+                                        <div class="tree-node prereq" onclick="showEnhancedLesson('${info.id}')" 
+                                             title="${escapeHtml(info.connection)}">
+                                            ${escapeHtml(info.title)}
+                                        </div>
+                                    `).join('')}
                                 </div>
                                 <div class="tree-arrow">→</div>
                             ` : ''}
@@ -467,16 +493,16 @@
                                 </div>
                             </div>
                             
-                            <!-- Unlocks -->
-                            ${st.unlocks && st.unlocks.length > 0 ? `
+                            <!-- Unlocks - Only show if there are valid ones -->
+                            ${validUnlocks.length > 0 ? `
                                 <div class="tree-arrow">→</div>
                                 <div class="tree-column unlocks">
                                     <h4>Unlocks</h4>
-                                    ${st.unlocks.map(u => `
-                                        <div class="tree-node unlock" onclick="showEnhancedLesson('${u.lesson_id || u.id || ''}')" 
-                                             title="${escapeHtml(u.connection || '')}">
-                                            <span class="node-title">${escapeHtml(u.title || u.lesson_id || '')}</span>
-                                            <span class="node-hint">${escapeHtml(u.connection || '')}</span>
+                                    ${validUnlocks.map(info => `
+                                        <div class="tree-node unlock" onclick="showEnhancedLesson('${info.id}')" 
+                                             title="${escapeHtml(info.connection)}">
+                                            <span class="node-title">${escapeHtml(info.title)}</span>
+                                            ${info.connection ? `<span class="node-hint">${escapeHtml(info.connection)}</span>` : ''}
                                         </div>
                                     `).join('')}
                                 </div>
