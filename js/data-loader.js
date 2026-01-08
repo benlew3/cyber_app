@@ -189,11 +189,21 @@
             const promises = FILE_MANIFEST.lessons.map(url => this.loadJSON(url));
             const results = await Promise.all(promises);
             
+            // Initialize lessonData storage for enhanced viewer
+            if (!window.APP.content.lessonData) {
+                window.APP.content.lessonData = {};
+            }
+            
             results.forEach(data => {
                 if (data) {
-                    // Normalize lesson structure
+                    const lessonId = data.lesson_id || data.id;
+                    
+                    // Store FULL enhanced data for the enhanced lesson viewer
+                    window.APP.content.lessonData[lessonId] = data;
+                    
+                    // Normalize lesson structure for basic viewer compatibility
                     const lesson = {
-                        id: data.lesson_id || data.id,
+                        id: lessonId,
                         title: data.title,
                         domain: data.domain,
                         objectives: data.objectives_covered || [],
@@ -238,7 +248,7 @@
                 return a.id.localeCompare(b.id);
             });
             
-            console.log(`✅ Loaded ${this.loaded.lessons.length} lessons`);
+            console.log(`✅ Loaded ${this.loaded.lessons.length} lessons with enhanced data`);
             this.loadStatus.completed += FILE_MANIFEST.lessons.length;
             return this.loaded.lessons;
         }

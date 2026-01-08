@@ -4116,6 +4116,17 @@ function getNextLesson(currentLessonId) {
 }
 
 function showLessonViewer(lessonId) {
+    // Check if enhanced lesson viewer is available and lesson has enhanced data
+    if (typeof showEnhancedLesson === 'function') {
+        const enhancedData = APP.content.lessonData?.[lessonId];
+        if (enhancedData && (enhancedData.sections || enhancedData.skill_tree || enhancedData.role_relevance)) {
+            console.log(`📚 Loading enhanced lesson: ${lessonId}`);
+            showEnhancedLesson(lessonId);
+            return;
+        }
+    }
+    
+    // Fall back to basic viewer
     const content = document.getElementById('content');
     const lesson = ALL_LESSONS.find(l => l.id === lessonId);
     if (!lesson) return;
@@ -6047,7 +6058,7 @@ function loadProgress() {
 function exportAllData() {
     const exportData = {
         exportDate: new Date().toISOString(),
-        version: 'v32',
+        version: 'v33',
         progress: APP.progress,
         notes: window.NotesSystem ? window.NotesSystem.getAllNotes() : []
     };
@@ -6433,7 +6444,7 @@ Object.keys(globalFunctions).forEach(key => {
 // STARTUP SEQUENCE
 // ============================================
 
-console.log('Starting Security+ Platform v32...');
+console.log('Starting Security+ Platform v33...');
 
 // Start immediately if DOM is ready
 if (document.readyState === 'loading') {
