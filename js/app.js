@@ -156,7 +156,6 @@ const ALL_LESSONS = [
         title: 'Security Controls Fundamentals', 
         domain: 1,
         objectives: ['1.1'],
-        duration: '45-55 min',
         difficulty: 'beginner',
         content: {
             introduction: `Every security breach you've ever heard of—from massive data leaks to ransomware attacks—could have been prevented or mitigated by properly implemented security controls. Understanding how controls are categorized and function is essential.`,
@@ -200,7 +199,6 @@ Compensating: Alternative when primary fails`
         title: 'CIA Triad Fundamentals', 
         domain: 1, 
         objectives: ['1.2'], 
-        duration: '45-55 min',
         difficulty: 'beginner',
         content: {
             introduction: 'The CIA Triad (Confidentiality, Integrity, Availability) forms the foundation of all information security. Every security decision, control, and practice ultimately serves to protect one or more of these three pillars.',
@@ -284,8 +282,7 @@ Common Threats:
         title: 'Authentication Methods', 
         domain: 1, 
         objectives: ['1.2'], 
-        duration: '50-60 min',
-        difficulty: 'intermediate',
+        difficulty: 'beginner',
         content: {
             introduction: 'Authentication verifies the identity of users, devices, or services before granting access. Modern authentication goes beyond simple passwords to include multiple factors and advanced biometric methods.',
             learningGoals: [
@@ -347,52 +344,52 @@ Common MFA Combinations:
             ]
         }
     },
-    { id: 'D1-LESSON-004', title: 'Cryptographic Fundamentals', domain: 1, objectives: ['1.4'], duration: '55-65 min' },
-    { id: 'D1-LESSON-005', title: 'Zero Trust Architecture', domain: 1, objectives: ['1.2'], duration: '50-60 min' },
-    { id: 'D1-LESSON-006', title: 'Physical Security Controls', domain: 1, objectives: ['1.1'], duration: '45-55 min' },
-    { id: 'D1-LESSON-007', title: 'Deception Technologies', domain: 1, objectives: ['1.1'], duration: '40-50 min' },
-    { id: 'D1-LESSON-008', title: 'Change Management', domain: 1, objectives: ['1.3'], duration: '45-55 min' },
+    { id: 'D1-LESSON-004', title: 'Cryptographic Fundamentals', domain: 1, objectives: ['1.4'], difficulty: 'intermediate' },
+    { id: 'D1-LESSON-005', title: 'Zero Trust Architecture', domain: 1, objectives: ['1.2'], difficulty: 'intermediate' },
+    { id: 'D1-LESSON-006', title: 'Physical Security Controls', domain: 1, objectives: ['1.1'], difficulty: 'beginner' },
+    { id: 'D1-LESSON-007', title: 'Deception Technologies', domain: 1, objectives: ['1.1'], difficulty: 'intermediate' },
+    { id: 'D1-LESSON-008', title: 'Change Management', domain: 1, objectives: ['1.3'], difficulty: 'intermediate' },
     
     // Domain 2 Lessons
-    { id: 'D2-LESSON-001', title: 'Threat Actors & Motivations', domain: 2, objectives: ['2.1'], duration: '50-60 min' },
-    { id: 'D2-LESSON-002', title: 'Threat Vectors & Attack Surfaces', domain: 2, objectives: ['2.2'], duration: '50-60 min' },
-    { id: 'D2-LESSON-003', title: 'Social Engineering', domain: 2, objectives: ['2.2'], duration: '55-65 min' },
-    { id: 'D2-LESSON-004', title: 'Malware Types', domain: 2, objectives: ['2.4'], duration: '50-60 min' },
-    { id: 'D2-LESSON-005', title: 'Network Attacks', domain: 2, objectives: ['2.4'], duration: '55-65 min' },
-    { id: 'D2-LESSON-006', title: 'Application Attacks', domain: 2, objectives: ['2.3', '2.4'], duration: '55-65 min' },
-    { id: 'D2-LESSON-007', title: 'Vulnerability Management', domain: 2, objectives: ['2.3'], duration: '50-60 min' },
-    { id: 'D2-LESSON-008', title: 'Indicators of Compromise', domain: 2, objectives: ['2.4'], duration: '45-55 min' },
-    { id: 'D2-LESSON-009', title: 'Hardening & Configurations', domain: 2, objectives: ['2.5'], duration: '50-60 min' },
-    { id: 'D2-LESSON-010', title: 'Mitigation Techniques', domain: 2, objectives: ['2.5'], duration: '50-60 min' },
-    { id: 'D2-LESSON-011', title: 'Attack Frameworks', domain: 2, objectives: ['2.1'], duration: '45-55 min' },
-    { id: 'D2-LESSON-012', title: 'Security Assessments', domain: 2, objectives: ['2.3'], duration: '50-60 min' },
+    { id: 'D2-LESSON-001', title: 'Threat Actors & Motivations', domain: 2, objectives: ['2.1'], difficulty: 'beginner' },
+    { id: 'D2-LESSON-002', title: 'Threat Vectors & Attack Surfaces', domain: 2, objectives: ['2.2'], difficulty: 'beginner' },
+    { id: 'D2-LESSON-003', title: 'Social Engineering', domain: 2, objectives: ['2.2'], difficulty: 'beginner' },
+    { id: 'D2-LESSON-004', title: 'Malware Types', domain: 2, objectives: ['2.4'], difficulty: 'intermediate' },
+    { id: 'D2-LESSON-005', title: 'Network Attacks', domain: 2, objectives: ['2.4'], difficulty: 'intermediate' },
+    { id: 'D2-LESSON-006', title: 'Application Attacks', domain: 2, objectives: ['2.3', '2.4'], difficulty: 'advanced' },
+    { id: 'D2-LESSON-007', title: 'Vulnerability Management', domain: 2, objectives: ['2.3'], difficulty: 'intermediate' },
+    { id: 'D2-LESSON-008', title: 'Indicators of Compromise', domain: 2, objectives: ['2.4'], difficulty: 'intermediate' },
+    { id: 'D2-LESSON-009', title: 'Hardening & Configurations', domain: 2, objectives: ['2.5'], difficulty: 'intermediate' },
+    { id: 'D2-LESSON-010', title: 'Mitigation Techniques', domain: 2, objectives: ['2.5'], difficulty: 'intermediate' },
+    { id: 'D2-LESSON-011', title: 'Attack Frameworks', domain: 2, objectives: ['2.1'], difficulty: 'intermediate' },
+    { id: 'D2-LESSON-012', title: 'Security Assessments', domain: 2, objectives: ['2.3'], difficulty: 'intermediate' },
     
     // Domain 3 Lessons
-    { id: 'D3-LESSON-001', title: 'Security Architecture Concepts', domain: 3, objectives: ['3.1'], duration: '50-60 min' },
-    { id: 'D3-LESSON-002', title: 'Infrastructure Security', domain: 3, objectives: ['3.1'], duration: '55-65 min' },
-    { id: 'D3-LESSON-003', title: 'Network Security', domain: 3, objectives: ['3.2'], duration: '55-65 min' },
-    { id: 'D3-LESSON-004', title: 'Wireless Security', domain: 3, objectives: ['3.2'], duration: '50-60 min' },
-    { id: 'D3-LESSON-005', title: 'Cloud Security', domain: 3, objectives: ['3.3'], duration: '55-65 min' },
-    { id: 'D3-LESSON-006', title: 'Cryptography', domain: 3, objectives: ['3.4'], duration: '60-70 min' },
-    { id: 'D3-LESSON-007', title: 'Resilience & Recovery', domain: 3, objectives: ['3.5'], duration: '55-65 min' },
-    { id: 'D3-LESSON-008', title: 'Data Protection', domain: 3, objectives: ['3.1'], duration: '50-60 min' },
+    { id: 'D3-LESSON-001', title: 'Security Architecture Concepts', domain: 3, objectives: ['3.1'], difficulty: 'intermediate' },
+    { id: 'D3-LESSON-002', title: 'Infrastructure Security', domain: 3, objectives: ['3.1'], difficulty: 'intermediate' },
+    { id: 'D3-LESSON-003', title: 'Network Security', domain: 3, objectives: ['3.2'], difficulty: 'intermediate' },
+    { id: 'D3-LESSON-004', title: 'Wireless Security', domain: 3, objectives: ['3.2'], difficulty: 'intermediate' },
+    { id: 'D3-LESSON-005', title: 'Cloud Security', domain: 3, objectives: ['3.3'], difficulty: 'intermediate' },
+    { id: 'D3-LESSON-006', title: 'Cryptography', domain: 3, objectives: ['3.4'], difficulty: 'advanced' },
+    { id: 'D3-LESSON-007', title: 'Resilience & Recovery', domain: 3, objectives: ['3.5'], difficulty: 'intermediate' },
+    { id: 'D3-LESSON-008', title: 'Data Protection', domain: 3, objectives: ['3.1'], difficulty: 'intermediate' },
     
     // Domain 4 Lessons
-    { id: 'D4-LESSON-001', title: 'Security Monitoring', domain: 4, objectives: ['4.1'], duration: '55-65 min' },
-    { id: 'D4-LESSON-002', title: 'Incident Response', domain: 4, objectives: ['4.8'], duration: '55-65 min' },
-    { id: 'D4-LESSON-003', title: 'Digital Forensics', domain: 4, objectives: ['4.9'], duration: '55-65 min' },
-    { id: 'D4-LESSON-004', title: 'Vulnerability Management', domain: 4, objectives: ['4.3'], duration: '50-60 min' },
-    { id: 'D4-LESSON-005', title: 'Identity & Access Management', domain: 4, objectives: ['4.6'], duration: '55-65 min' },
-    { id: 'D4-LESSON-006', title: 'Data Protection', domain: 4, objectives: ['4.2'], duration: '50-60 min' },
-    { id: 'D4-LESSON-007', title: 'Security Automation', domain: 4, objectives: ['4.5'], duration: '45-55 min' },
+    { id: 'D4-LESSON-001', title: 'Security Monitoring', domain: 4, objectives: ['4.1'], difficulty: 'intermediate' },
+    { id: 'D4-LESSON-002', title: 'Incident Response', domain: 4, objectives: ['4.8'], difficulty: 'intermediate' },
+    { id: 'D4-LESSON-003', title: 'Digital Forensics', domain: 4, objectives: ['4.9'], difficulty: 'advanced' },
+    { id: 'D4-LESSON-004', title: 'Vulnerability Management', domain: 4, objectives: ['4.3'], difficulty: 'intermediate' },
+    { id: 'D4-LESSON-005', title: 'Identity & Access Management', domain: 4, objectives: ['4.6'], difficulty: 'intermediate' },
+    { id: 'D4-LESSON-006', title: 'Data Protection', domain: 4, objectives: ['4.2'], difficulty: 'intermediate' },
+    { id: 'D4-LESSON-007', title: 'Security Automation', domain: 4, objectives: ['4.5'], difficulty: 'advanced' },
     
     // Domain 5 Lessons
-    { id: 'D5-LESSON-001', title: 'Security Governance', domain: 5, objectives: ['5.1'], duration: '50-60 min' },
-    { id: 'D5-LESSON-002', title: 'Risk Management', domain: 5, objectives: ['5.2'], duration: '55-65 min' },
-    { id: 'D5-LESSON-003', title: 'Third-Party Risk Management', domain: 5, objectives: ['5.3'], duration: '50-60 min' },
-    { id: 'D5-LESSON-004', title: 'Security Compliance', domain: 5, objectives: ['5.4'], duration: '50-60 min' },
-    { id: 'D5-LESSON-005', title: 'Audits & Assessments', domain: 5, objectives: ['5.5'], duration: '50-60 min' },
-    { id: 'D5-LESSON-006', title: 'Security Awareness', domain: 5, objectives: ['5.6'], duration: '45-55 min' }
+    { id: 'D5-LESSON-001', title: 'Security Governance', domain: 5, objectives: ['5.1'], difficulty: 'intermediate' },
+    { id: 'D5-LESSON-002', title: 'Risk Management', domain: 5, objectives: ['5.2'], difficulty: 'intermediate' },
+    { id: 'D5-LESSON-003', title: 'Third-Party Risk Management', domain: 5, objectives: ['5.3'], difficulty: 'intermediate' },
+    { id: 'D5-LESSON-004', title: 'Security Compliance', domain: 5, objectives: ['5.4'], difficulty: 'intermediate' },
+    { id: 'D5-LESSON-005', title: 'Audits & Assessments', domain: 5, objectives: ['5.5'], difficulty: 'intermediate' },
+    { id: 'D5-LESSON-006', title: 'Security Awareness', domain: 5, objectives: ['5.6'], difficulty: 'beginner' }
 ];
 
 // ============================================
