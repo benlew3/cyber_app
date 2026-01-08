@@ -1,591 +1,119 @@
 {
   "lesson_id": "D2-LESSON-009",
   "domain": 2,
-  "title": "Hardening and Security Configurations",
-  "objectives_covered": ["2.5"],
-  "estimated_duration": "85-100 minutes (Core: 45 min, Deep Dives: 40-55 min)",
-  "difficulty": "intermediate",
-  "prerequisites": ["D2-LESSON-006"],
+  "title": "Hardening and Secure Configurations",
+  "subtitle": "Reducing Attack Surface Through Secure Configuration",
   "version": "2.0-enhanced",
+  "objectives_covered": ["2.5"],
+  "estimated_duration": "75-90 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": ["D2-LESSON-002"],
 
-  "introduction": {
-    "hook": "When attackers compromised a major casino through their fish tank thermometer in 2018, they exploited a fundamental security failure: the IoT device was connected to the corporate network with default credentials and no hardening. From there, they accessed the high-roller database and exfiltrated 10GB of data. Every unhardened system is a potential entry point. Hardening—removing unnecessary services, applying secure configurations—is one of the most cost-effective security measures. You can't exploit what isn't there.",
-    
-    "learning_goals": [
-      "Apply system hardening principles across OS, applications, and network devices",
-      "Implement secure baseline configurations using CIS Benchmarks and STIGs",
-      "Reduce attack surface through service and feature minimization",
-      "Configure host-based firewalls and application control",
-      "Harden Linux systems using practical commands",
-      "Apply mobile device and IoT security measures"
-    ],
-    
-    "why_it_matters": "Hardening converts systems from vulnerable by default to secure by design. Default installations include unnecessary services and weak configurations that attackers exploit routinely. Expect 5-7 Security+ questions on hardening techniques and baseline configurations.",
-    
-    "career_relevance": {
-      "soc_analyst": "You'll validate hardening compliance, investigate alerts related to missing controls, and understand why certain protections exist.",
-      "incident_responder": "Understanding hardening helps you identify what should have prevented an attack and recommend remediation.",
-      "grc_analyst": "You'll audit systems against hardening standards, track compliance metrics, and ensure configurations meet regulatory requirements.",
-      "penetration_tester": "Hardening gaps are common findings. Understanding standards helps you identify what's missing and communicate remediation.",
-      "security_engineer": "You'll create hardening standards, build golden images, implement configuration management, and automate compliance checking."
-    }
+  "skill_tree": {
+    "position": {"domain": 2, "sequence": 9, "tier": "intermediate"},
+    "prerequisites": [{"lesson_id": "D2-LESSON-002", "title": "Threat Vectors", "why_needed": "Hardening reduces attack vectors"}],
+    "unlocks": [{"lesson_id": "D3-LESSON-002", "title": "Infrastructure Security", "connection": "Hardening applied to infrastructure"}]
   },
 
-  "linux_fundamentals": {
-    "why_it_matters": "Linux hardening commands are essential skills for security engineers and analysts.",
-    
-    "essential_commands": {
-      "service_management": [
-        {
-          "command": "systemctl",
-          "purpose": "Manage services",
-          "examples": [
-            "systemctl list-units --type=service --state=running  # Running services",
-            "systemctl disable cups                                # Disable printing",
-            "systemctl stop cups && systemctl mask cups           # Stop and prevent start"
-          ]
-        }
-      ],
-      "user_management": [
-        {
-          "command": "User auditing",
-          "purpose": "Review accounts",
-          "examples": [
-            "cat /etc/passwd | grep -v nologin                    # Users who can login",
-            "awk -F: '($3 == 0) {print}' /etc/passwd             # UID 0 accounts",
-            "lastlog | grep -v 'Never'                            # Recent logins"
-          ]
-        },
-        {
-          "command": "Password policy",
-          "purpose": "Enforce strong passwords",
-          "examples": [
-            "chage -l username                                    # View password policy",
-            "chage -M 90 username                                 # Max 90 days"
-          ]
-        }
-      ],
-      "file_permissions": [
-        {
-          "command": "Permission auditing",
-          "purpose": "Find risky permissions",
-          "examples": [
-            "find / -perm -4000 -type f 2>/dev/null              # SUID files",
-            "find / -perm -2000 -type f 2>/dev/null              # SGID files",
-            "find / -perm -o+w -type f 2>/dev/null               # World-writable files"
-          ]
-        }
-      ],
-      "firewall": [
-        {
-          "command": "ufw / iptables",
-          "purpose": "Host-based firewall",
-          "examples": [
-            "ufw enable                                           # Enable firewall",
-            "ufw default deny incoming                            # Deny by default",
-            "ufw allow 22/tcp                                     # Allow SSH",
-            "ufw status verbose                                   # View rules"
-          ]
-        }
-      ]
-    }
+  "role_relevance": {
+    "soc_analyst": {"relevance": "medium", "percentage_of_job": "15-25%", "daily_tasks": ["Verify hardening compliance", "Identify misconfigurations"]},
+    "security_engineer": {"relevance": "critical", "percentage_of_job": "50-60%", "daily_tasks": ["Implement hardening standards", "Configure secure baselines", "Automate configurations"]},
+    "grc_analyst": {"relevance": "high", "percentage_of_job": "35-45%", "daily_tasks": ["Audit against benchmarks", "Report compliance status"]},
+    "penetration_tester": {"relevance": "high", "percentage_of_job": "35-45%", "daily_tasks": ["Identify misconfigurations", "Test hardening effectiveness"]}
+  },
+
+  "introduction": {
+    "hook": "Default configurations are designed for ease of use, not security. That default admin password, those unnecessary services, that overly permissive firewall rule—they're all attack vectors waiting to be exploited.",
+    "exam_weight": {"estimated_questions": "4-6", "high_yield_topics": ["CIS benchmarks", "Secure baseline", "Least functionality", "Default credential risks"]}
   },
 
   "sections": [
     {
       "section_id": "D2-L009-S01",
       "title": "Hardening Fundamentals",
-      "estimated_time": "15 minutes",
-      
+      "estimated_time": "12 minutes",
       "content": {
-        "overview": "System hardening reduces attack surface by removing unnecessary functionality, applying secure configurations, and implementing protective controls.",
-        
-        "hardening_principles": [
+        "core_concepts": [
           {
-            "principle": "Least Functionality",
-            "description": "Install and enable only what's required",
-            "actions": [
-              "Remove unnecessary software",
-              "Disable unused services",
-              "Remove unnecessary features",
-              "Disable unused protocols"
-            ]
+            "concept": "Hardening Definition",
+            "definition": "Process of securing systems by reducing attack surface and eliminating unnecessary functionality",
+            "principle": "Least functionality—only enable what's needed"
           },
           {
-            "principle": "Secure Defaults",
-            "description": "Change insecure default configurations",
-            "actions": [
-              "Change default passwords",
-              "Modify default configurations",
-              "Disable default accounts",
-              "Remove sample content"
-            ]
+            "concept": "Secure Baseline",
+            "definition": "Documented, approved security configuration for a system type",
+            "components": ["OS settings", "Services enabled/disabled", "User accounts", "Network configuration"],
+            "benefit": "Consistent, repeatable security across all systems"
           },
           {
-            "principle": "Defense in Depth",
-            "description": "Layer multiple security controls",
-            "actions": [
-              "Multiple protection mechanisms",
-              "Assume outer layers will fail",
-              "No single point of failure"
+            "concept": "Configuration Standards",
+            "standards": [
+              {"standard": "CIS Benchmarks", "source": "Center for Internet Security", "type": "Comprehensive configuration guides"},
+              {"standard": "DISA STIGs", "source": "Defense Information Systems Agency", "type": "US government security technical implementation guides"},
+              {"standard": "Vendor Guides", "source": "Microsoft, Cisco, etc.", "type": "Platform-specific hardening"}
             ]
           }
-        ],
-        
-        "attack_surface_reduction": {
-          "definition": "Attack surface = total of all potential attack vectors",
-          "concept": "Every service, port, application is potential attack surface",
-          "goal": "Smaller surface = fewer opportunities for attackers",
-          "methods": [
-            "Disable unnecessary services",
-            "Close unused ports",
-            "Remove unused applications",
-            "Limit network exposure",
-            "Restrict user permissions"
-          ]
-        },
-        
-        "hardening_standards": [
-          {
-            "standard": "CIS Benchmarks",
-            "source": "Center for Internet Security",
-            "cost": "Free",
-            "characteristics": ["Consensus-based", "Detailed configuration guides", "Level 1 (basic) and Level 2 (strict)"],
-            "coverage": "Windows, Linux, macOS, cloud, applications, network devices"
-          },
-          {
-            "standard": "DISA STIGs",
-            "source": "Defense Information Systems Agency",
-            "cost": "Free",
-            "characteristics": ["Required for DoD systems", "Very prescriptive", "Detailed technical controls"],
-            "note": "More strict than CIS, may impact functionality"
-          },
-          {
-            "standard": "Vendor Security Guides",
-            "examples": ["Microsoft Security Baseline", "Red Hat Security Guide", "Cisco Hardening Guide"],
-            "note": "Platform-specific recommendations"
-          }
-        ],
-        
-        "hardening_process": [
-          {"phase": "1. Baseline Assessment", "activities": ["Document current state", "Identify services", "Map network connections", "Audit accounts"]},
-          {"phase": "2. Standard Selection", "activities": ["Choose benchmark (CIS, STIG)", "Consider regulatory requirements", "Balance security vs functionality"]},
-          {"phase": "3. Implementation", "activities": ["Apply configurations", "Test functionality", "Document changes", "Create golden image"]},
-          {"phase": "4. Verification", "activities": ["Scan for compliance", "Penetration testing", "Regular reassessment"]}
-        ],
-        
-        "visualization": {
-          "type": "ascii_diagram",
-          "title": "Attack Surface Reduction",
-          "diagram": [
-            "╔══════════════════════════════════════════════════════════════════════════════╗",
-            "║                      ATTACK SURFACE REDUCTION                                ║",
-            "╠══════════════════════════════════════════════════════════════════════════════╣",
-            "║                                                                               ║",
-            "║   BEFORE HARDENING                    AFTER HARDENING                        ║",
-            "║   ════════════════                    ═══════════════                        ║",
-            "║                                                                               ║",
-            "║   ┌─────────────────────┐            ┌─────────────────────┐                ║",
-            "║   │ ○ SSH (22)          │            │ ○ SSH (22) - limited│                ║",
-            "║   │ ○ HTTP (80)         │            │ ○ HTTPS (443)       │                ║",
-            "║   │ ○ HTTPS (443)       │            │                     │                ║",
-            "║   │ ○ FTP (21)          │            │                     │                ║",
-            "║   │ ○ Telnet (23)       │            │                     │                ║",
-            "║   │ ○ SMB (445)         │            │                     │                ║",
-            "║   │ ○ RDP (3389)        │            │                     │                ║",
-            "║   │ ○ MySQL (3306)      │            │                     │                ║",
-            "║   └─────────────────────┘            └─────────────────────┘                ║",
-            "║   8 open services                    2 open services                        ║",
-            "║   Default configs                    Hardened configs                        ║",
-            "║   All users can access               Access restricted                       ║",
-            "║                                                                               ║",
-            "║   PRINCIPLE: Can't exploit what isn't there                                 ║",
-            "║                                                                               ║",
-            "╚══════════════════════════════════════════════════════════════════════════════╝"
-          ]
-        }
+        ]
       },
-      
-      "key_points": [
-        "Least functionality: install/enable only what's required",
-        "Attack surface = all potential entry points; reduce by removing unnecessary",
-        "CIS Benchmarks = free, consensus-based; Level 1 basic, Level 2 strict",
-        "DISA STIGs = DoD required, very prescriptive",
-        "Hardening process: baseline → standard selection → implementation → verification"
+      "must_remember_for_exam": [
+        {"fact": "Hardening = reducing attack surface, least functionality", "why_tested": "Definition"},
+        {"fact": "Secure baseline = documented approved configuration", "why_tested": "Concept"},
+        {"fact": "CIS Benchmarks = industry-standard hardening guides", "why_tested": "Standard"},
+        {"fact": "DISA STIGs = US government security guides", "why_tested": "Standard"}
       ],
-      
-      "exam_tips": [
-        "CIS Benchmarks = free, consensus-based hardening guides",
-        "CIS Level 1 = basic; Level 2 = strict (may impact functionality)",
-        "DISA STIGs = DoD required, very prescriptive",
-        "Least functionality = only install what's needed",
-        "Golden image = hardened baseline for deployment"
-      ],
-      
-      "glossary_terms": [
-        {
-          "term": "CIS Benchmarks",
-          "definition": "Free, consensus-based security configuration guides from Center for Internet Security.",
-          "exam_note": "Level 1 = basic hardening; Level 2 = strict, may affect functionality."
-        },
-        {
-          "term": "STIG",
-          "definition": "Security Technical Implementation Guide - DoD's security configuration standards.",
-          "exam_note": "Required for DoD systems. More strict than CIS."
-        },
-        {
-          "term": "Golden Image",
-          "definition": "Pre-configured, hardened system template used for consistent deployment.",
-          "exam_note": "Ensures all systems start from secure baseline."
-        }
-      ]
+      "key_points": ["Hardening removes unnecessary functionality", "Secure baseline provides consistent configuration", "CIS Benchmarks and DISA STIGs are standard references"]
     },
-
     {
       "section_id": "D2-L009-S02",
-      "title": "Operating System Hardening",
-      "estimated_time": "15 minutes",
-      
-      "content": {
-        "overview": "Operating system hardening applies secure configurations specific to Windows, Linux, and other platforms.",
-        
-        "windows_hardening": {
-          "services": [
-            {"action": "Disable Print Spooler", "reason": "PrintNightmare and other exploits", "exception": "Print servers only"},
-            {"action": "Disable Remote Registry", "reason": "Prevent remote configuration changes"},
-            {"action": "Disable SMBv1", "reason": "Vulnerable to EternalBlue (WannaCry)"},
-            {"action": "Disable NetBIOS over TCP/IP", "reason": "Legacy protocol with security issues"}
-          ],
-          "accounts": [
-            {"action": "Rename/disable Administrator", "reason": "Prevent brute force against known account"},
-            {"action": "Disable Guest account", "reason": "No anonymous access"},
-            {"action": "Implement LAPS", "reason": "Unique local admin passwords per system"}
-          ],
-          "configurations": [
-            {"action": "Enable UAC", "reason": "Prevent silent privilege escalation"},
-            {"action": "Enable Windows Firewall", "reason": "Host-based network protection"},
-            {"action": "Configure audit policies", "reason": "Log security events"},
-            {"action": "Enable BitLocker", "reason": "Full disk encryption"}
-          ]
-        },
-        
-        "linux_hardening": {
-          "services": [
-            {"action": "Disable unused services", "command": "systemctl disable <service>"},
-            {"action": "Remove unnecessary packages", "command": "apt purge <package>"},
-            {"action": "Disable USB storage if not needed", "method": "blacklist usb-storage"}
-          ],
-          "accounts": [
-            {"action": "Disable root login via SSH", "config": "PermitRootLogin no in /etc/ssh/sshd_config"},
-            {"action": "Remove unused accounts", "command": "userdel <user>"},
-            {"action": "Configure password aging", "command": "chage -M 90 <user>"},
-            {"action": "Use sudo instead of root", "reason": "Auditable, limited privileges"}
-          ],
-          "permissions": [
-            {"action": "Restrict /tmp execution", "method": "noexec mount option"},
-            {"action": "Set restrictive umask", "value": "027 or 077"},
-            {"action": "Review SUID/SGID files", "command": "find / -perm -4000 -type f"}
-          ],
-          "network": [
-            {"action": "Enable firewall", "command": "ufw enable"},
-            {"action": "Disable IPv6 if not used", "method": "/etc/sysctl.conf"},
-            {"action": "Configure TCP wrappers", "files": "/etc/hosts.allow, /etc/hosts.deny"}
-          ]
-        },
-        
-        "common_hardening": [
-          {"category": "Patching", "action": "Keep systems updated", "frequency": "Regular schedule"},
-          {"category": "Logging", "action": "Enable comprehensive logging", "send_to": "Central SIEM"},
-          {"category": "Time Sync", "action": "Configure NTP", "reason": "Log correlation"},
-          {"category": "Banners", "action": "Configure warning banners", "reason": "Legal protection"}
-        ]
-      },
-      
-      "key_points": [
-        "Windows: disable Print Spooler, SMBv1, use LAPS for local admin",
-        "Linux: disable root SSH login, restrict tmp execution, use sudo",
-        "Both: patch regularly, enable logging, configure host firewall",
-        "Review SUID/SGID files on Linux (potential privilege escalation)",
-        "Warning banners provide legal protection"
-      ],
-      
-      "deep_dive": {
-        "title": "Practical Linux Hardening",
-        "estimated_time": "25 minutes",
-        "content": {
-          "description": "Apply common Linux hardening configurations.",
-          
-          "lab_linux_hardening": {
-            "title": "Lab: Harden a Linux System",
-            "objective": "Apply CIS-aligned hardening to Linux",
-            "steps": [
-              {
-                "step": 1,
-                "category": "Service Hardening",
-                "commands": [
-                  "# List running services",
-                  "systemctl list-units --type=service --state=running",
-                  "",
-                  "# Disable unnecessary services",
-                  "sudo systemctl disable cups          # Printing (if not needed)",
-                  "sudo systemctl disable avahi-daemon  # mDNS (if not needed)",
-                  "",
-                  "# Mask to prevent accidental start",
-                  "sudo systemctl mask cups"
-                ]
-              },
-              {
-                "step": 2,
-                "category": "SSH Hardening",
-                "commands": [
-                  "# Edit /etc/ssh/sshd_config",
-                  "sudo nano /etc/ssh/sshd_config",
-                  "",
-                  "# Apply these settings:",
-                  "PermitRootLogin no",
-                  "PasswordAuthentication no      # Use keys only",
-                  "MaxAuthTries 3",
-                  "ClientAliveInterval 300",
-                  "ClientAliveCountMax 2",
-                  "",
-                  "# Restart SSH",
-                  "sudo systemctl restart sshd"
-                ]
-              },
-              {
-                "step": 3,
-                "category": "Firewall Configuration",
-                "commands": [
-                  "# Enable UFW",
-                  "sudo ufw default deny incoming",
-                  "sudo ufw default allow outgoing",
-                  "sudo ufw allow 22/tcp            # SSH",
-                  "sudo ufw enable",
-                  "sudo ufw status verbose"
-                ]
-              },
-              {
-                "step": 4,
-                "category": "Account Security",
-                "commands": [
-                  "# Check for UID 0 accounts (should only be root)",
-                  "awk -F: '($3 == 0) {print}' /etc/passwd",
-                  "",
-                  "# Set password aging",
-                  "sudo chage -M 90 -W 7 username",
-                  "",
-                  "# Lock unused accounts",
-                  "sudo usermod -L unused_account"
-                ]
-              },
-              {
-                "step": 5,
-                "category": "File Permission Audit",
-                "commands": [
-                  "# Find world-writable files",
-                  "sudo find / -perm -o+w -type f 2>/dev/null",
-                  "",
-                  "# Find SUID binaries",
-                  "sudo find / -perm -4000 -type f 2>/dev/null",
-                  "",
-                  "# Secure sensitive files",
-                  "sudo chmod 600 /etc/shadow",
-                  "sudo chmod 644 /etc/passwd"
-                ]
-              }
-            ]
-          }
-        }
-      },
-      
-      "exam_tips": [
-        "Disable SMBv1 on Windows (EternalBlue/WannaCry)",
-        "LAPS = Local Administrator Password Solution",
-        "PermitRootLogin no in SSH config",
-        "SUID files = potential privilege escalation",
-        "umask controls default file permissions"
-      ],
-      
-      "knowledge_check": {
-        "question": "Which Windows service should be disabled on most servers due to vulnerabilities like PrintNightmare?",
-        "options": [
-          "Windows Firewall",
-          "Print Spooler",
-          "Windows Defender",
-          "Remote Desktop"
-        ],
-        "correct": 1,
-        "explanation": "Print Spooler should be disabled on systems that don't need to print. PrintNightmare and other vulnerabilities allow remote code execution through this service. It should only be enabled on dedicated print servers."
-      }
-    },
-
-    {
-      "section_id": "D2-L009-S03",
-      "title": "Application and Network Hardening",
+      "title": "Common Hardening Actions",
       "estimated_time": "12 minutes",
-      
       "content": {
-        "overview": "Beyond OS hardening, applications and network devices require specific security configurations.",
-        
-        "application_hardening": [
+        "core_concepts": [
           {
-            "area": "Web Servers",
+            "concept": "Hardening Checklist",
             "actions": [
-              "Remove default pages and documentation",
-              "Disable directory listing",
-              "Configure security headers (CSP, HSTS, X-Frame-Options)",
-              "Minimize modules/extensions",
-              "Run as non-root user"
+              {"action": "Change default credentials", "why": "Known passwords are first attack attempt"},
+              {"action": "Disable unnecessary services", "why": "Each service is potential attack vector"},
+              {"action": "Remove unnecessary software", "why": "Less software = fewer vulnerabilities"},
+              {"action": "Enable host firewall", "why": "Restrict network access to services"},
+              {"action": "Apply latest patches", "why": "Fix known vulnerabilities"},
+              {"action": "Configure logging", "why": "Enable detection and forensics"},
+              {"action": "Restrict administrative access", "why": "Limit privileged accounts"},
+              {"action": "Disable USB/removable media", "why": "Prevent physical attack vector"}
             ]
           },
           {
-            "area": "Databases",
+            "concept": "Application Hardening",
             "actions": [
-              "Change default ports",
-              "Remove sample databases",
-              "Disable remote root login",
-              "Use strong authentication",
-              "Encrypt connections (TLS)"
-            ]
-          },
-          {
-            "area": "Applications",
-            "actions": [
-              "Remove debug modes",
-              "Disable verbose errors",
-              "Remove default credentials",
-              "Apply least privilege",
-              "Enable logging"
+              "Disable debug features in production",
+              "Remove sample/default content",
+              "Configure strong authentication",
+              "Implement input validation",
+              "Use secure communication (TLS)"
             ]
           }
-        ],
-        
-        "network_device_hardening": [
-          {"action": "Change default credentials", "priority": "Critical"},
-          {"action": "Disable unused interfaces", "reason": "Reduce attack surface"},
-          {"action": "Use SSH, disable Telnet", "reason": "Encrypted management"},
-          {"action": "Implement ACLs", "reason": "Control traffic flow"},
-          {"action": "Enable logging", "destination": "Central SIEM"},
-          {"action": "Disable CDP/LLDP if not needed", "reason": "Information disclosure"},
-          {"action": "Configure NTP", "reason": "Time synchronization for logs"}
-        ],
-        
-        "mobile_hardening": [
-          {"control": "Require screen lock", "type": "PIN/biometric"},
-          {"control": "Enable encryption", "note": "Usually default on modern devices"},
-          {"control": "Configure remote wipe", "purpose": "Lost device protection"},
-          {"control": "Restrict app installation", "method": "Enterprise app store only"},
-          {"control": "Separate work/personal", "method": "Containers, work profiles"}
-        ],
-        
-        "iot_hardening": [
-          {"action": "Change default credentials", "note": "Most critical—often overlooked"},
-          {"action": "Segment on separate network", "reason": "Limit blast radius"},
-          {"action": "Disable unused features", "example": "Remote access, UPnP"},
-          {"action": "Keep firmware updated", "challenge": "Often difficult or impossible"},
-          {"action": "Monitor traffic", "reason": "Detect anomalous behavior"}
         ]
       },
-      
-      "key_points": [
-        "Web servers: remove defaults, disable directory listing, add security headers",
-        "Databases: change default ports, disable remote root, encrypt connections",
-        "Network devices: change defaults, use SSH not Telnet, enable logging",
-        "IoT: change defaults, segment network, update firmware",
-        "Mobile: encryption, screen lock, remote wipe, app restrictions"
+      "must_remember_for_exam": [
+        {"fact": "Change default credentials - first step", "why_tested": "Critical action"},
+        {"fact": "Disable unnecessary services - reduce attack surface", "why_tested": "Core principle"},
+        {"fact": "Least functionality principle", "why_tested": "Key concept"}
       ],
-      
-      "exam_tips": [
-        "Always change default credentials (especially IoT!)",
-        "Segment IoT on separate network",
-        "Use SSH instead of Telnet (encrypted)",
-        "Web security headers: CSP, HSTS, X-Frame-Options",
-        "Mobile MDM: remote wipe, encryption, app control"
-      ],
-      
-      "knowledge_check": {
-        "question": "What is the MOST important hardening step for IoT devices that organizations often overlook?",
-        "options": [
-          "Installing antivirus software",
-          "Changing default credentials",
-          "Enabling automatic updates",
-          "Configuring VPN access"
-        ],
-        "correct": 1,
-        "explanation": "Changing default credentials is the most critical and most overlooked IoT hardening step. Many IoT devices ship with well-known default passwords (admin/admin, etc.) that are never changed. The Mirai botnet exploited exactly this weakness. IoT devices often can't run antivirus, may not support auto-updates, and rarely need VPN."
-      }
+      "key_points": ["Change defaults, disable unnecessary services", "Apply patches, configure logging", "Least functionality principle"]
     }
   ],
 
-  "tool_spotlights": {
-    "tools": [
-      {
-        "name": "CIS-CAT",
-        "category": "Compliance Scanner",
-        "description": "Scan systems against CIS Benchmarks",
-        "free_tier": "CIS-CAT Lite free",
-        "url": "https://www.cisecurity.org/cis-cat",
-        "career_relevance": "Automated compliance checking"
-      },
-      {
-        "name": "OpenSCAP",
-        "category": "Security Compliance",
-        "description": "Open-source security compliance toolkit",
-        "free_tier": "Completely free",
-        "url": "https://www.open-scap.org",
-        "career_relevance": "Linux compliance scanning"
-      },
-      {
-        "name": "Lynis",
-        "category": "Security Auditing",
-        "description": "Security auditing tool for Linux",
-        "free_tier": "Community version free",
-        "url": "https://cisofy.com/lynis/",
-        "career_relevance": "Quick Linux security assessment"
-      },
-      {
-        "name": "Windows Security Baseline",
-        "category": "Hardening Guide",
-        "description": "Microsoft's recommended security settings",
-        "free_tier": "Free",
-        "url": "https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-security-baselines",
-        "career_relevance": "Official Windows hardening"
-      }
+  "summary": {
+    "exam_essentials": [
+      "Hardening = reduce attack surface, least functionality",
+      "Secure baseline = documented approved configuration",
+      "CIS Benchmarks = industry hardening standards",
+      "Change default credentials immediately",
+      "Disable unnecessary services and software"
     ]
   },
 
-  "summary": {
-    "key_takeaways": [
-      "Least functionality: install/enable only what's required",
-      "Attack surface = all potential entry points; reduce by removing unnecessary",
-      "CIS Benchmarks = free hardening guides; Level 1 basic, Level 2 strict",
-      "Always change default credentials (especially IoT!)",
-      "Segment IoT devices on separate networks",
-      "Windows: disable Print Spooler, SMBv1; use LAPS",
-      "Linux: disable root SSH, restrict permissions, enable firewall"
-    ],
-    
-    "exam_essentials": [
-      "CIS Benchmarks vs DISA STIGs",
-      "Level 1 vs Level 2 benchmarks",
-      "Golden image purpose",
-      "Key Windows hardening (SMBv1, Print Spooler)",
-      "Key Linux hardening (root SSH, SUID)"
-    ],
-    
-    "skills_gained": [
-      "Apply Linux hardening commands",
-      "Configure host-based firewall",
-      "Audit file permissions",
-      "Implement service hardening"
-    ],
-    
-    "connection_to_next": "Hardening prevents attacks, but what about when attacks occur? The next lesson covers Mitigation Techniques—how to respond to and limit the damage from security incidents."
-  },
-
   "related_content": {
-    "simulations": ["D2-SIM-005"],
-    "remediation": ["D2-REM-003"],
     "next_lesson": "D2-LESSON-010",
     "previous_lesson": "D2-LESSON-008"
   }

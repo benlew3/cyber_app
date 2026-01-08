@@ -1,452 +1,244 @@
 {
   "lesson_id": "D2-LESSON-012",
   "domain": 2,
-  "title": "Security Assessments",
-  "objectives_covered": ["2.3", "2.5"],
-  "estimated_duration": "80-95 minutes (Core: 45 min, Deep Dives: 35-50 min)",
-  "difficulty": "intermediate",
-  "prerequisites": ["D2-LESSON-007", "D2-LESSON-011"],
+  "title": "Security Assessments and Testing",
+  "subtitle": "Measuring Security: Pentests, Audits, and Assessments",
   "version": "2.0-enhanced",
+  "objectives_covered": ["2.3"],
+  "estimated_duration": "75-90 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": ["D2-LESSON-007"],
+
+  "skill_tree": {
+    "position": {"domain": 2, "sequence": 12, "tier": "intermediate"},
+    "prerequisites": [{"lesson_id": "D2-LESSON-007", "title": "Vulnerability Management", "why_needed": "Assessments build on vulnerability concepts"}],
+    "unlocks": [{"lesson_id": "D5-LESSON-005", "title": "Audits and Assessments", "connection": "GRC perspective on assessments"}]
+  },
+
+  "role_relevance": {
+    "soc_analyst": {"relevance": "medium", "percentage_of_job": "15-25%", "daily_tasks": ["Support assessment activities", "Review findings"]},
+    "security_engineer": {"relevance": "high", "percentage_of_job": "30-40%", "daily_tasks": ["Coordinate assessments", "Remediate findings"]},
+    "grc_analyst": {"relevance": "critical", "percentage_of_job": "50-60%", "daily_tasks": ["Plan assessments", "Track remediation", "Report to stakeholders"]},
+    "penetration_tester": {"relevance": "critical", "percentage_of_job": "70-80%", "daily_tasks": ["Conduct penetration tests", "Write reports", "Validate fixes"]}
+  },
 
   "introduction": {
-    "hook": "When Target's 2013 breach exposed 40 million credit card numbers, investigators found that security assessments had identified vulnerabilities months before—but findings weren't acted upon. Security assessments are only valuable if they drive action. From vulnerability scans to penetration tests, assessments reveal where you're vulnerable and what needs fixing. Organizations that assess regularly and act on findings avoid becoming the next headline.",
-    
-    "learning_goals": [
-      "Differentiate between security assessment types and use cases",
-      "Understand vulnerability assessment methodologies",
-      "Analyze penetration testing scopes, types, and reporting",
-      "Understand compliance assessment requirements",
-      "Interpret results and prioritize remediation"
-    ],
-    
-    "why_it_matters": "You can't protect what you don't measure. Security assessments provide visibility to understand your posture, identify weaknesses, and validate controls. Expect 5-7 Security+ questions on assessment types and methodologies.",
-    
-    "career_relevance": {
-      "soc_analyst": "You'll review vulnerability scan results, validate findings, and track remediation. Understanding assessment outputs helps prioritize response.",
-      "incident_responder": "Post-incident assessments identify what failed. You'll conduct root cause analysis and validate remediation effectiveness.",
-      "grc_analyst": "You'll manage assessment programs, ensure compliance requirements are met, and report on security posture to leadership.",
-      "penetration_tester": "This IS your job. You'll scope engagements, conduct tests, and deliver reports that drive security improvement.",
-      "security_engineer": "You'll fix what assessments find. Understanding assessment types helps you interpret results and implement effective remediation."
-    }
+    "hook": "How do you know if your security controls actually work? Security assessments—from vulnerability scans to full penetration tests—provide evidence of your security posture and identify weaknesses before attackers do.",
+    "exam_weight": {"estimated_questions": "4-6", "high_yield_topics": ["Pentest vs vuln scan", "Assessment types", "Rules of engagement", "Reporting"]}
   },
 
   "sections": [
     {
       "section_id": "D2-L012-S01",
-      "title": "Security Assessment Types",
+      "title": "Assessment Types",
       "estimated_time": "15 minutes",
-      
       "content": {
-        "overview": "Security assessments evaluate organizational security through various methods, each providing different perspectives and depth.",
-        
-        "assessment_types": [
+        "core_concepts": [
           {
-            "type": "Vulnerability Assessment",
-            "description": "Identify security weaknesses across systems",
-            "characteristics": [
-              "Automated scanning focus",
-              "Broad coverage",
-              "Point-in-time snapshot",
-              "Does NOT validate exploitability"
-            ],
-            "output": "List of vulnerabilities with severity ratings",
-            "frequency": "Weekly to monthly"
-          },
-          {
-            "type": "Penetration Testing",
-            "description": "Attempt to exploit vulnerabilities to validate risk",
-            "characteristics": [
-              "Human testers (with tools)",
-              "Validates actual risk",
-              "Tests defense effectiveness",
-              "Demonstrates real impact"
-            ],
-            "output": "Exploitation evidence, attack narrative, recommendations",
-            "frequency": "Annually or after major changes"
-          },
-          {
-            "type": "Security Audit",
-            "description": "Verify compliance with standards/policies",
-            "characteristics": [
-              "Policy and procedure review",
-              "Control effectiveness testing",
-              "Documentation review",
-              "May be regulatory requirement"
-            ],
-            "output": "Compliance findings, gaps, recommendations",
-            "examples": ["SOC 2", "ISO 27001", "PCI DSS"]
-          },
-          {
-            "type": "Risk Assessment",
-            "description": "Identify and evaluate risks to organization",
-            "characteristics": [
-              "Business context focus",
-              "Asset valuation",
-              "Threat and impact analysis",
-              "Prioritization framework"
-            ],
-            "output": "Risk register, prioritized risks, treatment recommendations"
-          }
-        ],
-        
-        "assessment_spectrum": {
-          "description": "From automated to manual, broad to deep",
-          "spectrum": [
-            {"type": "Automated Vulnerability Scan", "coverage": "Broad", "depth": "Shallow", "frequency": "High"},
-            {"type": "Manual Vulnerability Assessment", "coverage": "Moderate", "depth": "Moderate", "frequency": "Medium"},
-            {"type": "Penetration Test", "coverage": "Targeted", "depth": "Deep", "frequency": "Low"},
-            {"type": "Red Team Exercise", "coverage": "Targeted", "depth": "Very Deep", "frequency": "Very Low"}
-          ]
-        },
-        
-        "internal_vs_external": {
-          "internal": {
-            "description": "Conducted by organization's staff",
-            "pros": ["Deep organizational knowledge", "Continuous availability", "Lower cost"],
-            "cons": ["May lack independence", "Potential bias", "Limited fresh perspective"]
-          },
-          "external": {
-            "description": "Conducted by third parties",
-            "pros": ["Independent perspective", "Fresh eyes", "Specialized skills"],
-            "cons": ["Higher cost", "Less context", "Point-in-time"],
-            "note": "Required for some compliance (PCI DSS ASV)"
-          }
-        },
-        
-        "visualization": {
-          "type": "ascii_diagram",
-          "title": "Assessment Type Comparison",
-          "diagram": [
-            "╔══════════════════════════════════════════════════════════════════════════════╗",
-            "║                    SECURITY ASSESSMENT COMPARISON                            ║",
-            "╠══════════════════════════════════════════════════════════════════════════════╣",
-            "║                                                                               ║",
-            "║   TYPE                   FOCUS              VALIDATES EXPLOITABILITY?        ║",
-            "║   ════                   ═════              ═════════════════════════        ║",
-            "║                                                                               ║",
-            "║   Vulnerability Scan     Find weaknesses    NO - just identifies             ║",
-            "║   Penetration Test       Exploit weaknesses YES - proves impact              ║",
-            "║   Security Audit         Verify compliance  NO - checks controls             ║",
-            "║   Risk Assessment        Evaluate impact    NO - analyzes risk               ║",
-            "║                                                                               ║",
-            "║   DEPTH vs BREADTH:                                                          ║",
-            "║                                                                               ║",
-            "║   BREADTH ◄─────────────────────────────────────────────────────▶            ║",
-            "║        Vuln Scan         Vuln Assessment    Pen Test       Red Team          ║",
-            "║        (automated)       (validated)        (exploitation) (adversary sim)   ║",
-            "║   D                                                                           ║",
-            "║   E                                                              ▲            ║",
-            "║   P                                                              │            ║",
-            "║   T                                                              │            ║",
-            "║   H ◄───────────────────────────────────────────────────────────▶            ║",
-            "║                                                                               ║",
-            "╚══════════════════════════════════════════════════════════════════════════════╝"
-          ]
-        }
-      },
-      
-      "key_points": [
-        "Vulnerability assessment identifies weaknesses; pen test validates exploitability",
-        "Security audit verifies compliance; risk assessment evaluates business impact",
-        "Internal = staff; External = third party (independence)",
-        "Automated scans are broad/shallow; pen tests are targeted/deep",
-        "Hybrid approach: internal for routine, external for validation"
-      ],
-      
-      "exam_tips": [
-        "Vulnerability assessment = identify (doesn't exploit)",
-        "Penetration test = attempt exploitation (validates risk)",
-        "Security audit = verify compliance with standards",
-        "Risk assessment = business impact analysis",
-        "External often required for compliance"
-      ],
-      
-      "glossary_terms": [
-        {
-          "term": "Vulnerability Assessment",
-          "definition": "Process of identifying security weaknesses in systems without attempting exploitation.",
-          "exam_note": "Finds issues; doesn't validate exploitability."
-        },
-        {
-          "term": "Penetration Testing",
-          "definition": "Authorized simulated attack that attempts to exploit vulnerabilities to validate risk.",
-          "exam_note": "Validates exploitability; demonstrates real impact."
-        }
-      ]
-    },
-
-    {
-      "section_id": "D2-L012-S02",
-      "title": "Penetration Testing",
-      "estimated_time": "15 minutes",
-      
-      "content": {
-        "overview": "Penetration testing simulates real attacks to identify exploitable vulnerabilities and test defensive capabilities.",
-        
-        "testing_perspectives": [
-          {
-            "perspective": "Black Box",
-            "also_called": "Blind testing",
-            "description": "Tester has no prior knowledge of target",
-            "simulates": "External attacker with no inside information",
-            "pros": ["Realistic attacker perspective", "Tests detection"],
-            "cons": ["Time-consuming", "May miss complex issues"]
-          },
-          {
-            "perspective": "White Box",
-            "also_called": "Crystal box, Clear box",
-            "description": "Tester has full knowledge (architecture, code, credentials)",
-            "simulates": "Malicious insider or post-compromise attacker",
-            "pros": ["Thorough coverage", "Efficient", "Finds complex issues"],
-            "cons": ["Less realistic external perspective"]
-          },
-          {
-            "perspective": "Gray Box",
-            "description": "Tester has partial knowledge",
-            "simulates": "Attacker with some reconnaissance completed",
-            "pros": ["Balance of efficiency and realism"],
-            "common_for": "Most common approach"
-          }
-        ],
-        
-        "testing_environments": [
-          {
-            "environment": "External",
-            "description": "Test from internet perspective",
-            "targets": ["Public-facing systems", "Web apps", "VPN", "Email"],
-            "goal": "Can attacker breach perimeter?"
-          },
-          {
-            "environment": "Internal",
-            "description": "Test from inside network",
-            "simulates": ["Compromised employee", "Physical breach", "Malware infection"],
-            "goal": "What can attacker do once inside?"
-          },
-          {
-            "environment": "Physical",
-            "description": "Test physical security controls",
-            "activities": ["Badge cloning", "Tailgating", "Lock picking", "Dumpster diving"],
-            "goal": "Can attacker gain physical access?"
-          },
-          {
-            "environment": "Social Engineering",
-            "description": "Test human vulnerabilities",
-            "activities": ["Phishing campaigns", "Vishing calls", "Pretexting"],
-            "goal": "Will employees fall for manipulation?"
-          }
-        ],
-        
-        "testing_rules": {
-          "rules_of_engagement": {
-            "description": "Formal agreement defining test parameters",
-            "contents": [
-              "Scope (what to test)",
-              "Out-of-scope (what NOT to test)",
-              "Testing window",
-              "Point of contact for issues",
-              "Acceptable techniques",
-              "Authorization documentation"
+            "concept": "Assessment Spectrum",
+            "types": [
+              {"type": "Vulnerability Scan", "method": "Automated tool identifies known vulnerabilities", "depth": "Broad, shallow", "exploitation": "None"},
+              {"type": "Vulnerability Assessment", "method": "Scan + analysis + prioritization", "depth": "Broader analysis", "exploitation": "None"},
+              {"type": "Penetration Test", "method": "Attempt to actually exploit vulnerabilities", "depth": "Deep, targeted", "exploitation": "Yes - proves exploitability"},
+              {"type": "Red Team Exercise", "method": "Full adversary simulation", "depth": "Comprehensive", "exploitation": "Yes - tests people, process, technology"}
             ]
           },
-          "critical_elements": [
-            {"element": "Written Authorization", "importance": "Legal protection for testers"},
-            {"element": "Scope Definition", "importance": "Clear boundaries"},
-            {"element": "Emergency Contact", "importance": "If testing causes issues"},
-            {"element": "Sensitive Data Handling", "importance": "What if tester finds PII/secrets"}
-          ]
-        },
-        
-        "red_vs_blue_vs_purple": [
           {
-            "team": "Red Team",
-            "role": "Offensive - simulate attackers",
-            "activities": ["Penetration testing", "Social engineering", "Physical intrusion"],
-            "goal": "Achieve objectives (data theft, access)"
+            "concept": "Penetration Test Types",
+            "types": [
+              {"type": "Black Box", "knowledge": "No prior knowledge", "simulates": "External attacker"},
+              {"type": "White Box", "knowledge": "Full knowledge (code, architecture)", "simulates": "Insider or thorough review"},
+              {"type": "Gray Box", "knowledge": "Partial knowledge", "simulates": "Compromised insider or partner"}
+            ]
           },
           {
-            "team": "Blue Team",
-            "role": "Defensive - protect and detect",
-            "activities": ["Monitoring", "Detection", "Response", "Hardening"],
-            "goal": "Detect and stop attacks"
-          },
-          {
-            "team": "Purple Team",
-            "role": "Collaboration between red and blue",
-            "activities": ["Joint exercises", "Knowledge sharing", "Detection improvement"],
-            "goal": "Improve overall security through collaboration"
+            "concept": "Testing Environments",
+            "environments": [
+              {"environment": "Known Environment", "description": "Tester has full info (white box)"},
+              {"environment": "Partially Known", "description": "Tester has some info (gray box)"},
+              {"environment": "Unknown Environment", "description": "Tester has no info (black box)"}
+            ],
+            "note": "CompTIA now uses 'known/unknown environment' terminology"
           }
         ]
       },
-      
-      "key_points": [
-        "Black box = no knowledge; White box = full knowledge; Gray box = partial",
-        "External tests perimeter; Internal tests post-breach scenarios",
-        "Rules of Engagement define scope and authorization",
-        "Red Team = offense; Blue Team = defense; Purple Team = collaboration",
-        "Written authorization is essential—legal protection"
-      ],
-      
-      "deep_dive": {
-        "title": "Understanding Pen Test Reports",
-        "estimated_time": "15 minutes",
-        "content": {
-          "description": "Learn to read and act on penetration test findings.",
-          
-          "report_sections": [
-            {
-              "section": "Executive Summary",
-              "audience": "Leadership",
-              "content": "High-level findings, overall risk rating, key recommendations"
-            },
-            {
-              "section": "Scope and Methodology",
-              "audience": "Technical and management",
-              "content": "What was tested, how, limitations"
-            },
-            {
-              "section": "Findings",
-              "audience": "Technical teams",
-              "content": "Detailed vulnerabilities with evidence, severity, remediation"
-            },
-            {
-              "section": "Attack Narrative",
-              "audience": "All",
-              "content": "Story of how tester achieved objectives"
-            }
-          ],
-          
-          "finding_ratings": [
-            {"rating": "Critical", "criteria": "Immediate risk, easy exploit, major impact", "sla": "24-72 hours"},
-            {"rating": "High", "criteria": "Significant risk, exploitable", "sla": "7-14 days"},
-            {"rating": "Medium", "criteria": "Moderate risk, requires conditions", "sla": "30-60 days"},
-            {"rating": "Low", "criteria": "Minor risk, best practice", "sla": "90 days"},
-            {"rating": "Informational", "criteria": "No immediate risk, awareness", "sla": "Next review cycle"}
-          ]
-        }
+      "memory_hooks": {
+        "mnemonic": "Black = Blind, White = Wide open, Gray = Glimpse",
+        "common_mistakes": [{"mistake": "Thinking vulnerability scans prove exploitability", "correction": "Scans identify potential vulnerabilities. Only pentests prove they can actually be exploited."}]
       },
-      
-      "exam_tips": [
-        "Black box = no info; White box = full info; Gray box = partial",
-        "Rules of Engagement = formal test agreement",
-        "Authorization is REQUIRED before testing",
-        "Red = attack; Blue = defend; Purple = collaborate",
-        "External = internet view; Internal = inside network"
+      "must_remember_for_exam": [
+        {"fact": "Vulnerability scan = automated, no exploitation", "why_tested": "Assessment distinction"},
+        {"fact": "Penetration test = actually exploits vulnerabilities", "why_tested": "Assessment distinction"},
+        {"fact": "Black box = no knowledge; White box = full knowledge", "why_tested": "Test types"},
+        {"fact": "Red team = full adversary simulation", "why_tested": "Assessment type"}
       ],
-      
+      "key_points": ["Vuln scan identifies; pentest exploits", "Black = no knowledge, White = full, Gray = partial", "Red team simulates real adversary"],
       "knowledge_check": {
-        "question": "A penetration tester is given network diagrams, application architecture, and user credentials before testing. What type of testing is this?",
-        "options": [
-          "Black box testing",
-          "White box testing",
-          "Gray box testing",
-          "Blind testing"
-        ],
-        "correct": 1,
-        "explanation": "White box (also called crystal box or clear box) testing provides the tester with full knowledge of the target including architecture, code, and credentials. This allows thorough testing but is less realistic of an external attacker perspective. Black box = no knowledge; Gray box = partial knowledge."
+        "question": "A security team wants to prove that identified vulnerabilities can actually be exploited. Which assessment type should they use?",
+        "options": ["Vulnerability scan", "Vulnerability assessment", "Penetration test", "Compliance audit"],
+        "correct": 2,
+        "explanation": "Penetration tests actually attempt to exploit vulnerabilities, proving exploitability. Scans and assessments only identify potential vulnerabilities.",
+        "wrong_answer_analysis": [
+          {"option": 0, "why_wrong": "Scans identify but don't exploit"},
+          {"option": 1, "why_wrong": "Assessments analyze but don't exploit"},
+          {"option": 3, "why_wrong": "Audits check compliance, not exploitability"}
+        ]
       }
     },
-
     {
-      "section_id": "D2-L012-S03",
-      "title": "Compliance and Audit Requirements",
-      "estimated_time": "10 minutes",
-      
+      "section_id": "D2-L012-S02",
+      "title": "Penetration Testing Process",
+      "estimated_time": "12 minutes",
       "content": {
-        "overview": "Many security assessments are driven by compliance requirements. Understanding these requirements ensures proper assessment programs.",
-        
-        "common_requirements": [
+        "core_concepts": [
           {
-            "framework": "PCI DSS",
-            "assessments": [
-              {"assessment": "Quarterly external vulnerability scan", "requirement": "By Approved Scanning Vendor (ASV)"},
-              {"assessment": "Annual penetration test", "requirement": "External and internal"},
-              {"assessment": "Annual risk assessment", "requirement": "Document risks to cardholder data"}
+            "concept": "Pentest Phases",
+            "phases": [
+              {"phase": "Planning/Scoping", "activities": "Define scope, rules of engagement, get authorization"},
+              {"phase": "Reconnaissance", "activities": "Gather information about target"},
+              {"phase": "Scanning/Enumeration", "activities": "Identify systems, services, vulnerabilities"},
+              {"phase": "Exploitation", "activities": "Attempt to exploit vulnerabilities"},
+              {"phase": "Post-Exploitation", "activities": "Maintain access, pivot, escalate privileges"},
+              {"phase": "Reporting", "activities": "Document findings, recommendations"}
             ]
           },
           {
-            "framework": "HIPAA",
-            "assessments": [
-              {"assessment": "Risk assessment", "requirement": "Required, no specific frequency"},
-              {"assessment": "Periodic technical evaluation", "requirement": "When changes occur"}
-            ]
+            "concept": "Rules of Engagement",
+            "definition": "Documented agreement defining test boundaries",
+            "includes": [
+              "Scope (what can be tested)",
+              "Timeline (when testing occurs)",
+              "Methods (allowed techniques)",
+              "Communication (emergency contacts)",
+              "Data handling (what happens to findings)"
+            ],
+            "importance": "Protects both tester and organization legally"
           },
           {
-            "framework": "SOC 2",
-            "assessments": [
-              {"assessment": "Annual audit", "requirement": "By independent CPA firm"},
-              {"assessment": "Control testing", "requirement": "Throughout audit period"}
-            ]
-          },
-          {
-            "framework": "FedRAMP",
-            "assessments": [
-              {"assessment": "Third-party assessment", "requirement": "By accredited 3PAO"},
-              {"assessment": "Annual assessment", "requirement": "For continued authorization"},
-              {"assessment": "Continuous monitoring", "requirement": "Monthly vulnerability scans"}
-            ]
+            "concept": "Authorization",
+            "requirement": "Written authorization REQUIRED before testing",
+            "without_it": "Testing without authorization is illegal (computer crime)",
+            "document": "Often called 'get out of jail free' letter"
           }
-        ],
-        
-        "assessment_best_practices": [
-          "Maintain assessment schedule aligned with compliance requirements",
-          "Track findings through remediation",
-          "Document exceptions and risk acceptance",
-          "Report metrics to leadership",
-          "Use consistent methodology across assessments",
-          "Retain evidence for audit purposes"
         ]
       },
-      
-      "key_points": [
-        "PCI DSS requires quarterly ASV scans and annual pen tests",
-        "HIPAA requires risk assessment (no set frequency)",
-        "SOC 2 requires annual independent audit",
-        "Track findings through remediation lifecycle",
-        "Document exceptions and risk acceptance"
+      "must_remember_for_exam": [
+        {"fact": "Written authorization required before penetration testing", "why_tested": "Legal requirement"},
+        {"fact": "Rules of engagement define scope and boundaries", "why_tested": "Process element"},
+        {"fact": "Testing without authorization = illegal", "why_tested": "Legal awareness"}
       ],
-      
-      "exam_tips": [
-        "PCI DSS = quarterly external scans + annual pen test",
-        "ASV = Approved Scanning Vendor (PCI requirement)",
-        "HIPAA requires risk assessment",
-        "SOC 2 = independent CPA firm audit",
-        "Know which frameworks require which assessments"
-      ]
+      "key_points": ["Written authorization required before testing", "Rules of engagement define boundaries", "Phases: Plan → Recon → Scan → Exploit → Post-exploit → Report"]
+    },
+    {
+      "section_id": "D2-L012-S03",
+      "title": "Specialized Assessment Types",
+      "estimated_time": "10 minutes",
+      "content": {
+        "core_concepts": [
+          {
+            "concept": "Physical Penetration Testing",
+            "targets": "Physical security controls",
+            "techniques": ["Tailgating/piggybacking", "Lock picking", "Badge cloning", "Social engineering"],
+            "goal": "Test physical access controls"
+          },
+          {
+            "concept": "Social Engineering Assessment",
+            "targets": "Human element",
+            "techniques": ["Phishing simulations", "Vishing calls", "Pretexting", "Physical social engineering"],
+            "goal": "Test employee security awareness"
+          },
+          {
+            "concept": "Wireless Assessment",
+            "targets": "Wireless networks",
+            "techniques": ["Rogue AP detection", "WPA cracking", "Evil twin attacks"],
+            "goal": "Test wireless security controls"
+          },
+          {
+            "concept": "Bug Bounty Programs",
+            "definition": "Crowdsourced security testing with rewards",
+            "benefits": ["Continuous testing", "Diverse perspectives", "Pay for results"],
+            "considerations": ["Scope definition", "Legal framework", "Reward structure"]
+          }
+        ]
+      },
+      "must_remember_for_exam": [
+        {"fact": "Physical pentest tests physical security controls", "why_tested": "Assessment type"},
+        {"fact": "Social engineering assessment tests human element", "why_tested": "Assessment type"},
+        {"fact": "Bug bounty = crowdsourced security testing", "why_tested": "Modern approach"}
+      ],
+      "key_points": ["Physical pentests test locks, badges, tailgating", "Social engineering tests employees", "Bug bounties provide crowdsourced testing"]
+    },
+    {
+      "section_id": "D2-L012-S04",
+      "title": "Reporting and Remediation",
+      "estimated_time": "10 minutes",
+      "content": {
+        "core_concepts": [
+          {
+            "concept": "Assessment Report Components",
+            "components": [
+              {"component": "Executive Summary", "audience": "Leadership", "content": "High-level findings and risk"},
+              {"component": "Technical Details", "audience": "Technical teams", "content": "Vulnerabilities, evidence, reproduction steps"},
+              {"component": "Risk Ratings", "audience": "All", "content": "Severity based on impact and likelihood"},
+              {"component": "Recommendations", "audience": "All", "content": "Remediation guidance"}
+            ]
+          },
+          {
+            "concept": "Finding Severity",
+            "factors": ["Exploitability", "Impact", "Affected systems", "Data sensitivity"],
+            "common_scale": ["Critical", "High", "Medium", "Low", "Informational"]
+          },
+          {
+            "concept": "Remediation Tracking",
+            "process": [
+              "Assign owners to findings",
+              "Set remediation timelines by severity",
+              "Track progress",
+              "Verify fixes (retest)"
+            ]
+          }
+        ]
+      },
+      "must_remember_for_exam": [
+        {"fact": "Executive summary for leadership, technical details for IT", "why_tested": "Report audience"},
+        {"fact": "Findings should be verified/retested after remediation", "why_tested": "Process completion"}
+      ],
+      "key_points": ["Reports have executive and technical sections", "Severity based on exploitability and impact", "Always retest after remediation"]
     }
   ],
 
+  "hands_on_labs": {
+    "browser_labs": [
+      {"lab_id": "lab-assessment-planner", "title": "Assessment Planning", "type": "scenario", "description": "Create scope and rules of engagement for a pentest"},
+      {"lab_id": "lab-finding-classifier", "title": "Finding Classifier", "type": "quiz", "description": "Rate finding severity based on details"}
+    ],
+    "external_labs": [
+      {"resource": "TryHackMe", "lab_name": "Intro to Offensive Security", "url": "https://tryhackme.com", "description": "Hands-on penetration testing basics"},
+      {"resource": "HackTheBox", "url": "https://hackthebox.com", "description": "Practice penetration testing skills"}
+    ]
+  },
+
   "summary": {
     "key_takeaways": [
-      "Vulnerability assessment identifies; penetration test validates exploitability",
-      "Black box = no knowledge; White box = full; Gray box = partial",
-      "Rules of Engagement define test scope and authorization",
-      "Red Team = offense; Blue Team = defense; Purple Team = collaboration",
-      "PCI DSS requires quarterly ASV scans and annual pen tests",
-      "Written authorization is essential before any testing",
-      "Assessment value = findings + remediation action"
+      "Vulnerability scan identifies; penetration test exploits",
+      "Black box = no knowledge; White box = full knowledge; Gray box = partial",
+      "Red team simulates full adversary with minimal restrictions",
+      "Written authorization required before any penetration testing",
+      "Rules of engagement define scope and boundaries",
+      "Reports need executive summary and technical details"
     ],
-    
     "exam_essentials": [
-      "Assessment types and what they validate",
-      "Black/White/Gray box distinctions",
-      "Red/Blue/Purple team roles",
-      "PCI DSS assessment requirements",
-      "Rules of Engagement purpose"
-    ],
-    
-    "skills_gained": [
-      "Distinguish assessment types",
-      "Understand penetration test scoping",
-      "Interpret assessment findings",
-      "Align assessments with compliance"
-    ],
-    
-    "connection_to_next": "You've completed Domain 2: Threats, Vulnerabilities, and Mitigations! You now understand threat actors, attack techniques, vulnerabilities, and how to assess security. Domain 3 explores Security Architecture—designing and building secure systems from the ground up."
+      "Pentest exploits; vuln scan only identifies",
+      "Black box = unknown environment",
+      "White box = known environment",
+      "Written authorization REQUIRED",
+      "Rules of engagement define test boundaries",
+      "Bug bounty = crowdsourced testing"
+    ]
   },
 
   "related_content": {
-    "simulations": ["D2-SIM-002"],
-    "remediation": ["D2-REM-003"],
+    "simulations": ["D2-SIM-005"],
     "next_lesson": "D3-LESSON-001",
     "previous_lesson": "D2-LESSON-011"
   }

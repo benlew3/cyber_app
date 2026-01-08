@@ -3,406 +3,653 @@
   "domain": 3,
   "title": "Wireless Security",
   "objectives_covered": ["3.2"],
-  "estimated_duration": "45-50 minutes",
+  "estimated_duration": "50-60 minutes",
   "difficulty": "intermediate",
-  "prerequisites": ["D3-LESSON-003"],
+  "version": "2.0-enhanced",
+
+  "skill_tree": {
+    "prerequisites": ["D3-LESSON-003"],
+    "unlocks": ["D3-LESSON-005"],
+    "cascade_learning": {
+      "builds_on": [
+        {"lesson": "D3-LESSON-003", "concepts": ["Network security fundamentals", "802.1X authentication", "Encryption protocols"]}
+      ],
+      "enables": [
+        {"lesson": "D3-LESSON-005", "concepts": ["Cloud connectivity often involves wireless access"]}
+      ]
+    }
+  },
+
+  "role_relevance": {
+    "soc_analyst": {
+      "importance": "high",
+      "daily_tasks": [
+        "Monitoring for rogue access points",
+        "Investigating wireless authentication failures",
+        "Detecting evil twin attacks",
+        "Correlating wireless events with security incidents"
+      ],
+      "real_scenario": "Alert shows employee device connected to AP with corporate SSID but different MAC—potential evil twin attack requiring investigation"
+    },
+    "incident_responder": {
+      "importance": "medium",
+      "daily_tasks": [
+        "Investigating wireless-based attacks",
+        "Containing threats that originated from wireless",
+        "Assessing impact of rogue AP discoveries",
+        "Gathering wireless forensic evidence"
+      ],
+      "real_scenario": "Rogue AP discovered in conference room—investigate how long it was active, what devices connected, and what data may have been intercepted"
+    },
+    "grc_analyst": {
+      "importance": "medium",
+      "daily_tasks": [
+        "Auditing wireless security configurations",
+        "Ensuring WPA3/WPA2-Enterprise compliance",
+        "Reviewing guest network policies",
+        "Documenting wireless security controls"
+      ],
+      "real_scenario": "PCI audit requires verifying wireless networks don't connect to CDE without proper segmentation and encryption"
+    },
+    "penetration_tester": {
+      "importance": "critical",
+      "daily_tasks": [
+        "Testing wireless authentication security",
+        "Attempting evil twin and deauthentication attacks",
+        "Cracking WPA2-Personal passwords",
+        "Identifying wireless misconfigurations"
+      ],
+      "real_scenario": "Set up evil twin AP at client site—25 devices connected within an hour, capturing credentials and sensitive data"
+    },
+    "security_engineer": {
+      "importance": "high",
+      "daily_tasks": [
+        "Designing secure wireless architectures",
+        "Implementing WPA3 and 802.1X",
+        "Configuring wireless IDS/IPS",
+        "Managing wireless security policies"
+      ],
+      "real_scenario": "Deploying enterprise wireless with WPA3-Enterprise, RADIUS authentication, and dynamic VLAN assignment based on user role"
+    }
+  },
 
   "introduction": {
-    "hook": "In 2007, hackers stole 45 million credit card numbers from TJX Companies (T.J. Maxx, Marshalls) by exploiting weak WEP encryption on store wireless networks. They sat in parking lots with laptops and antennas, cracked the encryption in minutes, and had access to corporate systems for over 18 months. The breach cost TJX over $256 million. Wireless networks extend your perimeter into parking lots, neighboring buildings, and the air itself. Without proper security, attackers don't even need to set foot in your building.",
+    "hook": "In 2007, TJX suffered a massive breach exposing 45 million credit cards—attackers initially gained access by cracking WEP encryption on the store's WiFi network. WEP was known to be broken, but the company hadn't upgraded. Wireless networks extend your perimeter into thin air, literally broadcasting your network's presence to anyone within range. Securing wireless isn't optional—it's extending your security to an inherently exposed medium.",
     "learning_goals": [
-      "Understand wireless security protocols and their strengths and weaknesses",
-      "Implement secure wireless configurations using WPA3 and enterprise authentication",
-      "Identify and defend against common wireless attacks",
-      "Design secure wireless architectures for enterprise environments",
-      "Apply security controls for Bluetooth and other wireless technologies"
+      "Compare wireless security protocols (WEP, WPA, WPA2, WPA3) and their vulnerabilities",
+      "Implement enterprise wireless security with 802.1X and RADIUS",
+      "Identify and mitigate wireless attacks including evil twins and deauthentication",
+      "Secure Bluetooth and other wireless technologies",
+      "Design secure wireless architectures for different environments"
     ],
-    "why_it_matters": "Wireless networks are everywhereâ€”offices, warehouses, healthcare facilities, retail stores. They provide convenience but also create invisible attack surfaces. Security professionals configure wireless security, detect rogue access points, and respond to wireless attacks. Expect 4-6 Security+ questions on wireless protocols, attacks, and security configurations."
+    "why_it_matters": "Wireless networks are everywhere—corporate offices, remote sites, and IoT deployments. Poor wireless security provides attackers easy initial access. Security professionals must understand wireless protocols, attacks, and defenses.",
+    "exam_weight": {
+      "percentage": "4-5% of Domain 3",
+      "question_count": "3-5 questions",
+      "question_types": ["Protocol comparison", "Attack identification", "Security configuration"]
+    }
   },
 
   "sections": [
     {
       "section_id": "D3-L004-S01",
       "title": "Wireless Security Protocols",
-      "content": "Wireless security protocols have evolved significantly, with each generation addressing weaknesses in predecessors.\n\n**Protocol Evolution**\n\n*WEP (Wired Equivalent Privacy)*\n- Original 802.11 security\n- 64-bit or 128-bit keys\n- RC4 encryption (weak implementation)\n- Static keys shared by all users\n- BROKEN - crack in minutes\n- Never use\n\n*WPA (Wi-Fi Protected Access)*\n- Interim solution for WEP\n- TKIP encryption (temporal keys)\n- Still uses RC4 underneath\n- Vulnerable to attacks\n- Deprecated - avoid\n\n*WPA2 (2004)*\n- Uses AES-CCMP encryption\n- Strong encryption standard\n- Current minimum standard\n- Personal (PSK) and Enterprise modes\n- Vulnerable to KRACK attack (patched)\n\n*WPA3 (2018)*\n- Latest standard\n- SAE (Simultaneous Authentication of Equals)\n- Protection against offline dictionary attacks\n- Forward secrecy\n- Enhanced protection for open networks\n- 192-bit security mode (Enterprise)\n\n**Authentication Modes**\n\n*Personal (PSK)*\n- Pre-shared key\n- Same password for everyone\n- Simpler to implement\n- Key management challenges\n- Good for home/small office\n\n*Enterprise (802.1X)*\n- Individual user authentication\n- RADIUS server backend\n- Certificate or credential-based\n- Better accountability\n- Scalable for organizations\n\n**WPA3 Improvements**\n\n*SAE (Dragonfly)*\n- Password-based key exchange\n- Resistant to offline attacks\n- Even weak passwords safer\n- Perfect forward secrecy\n\n*Enhanced Open (OWE)*\n- Encryption for open networks\n- No password needed\n- Protects against eavesdropping\n- Opportunistic Wireless Encryption\n\n*192-bit Security*\n- WPA3-Enterprise\n- Commercial National Security Algorithm Suite\n- For sensitive environments\n\n**Protocol Selection**\n\n*Best Practice*\n- WPA3 if all devices support\n- WPA2 (AES) minimum acceptable\n- WPA3/WPA2 transition mode if needed\n- Never WEP or WPA (TKIP)",
+      "content": "WiFi security has evolved through multiple generations, each addressing flaws in predecessors.\n\n**WEP (Wired Equivalent Privacy)**\n\n*Historical Context*\n- Original WiFi security (1999)\n- Static encryption keys\n- 24-bit initialization vector (IV)\n- RC4 stream cipher\n\n*Why It Failed*\n- IV too short (collisions occur)\n- Keys rarely changed\n- Weak key scheduling\n- Can be cracked in minutes\n- Never use WEP\n\n**WPA (WiFi Protected Access)**\n\n*Improvements Over WEP*\n- Temporary fix while WPA2 developed\n- TKIP (Temporal Key Integrity Protocol)\n- Dynamic key generation\n- Message integrity check\n\n*Limitations*\n- Still used RC4 (weaker cipher)\n- TKIP has vulnerabilities\n- Deprecated, avoid if possible\n\n**WPA2**\n\n*Key Features*\n- AES encryption (CCMP)\n- Much stronger than WPA\n- Two modes: Personal and Enterprise\n- Industry standard for years\n\n*WPA2-Personal (PSK)*\n- Pre-shared key (password)\n- All users share same key\n- Vulnerable to dictionary attacks\n- Suitable for home/small office\n\n*WPA2-Enterprise*\n- 802.1X authentication\n- Individual credentials\n- RADIUS server required\n- No shared password\n- Proper for corporate use\n\n**WPA3**\n\n*Enhancements*\n- SAE (Simultaneous Authentication of Equals)\n- Resistant to offline dictionary attacks\n- Forward secrecy\n- Protected management frames\n- Enhanced Open for public WiFi\n\n*WPA3-Personal*\n- SAE replaces PSK\n- Stronger even with weak passwords\n- Each session uniquely encrypted\n\n*WPA3-Enterprise*\n- 192-bit security mode\n- Suite B cryptography\n- Even stronger for high-security environments",
 
       "key_points": [
-        "WEP is broken (minutes to crack); never use",
-        "WPA uses TKIP (deprecated); WPA2 uses AES-CCMP (current minimum)",
-        "WPA3 uses SAE, provides forward secrecy, resists offline dictionary attacks",
-        "Personal = PSK (shared password); Enterprise = 802.1X/RADIUS (individual auth)",
-        "WPA3 Enhanced Open (OWE) encrypts open networks without password"
+        "WEP is broken—never use (cracked in minutes)",
+        "WPA was temporary fix; WPA2 is current standard with AES",
+        "WPA2-Personal uses shared password (PSK); Enterprise uses 802.1X",
+        "WPA3 adds SAE for protection against offline dictionary attacks",
+        "Forward secrecy in WPA3 means capturing traffic doesn't help decrypt past sessions"
       ],
 
-      "real_world_example": {
-        "scenario": "WPA2-Enterprise preventing credential sharing",
-        "company": "Pinnacle Financial Services",
-        "application": "Pinnacle upgraded from WPA2-Personal to WPA2-Enterprise: PROBLEM (WPA2-Personal PSK shared among all employees, no accountability, key never rotated, ex-employees retained access), SOLUTION (deployed RADIUS server with AD integration, each employee uses individual credentials, certificate-based authentication for managed devices), BENEFITS (immediate access revocation when employees leave, individual accountability via logging, no shared secrets to manage, can enforce per-user policies), IMPLEMENTATION (phased rollout by department, transition mode during migration), RESULT (eliminated shared credential risk, full user accountability, simplified onboarding/offboarding)."
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "name": "WEP = Weak, Eventually Pwned",
+            "expansion": "WEP is weak and will eventually be compromised",
+            "usage": "Remember WEP is never acceptable"
+          },
+          {
+            "name": "2 = AES, 3 = SAE",
+            "expansion": "WPA2 brought AES; WPA3 brought SAE",
+            "usage": "Remember the key advancement of each generation"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "PSK vs Enterprise",
+            "analogy": "PSK is like everyone in an apartment building sharing one key. Enterprise is like each tenant having their own unique key.",
+            "why_it_works": "Shared keys mean one compromised user exposes everyone"
+          },
+          {
+            "concept": "SAE Forward Secrecy",
+            "analogy": "Like a self-destructing message—even if someone gets your password later, they can't decrypt conversations they already recorded",
+            "why_it_works": "Forward secrecy protects past sessions even if current keys compromised"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Thinking WPA is acceptable alternative to WPA2",
+            "correction": "WPA uses weaker TKIP. Always use WPA2 minimum, WPA3 preferred. WPA is deprecated.",
+            "exam_trap": "Don't choose WPA when WPA2 or WPA3 is available"
+          },
+          {
+            "mistake": "Using WPA2-Personal for enterprise environments",
+            "correction": "Enterprise environments should use WPA2/WPA3-Enterprise with 802.1X. Personal mode's shared key is inappropriate for corporate use.",
+            "exam_trap": "Corporate scenario = Enterprise mode"
+          }
+        ]
       },
 
-      "exam_tips": [
-        "WEP = broken (RC4, static keys); WPA = TKIP (deprecated)",
-        "WPA2 = AES-CCMP (minimum standard); WPA3 = SAE (current best)",
-        "PSK = shared password; Enterprise = 802.1X/RADIUS",
-        "WPA3 SAE resists offline dictionary attacks (even weak passwords safer)",
-        "WPA3 OWE = encryption for open networks (no password needed)"
+      "real_world_example": {
+        "scenario": "WPA3 preventing credential theft",
+        "company": "Zenith Corporation",
+        "application": "After implementing WPA3-Enterprise, penetration testers attempted traditional WiFi attacks: Captured handshake but SAE prevented offline dictionary attack. No more password hash exposure. Deauthentication attacks mitigated by protected management frames. Evil twin detected immediately by certificate validation. Previous WPA2 assessment had found PSK crackable in 4 hours—WPA3 made these attacks ineffective."
+      },
+
+      "what_would_happen_if": [
+        {
+          "situation": "Company continues using WEP because 'it still works'",
+          "consequence": "Attacker with basic tools cracks WEP in under 5 minutes. Full network access. Everything transmitted is readable. Immediate breach.",
+          "lesson": "WEP is completely broken. No amount of convenience justifies its use."
+        },
+        {
+          "situation": "Large enterprise uses WPA2-Personal for corporate WiFi",
+          "consequence": "All employees share same password. Departing employee knows the password indefinitely. No individual accountability. One compromised password = everyone compromised.",
+          "lesson": "Enterprise environments need Enterprise mode—individual credentials, revocable access."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A company wants to implement the most secure WiFi for their corporate environment. They need individual user authentication and the strongest available encryption. Which option meets their requirements?",
+        "options": [
+          "WPA2-Personal with a strong 20+ character passphrase",
+          "WPA2-Enterprise with 802.1X and RADIUS",
+          "WPA3-Personal with SAE",
+          "WPA3-Enterprise with 802.1X and 192-bit security"
+        ],
+        "correct": 3,
+        "explanation": "WPA3-Enterprise provides individual user authentication via 802.1X, strongest encryption (192-bit security mode), and SAE protection. It meets both requirements: individual authentication AND strongest encryption.",
+        "wrong_answer_analysis": {
+          "0": "Personal mode doesn't provide individual authentication—all users share the same key.",
+          "1": "WPA2-Enterprise provides individual auth but not the strongest available encryption.",
+          "2": "WPA3-Personal has SAE but no individual authentication—shared key model."
+        }
+      },
+
+      "must_remember_for_exam": [
+        {
+          "point": "WEP = broken, never use; WPA = deprecated; WPA2 = standard; WPA3 = best",
+          "why_tested": "Protocol comparison is very common exam question."
+        },
+        {
+          "point": "Personal = PSK (shared); Enterprise = 802.1X (individual)",
+          "why_tested": "Know when to use each mode."
+        },
+        {
+          "point": "WPA3 SAE prevents offline dictionary attacks",
+          "why_tested": "Key improvement in WPA3."
+        }
       ],
 
       "glossary_terms": [
         {
+          "term": "WEP (Wired Equivalent Privacy)",
+          "definition": "The original WiFi security protocol using static keys and RC4 encryption, now completely broken and should never be used.",
+          "exam_note": "Broken. Never use. Cracked in minutes. Historical only."
+        },
+        {
+          "term": "WPA2",
+          "definition": "WiFi security protocol using AES encryption (CCMP), available in Personal (PSK) and Enterprise (802.1X) modes, current industry standard.",
+          "exam_note": "AES encryption. Personal or Enterprise. Current standard."
+        },
+        {
           "term": "WPA3",
-          "definition": "The latest Wi-Fi security standard using SAE authentication, providing protection against offline dictionary attacks and forward secrecy.",
-          "exam_note": "Current best. SAE authentication. Resists offline attacks. Forward secrecy."
+          "definition": "The latest WiFi security protocol featuring SAE authentication, forward secrecy, and protected management frames for improved security.",
+          "exam_note": "SAE. Forward secrecy. Protected management frames. Latest standard."
         },
         {
           "term": "SAE (Simultaneous Authentication of Equals)",
-          "definition": "The authentication method used in WPA3 that provides secure key exchange even with weak passwords, resistant to offline attacks.",
-          "exam_note": "WPA3 authentication. Dragonfly handshake. Offline attack resistant. PFS."
-        },
-        {
-          "term": "WPA2-Enterprise",
-          "definition": "WPA2 using 802.1X authentication with a RADIUS server, providing individual user authentication rather than shared passwords.",
-          "exam_note": "Individual auth. RADIUS backend. Better than PSK. User accountability."
-        },
-        {
-          "term": "OWE (Opportunistic Wireless Encryption)",
-          "definition": "WPA3 Enhanced Open mode that provides encryption for open networks without requiring a password.",
-          "exam_note": "Encrypts open networks. No password. Protects against eavesdropping."
+          "definition": "WPA3's key exchange protocol that provides protection against offline dictionary attacks and ensures forward secrecy.",
+          "exam_note": "WPA3 feature. Prevents offline attacks. Forward secrecy."
         }
-      ],
-
-      "knowledge_check": {
-        "question": "An organization needs wireless security that protects against offline dictionary attacks even if users choose weak passwords. Which protocol provides this protection?",
-        "options": [
-          "WPA2-Personal because it uses AES encryption",
-          "WPA2-Enterprise because it uses RADIUS",
-          "WPA3 because SAE resists offline dictionary attacks",
-          "WEP because it uses static keys"
-        ],
-        "correct": 2,
-        "explanation": "WPA3's SAE (Simultaneous Authentication of Equals) authentication method is specifically designed to resist offline dictionary attacks. Even if attackers capture the handshake, they cannot perform offline attacks against the password. WPA2-Personal's 4-way handshake is vulnerable to offline dictionary attacks. WPA2-Enterprise improves accountability but PSK capture is still possible. WEP is completely broken."
-      }
+      ]
     },
     {
       "section_id": "D3-L004-S02",
-      "title": "Wireless Attacks",
-      "content": "Wireless networks face unique attack vectors due to the broadcast nature of radio communications.\n\n**Reconnaissance Attacks**\n\n*War Driving*\n- Searching for wireless networks\n- Mapping network locations\n- Identifying weak security\n- Tools: WiFi scanners, GPS\n\n*War Chalking*\n- Marking locations of networks\n- Symbols indicate security status\n- Historical practice\n\n**Authentication Attacks**\n\n*Offline Dictionary Attack (WPA/WPA2-PSK)*\n- Capture 4-way handshake\n- Attempt password offline\n- No detection during attack\n- Strong password critical\n\n*Brute Force*\n- Try all combinations\n- Time-intensive\n- Rate limiting helps\n- WPA3 SAE resistant\n\n*PMKID Attack*\n- Capture PMKID from AP\n- No client needed\n- Faster than handshake capture\n- Target WPA2-Personal\n\n**Man-in-the-Middle Attacks**\n\n*Evil Twin*\n- Fake access point\n- Same SSID as legitimate\n- Higher signal strength\n- Victims connect to attacker\n- Intercept all traffic\n\n*Rogue Access Point*\n- Unauthorized AP on network\n- May be malicious or accidental\n- Bypasses security controls\n- Backdoor into network\n\n*Captive Portal Attacks*\n- Fake login pages\n- Credential harvesting\n- Often used with evil twin\n- Phishing over WiFi\n\n**Deauthentication Attacks**\n\n*Deauth Flood*\n- Send deauth frames to clients\n- Force disconnection\n- Denial of service\n- Enable other attacks (force reconnection to evil twin)\n\n*WPA3 Protection*\n- Management Frame Protection (MFP/802.11w)\n- Prevents deauth attacks\n- Required in WPA3\n- Optional in WPA2\n\n**Other Wireless Attacks**\n\n*Jamming*\n- Overwhelm RF spectrum\n- Denial of service\n- Illegal in most jurisdictions\n- Difficult to defend\n\n*Replay Attacks*\n- Capture and retransmit\n- KRACK attack (WPA2)\n- Nonce reuse vulnerability\n- Patched in updates\n\n*WPS Attacks*\n- Wi-Fi Protected Setup\n- PIN brute force (Reaver)\n- 11,000 combinations\n- Disable WPS",
+      "title": "Enterprise Wireless Security",
+      "content": "Enterprise wireless requires robust authentication, centralized management, and proper network architecture.\n\n**802.1X for Wireless**\n\n*Components*\n- Supplicant: Client device (laptop, phone)\n- Authenticator: Access point\n- Authentication Server: RADIUS\n\n*EAP Methods*\n- EAP-TLS: Certificate-based (most secure)\n- PEAP: Password with TLS tunnel\n- EAP-TTLS: Similar to PEAP\n- EAP-FAST: Cisco developed, PAC-based\n\n*EAP-TLS*\n- Requires certificate on client\n- Most secure EAP method\n- Complex to deploy (PKI needed)\n- No passwords to steal\n\n*PEAP*\n- Password authentication\n- Protected by TLS tunnel\n- Easier deployment\n- Server certificate validates AP\n\n**Wireless Architecture**\n\n*Controller-Based*\n- Centralized management\n- Thin access points\n- Consistent policy enforcement\n- Easier updates and changes\n\n*Cloud-Managed*\n- Controller in cloud\n- Lower on-premise infrastructure\n- Subscription-based\n- Easy multi-site management\n\n*Autonomous APs*\n- Each AP configured independently\n- No controller needed\n- Harder to manage at scale\n- Suited for small deployments\n\n**Network Segmentation**\n\n*Separate VLANs*\n- Corporate WiFi on corporate VLAN\n- Guest WiFi isolated\n- IoT devices on separate VLAN\n- Management traffic isolated\n\n*Guest Networks*\n- Captive portal authentication\n- Internet-only access\n- No corporate resource access\n- Terms of service acceptance\n- Bandwidth limitations\n\n**Wireless IDS/IPS**\n\n*Capabilities*\n- Rogue AP detection\n- Evil twin detection\n- Deauthentication attack detection\n- Policy violation monitoring\n- Spectrum analysis",
 
       "key_points": [
-        "Evil twin: fake AP with same SSID and stronger signalâ€”intercepts traffic",
-        "Deauth attacks disconnect clients; enable evil twin attacks",
-        "WPA/WPA2-PSK vulnerable to offline dictionary attack if handshake captured",
-        "WPA3 (802.11w) protects management frames, prevents deauth attacks",
-        "Disable WPSâ€”PIN is vulnerable to brute force"
+        "802.1X wireless uses same supplicant/authenticator/server model as wired",
+        "EAP-TLS (certificates) is most secure; PEAP (passwords) is easier to deploy",
+        "Controller-based architecture provides centralized management and consistent policy",
+        "Guest networks should be isolated on separate VLAN with captive portal",
+        "Wireless IDS detects rogue APs, evil twins, and deauthentication attacks"
       ],
 
-      "real_world_example": {
-        "scenario": "Evil twin attack at conference",
-        "company": "Apex Consulting Group",
-        "application": "An Apex employee fell victim to an evil twin attack at an industry conference: ATTACK (attacker set up evil twin 'Conference_WiFi' with stronger signal, employee connected, attacker captured credentials), IMPACT (email credentials harvested through fake captive portal, attacker accessed email for 2 days before detected), DEFENSE GAPS (no VPN policy for public WiFi, no employee awareness training on WiFi risks), REMEDIATION (mandatory VPN for all internet access on untrusted networks, security awareness training on evil twin attacks, enabled WPA3 on all corporate networks with MFP), LESSON (public WiFi is untrustedâ€”treat all traffic as potentially intercepted)."
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "name": "TLS = Two-way certificates, PEAP = Password in tunnel",
+            "expansion": "EAP-TLS needs certificates on both sides; PEAP uses password protected by TLS",
+            "usage": "Remember key difference between EAP methods"
+          },
+          {
+            "name": "CAI",
+            "expansion": "Controller, Autonomous, Cloud (wireless architectures)",
+            "usage": "Three wireless architecture models"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "EAP-TLS vs PEAP",
+            "analogy": "EAP-TLS is like showing your ID badge at the door—both you and the building verify each other. PEAP is like entering a password at a secured door—the door proves it's legitimate, then you enter your code.",
+            "why_it_works": "TLS has mutual certificate authentication; PEAP has server cert + password"
+          },
+          {
+            "concept": "Controller vs Autonomous",
+            "analogy": "Controller-based is like a franchise—headquarters sets all the rules. Autonomous is like independent stores—each owner makes their own decisions.",
+            "why_it_works": "Centralized control vs distributed management"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Assuming PEAP is insecure because it uses passwords",
+            "correction": "PEAP protects passwords inside TLS tunnel. Attacker can't capture password directly. It's less secure than EAP-TLS but still enterprise-appropriate.",
+            "exam_trap": "PEAP is acceptable for enterprise; it's not 'insecure'"
+          },
+          {
+            "mistake": "Guest network on same VLAN as corporate",
+            "correction": "Guest networks MUST be isolated. Separate VLAN, no access to internal resources, internet-only. Guests should never reach corporate systems.",
+            "exam_trap": "Guest isolation is always required in correct answers"
+          }
+        ]
       },
 
-      "exam_tips": [
-        "Evil twin = fake AP, same SSID, stronger signal",
-        "Rogue AP = unauthorized AP on network (backdoor)",
-        "Deauth attack forces client disconnect (DoS or enable evil twin)",
-        "802.11w/MFP protects management frames (required in WPA3)",
-        "WPS PIN is vulnerableâ€”disable WPS"
-      ],
-
-      "glossary_terms": [
+      "what_would_happen_if": [
         {
-          "term": "Evil Twin",
-          "definition": "A rogue access point configured with the same SSID as a legitimate network to trick users into connecting, enabling traffic interception.",
-          "exam_note": "Fake AP. Same SSID. Stronger signal. MITM attack. Credential theft."
+          "situation": "Enterprise deploys wireless without 802.1X authentication",
+          "consequence": "Anyone with the PSK can connect. No individual user accountability. Can't revoke access for one user without changing password for everyone.",
+          "lesson": "Enterprise wireless requires 802.1X for individual accountability and access control."
         },
         {
-          "term": "Rogue Access Point",
-          "definition": "An unauthorized wireless access point connected to a network, potentially creating a security backdoor.",
-          "exam_note": "Unauthorized AP. May be malicious or accidental. Bypasses security. Detect with WIDS."
-        },
-        {
-          "term": "Deauthentication Attack",
-          "definition": "An attack that sends forged deauthentication frames to disconnect wireless clients from access points.",
-          "exam_note": "Forged deauth frames. DoS attack. Enables evil twin. 802.11w protects."
-        },
-        {
-          "term": "WPS (Wi-Fi Protected Setup)",
-          "definition": "A network security standard that allows easy connection to wireless networks, but is vulnerable to PIN brute force attacks.",
-          "exam_note": "Easy setup feature. PIN vulnerable to brute force. Disable WPS."
+          "situation": "Guest wireless has access to internal network",
+          "consequence": "Visitors, contractors, anyone can reach internal systems. Attackers connect as 'guests' and pivot to corporate resources. Major security violation.",
+          "lesson": "Guest networks must be completely isolated—internet only, no internal access."
         }
       ],
 
       "knowledge_check": {
-        "question": "An attacker sets up a wireless access point with the same SSID as a coffee shop's legitimate network but with a stronger signal. Customers unknowingly connect to the attacker's AP. This attack is called:",
+        "question": "A company wants to deploy enterprise wireless with the strongest authentication possible while avoiding the complexity of deploying client certificates. Which solution best meets their needs?",
         "options": [
-          "Rogue access point because it's unauthorized",
-          "Evil twin because it impersonates a legitimate network",
-          "War driving because the attacker is in a public location",
-          "Deauthentication because users are disconnected"
+          "WPA2-Personal with complex passphrase",
+          "WPA2-Enterprise with EAP-TLS",
+          "WPA2-Enterprise with PEAP",
+          "WPA3-Personal with SAE"
         ],
-        "correct": 1,
-        "explanation": "This is an evil twin attackâ€”creating a fake access point with the same SSID as a legitimate network to trick users into connecting. The stronger signal ensures victims connect to the attacker's AP instead of the legitimate one. A rogue AP is unauthorized but doesn't necessarily impersonate another network. War driving is searching for networks. Deauth attacks disconnect clients."
-      }
-    },
-    {
-      "section_id": "D3-L004-S03",
-      "title": "Enterprise Wireless Security",
-      "content": "Enterprise wireless deployments require comprehensive security architecture beyond basic encryption.\n\n**Enterprise Authentication (802.1X)**\n\n*Architecture*\n- Supplicant (client device)\n- Authenticator (access point)\n- Authentication server (RADIUS)\n\n*EAP Methods*\n\n*EAP-TLS*\n- Certificate-based\n- Mutual authentication\n- Strongest security\n- Requires PKI\n- Best for managed devices\n\n*PEAP (Protected EAP)*\n- TLS tunnel, then credentials\n- Server certificate only\n- Username/password inside tunnel\n- Easier deployment than EAP-TLS\n\n*EAP-TTLS*\n- Similar to PEAP\n- More flexible inner methods\n- Good alternative to PEAP\n\n*EAP-FAST*\n- Cisco developed\n- Protected Access Credentials (PAC)\n- Faster re-authentication\n\n**Wireless Controller Architecture**\n\n*Components*\n- Wireless LAN Controller (WLC)\n- Lightweight Access Points (LWAP)\n- Centralized management\n- Consistent policy enforcement\n\n*Benefits*\n- Centralized configuration\n- Coordinated RF management\n- Unified security policy\n- Rogue AP detection\n- Guest network management\n\n**Network Segmentation**\n\n*Separate SSIDs*\n- Corporate network\n- Guest network\n- IoT network\n- Voice network\n\n*VLAN Assignment*\n- Different VLANs per SSID\n- Dynamic VLAN based on user\n- Isolation between networks\n- Firewall between segments\n\n**Wireless Intrusion Detection/Prevention**\n\n*WIDS/WIPS Functions*\n- Rogue AP detection\n- Evil twin detection\n- Deauth attack detection\n- Policy violation alerts\n- Automated response\n\n*Detection Methods*\n- MAC address monitoring\n- SSID monitoring\n- RF fingerprinting\n- Behavioral analysis\n\n**Guest Network Security**\n\n*Requirements*\n- Isolated from corporate\n- Captive portal authentication\n- Bandwidth limits\n- Time restrictions\n- Terms of service acceptance\n- No access to internal resources",
-
-      "key_points": [
-        "802.1X: Supplicant â†’ Authenticator (AP) â†’ RADIUS server",
-        "EAP-TLS (certificates) strongest; PEAP (username/password in tunnel) common",
-        "Wireless controller centralizes management and policy enforcement",
-        "WIDS/WIPS detects rogue APs, evil twins, and attacks",
-        "Guest networks must be isolated from corporate with no internal access"
-      ],
-
-      "real_world_example": {
-        "scenario": "WIDS detecting insider rogue AP",
-        "company": "MedCare Health Systems",
-        "application": "MedCare's WIDS detected a security violation: DETECTION (WIDS flagged new SSID 'IT_Test' with MAC address matching corporate equipment), INVESTIGATION (AP was in radiology department, connected to clinical network segment), FINDINGS (technician set up personal AP for 'convenience'â€”no malicious intent), RISKS (AP had no security, provided backdoor into clinical network, HIPAA violation potential), RESPONSE (AP removed, technician counseled, incident documented), POLICY UPDATE (clear policy on unauthorized wireless devices, regular WIDS scans, employee awareness training). WIDS prevented accidental security gap from becoming breach vector."
+        "correct": 2,
+        "explanation": "PEAP provides enterprise-grade authentication with 802.1X/RADIUS without requiring client certificates. Users authenticate with username/password protected by TLS tunnel. EAP-TLS is stronger but requires client certificate deployment.",
+        "wrong_answer_analysis": {
+          "0": "Personal mode doesn't provide individual user authentication.",
+          "1": "EAP-TLS requires client certificates—doesn't meet 'avoid certificate complexity' requirement.",
+          "3": "WPA3-Personal doesn't provide individual authentication."
+        }
       },
 
-      "exam_tips": [
-        "EAP-TLS = certificates (strongest); PEAP = password in TLS tunnel",
-        "802.1X uses RADIUS for authentication",
-        "Wireless controller manages multiple APs centrally",
-        "WIDS = detect; WIPS = detect + prevent (automated response)",
-        "Guest network: isolated, captive portal, no internal access"
+      "must_remember_for_exam": [
+        {
+          "point": "EAP-TLS = certificates (most secure); PEAP = passwords in TLS tunnel",
+          "why_tested": "Know the key EAP methods and their characteristics."
+        },
+        {
+          "point": "Guest networks require isolation—separate VLAN, no internal access",
+          "why_tested": "Very common scenario question."
+        },
+        {
+          "point": "Wireless IDS detects rogue APs and evil twins",
+          "why_tested": "Know what wireless IDS/IPS can detect."
+        }
       ],
 
       "glossary_terms": [
         {
           "term": "EAP-TLS",
-          "definition": "An EAP authentication method using TLS with client and server certificates, providing the strongest wireless authentication.",
-          "exam_note": "Certificate-based. Mutual auth. Strongest EAP. Requires PKI."
+          "definition": "An EAP method requiring certificates on both client and server for mutual authentication, providing the strongest wireless security.",
+          "exam_note": "Certificates both sides. Most secure. PKI required. No passwords."
         },
         {
           "term": "PEAP",
-          "definition": "Protected EAPâ€”an authentication method that creates a TLS tunnel to protect credential exchange, requiring only server certificates.",
-          "exam_note": "TLS tunnel. Server cert only. Password inside. Easier than EAP-TLS."
+          "definition": "Protected Extensible Authentication Protocol—an EAP method that uses a TLS tunnel to protect password-based authentication.",
+          "exam_note": "Password protected by TLS. Easier than TLS. Server cert validates AP."
         },
         {
-          "term": "WIPS (Wireless Intrusion Prevention System)",
-          "definition": "A system that monitors wireless networks for threats and can automatically respond to detected attacks.",
-          "exam_note": "Detects AND responds. Rogue AP containment. Evil twin prevention. Automated."
+          "term": "Captive Portal",
+          "definition": "A web page that users must interact with before being granted full network access, typically used for guest network authentication and terms acceptance.",
+          "exam_note": "Guest networks. Terms acceptance. Authentication redirect."
         },
         {
-          "term": "Wireless LAN Controller (WLC)",
-          "definition": "A device that centrally manages multiple wireless access points, providing unified configuration and security policy enforcement.",
-          "exam_note": "Centralized management. Consistent policy. Works with lightweight APs."
+          "term": "Rogue Access Point",
+          "definition": "An unauthorized wireless access point connected to the network, potentially installed by employees or attackers to bypass security.",
+          "exam_note": "Unauthorized AP. Security risk. Detected by wireless IDS."
+        }
+      ]
+    },
+    {
+      "section_id": "D3-L004-S03",
+      "title": "Wireless Attacks and Countermeasures",
+      "content": "Understanding wireless attacks enables effective defense and detection.\n\n**Evil Twin Attack**\n\n*How It Works*\n- Attacker creates fake AP\n- Same SSID as legitimate network\n- Stronger signal to attract connections\n- Victims connect thinking it's real\n- All traffic passes through attacker\n\n*Impact*\n- Credential theft\n- Man-in-the-middle attacks\n- Session hijacking\n- Data interception\n\n*Countermeasures*\n- Certificate-based authentication (EAP-TLS)\n- Server certificate validation in PEAP\n- Wireless IDS to detect duplicates\n- Employee awareness training\n- Use VPN on untrusted networks\n\n**Deauthentication Attack**\n\n*How It Works*\n- Attacker sends deauth frames\n- Frames appear from legitimate AP\n- Forces clients to disconnect\n- Can target all clients or specific MAC\n\n*Attack Uses*\n- Denial of service\n- Force reconnection to evil twin\n- Capture WPA handshake for cracking\n- Disruption during critical operations\n\n*Countermeasures*\n- WPA3 protected management frames (PMF)\n- 802.11w management frame protection\n- Wireless IDS detection\n- Wired fallback for critical systems\n\n**WPA/WPA2 Attacks**\n\n*Handshake Capture*\n- Capture 4-way handshake\n- Offline dictionary attack\n- Weak passwords vulnerable\n- Time/resources vs password strength\n\n*KRACK (Key Reinstallation Attack)*\n- WPA2 protocol vulnerability\n- Forces key reinstallation\n- Enables traffic decryption\n- Requires patching\n\n*Countermeasures*\n- Strong passwords (20+ characters)\n- WPA3 (SAE prevents offline attacks)\n- Keep devices patched\n- Enterprise mode (no PSK to crack)\n\n**Rogue AP Detection**\n\n*Detection Methods*\n- Wireless IDS scanning\n- MAC address monitoring\n- Signal triangulation\n- Regular site surveys\n- Employee reporting\n\n*Response*\n- Locate physically\n- Remove or disable\n- Investigate how it appeared\n- Policy enforcement",
+
+      "key_points": [
+        "Evil twin mimics legitimate AP—certificate validation detects it",
+        "Deauthentication attacks force disconnection; WPA3/802.11w protects management frames",
+        "Captured WPA2 handshakes enable offline dictionary attacks; WPA3 SAE prevents this",
+        "KRACK attacked WPA2 key reinstallation—patching required",
+        "Wireless IDS detects rogue APs, evil twins, and deauth attacks"
+      ],
+
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "name": "EDICT",
+            "expansion": "Evil twin, Deauthentication, Impersonation, Cracking, Traffic interception",
+            "usage": "Five major wireless attack categories"
+          },
+          {
+            "name": "PMF = Protected Management Frames (WPA3/802.11w)",
+            "expansion": "PMF protects deauth frames",
+            "usage": "Remember what protects against deauth attacks"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "Evil Twin",
+            "analogy": "Like a thief setting up a fake ATM that looks identical to the real one—you enter your PIN thinking it's legitimate, and they capture it",
+            "why_it_works": "Evil twin captures credentials by impersonating trusted network"
+          },
+          {
+            "concept": "Deauthentication Attack",
+            "analogy": "Like someone repeatedly hanging up your phone call—you keep getting disconnected and have to redial (reconnect)",
+            "why_it_works": "Forces disconnection repeatedly, either for DoS or to capture reconnection"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Thinking hidden SSID prevents evil twin",
+            "correction": "Hidden SSID provides no security. Attackers can discover hidden SSIDs easily. SSID hiding is not a security control.",
+            "exam_trap": "Hidden SSID = security through obscurity = not effective"
+          },
+          {
+            "mistake": "Assuming WPA2 is safe from all attacks",
+            "correction": "WPA2-Personal is vulnerable to dictionary attacks on captured handshakes. KRACK affected WPA2 until patched. WPA2-Enterprise reduces but doesn't eliminate risks.",
+            "exam_trap": "WPA2 has known attack vectors; WPA3 addresses many"
+          }
+        ]
+      },
+
+      "what_would_happen_if": [
+        {
+          "situation": "Coffee shop WiFi with WPA2-Personal and common password",
+          "consequence": "Attacker captures handshake, cracks password quickly. Sets up evil twin. Intercepts traffic of connecting users. Credentials, sessions, data stolen.",
+          "lesson": "Public WiFi is inherently risky. Use VPN. Don't trust unknown networks."
+        },
+        {
+          "situation": "Enterprise wireless without certificate validation in PEAP",
+          "consequence": "Evil twin presents fake certificate. User enters credentials. Attacker captures username/password. Corporate network compromised.",
+          "lesson": "Configure clients to validate server certificates in PEAP/EAP-TLS."
         }
       ],
 
       "knowledge_check": {
-        "question": "An organization wants to deploy wireless authentication where each user has individual credentials and authentication is handled by Active Directory. Which solution is MOST appropriate?",
+        "question": "Users report being repeatedly disconnected from the corporate WiFi. The wireless team notices unusual traffic patterns suggesting someone is forcing disconnections. What type of attack is occurring?",
         "options": [
-          "WPA2-Personal with a complex password",
-          "WPA2-Enterprise with PEAP authentication and RADIUS",
-          "WPA3-Personal with SAE",
-          "Open network with captive portal"
+          "Evil twin attack creating signal interference",
+          "Deauthentication attack sending forged management frames",
+          "Rogue AP attack competing for connections",
+          "KRACK attack exploiting handshake vulnerability"
         ],
         "correct": 1,
-        "explanation": "WPA2-Enterprise with PEAP and RADIUS provides individual user authentication integrated with Active Directory. PEAP creates a TLS tunnel and allows username/password authentication against AD via RADIUS. WPA2-Personal uses shared passwords. WPA3-Personal is still PSK-based. Open network with captive portal doesn't encrypt traffic properly."
-      }
+        "explanation": "Deauthentication attacks send forged management frames that force clients to disconnect from legitimate APs. This can be DoS or preparation for evil twin attack. WPA3's protected management frames mitigate this.",
+        "wrong_answer_analysis": {
+          "0": "Evil twin doesn't cause disconnection—it attracts connections to fake AP.",
+          "2": "Rogue AP provides alternative connection, doesn't force disconnection.",
+          "3": "KRACK exploits key reinstallation, doesn't cause repeated disconnection."
+        }
+      },
+
+      "must_remember_for_exam": [
+        {
+          "point": "Evil twin = fake AP with same SSID; detect with certificate validation",
+          "why_tested": "Common attack. Know how to identify and prevent."
+        },
+        {
+          "point": "Deauthentication attack forces disconnection; WPA3/802.11w protects",
+          "why_tested": "Know what attack causes disconnection and countermeasure."
+        },
+        {
+          "point": "WPA2 handshake capture enables offline dictionary attack; WPA3 SAE prevents",
+          "why_tested": "Understand the WPA2 vulnerability and WPA3 improvement."
+        }
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Evil Twin",
+          "definition": "A malicious access point configured with the same SSID as a legitimate network to trick users into connecting and intercepting their traffic.",
+          "exam_note": "Same SSID. Stronger signal. MitM attack. Certificate validation detects."
+        },
+        {
+          "term": "Deauthentication Attack",
+          "definition": "An attack using forged management frames to force wireless clients to disconnect from their access point, enabling DoS or evil twin attacks.",
+          "exam_note": "Forged frames. Forces disconnect. DoS or handshake capture. PMF prevents."
+        },
+        {
+          "term": "Protected Management Frames (PMF)",
+          "definition": "A security feature in WPA3 and 802.11w that encrypts management frames, preventing deauthentication and disassociation attacks.",
+          "exam_note": "WPA3 feature. 802.11w. Prevents deauth attacks."
+        },
+        {
+          "term": "KRACK",
+          "definition": "Key Reinstallation Attack—a vulnerability in the WPA2 protocol that allowed attackers to manipulate and replay handshake messages to reinstall already-used keys.",
+          "exam_note": "WPA2 vulnerability. Key reinstallation. Required patching. 2017."
+        }
+      ]
     },
     {
       "section_id": "D3-L004-S04",
-      "title": "Wireless Configuration Best Practices",
-      "content": "Secure wireless configuration goes beyond protocol selection to include access point hardening and network design.\n\n**Access Point Security**\n\n*Basic Hardening*\n- Change default SSID\n- Change default admin credentials\n- Strong admin password\n- Disable remote management (or secure it)\n- Keep firmware updated\n\n*Disable Unnecessary Features*\n- WPS (Wi-Fi Protected Setup)â€”PIN vulnerable\n- UPnP (Universal Plug and Play)\n- Remote management if not needed\n- Guest network if not used\n\n**SSID Configuration**\n\n*SSID Broadcasting*\n- Hiding SSID provides minimal security\n- SSID discovered through probe requests\n- Can cause client security issues\n- Consider broadcasting with strong auth\n\n*SSID Naming*\n- Don't reveal organization name\n- Don't reveal location\n- Don't suggest network purpose\n- Generic names preferred\n\n**RF Security**\n\n*Power Management*\n- Reduce transmission power\n- Cover only needed area\n- Minimize signal bleed outside\n- Balance coverage vs. security\n\n*Antenna Positioning*\n- Direct coverage inward\n- Minimize external exposure\n- Consider directional antennas\n- Physical placement matters\n\n*Channel Management*\n- Avoid interference\n- Use non-overlapping channels\n- 2.4 GHz: 1, 6, 11 (US)\n- 5 GHz: More channels available\n\n**Client Security**\n\n*Managed Devices*\n- Deploy certificates via MDM\n- Configure auto-connect to corporate only\n- Disable auto-connect to open networks\n- Prefer 5 GHz (less range, less crowded)\n\n*Certificate Pinning*\n- Validate RADIUS server certificate\n- Prevent evil twin with fake cert\n- Configure expected certificate\n\n**Physical Security**\n\n*Access Point Protection*\n- Secure mounting\n- Tamper detection\n- Locked enclosures\n- Hidden cabling\n\n*Coverage Planning*\n- Map coverage areas\n- Identify bleed zones\n- Consider neighboring buildings\n- Parking lots are threat vectors",
+      "title": "Bluetooth and Other Wireless",
+      "content": "Beyond WiFi, other wireless technologies present unique security challenges.\n\n**Bluetooth Security**\n\n*Pairing Modes*\n- Just Works: No authentication\n- Numeric Comparison: Verify displayed numbers\n- Passkey Entry: Enter PIN\n- Out of Band: External channel (NFC)\n\n*Bluetooth Attacks*\n- Bluejacking: Unsolicited messages\n- Bluesnarfing: Data theft\n- Bluebugging: Taking control of device\n- BIAS: Impersonation attack\n\n*Bluetooth Security Measures*\n- Use non-discoverable mode\n- Require authentication\n- Keep devices updated\n- Review paired devices regularly\n- Disable when not in use\n\n**RFID Security**\n\n*Concerns*\n- Tracking individuals\n- Cloning cards/tags\n- Eavesdropping\n- Data modification\n\n*Countermeasures*\n- Encryption (newer RFID)\n- Shielded wallets/badges\n- Mutual authentication\n- Distance limitations\n\n**NFC Security**\n\n*Uses*\n- Contactless payments\n- Access control\n- Data transfer\n- Bluetooth pairing\n\n*Security Features*\n- Very short range (cm)\n- Encryption for payments\n- One-time tokens\n- Device authentication\n\n**Cellular/Mobile Security**\n\n*5G Security Improvements*\n- Better authentication\n- Encrypted identifiers\n- Network slicing isolation\n- Subscriber identity protection\n\n*Concerns*\n- IMSI catchers (fake towers)\n- SS7 vulnerabilities\n- Rogue base stations\n- Location tracking\n\n**IoT Wireless**\n\n*Protocols*\n- Zigbee (home automation)\n- Z-Wave (smart home)\n- LoRa (long range, low power)\n- Cellular IoT\n\n*Security Challenges*\n- Limited processing power\n- Weak or no encryption\n- Default credentials\n- Difficult to update\n- Long deployment life",
 
       "key_points": [
-        "Disable WPSâ€”PIN is vulnerable to brute force attacks",
-        "SSID hiding provides minimal security (discovered via probes)",
-        "Reduce transmission power to minimize signal outside building",
-        "Configure clients to validate RADIUS certificate (prevent evil twin)",
-        "Keep AP firmware updated; change default credentials"
+        "Bluetooth attacks: bluejacking (messages), bluesnarfing (data theft), bluebugging (control)",
+        "RFID vulnerable to cloning and eavesdropping; use encryption and shielding",
+        "NFC security relies on very short range; used for payments and access",
+        "5G improves security with encrypted identifiers and subscriber protection",
+        "IoT wireless often has weak security due to processing constraints"
       ],
 
-      "real_world_example": {
-        "scenario": "Wireless coverage audit revealing exposure",
-        "company": "Coastal Community Bank",
-        "application": "Coastal conducted a wireless security audit: DISCOVERY (wireless signal detectable from parking lot 100 meters away, signal reached neighboring office building), RF ADJUSTMENT (reduced transmission power on perimeter APs, repositioned antennas to direct coverage inward), SSID CHANGE (renamed from 'CoastalBank_Corp' to generic 'CCB-Internal', removed geographic identifiers), AUTHENTICATION (upgraded to WPA3-Enterprise with EAP-TLS for employees, deployed certificates via MDM), MONITORING (positioned directional antennas for WIDS sensors covering parking lot), RESULT (signal reduced to property boundaries, attacks from outside much harder, maintained full internal coverage)."
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "name": "Blue-JSB",
+            "expansion": "Bluejacking (messages), Bluesnarfing (stealing), Bluebugging (control)",
+            "usage": "Three main Bluetooth attacks in order of severity"
+          },
+          {
+            "name": "NFC = Near Field (Centimeters)",
+            "expansion": "NFC works at centimeters distance",
+            "usage": "Remember NFC's short range security feature"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "Bluejacking vs Bluesnarfing vs Bluebugging",
+            "analogy": "Bluejacking is like someone slipping a note in your pocket (annoying). Bluesnarfing is like pickpocketing (stealing data). Bluebugging is like someone controlling your wallet remotely (device control).",
+            "why_it_works": "Escalating severity of Bluetooth attacks"
+          },
+          {
+            "concept": "RFID Cloning",
+            "analogy": "Like someone taking a photo of your key and 3D printing a copy—they can access anything your card accesses",
+            "why_it_works": "RFID cards can be cloned without physical possession"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Thinking Bluetooth is secure because it's short range",
+            "correction": "Bluetooth range can be extended with specialized antennas. Many Bluetooth attacks are effective from distance. Don't rely on range for security.",
+            "exam_trap": "Short range is not a security guarantee for Bluetooth"
+          },
+          {
+            "mistake": "Ignoring IoT device security because they're 'just sensors'",
+            "correction": "IoT devices can be entry points for network attacks. Botnets like Mirai weaponized IoT. Segment and secure all IoT devices.",
+            "exam_trap": "IoT security is critical despite device simplicity"
+          }
+        ]
       },
 
-      "exam_tips": [
-        "Disable WPS (PIN brute force vulnerability)",
-        "SSID hiding = minimal security (probes reveal SSID)",
-        "Reduce power to minimize external signal coverage",
-        "Certificate pinning prevents evil twin with fake RADIUS cert",
-        "Don't include organization name/location in SSID"
-      ],
-
-      "glossary_terms": [
+      "what_would_happen_if": [
         {
-          "term": "WPS (Wi-Fi Protected Setup)",
-          "definition": "A feature that simplifies wireless network setup but contains a vulnerability in its PIN method that allows brute force attacks.",
-          "exam_note": "Convenience feature. PIN vulnerable. 11,000 combinations. Disable it."
+          "situation": "Employee leaves Bluetooth in discoverable mode on laptop",
+          "consequence": "Attacker scans for discoverable devices. Attempts bluesnarf to steal contacts/data. If successful, sensitive information exfiltrated.",
+          "lesson": "Bluetooth should be non-discoverable when not actively pairing."
         },
         {
-          "term": "SSID Broadcasting",
-          "definition": "The practice of access points announcing their network name, which hiding provides minimal security benefit.",
-          "exam_note": "Hiding = minimal security. SSID in probes. Can cause client issues."
-        },
-        {
-          "term": "Certificate Pinning",
-          "definition": "A security technique where clients validate the specific certificate presented by servers, preventing acceptance of fraudulent certificates.",
-          "exam_note": "Validates specific cert. Prevents evil twin MITM. RADIUS server cert."
+          "situation": "Building uses cloneable RFID cards for access control",
+          "consequence": "Attacker with hidden reader captures card data. Clones card. Has same access as legitimate employee. No audit trail distinguishing real from cloned.",
+          "lesson": "Use encrypted RFID. Consider multi-factor access control."
         }
       ],
 
       "knowledge_check": {
-        "question": "A security administrator wants to prevent attackers from performing brute force attacks against the wireless network setup feature. Which action addresses this vulnerability?",
+        "question": "A security team discovers that an attacker has been stealing contact information and calendar data from employees' mobile phones via Bluetooth without their knowledge. Which Bluetooth attack is this?",
         "options": [
-          "Hide the SSID",
-          "Disable WPS",
-          "Enable MAC filtering",
-          "Reduce transmission power"
+          "Bluejacking—sending unsolicited messages",
+          "Bluesnarfing—unauthorized data extraction",
+          "Bluebugging—taking control of the device",
+          "BIAS—Bluetooth impersonation attack"
         ],
         "correct": 1,
-        "explanation": "Disabling WPS (Wi-Fi Protected Setup) prevents brute force attacks against the WPS PIN. The WPS PIN has only 11,000 effective combinations due to how validation works, making it vulnerable to brute force tools like Reaver. Hiding SSID provides minimal security. MAC filtering can be bypassed. Reducing power doesn't address WPS vulnerability."
-      }
-    },
-    {
-      "section_id": "D3-L004-S05",
-      "title": "Other Wireless Technologies",
-      "content": "Beyond Wi-Fi, other wireless technologies present security considerations including Bluetooth, NFC, cellular, and GPS.\n\n**Bluetooth Security**\n\n*Modes*\n- Discoverable: Visible to other devices\n- Non-discoverable: Hidden from scanning\n- Pairing: Establishing trusted connection\n\n*Attacks*\n\n*Bluejacking*\n- Sending unsolicited messages\n- Spam/advertising\n- Annoying but not data theft\n- No pairing required\n\n*Bluesnarfing*\n- Unauthorized data access\n- Stealing contacts, calendar, files\n- Exploits vulnerable devices\n- More serious than bluejacking\n\n*Bluebugging*\n- Full device control\n- Make calls, send messages\n- Eavesdrop on conversations\n- Most severe Bluetooth attack\n\n*Best Practices*\n- Keep non-discoverable when not pairing\n- Use Bluetooth 4.0+ with LE Secure Connections\n- Disable when not in use\n- Remove old pairings\n\n**Near Field Communication (NFC)**\n\n*Characteristics*\n- Very short range (4cm)\n- Used for payments, access\n- Quick transactions\n\n*Security Concerns*\n- Eavesdropping (short range limits this)\n- Relay attacks\n- Data manipulation\n- Card skimming\n\n*Protections*\n- Tokenization\n- Encryption\n- User confirmation for payments\n- Short range is inherent protection\n\n**Cellular/Mobile Security**\n\n*Technologies*\n- 4G LTE\n- 5G (improved security)\n- Mobile data encryption\n\n*Threats*\n\n*IMSI Catcher (Stingray)*\n- Fake cell tower\n- Captures device identifiers\n- May intercept calls/data\n- Used by law enforcement\n\n*SIM Swapping*\n- Social engineering carrier\n- Hijack phone number\n- Intercept 2FA codes\n- Account takeover\n\n**GPS Security**\n\n*Spoofing*\n- Fake GPS signals\n- Mislead location\n- Affects navigation, timing\n- Can redirect vehicles\n\n*Jamming*\n- Block GPS reception\n- Denial of service\n- Affects systems relying on GPS time\n\n**Radio Frequency Identification (RFID)**\n\n*Uses*\n- Access cards\n- Inventory tracking\n- Asset management\n\n*Attacks*\n- Cloning/skimming\n- Replay attacks\n- Eavesdropping\n- Unauthorized reading\n\n*Protections*\n- Encrypted RFID\n- Shielded wallets/holders\n- Challenge-response authentication",
-
-      "key_points": [
-        "Bluejacking = unsolicited messages; Bluesnarfing = data theft; Bluebugging = full control",
-        "Keep Bluetooth non-discoverable when not pairing; disable when not in use",
-        "NFC short range (4cm) provides inherent security; watch for relay attacks",
-        "IMSI catcher (Stingray) is fake cell tower for interception",
-        "GPS spoofing/jamming can affect navigation and timing systems"
-      ],
-
-      "real_world_example": {
-        "scenario": "SIM swapping attack bypassing MFA",
-        "company": "Individual victim, lesson for organizations",
-        "application": "A high-profile cryptocurrency investor lost $24 million in a SIM swap attack: ATTACK (attacker social engineered mobile carrier, convinced them to port victim's number to attacker's SIM), RESULT (attacker received all SMS messages including 2FA codes, accessed cryptocurrency exchange accounts, transferred funds), DEFENSE LESSONS (SMS-based MFA vulnerable to SIM swap, use authenticator apps or hardware tokens instead, carrier PIN/password for account changes, alert on SIM changes). Organizations should not rely solely on SMS for MFA, especially for high-value accounts."
+        "explanation": "Bluesnarfing is unauthorized access to device data (contacts, calendar, messages) via Bluetooth. Unlike bluejacking (just messages) or bluebugging (device control), bluesnarfing specifically extracts data without controlling the device.",
+        "wrong_answer_analysis": {
+          "0": "Bluejacking sends messages to the device; it doesn't steal data.",
+          "2": "Bluebugging takes control of the device; this scenario just shows data theft.",
+          "3": "BIAS impersonates devices to bypass authentication; this scenario shows data theft."
+        }
       },
 
-      "exam_tips": [
-        "Bluejacking = messages; Bluesnarfing = data theft; Bluebugging = control",
-        "IMSI catcher = fake cell tower (Stingray)",
-        "SIM swapping hijacks phone number (bypasses SMS 2FA)",
-        "NFC = very short range (~4cm); relay attacks extend range",
-        "GPS spoofing provides fake location; jamming blocks signal"
+      "must_remember_for_exam": [
+        {
+          "point": "Bluejacking = messages; Bluesnarfing = data theft; Bluebugging = control",
+          "why_tested": "Distinguish between three Bluetooth attack types."
+        },
+        {
+          "point": "NFC security relies on very short range (centimeters)",
+          "why_tested": "Know NFC's inherent security limitation."
+        },
+        {
+          "point": "IoT has limited security due to processing/power constraints",
+          "why_tested": "Understand IoT security challenges."
+        }
       ],
 
       "glossary_terms": [
         {
+          "term": "Bluejacking",
+          "definition": "A Bluetooth attack that sends unsolicited messages to discoverable devices, typically for spam or social engineering rather than data theft.",
+          "exam_note": "Unsolicited messages. Nuisance. Not data theft."
+        },
+        {
           "term": "Bluesnarfing",
-          "definition": "A Bluetooth attack that allows unauthorized access to data on a device, including contacts, calendars, and files.",
-          "exam_note": "Data theft via Bluetooth. Contacts, files. More serious than bluejacking."
+          "definition": "A Bluetooth attack that exploits vulnerabilities to access and steal data from a device without the owner's knowledge or consent.",
+          "exam_note": "Data theft. Contacts, calendar, messages. Unauthorized access."
         },
         {
           "term": "Bluebugging",
-          "definition": "A Bluetooth attack that provides complete control over a device, enabling calls, messages, and eavesdropping.",
-          "exam_note": "Full device control. Most severe Bluetooth attack. Make calls, spy."
+          "definition": "A Bluetooth attack that allows an attacker to take control of a device, including making calls, sending messages, and accessing data.",
+          "exam_note": "Device control. Most severe. Can make calls, send messages."
         },
         {
-          "term": "IMSI Catcher",
-          "definition": "A device that masquerades as a cell tower to intercept mobile communications and identify devices, also known as a Stingray.",
-          "exam_note": "Fake cell tower. Intercepts calls. Identifies devices. Law enforcement use."
-        },
-        {
-          "term": "SIM Swapping",
-          "definition": "An attack where an attacker convinces a mobile carrier to transfer a victim's phone number to a SIM card controlled by the attacker.",
-          "exam_note": "Social engineering carrier. Hijacks phone number. Bypasses SMS 2FA."
+          "term": "RFID Cloning",
+          "definition": "Creating a duplicate of an RFID card or tag by reading and copying its data, potentially bypassing access control systems.",
+          "exam_note": "Copy card data. Bypass access control. Shielding prevents."
         }
-      ],
-
-      "knowledge_check": {
-        "question": "An attacker exploits a Bluetooth vulnerability to access contacts, calendar entries, and files on a victim's smartphone without authorization. This attack is called:",
-        "options": [
-          "Bluejacking because Bluetooth is used",
-          "Bluesnarfing because data is stolen",
-          "Bluebugging because the device is accessed",
-          "NFC skimming because data is read"
-        ],
-        "correct": 1,
-        "explanation": "Bluesnarfing is the attack where an attacker gains unauthorized access to data on a Bluetooth device, such as contacts, calendars, and files. Bluejacking only sends unsolicited messages without accessing data. Bluebugging provides full device control. NFC skimming involves near-field communication, not Bluetooth."
-      }
+      ]
     }
   ],
 
   "hands_on_activity": {
     "title": "Wireless Security Assessment",
-    "objective": "Assess and improve wireless security configuration for an organization",
-    "scenario": "You're conducting a wireless security assessment at Apex Consulting Group.",
+    "objective": "Assess and improve wireless network security",
+    "scenario": "You're conducting a wireless security assessment at Pinnacle Financial. Evaluate current wireless security and recommend improvements.",
     "steps": [
-      "Step 1: Inventory current wireless deployment:\n   - Number and location of APs\n   - Current security protocol (WEP/WPA/WPA2/WPA3)\n   - Authentication mode (Personal/Enterprise)\n   - SSID configuration",
-      "Step 2: Assess current vulnerabilities:\n   - Is WEP or WPA(TKIP) in use? (Critical)\n   - Is WPS enabled? (High)\n   - Are default credentials changed? (High)\n   - Is firmware current? (Medium)\n   - Is SSID revealing organization info? (Low)",
-      "Step 3: Design target architecture:\n   - Corporate network (WPA3-Enterprise or WPA2-Enterprise)\n   - Guest network (isolated, captive portal)\n   - IoT network (isolated VLAN)\n   - Authentication method selection",
-      "Step 4: Plan 802.1X deployment:\n   - RADIUS server setup\n   - EAP method selection (EAP-TLS vs PEAP)\n   - Certificate requirements\n   - AD integration",
-      "Step 5: Configure security monitoring:\n   - WIDS/WIPS deployment\n   - Rogue AP detection\n   - Alert thresholds\n   - Response procedures",
-      "Step 6: Develop RF security plan:\n   - Coverage mapping\n   - Power level optimization\n   - Antenna positioning\n   - External signal minimization",
-      "Step 7: Create wireless security policy documenting:\n   - Approved protocols\n   - SSID naming standards\n   - Guest access procedures\n   - BYOD requirements"
+      "Step 1: Identify all wireless networks broadcasting from the facility",
+      "Step 2: Document security protocols in use (WEP, WPA, WPA2, WPA3)",
+      "Step 3: Review authentication methods (PSK vs Enterprise)",
+      "Step 4: Assess guest network isolation and access controls",
+      "Step 5: Scan for rogue access points and evil twins",
+      "Step 6: Test for deauthentication attack vulnerability",
+      "Step 7: Document findings and prioritize remediation recommendations"
     ],
-    "expected_outcome": "Complete wireless security assessment including vulnerability inventory, target architecture design, 802.1X plan, monitoring configuration, RF security plan, and wireless security policy.",
-    "reflection_questions": [
-      "Why is WPA2-Enterprise preferable to WPA2-Personal in business environments?",
-      "How do you balance wireless coverage with security (signal bleed)?",
-      "What additional controls are needed for guest wireless networks?"
-    ]
+    "expected_outcome": "Wireless security assessment report with findings and recommendations for improvement."
   },
 
   "what_would_you_do": {
-    "scenario": "You're the security administrator at NexaTech Solutions. The company is opening a new office in a shared building with multiple other tenants. The building provides 'free WiFi' for tenants, and some employees are asking if they can use it for work to avoid setting up the corporate network immediately.",
-    "context": "Corporate network deployment is 2 weeks away. Employees need connectivity now. The building WiFi is open (no encryption) with a captive portal for terms acceptance. Employees handle sensitive customer data. VPN is available but not required by policy.",
-    "question": "How do you handle this situation?",
+    "scenario": "IT discovers several IoT devices (smart thermostats, security cameras) connected to the corporate WiFi network using WPA2-Personal.",
+    "context": "Devices were installed by facilities management without IT knowledge. Devices don't support 802.1X. Network contains sensitive financial data. Removing devices would affect building operations.",
+    "question": "How do you address this security issue?",
     "options": [
       {
         "id": "a",
-        "text": "Allow employees to use building WiFi since it's temporary",
+        "text": "Immediately remove all IoT devices from the network",
         "is_best": false,
-        "feedback": "Open WiFi networks are completely unencryptedâ€”all traffic is visible to anyone in range. In a shared building, other tenants, visitors, and attackers could easily capture sensitive data. Temporary doesn't mean safe.",
-        "consequences": "All traffic visible. Credentials capturable. Customer data exposed. Compliance violation likely. Evil twin attacks trivial."
+        "feedback": "Addresses security but ignores business impact. Building operations affected. Facilities management circumvented. No sustainable solution.",
+        "consequences": "Security improved but operational issues. Facilities may reconnect devices without telling IT."
       },
       {
         "id": "b",
-        "text": "Prohibit all connectivity until corporate network is deployed",
-        "is_best": false,
-        "feedback": "While secure, this significantly impacts business operations for two weeks. There are ways to enable productivity safely. Rigid prohibition without alternatives damages security's relationship with the business.",
-        "consequences": "Two weeks without connectivity. Business impact significant. Employees may use personal hotspots anyway. Security seen as blocker."
+        "text": "Create separate IoT network VLAN isolated from corporate network",
+        "is_best": true,
+        "feedback": "Best practice—segment IoT devices. Separate VLAN with firewall rules. IoT can operate but can't reach sensitive systems. Scalable for future IoT.",
+        "consequences": "IoT operational. Corporate network protected. Sustainable architecture for IoT growth."
       },
       {
         "id": "c",
-        "text": "Allow building WiFi use only with mandatory VPN connection for all traffic",
-        "is_best": true,
-        "feedback": "This is the balanced approach. The VPN encrypts all traffic, protecting against eavesdropping on the open network. Even if attackers capture traffic, they only see encrypted VPN data. Update policy to require VPN immediately, deploy VPN client to all devices, and communicate the requirement clearly.",
-        "consequences": "Traffic encrypted via VPN. Open network risk mitigated. Productivity maintained. Employees educated on risk. Sets good precedent for remote work security."
+        "text": "Accept the risk since IoT devices don't handle sensitive data",
+        "is_best": false,
+        "feedback": "IoT devices can be attack pivot points. Compromised camera could scan network, attack other systems. Risk is network access, not just device data.",
+        "consequences": "Network vulnerable to IoT-based attacks. Compliance issues possible."
       },
       {
         "id": "d",
-        "text": "Set up temporary mobile hotspots for employees to use instead",
+        "text": "Replace all IoT devices with 802.1X capable versions",
         "is_best": false,
-        "feedback": "Mobile hotspots provide better security than open WiFi, but this is expensive for multiple employees for two weeks, has bandwidth limitations, and creates management overhead. VPN over building WiFi achieves the security goal more efficiently.",
-        "consequences": "Expensive. Bandwidth limited. Management overhead. Works but not optimal solution."
+        "feedback": "Good security but potentially expensive and time-consuming. Many IoT devices don't support 802.1X. Segmentation is more practical.",
+        "consequences": "Expensive. May not be available. Delays resolution."
       }
     ],
-    "key_lesson": "Open WiFi networks are never safe for business use without VPN protection. All traffic on unencrypted wireless is visible to anyone in range. When encrypted networks aren't available, VPN provides the encryption layer needed to protect traffic. In shared buildings, the risk is amplified because multiple unknown parties share the same network. Always assume open WiFi is hostile."
+    "key_lesson": "IoT devices should be segmented on isolated network. They often can't support enterprise security but shouldn't be on corporate network. Segmentation is practical solution."
   },
 
   "summary": {
     "key_takeaways": [
-      "WPA3 with SAE is preferred; WPA2-AES minimum; WEP and WPA-TKIP are broken",
-      "Enterprise authentication (802.1X/RADIUS) provides individual user accountability",
-      "Evil twin attacks impersonate legitimate networks; deauth attacks enable them",
-      "WIDS/WIPS detects rogue APs, evil twins, and wireless attacks",
-      "Disable WPS due to PIN brute force vulnerability",
-      "Bluetooth: Bluejacking=messages, Bluesnarfing=data theft, Bluebugging=control"
+      "WEP is broken; WPA is deprecated; WPA2 is standard; WPA3 is most secure",
+      "Personal mode (PSK) for home; Enterprise mode (802.1X) for corporate",
+      "EAP-TLS (certificates) is most secure; PEAP (passwords) is easier to deploy",
+      "Evil twin attacks are detected by certificate validation",
+      "Deauthentication attacks mitigated by WPA3 protected management frames",
+      "IoT and Bluetooth introduce additional attack surfaces requiring segmentation"
     ],
     "exam_essentials": [
-      "WPA3 SAE resists offline dictionary attacks (even weak passwords)",
-      "WPA2-Enterprise = 802.1X + RADIUS (individual auth)",
-      "Evil twin = fake AP with same SSID (MITM attack)",
-      "802.11w/MFP protects management frames (prevents deauth attacks)",
-      "EAP-TLS = certificates (strongest); PEAP = password in tunnel",
-      "Bluesnarfing = data theft; Bluebugging = full control"
+      "WEP = broken, never use; WPA2 minimum; WPA3 preferred",
+      "WPA2-Personal = PSK; WPA2-Enterprise = 802.1X",
+      "WPA3 SAE prevents offline dictionary attacks",
+      "Evil twin = fake AP with same SSID",
+      "Deauth attack = forces disconnection; PMF prevents",
+      "Bluejacking = messages; Bluesnarfing = data theft; Bluebugging = control"
     ],
-    "connection_to_next": "Wireless security protects network access over radio. The next lesson explores cloud securityâ€”the unique considerations for securing infrastructure, platforms, and applications in cloud environments."
+    "connection_to_next": "Wireless security extends your network perimeter into the air. The next lesson explores cloud security—extending security concepts to cloud environments where you don't control the physical infrastructure."
   },
 
   "related_content": {

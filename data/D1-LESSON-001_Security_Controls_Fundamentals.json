@@ -2,199 +2,1154 @@
   "lesson_id": "D1-LESSON-001",
   "domain": 1,
   "title": "Security Controls Fundamentals",
+  "subtitle": "The Building Blocks of Every Security Program",
+  "version": "2.0-enhanced",
   "objectives_covered": ["1.1"],
-  "estimated_duration": "45-55 minutes",
+  "estimated_duration": "90-120 minutes (core: 60 min, labs: 30-60 min)",
   "difficulty": "beginner",
   "prerequisites": [],
 
+  "skill_tree": {
+    "position": {
+      "domain": 1,
+      "sequence": 1,
+      "tier": "foundation"
+    },
+    "prerequisites": [],
+    "unlocks": [
+      {
+        "lesson_id": "D1-LESSON-002",
+        "title": "CIA Triad Fundamentals",
+        "connection": "Controls protect the CIA triad - learn what you're protecting"
+      },
+      {
+        "lesson_id": "D1-SIM-001",
+        "title": "Security Controls Simulation",
+        "connection": "Apply control selection in realistic scenarios"
+      }
+    ],
+    "related_concepts": [
+      {
+        "topic": "Risk Management",
+        "lesson": "D5-LESSON-002",
+        "relationship": "Controls are risk treatments - risk drives control selection"
+      },
+      {
+        "topic": "Security Governance",
+        "lesson": "D5-LESSON-001",
+        "relationship": "Governance frameworks mandate control implementation"
+      },
+      {
+        "topic": "Incident Response",
+        "lesson": "D4-LESSON-002",
+        "relationship": "IR uses detective and corrective controls"
+      }
+    ],
+    "builds_toward": [
+      "CompTIA Security+ SY0-701 Certification",
+      "CompTIA CySA+ (builds on control concepts)",
+      "CISSP Domain 1: Security and Risk Management"
+    ],
+    "cascade_learning": {
+      "this_lesson_establishes": [
+        "Control categories (Technical, Managerial, Operational, Physical)",
+        "Control types (Preventive, Detective, Corrective, Deterrent, Compensating, Directive)",
+        "Defense in depth principle",
+        "Control selection methodology",
+        "Security frameworks introduction"
+      ],
+      "next_lesson_builds_on": "CIA Triad lesson uses control vocabulary to explain WHAT controls protect",
+      "concepts_used_later": {
+        "D1-LESSON-003": "Authentication controls are Technical Preventive controls",
+        "D1-LESSON-004": "Cryptography implements Technical controls for confidentiality/integrity",
+        "D1-LESSON-005": "Zero Trust uses all control categories in new architecture",
+        "D4-LESSON-001": "Security monitoring implements Detective controls",
+        "D5-LESSON-001": "Governance defines Managerial controls"
+      }
+    }
+  },
+
+  "role_relevance": {
+    "soc_analyst": {
+      "relevance": "high",
+      "percentage_of_job": "25-35%",
+      "daily_usage": "Constantly working with detective controls (SIEM, IDS, EDR) and understanding how preventive controls affect what you see",
+      "specific_tasks": [
+        "Understand why certain alerts fire (control logic)",
+        "Recommend control tuning based on alert patterns",
+        "Explain control gaps during incident briefings",
+        "Document which controls detected or missed threats"
+      ],
+      "tools_youll_use": [
+        "SIEM platforms (Splunk, Microsoft Sentinel, QRadar)",
+        "EDR solutions (CrowdStrike, SentinelOne, Carbon Black)",
+        "Network detection tools (Zeek, Suricata)"
+      ]
+    },
+    "incident_responder": {
+      "relevance": "high",
+      "percentage_of_job": "20-30%",
+      "daily_usage": "Analyzing which controls failed, recommending corrective controls, implementing containment",
+      "specific_tasks": [
+        "Identify control failures during incident analysis",
+        "Recommend compensating controls during response",
+        "Implement corrective controls post-incident",
+        "Document control gaps in lessons learned"
+      ],
+      "tools_youll_use": [
+        "Forensic tools for control validation",
+        "Network isolation tools (containment controls)",
+        "Configuration management tools"
+      ]
+    },
+    "security_engineer": {
+      "relevance": "critical",
+      "percentage_of_job": "50-70%",
+      "daily_usage": "Designing, implementing, and maintaining security controls across all categories",
+      "specific_tasks": [
+        "Design control architectures for new systems",
+        "Implement technical controls (firewalls, encryption, access control)",
+        "Automate control deployment and monitoring",
+        "Evaluate and select security products (control solutions)"
+      ],
+      "tools_youll_use": [
+        "Infrastructure as Code (Terraform, CloudFormation)",
+        "Configuration management (Ansible, Puppet)",
+        "Security orchestration platforms"
+      ]
+    },
+    "grc_analyst": {
+      "relevance": "critical",
+      "percentage_of_job": "60-80%",
+      "daily_usage": "Mapping controls to compliance requirements, conducting control assessments, documenting control effectiveness",
+      "specific_tasks": [
+        "Map controls to regulatory requirements (HIPAA, PCI-DSS, SOX)",
+        "Conduct control assessments and gap analyses",
+        "Document control effectiveness for auditors",
+        "Maintain control inventories and crosswalks"
+      ],
+      "tools_youll_use": [
+        "GRC platforms (ServiceNow GRC, RSA Archer, OneTrust)",
+        "Compliance management tools",
+        "Audit management systems"
+      ]
+    },
+    "penetration_tester": {
+      "relevance": "medium",
+      "percentage_of_job": "15-25%",
+      "daily_usage": "Understanding controls to test them effectively, bypassing preventive controls, avoiding detective controls",
+      "specific_tasks": [
+        "Identify which controls to test",
+        "Develop techniques to bypass preventive controls",
+        "Test whether detective controls identify your activities",
+        "Report on control effectiveness and gaps"
+      ],
+      "tools_youll_use": [
+        "Penetration testing frameworks (Metasploit, Cobalt Strike)",
+        "Network tools (Nmap, Burp Suite)",
+        "Evasion techniques and custom tooling"
+      ]
+    }
+  },
+
   "introduction": {
-    "hook": "Every security breach you've ever heard of - from massive data leaks to ransomware attacks - could have been prevented or mitigated by properly implemented security controls. But here's the challenge: with thousands of potential controls available, how do you know which ones to implement? The answer lies in understanding how controls are categorized, what function each type serves, and how they work together to create layers of protection. This isn't just theory - it's the foundation of every security program you'll ever build or manage.",
+    "hook": "Every security breach you've ever heard of—from massive data leaks to ransomware attacks—could have been prevented or mitigated by properly implemented security controls. But here's the challenge: with thousands of potential controls available, how do you know which ones to implement? The answer lies in understanding how controls are categorized, what function each type serves, and how they work together to create layers of protection. This isn't just theory—it's the foundation of every security program you'll ever build or manage.",
+    
     "learning_goals": [
       "Categorize security controls by implementation type (technical, managerial, operational, physical)",
       "Identify control functions (preventive, detective, corrective, deterrent, compensating, directive)",
       "Apply defense-in-depth principles to create layered security architectures",
       "Select appropriate controls based on risk, cost, and operational requirements",
-      "Recognize how the Security+ exam tests control classification scenarios"
+      "Recognize how different security roles interact with various control types",
+      "Use control frameworks (NIST CSF, CIS Controls) to structure security programs",
+      "Explain control concepts using real-world examples and analogies"
     ],
-    "why_it_matters": "As a security professional, you'll spend significant time recommending, implementing, and managing security controls. Whether you're a SOC analyst explaining why a detection rule matters, an incident responder recommending corrective actions, or a GRC analyst mapping controls to compliance frameworks, understanding control fundamentals is essential. On the exam, expect 3-5 questions directly testing your ability to categorize and select appropriate controls.",
-    "career_relevance": {
-      "soc_analyst": "You'll implement and monitor technical controls daily - understanding categories helps you explain findings to stakeholders",
-      "incident_responder": "You recommend corrective and compensating controls after incidents - knowing the taxonomy is essential",
-      "grc_analyst": "You map controls to frameworks like NIST and ISO - this lesson is your bread and butter",
-      "penetration_tester": "You test controls for weaknesses - understanding their intended function helps you find gaps",
-      "security_engineer": "You design and implement controls across all categories - this is foundational knowledge"
+    
+    "why_it_matters": {
+      "career_impact": "As a security professional, you'll spend significant time recommending, implementing, and managing security controls. Whether you're a SOC analyst explaining why a detection rule matters, an incident responder recommending corrective actions, or a GRC analyst mapping controls to compliance frameworks, understanding control fundamentals is essential.",
+      "real_world_connection": "The 2023 Verizon DBIR found that 74% of breaches involved the human element—but technical controls like MFA can block 99.9% of automated attacks. Understanding control selection helps you prioritize investments where they matter most.",
+      "exam_relevance": "On the exam, expect 3-5 questions directly testing your ability to categorize and select appropriate controls. These questions often present scenarios requiring you to identify control types or recommend solutions."
+    },
+    
+    "exam_weight": {
+      "domain": "Domain 1: General Security Concepts (12%)",
+      "estimated_questions": "3-5 questions on this specific topic",
+      "question_types": [
+        "Scenario-based: 'Which control type would address this situation?'",
+        "Classification: 'How should this control be categorized?'",
+        "Selection: 'Which control is most appropriate given these constraints?'",
+        "Framework: 'Which NIST CSF function does this control support?'"
+      ],
+      "high_yield_topics": [
+        "Control category classification (technical vs managerial vs operational vs physical)",
+        "IDS vs IPS (detective vs preventive)",
+        "Compensating controls concept",
+        "NIST CSF five functions",
+        "Defense in depth principle"
+      ]
     }
-  },
-
-  "linux_fundamentals": {
-    "why_linux": "Most security tools run on Linux, and understanding Linux security controls is essential for any security role. Kali Linux and Ubuntu are the most common distributions you'll encounter.",
-    "recommended_distros": [
-      {
-        "name": "Kali Linux",
-        "use_case": "Penetration testing, security assessments",
-        "download": "https://www.kali.org/get-kali/"
-      },
-      {
-        "name": "Ubuntu Server",
-        "use_case": "General security operations, SIEM deployment",
-        "download": "https://ubuntu.com/download/server"
-      },
-      {
-        "name": "Security Onion",
-        "use_case": "Network security monitoring, IDS/IPS",
-        "download": "https://securityonionsolutions.com/"
-      }
-    ],
-    "setup_options": [
-      "Virtual Machine (VMware/VirtualBox) - Best for learning",
-      "WSL2 on Windows - Quick setup for Windows users",
-      "Cloud instance (AWS/Azure free tier) - No local resources needed",
-      "Dedicated hardware - For serious home labs"
-    ],
-    "essential_commands_this_lesson": [
-      {
-        "command": "sudo ufw status",
-        "purpose": "Check firewall status (technical control)",
-        "example_output": "Status: active\nTo                         Action      From\n--                         ------      ----\n22/tcp                     ALLOW       Anywhere"
-      },
-      {
-        "command": "cat /etc/passwd",
-        "purpose": "View user accounts (operational control review)",
-        "example_output": "root:x:0:0:root:/root:/bin/bash\nuser:x:1000:1000::/home/user:/bin/bash"
-      },
-      {
-        "command": "ls -la /var/log/",
-        "purpose": "View security logs (detective control)",
-        "example_output": "drwxr-xr-x  2 root root 4096 Jan  1 00:00 auth.log\ndrwxr-xr-x  2 root root 4096 Jan  1 00:00 syslog"
-      },
-      {
-        "command": "sudo chmod 600 /etc/shadow",
-        "purpose": "Set file permissions (technical control)",
-        "example_output": "No output on success - verify with ls -la"
-      }
-    ]
   },
 
   "sections": [
     {
       "section_id": "D1-L001-S01",
       "title": "Control Categories: The Four Pillars",
-      "content": "Security controls are categorized by HOW they are implemented. Think of these categories as the 'what' of controls - what form does the control take?\n\n**Technical Controls (Logical Controls)**\nThese are implemented through technology and automated systems. When you think 'computer does it,' you're thinking technical controls.\n\nExamples include:\n- Firewalls filtering network traffic\n- Encryption protecting data at rest and in transit\n- Antivirus/antimalware software\n- Intrusion Detection Systems (IDS) and Intrusion Prevention Systems (IPS)\n- Access Control Lists (ACLs)\n- Multi-factor authentication systems\n- Data Loss Prevention (DLP) tools\n\n**Managerial Controls (Administrative Controls)**\nThese are policies, procedures, and guidelines established by management. They define the rules and expectations for security behavior.\n\nExamples include:\n- Security policies and standards\n- Risk assessments and management frameworks\n- Security awareness training programs\n- Background checks and hiring procedures\n- Vendor management policies\n- Incident response plans\n- Business continuity planning\n\n**Operational Controls**\nThese are day-to-day procedures performed by people to maintain security. They're the human-executed processes that keep security running.\n\nExamples include:\n- Security guard patrols\n- Log review and monitoring\n- Patch management processes\n- Backup procedures\n- Change management processes\n- Account provisioning and deprovisioning\n- Media handling and destruction\n\n**Physical Controls**\nThese protect the physical environment and tangible assets. If you can touch it and it provides security, it's likely a physical control.\n\nExamples include:\n- Fences, walls, and gates\n- Locks (traditional and electronic)\n- Security cameras (CCTV)\n- Badge readers and access cards\n- Mantraps and turnstiles\n- Environmental controls (fire suppression, HVAC)\n- Cable locks and device cages\n\n**The Overlap Challenge**\nHere's where it gets tricky: some controls span categories. A security camera is physical (it's a device you install), but the video analytics software analyzing the feed is technical. Badge readers are physical devices that use technical systems for authentication. The exam loves testing these gray areas.",
+      "estimated_time": "18 minutes",
+      
+      "content": {
+        "overview": "Security controls are categorized by HOW they are implemented. Think of these categories as the 'what' of controls—what form does the control take? Understanding categories helps you ensure comprehensive coverage across all implementation methods.",
+        
+        "core_concepts": [
+          {
+            "concept": "Technical Controls (Logical Controls)",
+            "definition": "Controls implemented through technology and automated systems. When you think 'computer does it,' you're thinking technical controls.",
+            "how_it_works": {
+              "mechanism": "Technical controls use hardware, software, or firmware to enforce security automatically. They operate based on programmed rules and require minimal human intervention once configured.",
+              "example_flow": "A firewall examines each network packet → compares against ruleset → automatically allows or blocks based on rules → logs the decision → no human needed for each packet"
+            },
+            "examples": [
+              {
+                "control": "Firewalls",
+                "function": "Filter network traffic based on rules",
+                "implementation": "Hardware appliance or software running on servers/endpoints"
+              },
+              {
+                "control": "Encryption",
+                "function": "Protect data confidentiality",
+                "implementation": "Algorithms applied to data at rest or in transit"
+              },
+              {
+                "control": "Intrusion Detection/Prevention Systems",
+                "function": "Identify and/or block malicious activity",
+                "implementation": "Network sensors or host agents analyzing traffic/behavior"
+              },
+              {
+                "control": "Access Control Lists (ACLs)",
+                "function": "Define who can access what resources",
+                "implementation": "Rules on network devices, file systems, or applications"
+              },
+              {
+                "control": "Multi-Factor Authentication (MFA)",
+                "function": "Verify identity using multiple factors",
+                "implementation": "Authentication systems requiring something you know + have + are"
+              },
+              {
+                "control": "Data Loss Prevention (DLP)",
+                "function": "Prevent unauthorized data exfiltration",
+                "implementation": "Software analyzing data flows for sensitive content"
+              }
+            ],
+            "what_would_happen_if": {
+              "scenario": "What if you relied ONLY on technical controls?",
+              "consequence": "Technical controls can be misconfigured, bypassed, or fail. Without policies (managerial), people don't know what's expected. Without processes (operational), controls aren't maintained. Without physical controls, attackers can bypass technical controls entirely by walking in.",
+              "real_example": "Target breach 2013: Technical controls (FireEye) detected the attack, but operational failures (no response to alerts) allowed it to continue."
+            }
+          },
+          {
+            "concept": "Managerial Controls (Administrative Controls)",
+            "definition": "Policies, procedures, and guidelines established by management. They define the rules and expectations for security behavior.",
+            "how_it_works": {
+              "mechanism": "Managerial controls establish the framework within which other controls operate. They set expectations, define requirements, and create accountability. They don't directly stop attacks—they enable and require other controls.",
+              "example_flow": "Management creates security policy → policy requires encryption for sensitive data → technical team implements encryption → operational team verifies compliance → policy is enforced through disciplinary procedures"
+            },
+            "examples": [
+              {
+                "control": "Security Policies",
+                "function": "Define organizational security requirements",
+                "implementation": "Written documents approved by leadership"
+              },
+              {
+                "control": "Risk Assessments",
+                "function": "Identify and evaluate security risks",
+                "implementation": "Structured analysis process with documented findings"
+              },
+              {
+                "control": "Security Awareness Training",
+                "function": "Educate employees on security practices",
+                "implementation": "Training programs mandated by policy"
+              },
+              {
+                "control": "Background Checks",
+                "function": "Verify employee trustworthiness",
+                "implementation": "HR procedures for pre-employment screening"
+              },
+              {
+                "control": "Vendor Management",
+                "function": "Ensure third-party security",
+                "implementation": "Policies requiring vendor assessments and contracts"
+              },
+              {
+                "control": "Incident Response Plans",
+                "function": "Define how to handle security incidents",
+                "implementation": "Documented procedures approved by management"
+              }
+            ],
+            "what_would_happen_if": {
+              "scenario": "What if you had great policies but no enforcement?",
+              "consequence": "Policies become 'shelfware'—documented but ignored. Without technical controls to enforce and operational controls to verify, policies provide no actual security. They only matter if followed.",
+              "real_example": "Many breached organizations had policies requiring patches within 30 days but no operational process to verify or technical systems to enforce it."
+            }
+          },
+          {
+            "concept": "Operational Controls",
+            "definition": "Day-to-day procedures performed by people to maintain security. They're the human-executed processes that keep security running.",
+            "how_it_works": {
+              "mechanism": "Operational controls bridge the gap between policy (what should happen) and implementation (what actually happens). They're the recurring human activities that maintain security posture over time.",
+              "example_flow": "Policy requires log review → Analyst reviews SIEM alerts daily → Analyst investigates suspicious findings → Analyst escalates confirmed incidents → Documentation updated"
+            },
+            "examples": [
+              {
+                "control": "Security Guard Patrols",
+                "function": "Detect and deter physical intrusions",
+                "implementation": "Scheduled rounds by security personnel"
+              },
+              {
+                "control": "Log Review and Monitoring",
+                "function": "Identify security events",
+                "implementation": "Daily analyst review of security logs"
+              },
+              {
+                "control": "Patch Management",
+                "function": "Fix known vulnerabilities",
+                "implementation": "Regular process of testing and deploying patches"
+              },
+              {
+                "control": "Backup Procedures",
+                "function": "Enable data recovery",
+                "implementation": "Scheduled backup operations and verification"
+              },
+              {
+                "control": "Account Provisioning/Deprovisioning",
+                "function": "Manage user access lifecycle",
+                "implementation": "HR-triggered processes for creating/removing access"
+              },
+              {
+                "control": "Change Management",
+                "function": "Control modifications to systems",
+                "implementation": "Review and approval process for changes"
+              }
+            ],
+            "what_would_happen_if": {
+              "scenario": "What if you skipped operational controls?",
+              "consequence": "Technical controls degrade over time. Signatures become outdated, certificates expire, logs overflow. Without operational processes to maintain them, technical controls become less effective until they fail entirely.",
+              "real_example": "Equifax breach 2017: Technical scanning found the vulnerability, but operational failure (no one actioned the scan results) left it unpatched for months."
+            }
+          },
+          {
+            "concept": "Physical Controls",
+            "definition": "Controls that protect the physical environment and tangible assets. If you can touch it and it provides security, it's likely a physical control.",
+            "how_it_works": {
+              "mechanism": "Physical controls create barriers and deterrents in the real world. They protect against threats that bypass logical security—you can't hack a fence or phish a lock.",
+              "example_flow": "Fence surrounds facility → Gate requires badge scan → Mantrap prevents tailgating → Door requires PIN → Camera records entry → Guard verifies identity"
+            },
+            "examples": [
+              {
+                "control": "Fences, Walls, and Gates",
+                "function": "Create physical barriers",
+                "implementation": "Construction around protected areas"
+              },
+              {
+                "control": "Locks",
+                "function": "Restrict physical access",
+                "implementation": "Traditional or electronic locking mechanisms"
+              },
+              {
+                "control": "Security Cameras (CCTV)",
+                "function": "Monitor and record activity",
+                "implementation": "Camera systems with recording and monitoring"
+              },
+              {
+                "control": "Badge Readers",
+                "function": "Control access based on credentials",
+                "implementation": "Card/proximity readers at entry points"
+              },
+              {
+                "control": "Mantraps",
+                "function": "Prevent tailgating and verify identity",
+                "implementation": "Enclosed areas requiring individual authentication"
+              },
+              {
+                "control": "Environmental Controls",
+                "function": "Protect against environmental threats",
+                "implementation": "Fire suppression, HVAC, water detection"
+              }
+            ],
+            "what_would_happen_if": {
+              "scenario": "What if you ignored physical security?",
+              "consequence": "An attacker who gains physical access can bypass most technical controls. They can install hardware keyloggers, steal drives, or simply walk out with equipment. All the encryption in the world doesn't help if someone steals the unlocked laptop.",
+              "real_example": "Social engineering penetration tests routinely show that tailgating (following someone through a secured door) remains highly effective, bypassing expensive electronic access controls."
+            }
+          }
+        ],
+
+        "the_overlap_challenge": {
+          "explanation": "Here's where it gets tricky: some controls span categories. The exam loves testing these gray areas.",
+          "examples": [
+            {
+              "control": "Security Camera",
+              "complexity": "Physical device (physical) with video analytics software (technical)",
+              "classification": "Primarily PHYSICAL because the camera itself is the control"
+            },
+            {
+              "control": "Badge Reader",
+              "complexity": "Physical device (physical) using authentication database (technical)",
+              "classification": "Primarily PHYSICAL because it's a tangible device at a door"
+            },
+            {
+              "control": "Security Awareness Training",
+              "complexity": "Online platform (technical delivery) required by policy (managerial)",
+              "classification": "MANAGERIAL because it's a policy requirement—the platform is just delivery"
+            },
+            {
+              "control": "Log Review",
+              "complexity": "Uses SIEM (technical) but requires analyst action (operational)",
+              "classification": "OPERATIONAL because a human is performing the review"
+            }
+          ],
+          "exam_tip": "When classifying, focus on HOW the control is primarily implemented, not secondary aspects. What's the main mechanism?"
+        }
+      },
+
+      "deep_dive": {
+        "title": "Technical Deep Dive: Control Category Analysis Framework",
+        "expandable": true,
+        "content": {
+          "classification_methodology": {
+            "description": "A systematic approach to categorizing any security control",
+            "steps": [
+              {
+                "step": 1,
+                "question": "Does this control require a human to perform an action regularly?",
+                "if_yes": "Consider OPERATIONAL",
+                "if_no": "Continue to step 2"
+              },
+              {
+                "step": 2,
+                "question": "Is this a policy, procedure, or management directive?",
+                "if_yes": "Likely MANAGERIAL",
+                "if_no": "Continue to step 3"
+              },
+              {
+                "step": 3,
+                "question": "Does this control exist in the physical world (can you touch it)?",
+                "if_yes": "Consider PHYSICAL",
+                "if_no": "Continue to step 4"
+              },
+              {
+                "step": 4,
+                "question": "Is this implemented through technology/software/automation?",
+                "if_yes": "Likely TECHNICAL",
+                "if_no": "Re-examine—all controls fit somewhere"
+              }
+            ]
+          },
+          "control_mapping_matrix": {
+            "description": "Examples showing how common controls map to categories",
+            "matrix": [
+              {"control": "Firewall rules", "category": "Technical", "rationale": "Automated software enforcement"},
+              {"control": "Acceptable Use Policy", "category": "Managerial", "rationale": "Management directive"},
+              {"control": "Daily backup verification", "category": "Operational", "rationale": "Human process"},
+              {"control": "Server room door lock", "category": "Physical", "rationale": "Tangible barrier"},
+              {"control": "Encryption at rest", "category": "Technical", "rationale": "Automated by software"},
+              {"control": "Background check requirement", "category": "Managerial", "rationale": "HR policy"},
+              {"control": "Security guard patrol", "category": "Operational", "rationale": "Human activity"},
+              {"control": "Biometric scanner", "category": "Physical", "rationale": "Physical device at door"}
+            ]
+          }
+        }
+      },
+
+      "career_spotlight": {
+        "role": "GRC Analyst",
+        "title": "A Day in the Life: Mapping Controls for a Compliance Audit",
+        "scenario": {
+          "time": "Monday, 9:15 AM",
+          "situation": "Your organization's annual SOC 2 audit is in two weeks. The auditor has sent their initial request list, and you need to map your controls to the Trust Services Criteria.",
+          "your_actions": [
+            {
+              "step": 1,
+              "action": "Review the control requirements",
+              "details": "You pull up the SOC 2 criteria. CC6.1 requires 'logical and physical access controls.' You need to document all controls addressing this."
+            },
+            {
+              "step": 2,
+              "action": "Inventory technical controls",
+              "details": "You document: Active Directory for authentication, role-based access in applications, firewall rules, VPN requirements, encryption on laptops."
+            },
+            {
+              "step": 3,
+              "action": "Inventory physical controls",
+              "details": "You document: badge readers on all doors, visitor sign-in procedures, security cameras, locked server room with biometric access."
+            },
+            {
+              "step": 4,
+              "action": "Link to managerial controls",
+              "details": "You connect these to your Access Control Policy, which mandates these technical and physical controls."
+            },
+            {
+              "step": 5,
+              "action": "Document operational controls",
+              "details": "You show quarterly access reviews (operational) that verify the technical controls work as intended."
+            },
+            {
+              "step": 6,
+              "action": "Create the control matrix",
+              "details": "You build a spreadsheet mapping each control to the SOC 2 criteria, with evidence locations for the auditor."
+            }
+          ],
+          "outcome": "Your comprehensive control mapping gives the auditor exactly what they need. By categorizing controls properly, you showed defense-in-depth across all categories for each requirement."
+        },
+        "skills_demonstrated": [
+          "Control categorization",
+          "Framework mapping",
+          "Documentation",
+          "Audit preparation"
+        ]
+      },
+
+      "memory_hooks": {
+        "mnemonic": "TMOP: Technical, Managerial, Operational, Physical",
+        "alternative_mnemonic": "Technology, Management, Operations, Physical - 'The Manager Orders Pizza'",
+        "analogy": {
+          "concept": "Think of security controls like running a restaurant",
+          "mapping": [
+            {
+              "category": "Technical",
+              "restaurant_equivalent": "Kitchen equipment (ovens, refrigerators, POS systems)",
+              "explanation": "Automated systems that do the work"
+            },
+            {
+              "category": "Managerial",
+              "restaurant_equivalent": "Policies (recipes, health codes, employee handbook)",
+              "explanation": "Rules that define how things should be done"
+            },
+            {
+              "category": "Operational",
+              "restaurant_equivalent": "Daily procedures (prep work, cleaning schedules, inventory checks)",
+              "explanation": "Human activities performed regularly"
+            },
+            {
+              "category": "Physical",
+              "restaurant_equivalent": "Building security (locks, fire extinguishers, cash safe)",
+              "explanation": "Tangible protections you can touch"
+            }
+          ]
+        },
+        "common_mistakes": [
+          {
+            "mistake": "Classifying security awareness training as 'technical' because it's delivered via computer",
+            "why_wrong": "The delivery mechanism doesn't determine the category. Training is a management-mandated requirement—the policy is managerial.",
+            "correct_approach": "Focus on who mandates the control, not how it's delivered. Management requires training = managerial control."
+          },
+          {
+            "mistake": "Classifying background checks as 'operational'",
+            "why_wrong": "While HR performs background checks, the requirement itself is a managerial control (hiring policy).",
+            "correct_approach": "The policy requiring background checks is managerial. The execution might be operational, but we classify by the control's nature."
+          },
+          {
+            "mistake": "Calling security guards a 'physical control'",
+            "why_wrong": "Guards are people performing activities. The guard shack is physical, but the patrolling activity is operational.",
+            "correct_approach": "Security guard patrols = operational. Security guard booth = physical."
+          }
+        ]
+      },
+
+      "micro_checks": [
+        {
+          "type": "fill_in_blank",
+          "position": "after_technical",
+          "question": "Firewalls, encryption, and access control software are examples of __________ controls.",
+          "answer": "technical (or logical)",
+          "hint": "What type of control does the computer do automatically?"
+        },
+        {
+          "type": "quick_recall",
+          "position": "after_managerial",
+          "question": "What's another name for managerial controls?",
+          "answer": "Administrative controls",
+          "hint": "Policies come from administration/management"
+        },
+        {
+          "type": "classification",
+          "position": "after_all_categories",
+          "question": "Daily log review by a security analyst is what category of control?",
+          "answer": "Operational",
+          "hint": "A human is performing a daily activity"
+        }
+      ],
 
       "key_points": [
         "Technical controls are implemented through technology and automation",
         "Managerial controls are policies and procedures from leadership",
         "Operational controls are day-to-day security processes performed by people",
         "Physical controls protect tangible assets and the physical environment",
-        "Many controls span multiple categories - consider the primary implementation method"
+        "Many controls span multiple categories—classify by primary implementation method"
+      ],
+
+      "must_remember_for_exam": [
+        {
+          "fact": "Technical controls = also called 'logical controls'",
+          "why_tested": "Exam may use either term interchangeably"
+        },
+        {
+          "fact": "Security awareness training = MANAGERIAL (not technical)",
+          "why_tested": "Common exam trap—delivery method doesn't determine category"
+        },
+        {
+          "fact": "Background checks = MANAGERIAL (it's a policy requirement)",
+          "why_tested": "Common exam trap—HR performs it, but it's a policy"
+        },
+        {
+          "fact": "Security guard patrols = OPERATIONAL (not physical)",
+          "why_tested": "Guards are people doing activities, not physical barriers"
+        }
       ],
 
       "real_world_example": {
         "scenario": "A hospital implementing access control for their medical records system",
         "company": "MedCare Health Systems",
-        "application": "MedCare implements multiple control categories: Technical (role-based access control in their EHR system, encryption of patient data), Managerial (HIPAA compliance policies, acceptable use policy), Operational (quarterly access reviews by department heads, daily audit log reviews), and Physical (badge readers on server room doors, locked workstations in patient areas). Each category addresses different aspects of the same goal: protecting patient information."
-      },
-
-      "career_callout": {
-        "role": "GRC Analyst",
-        "insight": "When mapping controls to compliance frameworks like NIST 800-53 or ISO 27001, you'll categorize hundreds of controls. Understanding these four categories helps you quickly identify gaps - if a risk area only has technical controls, you know you need to add managerial policies and operational procedures."
+        "situation": "MedCare must comply with HIPAA while allowing 2,000 clinical staff to access patient records efficiently.",
+        "controls_implemented": {
+          "technical": [
+            "Role-based access control (RBAC) in EHR system",
+            "Encryption of patient data (AES-256)",
+            "Session timeouts after 15 minutes of inactivity",
+            "Audit logging of all record access"
+          ],
+          "managerial": [
+            "HIPAA compliance policies",
+            "Acceptable use policy for clinical systems",
+            "Minimum necessary access policy",
+            "Sanctions policy for violations"
+          ],
+          "operational": [
+            "Quarterly access reviews by department heads",
+            "Daily audit log review by compliance team",
+            "Monthly security awareness reminders",
+            "Exit procedures revoking access on termination"
+          ],
+          "physical": [
+            "Badge readers on server room doors",
+            "Locked workstations in patient areas",
+            "Privacy screens on monitors in public areas",
+            "Secure disposal bins for printed records"
+          ]
+        },
+        "outcome": "Defense-in-depth across all categories protects patient privacy while enabling care delivery. Technical controls enforce access rules, managerial controls define requirements, operational controls verify effectiveness, and physical controls protect the environment."
       },
 
       "exam_tips": [
         "When a question asks about control categories, focus on HOW the control is implemented, not what it does",
         "Background checks are MANAGERIAL (they're an HR policy), not operational",
         "Security guards performing patrols are OPERATIONAL; the guard shack they sit in is PHYSICAL",
-        "If the question mentions 'policy' or 'procedure,' think MANAGERIAL first"
+        "If the question mentions 'policy' or 'procedure' in defining the control, think MANAGERIAL first"
       ],
 
       "glossary_terms": [
         {
           "term": "Technical Control",
           "definition": "A security control implemented through technology, hardware, or software mechanisms that operate automatically or with minimal human intervention.",
-          "exam_note": "Also called 'logical controls.' Firewalls, encryption, and access control software are classic examples."
+          "also_known_as": "Logical control",
+          "examples": "Firewalls, encryption, access control software, IDS/IPS",
+          "exam_note": "Exam uses 'technical' and 'logical' interchangeably"
         },
         {
           "term": "Managerial Control",
           "definition": "A security control implemented through policies, procedures, standards, and guidelines established by organizational management.",
-          "exam_note": "Also called 'administrative controls.' These define WHAT should be done but require other controls to enforce."
+          "also_known_as": "Administrative control",
+          "examples": "Security policies, risk assessments, background checks, training requirements",
+          "exam_note": "These define WHAT should be done but require other controls to enforce"
         },
         {
           "term": "Operational Control",
           "definition": "A security control implemented through day-to-day processes and procedures performed by personnel.",
-          "exam_note": "Focus on human-executed, recurring activities like log reviews, patrols, and backup verification."
+          "examples": "Log reviews, security guard patrols, backup verification, change management",
+          "exam_note": "Focus on human-executed, recurring activities"
         },
         {
           "term": "Physical Control",
-          "definition": "A security control that protects the physical environment, facilities, and tangible assets from unauthorized access or damage.",
-          "exam_note": "Locks, fences, cameras, mantraps. If you can touch it and it provides security, it's physical."
+          "definition": "A security control that protects physical assets, facilities, and personnel through tangible mechanisms.",
+          "examples": "Fences, locks, cameras, badge readers, mantraps",
+          "exam_note": "Includes both passive (walls, fences) and active (cameras) controls"
         }
       ],
 
       "knowledge_check": {
-        "question": "A company requires all employees to complete annual security awareness training. What type of control is this?",
+        "question": "A company requires all employees to complete annual security awareness training delivered through an online learning platform. How should this control be categorized?",
         "options": [
-          "Technical control because it uses a computer-based training system",
-          "Managerial control because it's a policy requirement established by leadership",
-          "Operational control because employees perform the training",
-          "Physical control because it requires employees to be present"
+          "Technical control because it uses a computer-based training platform",
+          "Managerial control because it's a policy requirement from management",
+          "Operational control because employees must actively participate",
+          "Physical control because employees attend sessions at their workstations"
         ],
         "correct": 1,
-        "explanation": "Security awareness training is a MANAGERIAL control because it's a policy requirement established by management. While the training might be delivered via technical means (computer-based training) and employees operationally complete it, the CONTROL itself is the policy requiring the training. Always focus on the nature of the requirement, not the delivery mechanism."
+        "explanation": "Security awareness training is a MANAGERIAL control because it's a policy requirement established by management. While the training may use technical delivery methods (online platform) and require operational participation (employees taking the training), the control itself is categorized by its implementation origin: a management-mandated policy. The delivery method doesn't change the category.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "The platform is technology, so technical seems logical",
+            "why_wrong": "Delivery mechanism doesn't determine category. Many managerial controls use technology to implement."
+          },
+          {
+            "option": 2,
+            "why_tempting": "Employees perform an activity (taking training)",
+            "why_wrong": "Operational controls are recurring security processes. Training is a policy requirement, not an ongoing operational process."
+          },
+          {
+            "option": 3,
+            "why_tempting": "Training happens at physical workstations",
+            "why_wrong": "Physical controls protect tangible assets. Training doesn't protect physical environment."
+          }
+        ]
       }
     },
+
     {
       "section_id": "D1-L001-S02",
-      "title": "Control Functions: What Controls Do",
-      "content": "While categories describe HOW controls are implemented, functions describe WHAT controls do. Understanding control functions helps you build comprehensive security programs with no gaps.\n\n**Preventive Controls**\nThese stop security incidents before they happen. They're your first line of defense.\n\nExamples:\n- Firewalls blocking malicious traffic\n- Access controls denying unauthorized users\n- Encryption making data unreadable to attackers\n- Security guards preventing unauthorized entry\n- Fences keeping intruders out\n\n**Detective Controls**\nThese identify security incidents during or after they occur. You can't prevent everything, so detection is critical.\n\nExamples:\n- Intrusion Detection Systems (IDS) alerting on suspicious activity\n- Security cameras recording events\n- Audit logs capturing system activity\n- SIEM systems correlating events\n- Security guards noticing unusual behavior\n\n**Corrective Controls**\nThese fix problems after they're detected, restoring systems to normal operation.\n\nExamples:\n- Antivirus quarantining malware\n- Backup restoration after data loss\n- Patch management fixing vulnerabilities\n- Incident response procedures\n- Terminating compromised accounts\n\n**Deterrent Controls**\nThese discourage threat actors from attempting attacks by increasing perceived risk or consequences.\n\nExamples:\n- Warning banners on login screens\n- Visible security cameras\n- 'Authorized Personnel Only' signs\n- Published acceptable use policies with consequences\n- Security guards at entrances\n\n**Compensating Controls**\nThese provide alternative protection when primary controls aren't feasible. They're NOT inferior - they're legitimate alternatives.\n\nExamples:\n- Enhanced monitoring when patching isn't possible\n- Increased auditing when segregation of duties can't be achieved\n- Additional encryption when physical security is limited\n- Manual reviews when automation fails\n\n**Directive Controls**\nThese specify required actions or behaviors. They tell people what they must or must not do.\n\nExamples:\n- Acceptable use policies\n- Security procedures\n- Warning banners specifying terms of use\n- Compliance requirements\n- Standard operating procedures\n\n**Controls Often Have Multiple Functions**\nA security camera is both DETECTIVE (it records incidents) and DETERRENT (visible cameras discourage bad behavior). A firewall is PREVENTIVE (blocks attacks) but also DETECTIVE when logging is enabled (records blocked attempts).",
+      "title": "Control Types: Function and Purpose",
+      "estimated_time": "20 minutes",
+      
+      "content": {
+        "overview": "While categories tell us HOW a control is implemented, types tell us WHAT the control is designed to accomplish. Understanding control types helps you select the right tool for each security challenge and ensure comprehensive protection.",
+        
+        "core_concepts": [
+          {
+            "concept": "Preventive Controls",
+            "definition": "Controls that stop security incidents before they occur. They're your first line of defense, blocking threats at the door.",
+            "how_it_works": {
+              "mechanism": "Preventive controls create barriers that block unauthorized actions. They operate proactively, denying access or blocking activities before harm occurs.",
+              "example_flow": "User attempts login → Firewall checks source IP → IP is on blocklist → Connection denied → Attack prevented before reaching target"
+            },
+            "examples": [
+              {"control": "Firewalls", "how_prevents": "Block unauthorized network traffic before it reaches systems"},
+              {"control": "Encryption", "how_prevents": "Make data unreadable even if accessed by unauthorized parties"},
+              {"control": "Access controls", "how_prevents": "Deny unauthorized users before they can act"},
+              {"control": "Security guards at entrance", "how_prevents": "Stop unauthorized people before they enter"},
+              {"control": "Input validation", "how_prevents": "Block malicious input before it's processed"},
+              {"control": "Separation of duties", "how_prevents": "Prevent single person from committing fraud"}
+            ],
+            "what_would_happen_if": {
+              "scenario": "What if you ONLY had preventive controls?",
+              "consequence": "No control is 100% effective. Without detective controls, you won't know when prevention fails. Without corrective controls, you can't fix issues when they occur. You'd be blind to actual security state.",
+              "key_insight": "Prevention is preferred, but defense in depth requires all types."
+            }
+          },
+          {
+            "concept": "Detective Controls",
+            "definition": "Controls that identify security incidents during or after they occur. They don't stop attacks but ensure you know when something happens.",
+            "how_it_works": {
+              "mechanism": "Detective controls monitor activity and generate alerts when suspicious or unauthorized activity is observed. They provide visibility into security status.",
+              "example_flow": "IDS monitors network traffic → Detects pattern matching known attack → Generates alert → Security analyst investigates → Incident confirmed"
+            },
+            "examples": [
+              {"control": "Intrusion Detection Systems (IDS)", "how_detects": "Analyzes traffic for attack patterns"},
+              {"control": "Security cameras", "how_detects": "Record activity for review"},
+              {"control": "Audit logs", "how_detects": "Track user actions for investigation"},
+              {"control": "SIEM systems", "how_detects": "Correlate events to identify threats"},
+              {"control": "File integrity monitoring", "how_detects": "Alert when files change unexpectedly"},
+              {"control": "Motion sensors", "how_detects": "Detect movement in protected areas"}
+            ],
+            "critical_distinction": {
+              "ids_vs_ips": {
+                "ids": "Intrusion DETECTION System - DETECTS and ALERTS but does NOT block",
+                "ips": "Intrusion PREVENTION System - DETECTS and BLOCKS automatically",
+                "exam_importance": "HIGH - This distinction appears frequently on the exam"
+              }
+            },
+            "what_would_happen_if": {
+              "scenario": "What if you had detective controls but no one monitored them?",
+              "consequence": "Alerts fire into the void. Intrusions are detected but not responded to. This was the Target breach scenario—FireEye detected the malware but alerts weren't actioned.",
+              "key_insight": "Detection without response is useless. Detective controls need operational processes to act on alerts."
+            }
+          },
+          {
+            "concept": "Corrective Controls",
+            "definition": "Controls that remediate or fix issues after an incident is detected. They minimize damage and restore normal operations.",
+            "how_it_works": {
+              "mechanism": "Corrective controls activate after something goes wrong. They restore systems to secure state, remove threats, or fix vulnerabilities.",
+              "example_flow": "Malware detected on system → AV quarantines malware → System restored from backup → Patches applied to prevent recurrence → Normal operations resume"
+            },
+            "examples": [
+              {"control": "Antivirus quarantine", "how_corrects": "Isolates and removes detected malware"},
+              {"control": "Backup restoration", "how_corrects": "Recovers data after loss or corruption"},
+              {"control": "Patch management", "how_corrects": "Fixes vulnerabilities after discovery"},
+              {"control": "Incident response procedures", "how_corrects": "Structured approach to fixing security issues"},
+              {"control": "Fire extinguishers", "how_corrects": "Stops fires after they start"},
+              {"control": "Failover systems", "how_corrects": "Restores service after failure"}
+            ],
+            "what_would_happen_if": {
+              "scenario": "What if you had no corrective controls?",
+              "consequence": "Every incident becomes permanent. Malware can't be removed. Data can't be recovered. Vulnerabilities can't be fixed. The system degrades over time until failure.",
+              "key_insight": "Corrective controls enable recovery. Without them, there's no path back to normal operations."
+            }
+          },
+          {
+            "concept": "Deterrent Controls",
+            "definition": "Controls that discourage threat actors from attempting attacks. They don't prevent attacks directly but reduce likelihood by increasing perceived risk or effort.",
+            "how_it_works": {
+              "mechanism": "Deterrent controls work on attacker psychology. They make potential attackers believe they'll be caught, that the effort isn't worth it, or that consequences are severe.",
+              "example_flow": "Attacker considers target → Sees 'Premises Under Video Surveillance' sign → Sees visible cameras → Considers being recorded and caught → Decides to target somewhere else"
+            },
+            "examples": [
+              {"control": "Warning signs", "how_deters": "Communicates monitoring and consequences"},
+              {"control": "Login banners", "how_deters": "States legal consequences of unauthorized access"},
+              {"control": "Visible security cameras", "how_deters": "Shows surveillance is in place"},
+              {"control": "Security guard presence", "how_deters": "Shows active human monitoring"},
+              {"control": "Fences with barbed wire", "how_deters": "Shows serious security investment"},
+              {"control": "Published security policies", "how_deters": "States consequences for violations"}
+            ],
+            "important_distinction": {
+              "deterrent_vs_preventive": "Deterrent controls don't stop determined attackers—they discourage casual ones. A sign saying 'No Trespassing' doesn't physically prevent entry; it just discourages it.",
+              "exam_note": "Deterrent controls reduce likelihood of attack attempts but don't stop attacks in progress."
+            }
+          },
+          {
+            "concept": "Compensating Controls",
+            "definition": "Alternative controls used when primary controls aren't feasible. They provide equivalent or comparable protection through different means.",
+            "how_it_works": {
+              "mechanism": "When the 'textbook' control can't be implemented (due to cost, legacy systems, technical limitations), compensating controls address the same risk differently.",
+              "example_flow": "Legacy system can't support patching → Can't implement primary control (patches) → Implement network segmentation + enhanced monitoring → Same risk addressed through different means"
+            },
+            "examples": [
+              {"control": "Encryption when physical security is limited", "compensates_for": "Inability to physically secure laptops"},
+              {"control": "Additional monitoring on unpatched systems", "compensates_for": "Inability to patch legacy systems"},
+              {"control": "Network segmentation", "compensates_for": "Inability to update vulnerable applications"},
+              {"control": "Visitor escort policy", "compensates_for": "Inability to give contractors badge access"},
+              {"control": "Manual review process", "compensates_for": "Lack of automated detection"}
+            ],
+            "critical_exam_concept": {
+              "statement": "Compensating controls are NOT inferior or temporary—they're legitimate alternatives that address the same risk differently.",
+              "exam_importance": "HIGH - Exam often presents scenarios where primary controls aren't feasible and tests whether you understand compensating controls as valid solutions.",
+              "common_scenario": "Legacy system can't be patched. What do you do? Answer involves compensating controls (segmentation, monitoring), NOT accepting the risk."
+            }
+          },
+          {
+            "concept": "Directive Controls",
+            "definition": "Controls that specify required actions or behaviors. They tell people what they must do (or not do) for security purposes.",
+            "how_it_works": {
+              "mechanism": "Directive controls establish requirements through documentation. They create expectations and accountability. They're enforced through other controls and disciplinary procedures.",
+              "example_flow": "Acceptable Use Policy states 'No personal USB devices' → User reads policy → User knows requirement → Violation leads to disciplinary action"
+            },
+            "examples": [
+              {"control": "Acceptable Use Policies", "directs": "How systems may be used"},
+              {"control": "Security procedures", "directs": "Steps for security tasks"},
+              {"control": "Warning banners", "directs": "Terms of system usage"},
+              {"control": "Regulatory requirements", "directs": "Mandated security practices"},
+              {"control": "Contractual obligations", "directs": "Security terms with third parties"}
+            ],
+            "overlap_note": "Directive controls often overlap with deterrent. A login banner is both directive (states the rules) and deterrent (warns of consequences)."
+          }
+        ],
+
+        "control_type_combinations": {
+          "explanation": "A single control often serves multiple functions. Understanding this helps answer exam questions about primary function.",
+          "examples": [
+            {
+              "control": "Security Camera",
+              "functions": ["Detective (recording incidents)", "Deterrent (discouraging bad behavior)"],
+              "primary": "Detective—its main purpose is to record what happens"
+            },
+            {
+              "control": "Firewall",
+              "functions": ["Preventive (blocking attacks)", "Detective (logging blocked attempts)"],
+              "primary": "Preventive—its main purpose is to block"
+            },
+            {
+              "control": "Login Banner",
+              "functions": ["Directive (states terms)", "Deterrent (warns of consequences)"],
+              "primary": "Directive—its main purpose is to communicate requirements"
+            }
+          ],
+          "exam_strategy": "When asked about control type, focus on the PRIMARY function—what the control is mainly designed to do."
+        }
+      },
+
+      "deep_dive": {
+        "title": "Technical Deep Dive: IDS vs IPS Architecture",
+        "expandable": true,
+        "content": {
+          "ids_architecture": {
+            "description": "Intrusion Detection System - DETECTIVE control",
+            "deployment_modes": [
+              {
+                "mode": "Network-based (NIDS)",
+                "placement": "Connected to SPAN/mirror port or network tap",
+                "function": "Monitors copy of network traffic",
+                "key_point": "Passive—doesn't sit inline with traffic"
+              },
+              {
+                "mode": "Host-based (HIDS)",
+                "placement": "Agent installed on endpoints",
+                "function": "Monitors system calls, file changes, logs",
+                "key_point": "Monitors local system activity"
+              }
+            ],
+            "traffic_flow": "Traffic passes normally → IDS receives copy → Analyzes for threats → Generates alerts → Traffic already delivered regardless of detection"
+          },
+          "ips_architecture": {
+            "description": "Intrusion Prevention System - PREVENTIVE control",
+            "deployment_modes": [
+              {
+                "mode": "Inline deployment",
+                "placement": "Sits directly in traffic path",
+                "function": "All traffic must pass through IPS",
+                "key_point": "Active—can block traffic in real-time"
+              }
+            ],
+            "traffic_flow": "Traffic arrives at IPS → IPS analyzes → If malicious: BLOCK → If clean: FORWARD → Traffic only proceeds if allowed"
+          },
+          "comparison_table": {
+            "headers": ["Aspect", "IDS", "IPS"],
+            "rows": [
+              ["Control Type", "Detective", "Preventive"],
+              ["Traffic Position", "Out-of-band (copy)", "Inline"],
+              ["Can Block Traffic", "No", "Yes"],
+              ["Latency Impact", "None", "Adds some latency"],
+              ["Failure Mode", "Lose detection only", "May block all traffic (fail-open or fail-closed)"],
+              ["Response", "Alert only", "Alert and block"]
+            ]
+          }
+        }
+      },
+
+      "career_spotlight": {
+        "role": "Security Engineer",
+        "title": "A Day in the Life: Implementing Detective Controls",
+        "scenario": {
+          "time": "Wednesday, 2:00 PM",
+          "situation": "Your company has purchased a new SIEM (Splunk). You're responsible for implementing detective controls by creating correlation rules and dashboards.",
+          "your_actions": [
+            {
+              "step": 1,
+              "action": "Review use cases",
+              "details": "You review the detection use cases: failed login attempts, impossible travel, malware execution, data exfiltration patterns."
+            },
+            {
+              "step": 2,
+              "action": "Identify data sources",
+              "details": "For each use case, you identify required logs: Windows Event Logs, firewall logs, authentication logs, endpoint detection data."
+            },
+            {
+              "step": 3,
+              "action": "Create correlation rules",
+              "details": "You write SPL queries: 'Alert when >5 failed logins for same user in 10 minutes' - this implements a detective control."
+            },
+            {
+              "step": 4,
+              "action": "Test detection",
+              "details": "You simulate attack scenarios to verify rules fire correctly. You tune thresholds to balance detection vs. false positives."
+            },
+            {
+              "step": 5,
+              "action": "Create dashboards",
+              "details": "You build dashboards showing alert trends, top triggered rules, and systems with most suspicious activity."
+            },
+            {
+              "step": 6,
+              "action": "Document runbooks",
+              "details": "You create response procedures for each alert type—detective controls need operational controls to act on them."
+            }
+          ],
+          "outcome": "Your SIEM implementation provides visibility the organization never had. The SOC can now detect threats that previously went unnoticed. Your detective controls feed into operational response processes."
+        },
+        "skills_demonstrated": [
+          "SIEM configuration",
+          "Detection rule writing",
+          "Security monitoring design",
+          "Documentation"
+        ]
+      },
+
+      "memory_hooks": {
+        "mnemonic": "PDCCDD - Prevent, Detect, Correct, Compensate, Deter, Direct",
+        "alternative_mnemonic": "Please Don't Create Completely Dangerous Deployments",
+        "analogy": {
+          "concept": "Think of control types like home security",
+          "mapping": [
+            {
+              "type": "Preventive",
+              "home_equivalent": "Locks on doors and windows",
+              "explanation": "Stops intruders from entering in the first place"
+            },
+            {
+              "type": "Detective",
+              "home_equivalent": "Motion sensors and alarms",
+              "explanation": "Alerts you when something happens"
+            },
+            {
+              "type": "Corrective",
+              "home_equivalent": "Fire extinguisher, first aid kit",
+              "explanation": "Helps fix problems after they occur"
+            },
+            {
+              "type": "Deterrent",
+              "home_equivalent": "Security system sign in yard",
+              "explanation": "Discourages burglars from trying"
+            },
+            {
+              "type": "Compensating",
+              "home_equivalent": "Neighbor watching house when you can't afford alarm",
+              "explanation": "Alternative when primary control isn't feasible"
+            },
+            {
+              "type": "Directive",
+              "home_equivalent": "House rules posted on fridge",
+              "explanation": "Tells everyone what's expected"
+            }
+          ]
+        },
+        "common_mistakes": [
+          {
+            "mistake": "Confusing IDS (detective) with IPS (preventive)",
+            "why_wrong": "IDS can only detect and alert. IPS can detect and BLOCK.",
+            "memory_aid": "IDS = 'I Detect Stuff' (detective). IPS = 'I Prevent Stuff' (preventive)."
+          },
+          {
+            "mistake": "Thinking deterrent controls prevent attacks",
+            "why_wrong": "Deterrent controls only DISCOURAGE. A determined attacker ignores the 'No Trespassing' sign.",
+            "memory_aid": "Deterrent = psychological barrier, not physical/technical barrier."
+          },
+          {
+            "mistake": "Viewing compensating controls as inferior",
+            "why_wrong": "Compensating controls are legitimate alternatives, not second-class solutions.",
+            "memory_aid": "Compensating controls = ALTERNATIVE approach, same risk reduction."
+          }
+        ]
+      },
+
+      "micro_checks": [
+        {
+          "type": "fill_in_blank",
+          "position": "after_detective",
+          "question": "An IDS is a __________ control because it identifies threats but cannot block them.",
+          "answer": "detective",
+          "hint": "It DETECTS but doesn't prevent"
+        },
+        {
+          "type": "comparison",
+          "position": "after_ids_ips",
+          "question": "What is the PRIMARY difference between IDS and IPS?",
+          "answer": "IDS only detects and alerts (detective), while IPS detects AND blocks (preventive)",
+          "hint": "One just watches, one takes action"
+        },
+        {
+          "type": "application",
+          "position": "after_compensating",
+          "question": "A legacy system cannot be patched. Implementing network segmentation around it is an example of what control type?",
+          "answer": "Compensating control",
+          "hint": "Alternative approach when primary control isn't feasible"
+        }
+      ],
 
       "key_points": [
         "Preventive controls STOP incidents before they happen",
         "Detective controls IDENTIFY incidents during or after occurrence",
         "Corrective controls FIX issues and restore normal operations",
         "Deterrent controls DISCOURAGE attacks by increasing perceived risk",
-        "Compensating controls are ALTERNATIVES when primary controls aren't feasible",
-        "Directive controls SPECIFY required behaviors and actions"
+        "Compensating controls are ALTERNATIVES when primary controls aren't feasible—not inferior",
+        "Directive controls SPECIFY required behaviors and actions",
+        "IDS is DETECTIVE; IPS is PREVENTIVE—critical exam distinction"
+      ],
+
+      "must_remember_for_exam": [
+        {
+          "fact": "IDS = Detective, IPS = Preventive",
+          "why_tested": "One of the most common control classification questions"
+        },
+        {
+          "fact": "Compensating controls are LEGITIMATE alternatives, not inferior",
+          "why_tested": "Exam often tests whether you'd use compensating controls when primary isn't feasible"
+        },
+        {
+          "fact": "Security cameras = primarily Detective (also Deterrent)",
+          "why_tested": "Cameras record (detective) and discourage (deterrent)—but primary function is detection"
+        },
+        {
+          "fact": "Deterrent ≠ Preventive—deterrent only discourages",
+          "why_tested": "Exam tests understanding that deterrent controls don't physically stop attacks"
+        }
       ],
 
       "real_world_example": {
-        "scenario": "Protecting a data center from unauthorized access",
+        "scenario": "Protecting a data center from unauthorized physical access",
         "company": "NexaTech Solutions",
-        "application": "NexaTech's data center uses multiple control functions working together: PREVENTIVE (biometric access control requiring fingerprint scan), DETECTIVE (motion sensors and security cameras monitoring all areas), DETERRENT (visible cameras and 'Authorized Personnel Only' signage), CORRECTIVE (automatic door locks that engage during security alerts, incident response team on call), DIRECTIVE (data center access policy specifying who can enter and procedures to follow), and COMPENSATING (visitor escort policy for contractors who can't be granted badge access)."
-      },
-
-      "career_callout": {
-        "role": "Incident Responder",
-        "insight": "After every incident, you'll recommend corrective and compensating controls. Understanding the full taxonomy helps you provide comprehensive recommendations - not just 'patch the system' but 'implement detective controls to catch this earlier, add preventive controls to block it entirely, and establish compensating controls while patches are tested.'"
+        "controls_by_type": {
+          "preventive": [
+            "Biometric access control requiring fingerprint scan",
+            "Mantrap preventing tailgating",
+            "Security guards checking ID"
+          ],
+          "detective": [
+            "Motion sensors detecting movement",
+            "Security cameras recording activity",
+            "Door sensors logging entries"
+          ],
+          "corrective": [
+            "Automatic door locks during security alerts",
+            "Incident response team on call",
+            "Emergency procedures for security events"
+          ],
+          "deterrent": [
+            "Visible cameras throughout facility",
+            "'Authorized Personnel Only' signage",
+            "Security guard presence at entrance"
+          ],
+          "compensating": [
+            "Visitor escort policy for contractors who can't have badge access",
+            "Manual sign-in when badge reader fails"
+          ],
+          "directive": [
+            "Data center access policy defining who can enter",
+            "Visitor procedures posted at entrance"
+          ]
+        },
+        "defense_in_depth": "Multiple control types work together. If preventive controls fail (tailgating past mantrap), detective controls catch it (camera, motion sensor). If a security event occurs, corrective controls activate (door locks, incident response)."
       },
 
       "exam_tips": [
-        "IDS is DETECTIVE; IPS is PREVENTIVE - know the difference!",
+        "IDS is DETECTIVE; IPS is PREVENTIVE—memorize this distinction",
         "Security cameras are primarily DETECTIVE (they record) but also DETERRENT (they discourage)",
-        "Compensating controls questions often describe scenarios where 'normal' solutions aren't possible",
-        "Warning banners are DETERRENT and DIRECTIVE - they discourage AND specify terms",
-        "Don't confuse detective controls with forensic investigation - detection happens in real-time or near-real-time"
+        "Compensating control questions often describe scenarios where 'normal' solutions aren't possible",
+        "Warning banners are both DETERRENT and DIRECTIVE—they discourage AND specify terms",
+        "Don't confuse detective controls with forensic investigation—detection happens in real-time or near-real-time"
       ],
 
       "glossary_terms": [
         {
           "term": "Preventive Control",
           "definition": "A security control designed to stop security incidents from occurring by blocking or prohibiting unauthorized actions.",
-          "exam_note": "Firewalls and access controls are classic preventive examples. Focus on 'STOPS before it happens.'"
+          "examples": "Firewalls, encryption, access controls, guards at entrances",
+          "exam_note": "Focus on 'STOPS before it happens'"
         },
         {
           "term": "Detective Control",
           "definition": "A security control designed to identify and alert on security incidents during or after they occur.",
-          "exam_note": "IDS, audit logs, and security cameras are detective. Focus on 'IDENTIFIES when it happens.'"
+          "examples": "IDS, audit logs, security cameras, SIEM",
+          "exam_note": "Focus on 'IDENTIFIES when it happens'"
+        },
+        {
+          "term": "Corrective Control",
+          "definition": "A security control designed to remediate issues and restore normal operations after an incident.",
+          "examples": "Antivirus quarantine, backup restoration, patch management",
+          "exam_note": "Focus on 'FIXES after it happens'"
         },
         {
           "term": "Compensating Control",
           "definition": "An alternative security control implemented when primary controls are not feasible, providing equivalent protection through different means.",
-          "exam_note": "KEY EXAM CONCEPT: These are legitimate alternatives, NOT inferior or temporary measures."
+          "examples": "Segmentation for unpatched systems, encryption for unsecured physical locations",
+          "exam_note": "KEY EXAM CONCEPT: These are legitimate alternatives, NOT inferior"
         },
         {
           "term": "Deterrent Control",
           "definition": "A security control designed to discourage threat actors from attempting malicious actions by increasing perceived risk or consequences.",
-          "exam_note": "Warning signs, visible cameras, and login banners are deterrent. They don't prevent - they discourage."
+          "examples": "Warning signs, visible cameras, login banners",
+          "exam_note": "Deterrents don't prevent—they discourage"
+        },
+        {
+          "term": "Directive Control",
+          "definition": "A security control that specifies required actions or behaviors through policy, procedures, or guidelines.",
+          "examples": "Acceptable Use Policy, security procedures, compliance requirements",
+          "exam_note": "Directives tell people what to do"
         }
       ],
 
@@ -207,550 +1162,1277 @@
           "Deterrent control because attackers will see the segmentation and choose other targets"
         ],
         "correct": 2,
-        "explanation": "Network segmentation implemented because patching isn't feasible is a COMPENSATING control. It provides alternative protection (limiting blast radius, restricting access) when the primary control (patching) cannot be applied. Compensating controls address the same risk through different means. The monitoring mentioned would be detective, but the question specifically asks about the segmentation."
+        "explanation": "Network segmentation implemented because patching isn't feasible is a COMPENSATING control. It provides alternative protection (limiting blast radius, restricting access) when the primary control (patching) cannot be applied. Compensating controls address the same risk through different means.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "Segmentation does address the problem",
+            "why_wrong": "Corrective controls fix issues AFTER they occur. Segmentation is proactive protection, not post-incident remediation."
+          },
+          {
+            "option": 1,
+            "why_tempting": "The question mentions monitoring alongside segmentation",
+            "why_wrong": "The question specifically asks about the segmentation, not the monitoring. Segmentation limits access—it doesn't detect."
+          },
+          {
+            "option": 3,
+            "why_tempting": "Segmentation might discourage attackers",
+            "why_wrong": "Attackers generally don't see segmentation from outside. It's a technical barrier, not a psychological one."
+          }
+        ]
       }
     },
+
     {
       "section_id": "D1-L001-S03",
       "title": "Defense in Depth: Layered Security",
-      "content": "Defense in depth is a security strategy that deploys multiple layers of controls so that if one layer fails, others continue to provide protection. Think of it like a medieval castle: walls, moats, gates, guards, and inner keeps all work together. An attacker must defeat multiple defenses, not just one.\n\n**The Layer Concept**\nSecurity layers typically include:\n\n1. **Perimeter Layer**: Controls at the network boundary\n   - Firewalls, border routers, DMZ\n   - External-facing IDS/IPS\n   - Web Application Firewalls (WAF)\n\n2. **Network Layer**: Controls within the internal network\n   - Network segmentation and VLANs\n   - Internal firewalls\n   - Network Access Control (NAC)\n   - Network monitoring and detection\n\n3. **Host Layer**: Controls on individual systems\n   - Endpoint protection (antivirus, EDR)\n   - Host-based firewalls\n   - Operating system hardening\n   - Patch management\n\n4. **Application Layer**: Controls within software\n   - Input validation\n   - Authentication and authorization\n   - Secure coding practices\n   - Application-level encryption\n\n5. **Data Layer**: Controls protecting information itself\n   - Encryption at rest and in transit\n   - Data Loss Prevention (DLP)\n   - Access controls on data\n   - Data classification and handling\n\n6. **Physical Layer**: Controls protecting physical assets\n   - Facility access controls\n   - Environmental controls\n   - Hardware security\n\n7. **Administrative Layer**: Policies governing all other layers\n   - Security policies and procedures\n   - Training and awareness\n   - Risk management\n\n**Why Layers Matter**\nNo single control is perfect. Firewalls can be misconfigured. Antivirus misses zero-days. Users click phishing links despite training. Defense in depth ensures that a single failure doesn't result in complete compromise.\n\n**Diversity in Defense**\nEffective defense in depth uses diverse controls:\n- Multiple vendors (firewall from vendor A, endpoint protection from vendor B)\n- Multiple control types (preventive AND detective AND corrective)\n- Multiple control categories (technical AND physical AND operational)\n\nThis diversity ensures that a vulnerability in one product or approach doesn't compromise your entire security posture.",
+      "estimated_time": "15 minutes",
+      
+      "content": {
+        "overview": "Defense in depth is a security strategy that deploys multiple layers of controls so that if one layer fails, others continue to provide protection. Think of it like a medieval castle: walls, moats, gates, guards, and inner keeps all work together. An attacker must defeat multiple defenses, not just one.",
 
-      "key_points": [
-        "Defense in depth uses multiple overlapping layers of security",
-        "If one layer fails, others continue to provide protection",
-        "Layers include perimeter, network, host, application, data, physical, and administrative",
-        "Diversity in vendors and control types strengthens the overall posture",
-        "No single control should be a single point of failure"
-      ],
-
-      "real_world_example": {
-        "scenario": "Ransomware attack contained by layered defenses",
-        "company": "Coastal Community Bank",
-        "application": "When ransomware entered via a phishing email, Coastal's defense in depth limited the damage: LAYER 1 (Email filter) - Failed to catch the phishing email. LAYER 2 (User awareness) - User clicked the link despite training. LAYER 3 (Endpoint protection) - Antivirus missed the zero-day payload. LAYER 4 (Network segmentation) - HELD - Ransomware couldn't spread to critical banking systems. LAYER 5 (SIEM detection) - HELD - Alerted SOC within 3 minutes of encryption starting. LAYER 6 (Backup systems) - HELD - Clean backups restored affected workstations. OUTCOME: 12 workstations encrypted, $0 ransom paid, 4-hour recovery time. Without layered defense, the entire bank could have been encrypted."
-      },
-
-      "career_callout": {
-        "role": "Security Engineer",
-        "insight": "When designing security architectures, you'll constantly balance depth vs. cost. Every layer adds expense and complexity. Your job is to identify the right layers for the risk level - a small business doesn't need seven layers, but a bank absolutely does. Understanding defense in depth helps you justify security investments to leadership."
-      },
-
-      "visualization": {
-        "type": "ascii_diagram",
-        "title": "Defense in Depth Layers",
-        "diagram": [
-          "                    ATTACKER",
-          "                       |",
-          "                       v",
-          "    +------------------------------------------+",
-          "    |           PERIMETER LAYER               |",
-          "    |    Firewalls, IDS/IPS, DMZ, WAF         |",
-          "    +------------------------------------------+",
-          "                       |",
-          "                       v",
-          "    +------------------------------------------+",
-          "    |            NETWORK LAYER                |",
-          "    |    Segmentation, VLANs, NAC, Monitoring |",
-          "    +------------------------------------------+",
-          "                       |",
-          "                       v",
-          "    +------------------------------------------+",
-          "    |              HOST LAYER                 |",
-          "    |    EDR, Host Firewall, Hardening, Patch |",
-          "    +------------------------------------------+",
-          "                       |",
-          "                       v",
-          "    +------------------------------------------+",
-          "    |          APPLICATION LAYER              |",
-          "    |    Input Validation, AuthN/AuthZ        |",
-          "    +------------------------------------------+",
-          "                       |",
-          "                       v",
-          "    +------------------------------------------+",
-          "    |              DATA LAYER                 |",
-          "    |    Encryption, DLP, Classification      |",
-          "    +------------------------------------------+",
-          "                       |",
-          "                       v",
-          "                 PROTECTED ASSET"
-        ]
-      },
-
-      "exam_tips": [
-        "Defense in depth = multiple layers (no single point of failure)",
-        "Questions often present scenarios where one control failed - look for what other layers should have caught it",
-        "Diversity means using different vendors, control types, and categories",
-        "This concept appears across multiple exam objectives - it's fundamental"
-      ],
-
-      "glossary_terms": [
-        {
-          "term": "Defense in Depth",
-          "definition": "A security strategy that implements multiple layers of overlapping controls so that if one layer fails, others continue to provide protection.",
-          "exam_note": "Core concept. Multiple layers. Assume failure. No single point of failure."
-        },
-        {
-          "term": "Security Layer",
-          "definition": "A distinct level of security controls within a defense-in-depth architecture, each addressing different aspects of protection.",
-          "exam_note": "Perimeter, network, host, application, data, physical, administrative."
-        }
-      ],
-
-      "knowledge_check": {
-        "question": "An organization's firewall was misconfigured, allowing malicious traffic through. However, the endpoint detection and response (EDR) solution detected and blocked the malware before it could execute. This scenario demonstrates:",
-        "options": [
-          "Compensating controls providing alternative protection",
-          "Defense in depth where multiple layers provide overlapping protection",
-          "Corrective controls fixing the firewall misconfiguration",
-          "Detective controls identifying the misconfiguration"
+        "core_concepts": [
+          {
+            "concept": "The Layer Concept",
+            "explanation": "Security is implemented at multiple points, creating redundancy. Each layer adds protection, and failure of one doesn't mean total compromise.",
+            "layers": [
+              {
+                "layer": "Perimeter Layer",
+                "description": "Controls at the network boundary—first line of defense against external threats",
+                "controls": [
+                  "Firewalls and border routers",
+                  "DMZ (demilitarized zone)",
+                  "External IDS/IPS",
+                  "Web Application Firewalls (WAF)",
+                  "DDoS mitigation"
+                ],
+                "what_it_protects_against": "External attackers, internet-based threats, unauthorized network access"
+              },
+              {
+                "layer": "Network Layer",
+                "description": "Controls within the internal network—contains threats that bypass perimeter",
+                "controls": [
+                  "Network segmentation and VLANs",
+                  "Internal firewalls",
+                  "Network Access Control (NAC)",
+                  "Network monitoring and detection",
+                  "Microsegmentation"
+                ],
+                "what_it_protects_against": "Lateral movement, insider threats, compromised internal systems"
+              },
+              {
+                "layer": "Host Layer",
+                "description": "Controls on individual systems—protects each endpoint",
+                "controls": [
+                  "Endpoint detection and response (EDR)",
+                  "Host-based firewalls",
+                  "Operating system hardening",
+                  "Patch management",
+                  "Application whitelisting"
+                ],
+                "what_it_protects_against": "Malware, unauthorized software, system-level attacks"
+              },
+              {
+                "layer": "Application Layer",
+                "description": "Controls within software—protects against application-level attacks",
+                "controls": [
+                  "Input validation",
+                  "Authentication and authorization",
+                  "Secure coding practices",
+                  "Application-level encryption",
+                  "Session management"
+                ],
+                "what_it_protects_against": "Injection attacks, authentication bypass, session hijacking"
+              },
+              {
+                "layer": "Data Layer",
+                "description": "Controls protecting information itself—last line of defense",
+                "controls": [
+                  "Encryption at rest and in transit",
+                  "Data Loss Prevention (DLP)",
+                  "Access controls on data",
+                  "Data classification and handling",
+                  "Database activity monitoring"
+                ],
+                "what_it_protects_against": "Data theft, unauthorized disclosure, data leakage"
+              },
+              {
+                "layer": "Physical Layer",
+                "description": "Controls protecting physical assets—often overlooked but critical",
+                "controls": [
+                  "Facility access controls",
+                  "Environmental controls",
+                  "Hardware security",
+                  "Cable management",
+                  "Equipment disposal"
+                ],
+                "what_it_protects_against": "Physical theft, environmental damage, hardware tampering"
+              },
+              {
+                "layer": "Administrative Layer",
+                "description": "Policies governing all other layers—sets the foundation",
+                "controls": [
+                  "Security policies and procedures",
+                  "Training and awareness",
+                  "Risk management",
+                  "Incident response plans",
+                  "Change management"
+                ],
+                "what_it_protects_against": "Process failures, human error, inconsistent security"
+              }
+            ]
+          },
+          {
+            "concept": "Why Layers Matter",
+            "explanation": "No single control is perfect. Defense in depth ensures single failures don't mean total compromise.",
+            "failure_scenarios": [
+              {
+                "single_control_failure": "Firewall misconfiguration",
+                "without_depth": "Attacker has full access to internal network",
+                "with_depth": "Network segmentation limits scope, host controls detect anomalies, encryption protects data"
+              },
+              {
+                "single_control_failure": "User clicks phishing link",
+                "without_depth": "Attacker owns the system and can pivot freely",
+                "with_depth": "EDR detects malicious behavior, network segmentation limits movement, data encryption protects crown jewels"
+              },
+              {
+                "single_control_failure": "Zero-day vulnerability exploited",
+                "without_depth": "Unknown vulnerability = undefended",
+                "with_depth": "Behavioral detection catches anomalies, least privilege limits impact, backups enable recovery"
+              }
+            ]
+          },
+          {
+            "concept": "Diversity in Defense",
+            "explanation": "Effective defense in depth uses diverse controls to avoid single points of failure.",
+            "diversity_types": [
+              {
+                "type": "Vendor Diversity",
+                "description": "Use different vendors for different layers",
+                "example": "Firewall from Palo Alto, EDR from CrowdStrike, SIEM from Splunk",
+                "benefit": "Vulnerability in one vendor's product doesn't compromise all layers"
+              },
+              {
+                "type": "Control Type Diversity",
+                "description": "Use preventive AND detective AND corrective controls at each layer",
+                "example": "Firewall (preventive) + IDS (detective) + Incident response (corrective)",
+                "benefit": "If prevention fails, detection catches it; if detection is slow, correction limits damage"
+              },
+              {
+                "type": "Category Diversity",
+                "description": "Use technical AND managerial AND operational AND physical controls",
+                "example": "Encryption (technical) + data handling policy (managerial) + access reviews (operational) + secure room (physical)",
+                "benefit": "Addresses all aspects of security, not just technology"
+              }
+            ]
+          }
         ],
-        "correct": 1,
-        "explanation": "This is a classic defense-in-depth scenario. The perimeter layer (firewall) failed, but the host layer (EDR) provided overlapping protection and caught the threat. This is exactly why we implement multiple layers - no single control is perfect. The EDR isn't a compensating control (it's a standard part of the architecture), and no corrective action was described."
-      }
-    },
-    {
-      "section_id": "D1-L001-S04",
-      "title": "Selecting and Implementing Controls",
-      "content": "Selecting the right controls requires balancing security effectiveness against cost, usability, and operational impact. Not every organization needs every control.\n\n**Control Selection Factors**\n\n1. **Risk Level**: Higher risk requires stronger controls\n   - What's the likelihood of the threat?\n   - What's the impact if it occurs?\n   - Controls should be proportional to risk\n\n2. **Cost**: Both initial and ongoing\n   - Purchase/licensing costs\n   - Implementation effort\n   - Training requirements\n   - Maintenance and operational costs\n   - Total Cost of Ownership (TCO)\n\n3. **Regulatory Requirements**: Compliance mandates\n   - PCI DSS for payment card data\n   - HIPAA for healthcare information\n   - SOX for financial reporting\n   - GDPR for EU personal data\n   - Some controls are required by law\n\n4. **Operational Impact**: Effect on business\n   - User experience and productivity\n   - System performance\n   - Process changes required\n   - Support burden\n\n5. **Technical Feasibility**: Can it actually work?\n   - Compatibility with existing systems\n   - Integration requirements\n   - Available expertise\n   - Vendor support\n\n**The Control Selection Process**\n\n1. Identify assets and their value\n2. Assess threats and vulnerabilities\n3. Calculate risk (likelihood x impact)\n4. Identify potential controls\n5. Evaluate control effectiveness vs. cost\n6. Select controls that reduce risk to acceptable levels\n7. Implement and monitor\n8. Continuously reassess\n\n**Control Effectiveness**\nNot all controls are equally effective. Consider:\n- How much does the control reduce risk?\n- Can it be bypassed easily?\n- Does it address the root cause or just symptoms?\n- Is it sustainable long-term?\n\n**The Principle of Least Privilege**\nA key principle in control implementation: grant only the minimum access necessary to perform a job function. This limits the damage if an account is compromised.",
 
-      "key_points": [
-        "Control selection balances security effectiveness against cost and operational impact",
-        "Higher risk justifies stronger (and more expensive) controls",
-        "Regulatory requirements may mandate specific controls",
-        "Consider total cost of ownership, not just purchase price",
-        "Controls should be proportional to the risk they address"
-      ],
-
-      "real_world_example": {
-        "scenario": "Selecting authentication controls for different risk levels",
-        "company": "Apex Consulting Group",
-        "application": "Apex implemented tiered authentication based on risk: LOW RISK (internal wiki) - Username/password only, MEDIUM RISK (email, file shares) - Password + SMS code, HIGH RISK (client data, financial systems) - Password + hardware token + device certificate, CRITICAL (admin access, code deployment) - All of above + manager approval + time-limited access. This approach balanced security with usability - strong controls where needed, lighter controls where risk was lower."
-      },
-
-      "career_callout": {
-        "role": "SOC Analyst",
-        "insight": "You'll often be asked why certain alerts fired or didn't fire based on control configurations. Understanding control selection helps you explain to stakeholders why the controls are configured as they are - and when you should recommend changes based on new threats or incidents you're seeing."
-      },
-
-      "tool_spotlight": {
-        "name": "Nessus Essentials",
-        "category": "Vulnerability Scanner",
-        "description": "Free vulnerability scanner that helps identify where controls are missing or misconfigured",
-        "free_tier": "Yes - up to 16 IPs",
-        "website": "https://www.tenable.com/products/nessus/nessus-essentials",
-        "career_relevance": "Used by SOC analysts to identify control gaps, by GRC analysts for compliance assessments, and by pen testers for reconnaissance"
-      },
-
-      "exam_tips": [
-        "The exam often presents scenarios asking you to select the BEST control - consider cost, effectiveness, and feasibility",
-        "Regulatory requirements override cost considerations - if it's required, you must implement it",
-        "Least privilege appears frequently - always grant minimum necessary access",
-        "Total Cost of Ownership includes training, maintenance, and operational costs"
-      ],
-
-      "glossary_terms": [
-        {
-          "term": "Least Privilege",
-          "definition": "A security principle requiring that users and systems be granted only the minimum permissions necessary to perform their required functions.",
-          "exam_note": "Fundamental principle. Minimum access. Limits damage from compromise."
+        "how_it_works": {
+          "attack_scenario": {
+            "title": "Defense in Depth Against a Phishing Attack",
+            "attack_stages": [
+              {
+                "stage": "Phishing email sent",
+                "layers_involved": ["Perimeter"],
+                "controls_activated": "Email security gateway scans attachment, marks as suspicious",
+                "outcome": "Email delivered but flagged with warning banner"
+              },
+              {
+                "stage": "User clicks malicious link",
+                "layers_involved": ["Application", "Host"],
+                "controls_activated": "Web proxy blocks known malicious domain, browser warns user",
+                "outcome": "User proceeds anyway (control failed)"
+              },
+              {
+                "stage": "Malware downloads and executes",
+                "layers_involved": ["Host"],
+                "controls_activated": "EDR detects suspicious PowerShell execution, quarantines process",
+                "outcome": "Malware contained, alert generated"
+              },
+              {
+                "stage": "If EDR missed it: Malware attempts lateral movement",
+                "layers_involved": ["Network"],
+                "controls_activated": "Network segmentation blocks access to sensitive systems, NAC prevents joining new segments",
+                "outcome": "Lateral movement limited"
+              },
+              {
+                "stage": "If lateral movement succeeded: Attacker accesses database",
+                "layers_involved": ["Data"],
+                "controls_activated": "Data encryption makes exfiltrated data useless, DLP blocks large transfers",
+                "outcome": "Data protected even if accessed"
+              }
+            ],
+            "key_insight": "Multiple controls had to fail for significant damage. Each layer reduced the attack's effectiveness."
+          }
         },
-        {
-          "term": "Total Cost of Ownership (TCO)",
-          "definition": "The complete cost of implementing and maintaining a control over its lifetime, including purchase, implementation, training, and operational costs.",
-          "exam_note": "Consider ALL costs, not just purchase price. Ongoing costs often exceed initial."
-        },
-        {
-          "term": "Risk Appetite",
-          "definition": "The level of risk an organization is willing to accept in pursuit of its objectives.",
-          "exam_note": "Determines control stringency. Higher appetite = fewer controls needed."
+
+        "what_would_happen_if": {
+          "scenario": "What if you only secured the perimeter?",
+          "consequence": "Once an attacker gets through the perimeter (phishing, insider, VPN compromise), they have free rein internally. This was the traditional 'castle and moat' model, and it fails because: perimeters have many holes, insiders are already inside, and credentials bypass perimeter controls entirely.",
+          "modern_approach": "Zero Trust (covered in D1-LESSON-005) assumes the perimeter will fail and implements controls at every layer."
         }
-      ],
-
-      "knowledge_check": {
-        "question": "A small nonprofit organization needs to protect donor information but has very limited budget. Their IT staff consists of one part-time employee. Which approach to control selection is most appropriate?",
-        "options": [
-          "Implement enterprise-grade controls regardless of cost because donor data is sensitive",
-          "Skip security controls entirely due to budget constraints",
-          "Select controls proportional to risk, focusing on high-impact, low-cost options that the small team can manage",
-          "Outsource all security to a managed security service provider"
-        ],
-        "correct": 2,
-        "explanation": "Control selection must consider cost, operational capacity, and risk. For a small nonprofit, high-impact, low-cost controls that a small team can manage is the right approach. Enterprise-grade solutions would be too expensive and complex. Skipping security entirely is never acceptable. Full outsourcing might be disproportionate to the risk and budget. Focus on fundamentals: strong passwords, MFA, backups, basic endpoint protection."
-      }
-    },
-    {
-      "section_id": "D1-L001-S05",
-      "title": "Controls in Practice: Real-World Application",
-      "content": "Understanding how controls work together in real environments prepares you for both the exam and actual security work.\n\n**Control Frameworks**\nOrganizations use frameworks to organize and implement controls systematically:\n\n**NIST Cybersecurity Framework (CSF)**\n- Identify, Protect, Detect, Respond, Recover\n- Voluntary framework for critical infrastructure\n- Widely adopted across industries\n\n**NIST 800-53**\n- Comprehensive control catalog\n- Required for federal systems (FISMA)\n- Organized by control families\n\n**CIS Controls**\n- Prioritized list of security actions\n- Implementation groups by organization size\n- Practical, actionable guidance\n\n**ISO 27001**\n- International standard\n- Certification available\n- Annex A contains control objectives\n\n**Mapping Controls to Frameworks**\nSecurity professionals map their controls to these frameworks to:\n- Demonstrate compliance\n- Identify gaps\n- Communicate with auditors\n- Benchmark against peers\n\n**Control Assessment**\nControls must be regularly assessed for effectiveness:\n\n1. **Control Testing**: Does the control work as intended?\n2. **Vulnerability Assessment**: Are there gaps in coverage?\n3. **Penetration Testing**: Can controls be bypassed?\n4. **Audit**: Do controls meet compliance requirements?\n5. **Continuous Monitoring**: Are controls still effective over time?\n\n**Control Documentation**\nProper documentation is essential:\n- Control objectives and descriptions\n- Implementation details\n- Testing procedures and results\n- Exception processes\n- Review and update schedules\n\n**Common Control Mistakes**\n1. Implementing controls without clear objectives\n2. Failing to test controls regularly\n3. Ignoring operational impact on users\n4. Not documenting exceptions\n5. Set-and-forget mentality\n6. Relying on single controls without layers",
-
-      "key_points": [
-        "Frameworks provide structured approaches to implementing controls",
-        "NIST CSF, NIST 800-53, CIS Controls, and ISO 27001 are key frameworks to know",
-        "Controls must be regularly tested and assessed for effectiveness",
-        "Documentation is essential for audits and continuous improvement",
-        "Avoid common mistakes like set-and-forget and single points of failure"
-      ],
-
-      "real_world_example": {
-        "scenario": "Annual control assessment reveals gaps",
-        "company": "GlobalRetail Inc.",
-        "application": "During their annual assessment, GlobalRetail discovered: FINDING 1 - Firewall rules hadn't been reviewed in 18 months; 47 rules were obsolete. FINDING 2 - 23% of accounts had excessive privileges. FINDING 3 - Backup restoration hadn't been tested since implementation. FINDING 4 - Security awareness training completion was only 62%. Each finding represented a control that existed but wasn't being properly maintained. The assessment led to remediation plans with specific owners and deadlines."
       },
 
-      "career_callout": {
-        "role": "GRC Analyst",
-        "insight": "Control assessments and framework mapping will be a significant part of your work. You'll create control matrices mapping organizational controls to multiple frameworks simultaneously (NIST CSF for the board, PCI DSS for the auditors, CIS Controls for the technical team). Understanding controls deeply makes this mapping work much easier."
+      "deep_dive": {
+        "title": "Technical Deep Dive: Network Segmentation Implementation",
+        "expandable": true,
+        "content": {
+          "segmentation_types": [
+            {
+              "type": "VLAN Segmentation",
+              "implementation": "Separate broadcast domains using IEEE 802.1Q tagging",
+              "granularity": "Subnets/departments",
+              "use_case": "Separate HR, Finance, Engineering networks",
+              "linux_commands": {
+                "view_vlans": "ip -d link show",
+                "create_vlan": "ip link add link eth0 name eth0.100 type vlan id 100",
+                "assign_ip": "ip addr add 192.168.100.1/24 dev eth0.100"
+              }
+            },
+            {
+              "type": "Firewall Segmentation",
+              "implementation": "Internal firewalls between network segments",
+              "granularity": "Zones/segments",
+              "use_case": "Control traffic between departments",
+              "typical_rules": [
+                "Finance → HR: Deny all",
+                "HR → Finance: Allow specific payroll app",
+                "All → Internet: Allow via proxy only"
+              ]
+            },
+            {
+              "type": "Microsegmentation",
+              "implementation": "Software-defined, workload-level isolation",
+              "granularity": "Individual workloads/applications",
+              "use_case": "Isolate each application from all others",
+              "tools": ["VMware NSX", "Illumio", "Guardicore"]
+            }
+          ],
+          "segmentation_design_principles": [
+            {
+              "principle": "Default Deny",
+              "description": "Block all traffic by default, explicitly allow what's needed",
+              "benefit": "New systems are protected by default"
+            },
+            {
+              "principle": "Least Privilege Network Access",
+              "description": "Systems can only reach what they need",
+              "benefit": "Compromised system has limited reach"
+            },
+            {
+              "principle": "Monitor East-West Traffic",
+              "description": "Don't just monitor perimeter—watch internal traffic too",
+              "benefit": "Detect lateral movement attempts"
+            }
+          ]
+        }
       },
 
-      "framework_reference": {
-        "title": "Where to Find Framework Documentation",
-        "note": "You don't need to memorize frameworks - know where to find them",
-        "resources": [
+      "career_spotlight": {
+        "role": "Security Architect",
+        "title": "A Day in the Life: Designing Defense in Depth for a New Data Center",
+        "scenario": {
+          "time": "Thursday, 10:00 AM",
+          "situation": "Your company is building a new data center. You're designing the security architecture to protect the infrastructure.",
+          "your_actions": [
+            {
+              "step": 1,
+              "action": "Define security zones",
+              "details": "You create zones: Internet-facing DMZ, internal application tier, database tier, management network, each with different security requirements."
+            },
+            {
+              "step": 2,
+              "action": "Design perimeter controls",
+              "details": "Next-gen firewall, WAF for web apps, DDoS mitigation service, email security gateway—multiple vendors for diversity."
+            },
+            {
+              "step": 3,
+              "action": "Design network segmentation",
+              "details": "VLANs for each zone, internal firewalls between tiers, microsegmentation for critical databases."
+            },
+            {
+              "step": 4,
+              "action": "Specify host controls",
+              "details": "EDR on all servers, OS hardening standards, patch management SLAs, application whitelisting for critical systems."
+            },
+            {
+              "step": 5,
+              "action": "Design data protection",
+              "details": "Encryption at rest (AES-256), encryption in transit (TLS 1.3), DLP for sensitive data, key management infrastructure."
+            },
+            {
+              "step": 6,
+              "action": "Document control matrix",
+              "details": "Create matrix showing controls at each layer, mapping to threats and compliance requirements."
+            }
+          ],
+          "outcome": "Your architecture document becomes the blueprint for implementation. Each layer is designed with multiple controls, ensuring no single failure compromises the data center."
+        }
+      },
+
+      "memory_hooks": {
+        "mnemonic": "PNHADPA - Perimeter, Network, Host, Application, Data, Physical, Administrative",
+        "alternative_mnemonic": "Please Never Hack Any Data, Pretty Please Actually",
+        "analogy": {
+          "concept": "Defense in depth is like an onion",
+          "explanation": "Many layers, each one you peel back reveals another. An attacker must get through all layers to reach the core (your data). Even if outer layers are peeled, inner layers remain."
+        },
+        "common_mistakes": [
           {
-            "framework": "NIST CSF",
-            "url": "https://www.nist.gov/cyberframework",
-            "key_use": "Risk management, executive communication"
+            "mistake": "Relying only on perimeter security",
+            "why_wrong": "Perimeters fail. Phishing bypasses firewalls. VPNs create holes. Insiders are already inside.",
+            "correct_approach": "Implement controls at every layer. Assume perimeter will fail."
           },
           {
-            "framework": "NIST 800-53",
-            "url": "https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final",
-            "key_use": "Comprehensive control catalog, federal compliance"
-          },
-          {
-            "framework": "CIS Controls",
-            "url": "https://www.cisecurity.org/controls",
-            "key_use": "Prioritized actions, practical implementation"
-          },
-          {
-            "framework": "ISO 27001",
-            "url": "https://www.iso.org/isoiec-27001-information-security.html",
-            "key_use": "International standard, certification"
+            "mistake": "Using same vendor everywhere",
+            "why_wrong": "Single vulnerability affects all layers. Supply chain attack compromises everything.",
+            "correct_approach": "Diversify vendors, especially for critical controls at different layers."
           }
         ]
       },
 
-      "exam_tips": [
-        "Know the major frameworks by name and general purpose",
-        "NIST CSF functions: Identify, Protect, Detect, Respond, Recover",
-        "CIS Controls are prioritized and practical",
-        "Control assessment verifies controls work as intended",
-        "Documentation is required for audits and compliance"
+      "micro_checks": [
+        {
+          "type": "quick_recall",
+          "position": "after_layers",
+          "question": "Name the seven common security layers in defense in depth.",
+          "answer": "Perimeter, Network, Host, Application, Data, Physical, Administrative",
+          "hint": "PNHADPA"
+        },
+        {
+          "type": "application",
+          "position": "after_diversity",
+          "question": "Why should you use different vendors for firewalls and endpoint protection?",
+          "answer": "Vendor diversity ensures a vulnerability in one product doesn't compromise all layers",
+          "hint": "What happens if there's a zero-day in your firewall vendor's code?"
+        }
       ],
 
-      "glossary_terms": [
+      "key_points": [
+        "Defense in depth uses multiple security layers so failure of one doesn't mean total compromise",
+        "Layers typically include: perimeter, network, host, application, data, physical, and administrative",
+        "Each layer should include preventive, detective, and corrective controls",
+        "Diversity (vendors, control types) strengthens overall security",
+        "No single control is sufficient—layering provides resilience"
+      ],
+
+      "must_remember_for_exam": [
         {
-          "term": "NIST Cybersecurity Framework",
-          "definition": "A voluntary framework developed by NIST providing standards, guidelines, and best practices for managing cybersecurity risk.",
-          "exam_note": "Five functions: Identify, Protect, Detect, Respond, Recover. Voluntary but widely adopted."
+          "fact": "Defense in depth = multiple layers of protection",
+          "why_tested": "Core concept that appears in many questions"
         },
         {
-          "term": "CIS Controls",
-          "definition": "A prioritized set of actions developed by the Center for Internet Security that form a defense-in-depth approach to cybersecurity.",
-          "exam_note": "Prioritized and practical. Implementation groups help smaller organizations focus."
+          "fact": "Failure of one layer shouldn't mean total compromise",
+          "why_tested": "Tests understanding of why we use multiple controls"
         },
         {
-          "term": "Control Assessment",
-          "definition": "The process of evaluating whether security controls are implemented correctly, operating as intended, and producing the desired outcome.",
-          "exam_note": "Must be performed regularly. Includes testing, auditing, and monitoring."
+          "fact": "Vendor diversity is a defense-in-depth principle",
+          "why_tested": "Tests understanding of reducing single points of failure"
         }
       ],
 
       "knowledge_check": {
-        "question": "An organization wants to prioritize their security improvements based on what will have the most impact. They have limited resources and need practical, actionable guidance. Which framework would be most appropriate?",
+        "question": "An organization's firewall was bypassed by an attacker using an encrypted channel. However, the endpoint detection and response (EDR) tool on the target workstation detected and blocked the malicious payload. This scenario best demonstrates which security principle?",
         "options": [
-          "ISO 27001 because it provides certification",
-          "NIST 800-53 because it has the most comprehensive control catalog",
-          "CIS Controls because they provide prioritized, practical actions with implementation groups",
-          "NIST CSF because it's required for federal systems"
+          "Least privilege—the attacker didn't have sufficient permissions",
+          "Defense in depth—multiple layers provided protection when one failed",
+          "Separation of duties—different teams managed different controls",
+          "Zero trust—the internal system didn't trust the external traffic"
+        ],
+        "correct": 1,
+        "explanation": "This is a textbook defense-in-depth scenario. The perimeter control (firewall) was bypassed, but the host-layer control (EDR) provided the next line of defense. Multiple security layers ensured that the failure of one control didn't result in compromise.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "Permissions could have played a role",
+            "why_wrong": "The scenario describes control layers, not permission restrictions"
+          },
+          {
+            "option": 2,
+            "why_tempting": "Different teams might manage firewall vs EDR",
+            "why_wrong": "Separation of duties is about preventing fraud, not security layers"
+          },
+          {
+            "option": 3,
+            "why_tempting": "Zero trust is about not trusting anything",
+            "why_wrong": "The scenario describes layered controls, not the zero trust model specifically"
+          }
+        ]
+      }
+    },
+
+    {
+      "section_id": "D1-L001-S04",
+      "title": "Control Selection and Implementation",
+      "estimated_time": "15 minutes",
+      
+      "content": {
+        "overview": "Knowing control categories and types is essential, but the real skill is selecting the RIGHT controls for each situation. Security professionals must balance effectiveness, cost, operational impact, and organizational constraints.",
+
+        "core_concepts": [
+          {
+            "concept": "The Control Selection Process",
+            "steps": [
+              {
+                "step": 1,
+                "name": "Identify the Risk",
+                "questions": [
+                  "What asset are you protecting?",
+                  "What threats exist against it?",
+                  "What vulnerabilities could be exploited?",
+                  "What's the potential business impact?"
+                ],
+                "how_it_works": "Risk drives control selection. You can't choose appropriate controls without understanding what you're protecting against."
+              },
+              {
+                "step": 2,
+                "name": "Determine Requirements",
+                "questions": [
+                  "What regulatory requirements apply? (HIPAA, PCI-DSS, GDPR)",
+                  "What industry standards are relevant? (NIST, ISO 27001)",
+                  "What budget is available?",
+                  "What technical constraints exist?",
+                  "What operational requirements must be met?"
+                ],
+                "how_it_works": "Constraints shape options. Budget limits what you can buy. Regulations mandate certain controls. Technical environment determines what's possible."
+              },
+              {
+                "step": 3,
+                "name": "Evaluate Control Options",
+                "questions": [
+                  "What preventive controls could stop this threat?",
+                  "What detective controls would identify it?",
+                  "What corrective controls would fix it?",
+                  "If primary controls aren't feasible, what compensating controls exist?"
+                ],
+                "how_it_works": "Consider all control types for each risk. Don't just pick the first solution—evaluate options."
+              },
+              {
+                "step": 4,
+                "name": "Assess Cost vs. Benefit",
+                "factors": [
+                  "Implementation cost (purchase, deployment, configuration)",
+                  "Ongoing operational cost (maintenance, monitoring, training)",
+                  "Potential loss if risk materializes",
+                  "Risk reduction provided by the control"
+                ],
+                "how_it_works": "Controls should provide value proportional to cost. Don't spend $100,000 protecting a $10,000 asset."
+              },
+              {
+                "step": 5,
+                "name": "Consider Operational Impact",
+                "factors": [
+                  "Effect on user productivity",
+                  "Skills required to manage",
+                  "Integration with existing systems",
+                  "Failure mode behavior"
+                ],
+                "how_it_works": "A control that's too burdensome gets disabled or bypassed. Security must work with operations, not against them."
+              }
+            ]
+          },
+          {
+            "concept": "Common Control Selection Mistakes",
+            "mistakes": [
+              {
+                "mistake": "Over-relying on technical controls",
+                "problem": "Technology can't solve people and process problems",
+                "example": "Buying an expensive DLP tool but not training users on data handling",
+                "correct_approach": "Balance technical, managerial, and operational controls"
+              },
+              {
+                "mistake": "Ignoring compensating controls",
+                "problem": "Sometimes the 'textbook' solution isn't feasible",
+                "example": "Insisting on patching when vendor won't support it",
+                "correct_approach": "Accept that compensating controls are legitimate alternatives"
+              },
+              {
+                "mistake": "Failing to consider operational impact",
+                "problem": "Controls that impede work get circumvented",
+                "example": "Password policy requiring 30-character passwords changed weekly",
+                "correct_approach": "Balance security with usability; test controls with real users"
+              },
+              {
+                "mistake": "One-and-done mentality",
+                "problem": "Controls degrade over time without maintenance",
+                "example": "Implementing firewall rules and never reviewing them",
+                "correct_approach": "Plan for ongoing maintenance, monitoring, and adjustment"
+              }
+            ]
+          }
+        ],
+
+        "what_would_happen_if": {
+          "scenario": "What if you selected controls based only on security effectiveness, ignoring operational impact?",
+          "consequence": "Users would find workarounds. Shadow IT would flourish. Security would be seen as the enemy of productivity. Eventually, controls would be disabled 'temporarily' to get work done—and never re-enabled.",
+          "real_example": "Many organizations that implemented overly restrictive security saw users switching to personal devices and cloud services to bypass controls, creating more risk than the controls prevented."
+        }
+      },
+
+      "career_spotlight": {
+        "role": "SOC Analyst",
+        "title": "A Day in the Life: Recommending Controls Based on Incident Findings",
+        "scenario": {
+          "time": "Friday, 3:30 PM",
+          "situation": "You've just closed an incident where an employee fell for a phishing email. Now you're writing the lessons learned and control recommendations.",
+          "your_actions": [
+            {
+              "step": 1,
+              "action": "Analyze the attack path",
+              "details": "Email bypassed spam filter → User clicked link → Credentials entered on fake login page → Attacker accessed email → Data exfiltrated."
+            },
+            {
+              "step": 2,
+              "action": "Identify control gaps",
+              "details": "Spam filter missed the email (preventive failed), no MFA on email (no compensating control), no DLP for email exfiltration (detective gap)."
+            },
+            {
+              "step": 3,
+              "action": "Recommend detective improvements",
+              "details": "Add SIEM rule for impossible travel (user logging in from two locations). This is detective—identifies the compromise faster."
+            },
+            {
+              "step": 4,
+              "action": "Recommend preventive improvements",
+              "details": "Implement MFA for all email access. Even with stolen password, attacker can't access account. This is preventive—stops the attack."
+            },
+            {
+              "step": 5,
+              "action": "Recommend training improvements",
+              "details": "Phishing simulation program to train users. This is a managerial control (training requirement) that reduces likelihood of future clicks."
+            },
+            {
+              "step": 6,
+              "action": "Document cost-benefit",
+              "details": "MFA: $3/user/month, prevents credential theft attacks. Training: $10/user/year, reduces phishing success rate. Both have clear ROI against incident costs."
+            }
+          ],
+          "outcome": "Your recommendations go to management with clear justification. Control gaps identified in incident response drive real security improvements."
+        }
+      },
+
+      "key_points": [
+        "Control selection balances effectiveness, cost, and operational impact",
+        "Follow a structured process: identify risk, determine requirements, evaluate options, assess cost/benefit",
+        "Don't over-rely on technical controls—people and processes matter equally",
+        "Controls require ongoing maintenance and monitoring to remain effective",
+        "Document controls and map them to risks, compliance requirements, and assets"
+      ],
+
+      "knowledge_check": {
+        "question": "A healthcare organization needs to protect patient data on laptops used by traveling nurses. Full-disk encryption is the preferred control, but some legacy laptops can't support it. What approach best addresses this situation?",
+        "options": [
+          "Accept the risk since the laptops will be replaced eventually",
+          "Prohibit nurses from using the legacy laptops until they're replaced",
+          "Implement file-level encryption as a compensating control for legacy devices",
+          "Purchase new laptops immediately regardless of budget"
         ],
         "correct": 2,
-        "explanation": "CIS Controls are specifically designed to be prioritized and practical, with Implementation Groups (IG1, IG2, IG3) that help organizations of different sizes focus on what matters most. ISO 27001 is great for certification but not prioritized. NIST 800-53 is comprehensive but can be overwhelming. NIST CSF is voluntary (not required) and focuses more on risk management communication than tactical prioritization."
+        "explanation": "File-level encryption serves as a COMPENSATING CONTROL when full-disk encryption isn't feasible. It addresses the same risk (data exposure if laptop is lost) through alternative means. This is the pragmatic approach that balances security with operational reality.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "Eventually the problem will go away",
+            "why_wrong": "Risk acceptance for patient data likely violates HIPAA. Compensating controls are required."
+          },
+          {
+            "option": 1,
+            "why_tempting": "Prevents use of insecure systems",
+            "why_wrong": "May not be operationally feasible—nurses need laptops to do their jobs"
+          },
+          {
+            "option": 3,
+            "why_tempting": "Solves the problem completely",
+            "why_wrong": "Budget constraints are real. Security must work within organizational limitations."
+          }
+        ]
+      }
+    },
+
+    {
+      "section_id": "D1-L001-S05",
+      "title": "Control Frameworks and Standards",
+      "estimated_time": "15 minutes",
+      
+      "content": {
+        "overview": "Security professionals don't create control programs from scratch—they leverage established frameworks that provide comprehensive, tested approaches. Understanding these frameworks helps you implement controls systematically and satisfy compliance requirements.",
+
+        "core_concepts": [
+          {
+            "concept": "NIST Cybersecurity Framework (CSF)",
+            "description": "The most widely adopted framework in the US, organized around five core functions.",
+            "functions": [
+              {
+                "function": "Identify",
+                "purpose": "Understanding what you need to protect",
+                "activities": ["Asset management", "Risk assessment", "Governance", "Business environment"],
+                "question_answered": "What do we have and what are the risks?"
+              },
+              {
+                "function": "Protect",
+                "purpose": "Implementing safeguards",
+                "activities": ["Access control", "Awareness training", "Data security", "Protective technology"],
+                "question_answered": "How do we prevent incidents?"
+              },
+              {
+                "function": "Detect",
+                "purpose": "Identifying security events",
+                "activities": ["Continuous monitoring", "Detection processes", "Anomaly detection"],
+                "question_answered": "How do we know when something happens?"
+              },
+              {
+                "function": "Respond",
+                "purpose": "Acting on detected events",
+                "activities": ["Response planning", "Communications", "Analysis", "Mitigation"],
+                "question_answered": "What do we do when something happens?"
+              },
+              {
+                "function": "Recover",
+                "purpose": "Restoring capabilities",
+                "activities": ["Recovery planning", "Improvements", "Communications"],
+                "question_answered": "How do we get back to normal?"
+              }
+            ],
+            "exam_importance": "HIGH - Know the five functions in order",
+            "mnemonic": "I Prefer Dancing, Really Regularly (Identify, Protect, Detect, Respond, Recover)"
+          },
+          {
+            "concept": "NIST SP 800-53",
+            "description": "The comprehensive control catalog for federal systems with 1000+ controls organized into 20 families.",
+            "control_families_sample": [
+              "Access Control (AC)",
+              "Awareness and Training (AT)",
+              "Audit and Accountability (AU)",
+              "Configuration Management (CM)",
+              "Contingency Planning (CP)",
+              "Identification and Authentication (IA)",
+              "Incident Response (IR)"
+            ],
+            "baselines": {
+              "low": "Minimum controls for low-impact systems",
+              "moderate": "Enhanced controls for moderate-impact systems",
+              "high": "Maximum controls for high-impact systems"
+            },
+            "exam_note": "Know that 800-53 is for federal systems and provides detailed control catalog"
+          },
+          {
+            "concept": "ISO 27001/27002",
+            "description": "International standards for information security management.",
+            "distinction": {
+              "iso_27001": {
+                "purpose": "Requirements for an Information Security Management System (ISMS)",
+                "key_feature": "CERTIFIABLE—organizations get 'ISO 27001 certified'"
+              },
+              "iso_27002": {
+                "purpose": "Detailed guidance on implementing security controls",
+                "key_feature": "GUIDANCE—provides implementation details, not certification"
+              }
+            },
+            "exam_importance": "Know the distinction: 27001 = certification requirements, 27002 = implementation guidance"
+          },
+          {
+            "concept": "CIS Controls",
+            "description": "Prioritized, prescriptive set of actions organized into Implementation Groups.",
+            "implementation_groups": [
+              {
+                "group": "IG1 - Basic Cyber Hygiene",
+                "description": "Essential controls for all organizations",
+                "controls_count": "56 safeguards",
+                "for_whom": "Organizations with limited resources"
+              },
+              {
+                "group": "IG2 - Standard",
+                "description": "IG1 + additional controls for organizations with moderate resources",
+                "controls_count": "74 additional safeguards",
+                "for_whom": "Organizations with dedicated IT staff"
+              },
+              {
+                "group": "IG3 - Comprehensive",
+                "description": "IG1 + IG2 + advanced controls",
+                "controls_count": "23 additional safeguards",
+                "for_whom": "Organizations with significant security resources"
+              }
+            ],
+            "key_differentiator": "PRIORITIZATION—CIS tells you what to do first",
+            "exam_importance": "Know that CIS Controls are prioritized into Implementation Groups"
+          },
+          {
+            "concept": "Industry-Specific Frameworks",
+            "frameworks": [
+              {
+                "framework": "PCI-DSS",
+                "industry": "Payment card industry",
+                "structure": "12 requirements, ~250 controls",
+                "applies_to": "Any organization handling payment card data"
+              },
+              {
+                "framework": "HIPAA Security Rule",
+                "industry": "Healthcare",
+                "structure": "Administrative, physical, technical safeguards",
+                "applies_to": "Covered entities and business associates handling PHI"
+              },
+              {
+                "framework": "SOC 2",
+                "industry": "Service organizations",
+                "structure": "Trust Services Criteria",
+                "applies_to": "SaaS providers, cloud services, any service handling customer data"
+              }
+            ]
+          }
+        ],
+
+        "how_it_works": {
+          "framework_crosswalks": {
+            "concept": "Mapping controls between frameworks to satisfy multiple requirements with single implementations",
+            "example": "One encryption control can satisfy NIST CSF PR.DS-1, PCI-DSS Requirement 3.4, and HIPAA Technical Safeguard 164.312(a)(2)(iv)",
+            "benefit": "Reduce duplication of effort, streamline audits, ensure comprehensive coverage"
+          }
+        }
+      },
+
+      "deep_dive": {
+        "title": "Technical Deep Dive: Mapping Controls to Frameworks",
+        "expandable": true,
+        "content": {
+          "crosswalk_example": {
+            "control": "Data Encryption at Rest",
+            "framework_mappings": [
+              {
+                "framework": "NIST CSF",
+                "reference": "PR.DS-1",
+                "requirement": "Data-at-rest is protected"
+              },
+              {
+                "framework": "NIST 800-53",
+                "reference": "SC-28",
+                "requirement": "Protection of Information at Rest"
+              },
+              {
+                "framework": "ISO 27002",
+                "reference": "10.1.1",
+                "requirement": "Cryptographic controls policy"
+              },
+              {
+                "framework": "PCI-DSS",
+                "reference": "3.4",
+                "requirement": "Render PAN unreadable anywhere it is stored"
+              },
+              {
+                "framework": "CIS Controls",
+                "reference": "3.11",
+                "requirement": "Encrypt Sensitive Data at Rest"
+              }
+            ],
+            "practical_note": "One technical implementation, documented once, satisfies five framework requirements. This is why GRC teams create crosswalks."
+          }
+        }
+      },
+
+      "memory_hooks": {
+        "mnemonic_nist_csf": "I Prefer Dancing, Really Regularly - Identify, Protect, Detect, Respond, Recover",
+        "common_mistakes": [
+          {
+            "mistake": "Confusing NIST CSF with NIST 800-53",
+            "why_wrong": "CSF is voluntary framework for all; 800-53 is mandatory control catalog for federal",
+            "memory_aid": "CSF = Core Security Framework (voluntary). 800-53 = 800 detailed controls for government."
+          },
+          {
+            "mistake": "Confusing ISO 27001 and 27002",
+            "why_wrong": "27001 is the certification; 27002 is the guidance",
+            "memory_aid": "27001 = 'One' certification you get. 27002 = 'Too' much detail to certify against."
+          }
+        ]
+      },
+
+      "must_remember_for_exam": [
+        {
+          "fact": "NIST CSF five functions: Identify, Protect, Detect, Respond, Recover",
+          "why_tested": "Appears in multiple questions—memorize the order"
+        },
+        {
+          "fact": "CIS Controls are PRIORITIZED (Implementation Groups)",
+          "why_tested": "Key differentiator from other frameworks"
+        },
+        {
+          "fact": "ISO 27001 = certification, ISO 27002 = guidance",
+          "why_tested": "Common exam distinction"
+        },
+        {
+          "fact": "PCI-DSS has 12 requirements organized into 6 control objectives",
+          "why_tested": "Tests awareness of industry frameworks"
+        }
+      ],
+
+      "key_points": [
+        "NIST CSF organizes security into five functions: Identify, Protect, Detect, Respond, Recover",
+        "NIST SP 800-53 provides detailed control catalog with 1000+ controls for federal systems",
+        "ISO 27001 is the certifiable standard; ISO 27002 provides implementation guidance",
+        "CIS Controls are prioritized into Implementation Groups for practical adoption",
+        "Framework crosswalks help satisfy multiple compliance requirements with unified implementations"
+      ],
+
+      "knowledge_check": {
+        "question": "An organization wants to prioritize security improvements with limited resources, starting with the most impactful controls first. Which framework would be MOST appropriate for this approach?",
+        "options": [
+          "NIST SP 800-53 because it's the most comprehensive",
+          "ISO 27001 because it's internationally recognized",
+          "CIS Controls because they're organized by implementation priority",
+          "NIST CSF because it covers all five security functions"
+        ],
+        "correct": 2,
+        "explanation": "CIS Controls are specifically designed for prioritized implementation through Implementation Groups (IG1, IG2, IG3). Organizations can start with essential controls (IG1) and progressively add more as resources permit. This prioritization is the key differentiator of CIS Controls.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "Comprehensive seems thorough",
+            "why_wrong": "Comprehensive doesn't mean prioritized. 800-53 has 1000+ controls without telling you where to start."
+          },
+          {
+            "option": 1,
+            "why_tempting": "International recognition suggests wide applicability",
+            "why_wrong": "ISO 27001 provides requirements but not prioritization guidance"
+          },
+          {
+            "option": 3,
+            "why_tempting": "Covering all functions seems complete",
+            "why_wrong": "NIST CSF organizes security comprehensively but doesn't prioritize controls"
+          }
+        ]
       }
     }
   ],
 
-  "deep_dive": {
-    "title": "Hands-On Lab: Implementing Basic Linux Security Controls",
-    "introduction": "In this lab, you'll implement and verify several types of security controls on a Linux system. This hands-on experience reinforces the concepts and prepares you for real-world security work.",
-    "prerequisites": [
-      "Linux VM (Ubuntu 22.04 LTS recommended) or WSL2",
-      "Sudo/root access",
-      "Basic command line familiarity"
-    ],
-    "labs": [
+  "hands_on_labs": {
+    "browser_labs": [
       {
-        "lab_id": "LAB-001-1",
-        "title": "Lab 1: Configure UFW Firewall (Technical/Preventive Control)",
-        "objective": "Implement a host-based firewall to control network traffic",
+        "lab_id": "lab-control-classification",
+        "title": "Control Classification Challenge",
+        "type": "drag_and_drop",
+        "difficulty": "beginner",
         "estimated_time": "15 minutes",
-        "steps": [
-          {
-            "step": 1,
-            "instruction": "Check current firewall status",
-            "command": "sudo ufw status verbose",
-            "expected_output": "Status: inactive (if not yet configured)",
-            "explanation": "UFW (Uncomplicated Firewall) provides a user-friendly interface to iptables"
-          },
-          {
-            "step": 2,
-            "instruction": "Set default policies (deny incoming, allow outgoing)",
-            "command": "sudo ufw default deny incoming && sudo ufw default allow outgoing",
-            "expected_output": "Default incoming policy changed to 'deny'\nDefault outgoing policy changed to 'allow'",
-            "explanation": "This implements least privilege - deny by default, explicitly allow what's needed"
-          },
-          {
-            "step": 3,
-            "instruction": "Allow SSH access (so you don't lock yourself out)",
-            "command": "sudo ufw allow 22/tcp",
-            "expected_output": "Rules updated\nRules updated (v6)",
-            "explanation": "Always allow SSH before enabling the firewall on a remote system"
-          },
-          {
-            "step": 4,
-            "instruction": "Enable the firewall",
-            "command": "sudo ufw enable",
-            "expected_output": "Firewall is active and enabled on system startup",
-            "explanation": "The firewall is now a PREVENTIVE TECHNICAL control"
-          },
-          {
-            "step": 5,
-            "instruction": "Verify the configuration",
-            "command": "sudo ufw status numbered",
-            "expected_output": "Status: active\n[1] 22/tcp ALLOW IN Anywhere",
-            "explanation": "Always verify your security controls are working as intended"
-          }
-        ],
-        "control_mapping": {
-          "category": "Technical",
-          "function": "Preventive",
-          "frameworks": ["CIS Control 4.4", "NIST 800-53 SC-7"]
-        }
+        "description": "Classify 20 security controls by category (Technical, Managerial, Operational, Physical) and type (Preventive, Detective, Corrective, etc.). Drag each control to the correct classification and receive immediate feedback.",
+        "learning_objective": "Build rapid, accurate control classification skills for exam scenarios",
+        "skills_practiced": ["Control categorization", "Control typing", "Classification rationale"],
+        "controls_to_classify": [
+          {"control": "Firewall rules", "category": "Technical", "type": "Preventive"},
+          {"control": "Security awareness training requirement", "category": "Managerial", "type": "Directive"},
+          {"control": "Daily log review", "category": "Operational", "type": "Detective"},
+          {"control": "Badge reader on server room", "category": "Physical", "type": "Preventive"},
+          {"control": "Intrusion Detection System", "category": "Technical", "type": "Detective"},
+          {"control": "Background check policy", "category": "Managerial", "type": "Preventive"},
+          {"control": "Security guard patrols", "category": "Operational", "type": "Detective"},
+          {"control": "Warning signs", "category": "Physical", "type": "Deterrent"},
+          {"control": "Backup restoration procedures", "category": "Operational", "type": "Corrective"},
+          {"control": "Network segmentation for legacy system", "category": "Technical", "type": "Compensating"}
+        ]
       },
       {
-        "lab_id": "LAB-001-2",
-        "title": "Lab 2: Configure File Permissions (Technical/Preventive Control)",
-        "objective": "Implement proper file permissions following least privilege",
-        "estimated_time": "10 minutes",
-        "steps": [
-          {
-            "step": 1,
-            "instruction": "Create a sensitive file",
-            "command": "echo 'CONFIDENTIAL: API_KEY=abc123' > ~/sensitive.txt",
-            "expected_output": "(no output)",
-            "explanation": "We'll secure this file to demonstrate permission controls"
-          },
-          {
-            "step": 2,
-            "instruction": "Check current permissions",
-            "command": "ls -la ~/sensitive.txt",
-            "expected_output": "-rw-rw-r-- 1 user user ... sensitive.txt",
-            "explanation": "Default permissions often allow group and world read access"
-          },
-          {
-            "step": 3,
-            "instruction": "Restrict to owner only",
-            "command": "chmod 600 ~/sensitive.txt",
-            "expected_output": "(no output)",
-            "explanation": "600 = owner read/write, no group or world access"
-          },
-          {
-            "step": 4,
-            "instruction": "Verify new permissions",
-            "command": "ls -la ~/sensitive.txt",
-            "expected_output": "-rw------- 1 user user ... sensitive.txt",
-            "explanation": "Only the owner can now read or modify this file"
-          }
-        ],
-        "control_mapping": {
-          "category": "Technical",
-          "function": "Preventive",
-          "frameworks": ["CIS Control 3.3", "NIST 800-53 AC-6"]
-        }
+        "lab_id": "lab-defense-depth",
+        "title": "Defense in Depth Designer",
+        "type": "interactive_builder",
+        "difficulty": "intermediate",
+        "estimated_time": "20 minutes",
+        "description": "Build a defense-in-depth architecture for a given scenario. Select controls for each layer and see how they work together to stop a simulated attack.",
+        "learning_objective": "Understand how controls at different layers complement each other",
+        "skills_practiced": ["Layered security design", "Control selection", "Gap analysis"],
+        "scenario": "Design protection for an e-commerce company's customer database containing payment card information.",
+        "layers_to_fill": ["Perimeter", "Network", "Host", "Application", "Data"],
+        "available_controls": [
+          {"control": "Web Application Firewall", "layer": "Perimeter"},
+          {"control": "Network Segmentation", "layer": "Network"},
+          {"control": "EDR", "layer": "Host"},
+          {"control": "Input Validation", "layer": "Application"},
+          {"control": "Encryption at Rest", "layer": "Data"}
+        ]
       },
       {
-        "lab_id": "LAB-001-3",
-        "title": "Lab 3: Enable System Logging (Technical/Detective Control)",
-        "objective": "Configure and verify system logging for security monitoring",
+        "lab_id": "lab-fill-blank-controls",
+        "title": "Control Terminology Challenge",
+        "type": "fill_in_blank",
+        "difficulty": "beginner",
         "estimated_time": "10 minutes",
-        "steps": [
+        "description": "Complete sentences about security controls by filling in the correct terms. Reinforces key vocabulary and concepts.",
+        "learning_objective": "Solidify understanding of control terminology",
+        "questions": [
           {
-            "step": 1,
-            "instruction": "Check logging service status",
-            "command": "sudo systemctl status rsyslog",
-            "expected_output": "Active: active (running)",
-            "explanation": "rsyslog is the standard Linux logging daemon"
+            "sentence": "Controls implemented through technology and automation are called __________ controls.",
+            "answer": "technical",
+            "alternatives": ["logical"]
           },
           {
-            "step": 2,
-            "instruction": "View authentication logs",
-            "command": "sudo tail -20 /var/log/auth.log",
-            "expected_output": "(authentication events)",
-            "explanation": "This log captures login attempts, sudo usage, and authentication events"
+            "sentence": "An IDS is a __________ control because it identifies threats but cannot block them.",
+            "answer": "detective"
           },
           {
-            "step": 3,
-            "instruction": "Generate a log entry",
-            "command": "logger -t SecurityTest 'This is a test security event'",
-            "expected_output": "(no output)",
-            "explanation": "The logger command writes to syslog - useful for testing"
+            "sentence": "When primary controls aren't feasible, __________ controls provide alternative protection.",
+            "answer": "compensating"
           },
           {
-            "step": 4,
-            "instruction": "Verify the log entry",
-            "command": "grep SecurityTest /var/log/syslog",
-            "expected_output": "... SecurityTest: This is a test security event",
-            "explanation": "Your test message should appear in the system log"
+            "sentence": "The five NIST CSF functions are Identify, __________, Detect, Respond, and Recover.",
+            "answer": "Protect"
+          },
+          {
+            "sentence": "CIS Controls are organized into __________ Groups for prioritized implementation.",
+            "answer": "Implementation"
           }
-        ],
-        "control_mapping": {
-          "category": "Technical",
-          "function": "Detective",
-          "frameworks": ["CIS Control 8.2", "NIST 800-53 AU-2"]
-        }
+        ]
+      },
+      {
+        "lab_id": "lab-framework-matching",
+        "title": "Framework Matching Game",
+        "type": "matching",
+        "difficulty": "beginner",
+        "estimated_time": "10 minutes",
+        "description": "Match security frameworks to their key characteristics. Reinforces distinctions between major frameworks.",
+        "pairs": [
+          {"item": "NIST CSF", "match": "Five functions: Identify, Protect, Detect, Respond, Recover"},
+          {"item": "NIST 800-53", "match": "Comprehensive control catalog for federal systems"},
+          {"item": "ISO 27001", "match": "Certifiable international ISMS standard"},
+          {"item": "ISO 27002", "match": "Implementation guidance for security controls"},
+          {"item": "CIS Controls", "match": "Prioritized controls in Implementation Groups"},
+          {"item": "PCI-DSS", "match": "12 requirements for payment card security"}
+        ]
       }
-    ]
-  },
+    ],
 
-  "practice_platforms": {
-    "title": "Where to Practice",
-    "description": "These platforms provide hands-on environments to practice security controls",
-    "platforms": [
+    "external_labs": [
       {
-        "name": "TryHackMe",
-        "url": "https://tryhackme.com",
-        "cost": "Free tier available, $10/month for premium",
-        "best_for": "Beginners, guided learning paths",
-        "relevant_rooms": ["Linux Fundamentals", "Network Security", "Introduction to SIEM"]
-      },
-      {
-        "name": "HackTheBox Academy",
-        "url": "https://academy.hackthebox.com",
-        "cost": "Free tier available",
-        "best_for": "Intermediate learners, more technical depth",
-        "relevant_modules": ["Linux Fundamentals", "Introduction to Active Directory"]
-      },
-      {
-        "name": "LetsDefend",
-        "url": "https://letsdefend.io",
-        "cost": "Free tier available",
-        "best_for": "SOC analyst skills, defensive security",
-        "relevant_paths": ["SOC Analyst Learning Path"]
-      },
-      {
-        "name": "CyberDefenders",
-        "url": "https://cyberdefenders.org",
+        "resource": "TryHackMe",
+        "lab_name": "Security Awareness Room",
+        "url": "https://tryhackme.com/room/introtocybersecurity",
         "cost": "Free",
-        "best_for": "Blue team challenges, forensics",
-        "relevant_labs": ["Network forensics challenges"]
+        "estimated_time": "1-2 hours",
+        "difficulty": "beginner",
+        "description": "Introduction to core security concepts including control types and their purposes.",
+        "what_youll_learn": [
+          "Basic security terminology",
+          "Different types of security controls",
+          "How controls protect assets"
+        ],
+        "role_relevance": ["soc_analyst", "security_engineer", "grc_analyst"],
+        "setup_guide": {
+          "steps": [
+            "Create free account at tryhackme.com",
+            "Navigate to the 'Intro to Cyber Security' room",
+            "Complete the modules in order",
+            "Answer the questions to reinforce learning"
+          ]
+        }
+      },
+      {
+        "resource": "NIST Website",
+        "lab_name": "Exploring the NIST Cybersecurity Framework",
+        "url": "https://www.nist.gov/cyberframework",
+        "cost": "Free",
+        "estimated_time": "1 hour",
+        "difficulty": "beginner",
+        "description": "Official NIST resources for understanding the CSF framework and its implementation.",
+        "what_youll_learn": [
+          "NIST CSF structure and functions",
+          "How to use the framework",
+          "Implementation tiers and profiles"
+        ],
+        "role_relevance": ["grc_analyst", "security_engineer"],
+        "getting_started_guide": {
+          "title": "Getting Started with NIST CSF",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to nist.gov/cyberframework",
+              "what_to_look_for": "The main CSF page with overview and resources"
+            },
+            {
+              "step": 2,
+              "action": "Download the CSF 2.0 PDF",
+              "what_to_look_for": "The five functions, categories, and subcategories"
+            },
+            {
+              "step": 3,
+              "action": "Review the Quick Start Guides",
+              "what_to_look_for": "Practical implementation guidance"
+            },
+            {
+              "step": 4,
+              "action": "Explore the Informative References",
+              "what_to_look_for": "Mappings to other frameworks (crosswalks)"
+            }
+          ]
+        }
+      },
+      {
+        "resource": "CIS Website",
+        "lab_name": "CIS Controls Navigator",
+        "url": "https://www.cisecurity.org/controls",
+        "cost": "Free",
+        "estimated_time": "1 hour",
+        "difficulty": "beginner",
+        "description": "Interactive tool for exploring CIS Controls and their implementation guidance.",
+        "what_youll_learn": [
+          "CIS Controls structure",
+          "Implementation Groups (IG1, IG2, IG3)",
+          "Specific control safeguards"
+        ],
+        "role_relevance": ["security_engineer", "grc_analyst"],
+        "getting_started_guide": {
+          "title": "Getting Started with CIS Controls",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Go to cisecurity.org/controls",
+              "what_to_look_for": "Overview of the 18 CIS Controls"
+            },
+            {
+              "step": 2,
+              "action": "Download the CIS Controls v8 PDF",
+              "what_to_look_for": "Full control descriptions and safeguards"
+            },
+            {
+              "step": 3,
+              "action": "Review Implementation Groups",
+              "what_to_look_for": "Which controls are in IG1 (basic hygiene)"
+            },
+            {
+              "step": 4,
+              "action": "Use the CIS Controls Navigator tool",
+              "what_to_look_for": "Interactive exploration of controls and mappings"
+            }
+          ]
+        }
+      }
+    ],
+
+    "tools_introduction": [
+      {
+        "tool": "GRC Platforms Overview",
+        "category": "Governance, Risk, and Compliance",
+        "purpose": "Manage security controls, compliance requirements, and risk across the organization",
+        "common_platforms": [
+          {"name": "ServiceNow GRC", "type": "Enterprise", "cost": "Commercial"},
+          {"name": "RSA Archer", "type": "Enterprise", "cost": "Commercial"},
+          {"name": "OneTrust", "type": "Enterprise", "cost": "Commercial"},
+          {"name": "SimpleRisk", "type": "Open Source", "cost": "Free"},
+          {"name": "Eramba", "type": "Open Source", "cost": "Free (Community)"}
+        ],
+        "role_relevance": ["grc_analyst"],
+        "what_grc_platforms_do": [
+          "Maintain control inventories",
+          "Track compliance against frameworks",
+          "Manage risk registers",
+          "Document control assessments",
+          "Generate audit reports"
+        ],
+        "getting_started": {
+          "title": "Getting Started with GRC Concepts",
+          "recommendation": "For learning, try SimpleRisk or Eramba Community Edition to understand GRC workflows before using enterprise tools.",
+          "steps": [
+            "Download and install SimpleRisk (Docker available)",
+            "Create a sample organization and assets",
+            "Add risks and link to controls",
+            "Perform a control assessment",
+            "Generate a risk report"
+          ]
+        }
       }
     ]
   },
 
-  "tool_integration": {
-    "title": "Tools Covered in This Lesson",
-    "tools": [
-      {
-        "name": "UFW (Uncomplicated Firewall)",
-        "category": "Network Security",
-        "control_type": "Technical/Preventive",
-        "platform": "Linux",
-        "commands_to_know": ["ufw status", "ufw allow", "ufw deny", "ufw enable"]
-      },
-      {
-        "name": "Nessus Essentials",
-        "category": "Vulnerability Scanner",
-        "control_type": "Technical/Detective",
-        "platform": "Cross-platform",
-        "free_access": "https://www.tenable.com/products/nessus/nessus-essentials"
-      },
-      {
-        "name": "OpenVAS",
-        "category": "Vulnerability Scanner",
-        "control_type": "Technical/Detective",
-        "platform": "Linux",
-        "free_access": "https://www.openvas.org/"
-      }
-    ]
+  "tools_and_technologies": {
+    "tools_by_control_category": {
+      "technical_controls": [
+        {
+          "tool_category": "Firewalls",
+          "examples": ["Palo Alto", "Fortinet", "pfSense", "iptables/nftables"],
+          "role_usage": ["security_engineer", "soc_analyst"],
+          "lesson_integration": "Covered in depth in D3-LESSON-003 (Network Security)"
+        },
+        {
+          "tool_category": "Intrusion Detection/Prevention",
+          "examples": ["Snort", "Suricata", "Zeek"],
+          "role_usage": ["soc_analyst", "security_engineer"],
+          "lesson_integration": "Covered in D4-LESSON-001 (Security Monitoring)"
+        },
+        {
+          "tool_category": "Endpoint Detection and Response (EDR)",
+          "examples": ["CrowdStrike Falcon", "SentinelOne", "Carbon Black", "Microsoft Defender for Endpoint"],
+          "role_usage": ["soc_analyst", "incident_responder"],
+          "lesson_integration": "Covered in D4-LESSON-001 (Security Monitoring)"
+        },
+        {
+          "tool_category": "SIEM",
+          "examples": ["Splunk", "Microsoft Sentinel", "QRadar", "Elastic Security"],
+          "role_usage": ["soc_analyst", "security_engineer"],
+          "lesson_integration": "Covered in D4-LESSON-001 (Security Monitoring)"
+        }
+      ],
+      "managerial_controls": [
+        {
+          "tool_category": "GRC Platforms",
+          "examples": ["ServiceNow GRC", "RSA Archer", "OneTrust", "SimpleRisk"],
+          "role_usage": ["grc_analyst"],
+          "lesson_integration": "Covered in D5-LESSON-001 (Security Governance)"
+        },
+        {
+          "tool_category": "Policy Management",
+          "examples": ["PowerDMS", "ConvergePoint", "MetaCompliance"],
+          "role_usage": ["grc_analyst"],
+          "lesson_integration": "Covered in D5-LESSON-001 (Security Governance)"
+        }
+      ],
+      "operational_controls": [
+        {
+          "tool_category": "Patch Management",
+          "examples": ["WSUS", "SCCM/MECM", "Automox", "Qualys Patch Management"],
+          "role_usage": ["security_engineer", "soc_analyst"],
+          "lesson_integration": "Covered in D4-LESSON-004 (Vulnerability Management)"
+        },
+        {
+          "tool_category": "Backup Solutions",
+          "examples": ["Veeam", "Commvault", "Veritas", "AWS Backup"],
+          "role_usage": ["security_engineer"],
+          "lesson_integration": "Covered in D3-LESSON-007 (Resilience and Recovery)"
+        }
+      ]
+    }
   },
 
   "hands_on_activity": {
-    "title": "Control Matrix Challenge",
-    "objective": "Create a control matrix for a small business scenario",
-    "scenario": "You've been hired as a security consultant for a small accounting firm (25 employees) that handles sensitive financial data. They have a limited budget but need to protect client information.",
+    "title": "Control Classification Exercise",
+    "objective": "Practice categorizing and typing security controls in a realistic scenario",
+    "scenario": {
+      "company": "Meridian Manufacturing",
+      "situation": "Your CISO has asked you to document the security controls protecting the company's new automated production line.",
+      "assets_to_protect": [
+        "Industrial control systems (ICS)",
+        "Production databases with proprietary formulas",
+        "Employee workstations",
+        "Physical manufacturing equipment"
+      ]
+    },
     "steps": [
-      "Identify 3 key assets that need protection",
-      "For each asset, identify at least one threat",
-      "For each threat, recommend one control from each category (technical, managerial, operational, physical)",
-      "For each control, identify its function (preventive, detective, corrective, etc.)",
-      "Prioritize your controls based on cost-effectiveness"
+      {
+        "step": 1,
+        "task": "List all security measures currently protecting the production environment",
+        "guidance": "Brainstorm at least 15 controls across all categories"
+      },
+      {
+        "step": 2,
+        "task": "Categorize each control by implementation type",
+        "categories": ["Technical", "Managerial", "Operational", "Physical"]
+      },
+      {
+        "step": 3,
+        "task": "Classify each control by function",
+        "types": ["Preventive", "Detective", "Corrective", "Deterrent", "Compensating", "Directive"]
+      },
+      {
+        "step": 4,
+        "task": "Identify any gaps",
+        "questions": ["Are there categories with few controls?", "Are there types missing?", "Are all assets protected?"]
+      },
+      {
+        "step": 5,
+        "task": "Recommend one additional control for each gap identified",
+        "requirements": "Justify your selection based on risk and cost-benefit"
+      },
+      {
+        "step": 6,
+        "task": "Create a control matrix",
+        "format": "Controls mapped to assets they protect"
+      }
     ],
-    "expected_outcome": "A 3x4 matrix showing how different control categories work together to protect critical assets",
+    "expected_outcome": "A completed control inventory with proper categorization, gap analysis, and recommendations. You should have controls across all four categories and multiple types.",
     "reflection_questions": [
-      "Which control category was easiest to identify controls for? Why?",
-      "Did any single control serve multiple functions?",
-      "How would your recommendations change if the budget were unlimited?",
-      "What compensating controls might you need if certain controls aren't feasible?"
+      "Which control category had the most controls? The fewest? What does this suggest?",
+      "Did you find controls that fit multiple categories or types? How did you decide?",
+      "If budget only allowed three new controls, which would you prioritize and why?"
     ]
   },
 
   "what_would_you_do": {
-    "scenario": "Budget Crunch Decision",
-    "context": "You're the security manager at a mid-sized manufacturing company. Leadership has cut your security budget by 40% for the upcoming year. You currently have: enterprise antivirus, a firewall, security awareness training, quarterly vulnerability scans, and a full-time security analyst. You can only keep THREE of these five items.",
-    "question": "Which three controls do you keep, and why?",
+    "scenario": {
+      "company": "Pinnacle Financial Services",
+      "situation": "During a risk assessment, you discover that a critical customer database runs on a legacy system that cannot support modern encryption. The vendor is out of business, and replacing the system would cost $2 million and take 18 months. A compliance audit is in 6 months.",
+      "constraints": [
+        "Database contains customer financial information subject to multiple regulations",
+        "Security budget is $200,000",
+        "CISO needs recommendation by end of week",
+        "Business cannot tolerate significant downtime",
+        "Database processes 50,000 transactions daily"
+      ]
+    },
+    "question": "What would you recommend to address this security gap?",
     "options": [
       {
         "id": "a",
-        "text": "Antivirus, firewall, and security analyst - focus on technical controls and human expertise",
+        "text": "Request emergency budget increase to accelerate system replacement before the audit",
         "is_best": false,
-        "feedback": "This keeps strong technical defenses and expertise but eliminates training and vulnerability management. Users will become your biggest vulnerability, and you won't know about new vulnerabilities.",
-        "consequences": "Within 6 months, 3 phishing incidents occur because users weren't trained. A critical vulnerability goes unpatched for 8 months because scans stopped."
+        "feedback": "While ideal from a security perspective, this is likely unrealistic. $2 million emergency budget requests rarely get approved, and 18-month projects can't be meaningfully accelerated for a 6-month deadline.",
+        "consequences": "Budget request likely denied. Audit approaches with no solution. Credibility damaged with leadership."
       },
       {
         "id": "b",
-        "text": "Firewall, security awareness training, and vulnerability scans - balance prevention, human factors, and assessment",
+        "text": "Implement compensating controls: network segmentation, enhanced monitoring, and application-layer encryption for data leaving the database",
         "is_best": true,
-        "feedback": "This maintains perimeter defense, addresses the human element (often the weakest link), and ensures you can identify vulnerabilities. The analyst loss hurts, but these three cover more ground.",
-        "consequences": "You lose incident response capacity but maintain a solid defensive posture. Phishing attempts fail because users are trained. Vulnerabilities are identified and prioritized even without dedicated staff."
+        "feedback": "This is the pragmatic approach. Compensating controls address the risk through alternative means. Network segmentation limits exposure, monitoring enables detection, and encrypting data in transit protects data even though the database itself can't encrypt. Document these as compensating controls for the audit.",
+        "consequences": "Risk significantly reduced within budget. Audit shows documented compensating controls addressing the gap."
       },
       {
         "id": "c",
-        "text": "Antivirus, vulnerability scans, and security analyst - focus on endpoint protection and expertise",
+        "text": "Accept the risk and document it for the audit, noting that replacement is planned",
         "is_best": false,
-        "feedback": "Without a firewall, your perimeter is wide open. Without training, users will click on anything. The analyst will be overwhelmed responding to incidents that better controls would have prevented.",
-        "consequences": "Network attacks increase 300% without firewall protection. The analyst spends all time on incident response instead of proactive security."
+        "feedback": "Risk acceptance might be appropriate for low-impact issues, but unencrypted financial data is a significant regulatory concern. Auditors expect compensating controls when primary controls aren't feasible.",
+        "consequences": "Audit findings issued. Regulatory scrutiny increases. Organization may face penalties."
       },
       {
         "id": "d",
-        "text": "Keep the security analyst and let them decide what else to cut",
+        "text": "Immediately take the database offline until a secure replacement can be implemented",
         "is_best": false,
-        "feedback": "While having expertise make decisions is good, this doesn't answer the question and leaves the analyst without tools to do their job effectively.",
-        "consequences": "The analyst has no tools to work with and becomes ineffective, eventually leaving for a better-resourced position."
+        "feedback": "This addresses security but ignores business operations. 50,000 daily transactions means this database is critical. Taking it offline would cause more harm than the security risk you're mitigating.",
+        "consequences": "Business operations severely impacted. Revenue loss likely exceeds replacement cost."
       }
     ],
-    "key_lesson": "When resources are limited, prioritize controls that provide the most coverage across different attack vectors. Technical controls alone aren't enough - the human element (training) and continuous assessment (vulnerability scans) are critical. Defense in depth means having coverage at multiple layers, even if each layer is thinner."
+    "key_lesson": "Compensating controls are a legitimate and often necessary approach when ideal solutions aren't feasible. Security professionals must balance security requirements with business constraints, budget realities, and timelines."
   },
 
   "summary": {
     "key_takeaways": [
-      "Security controls are categorized by implementation (technical, managerial, operational, physical) and function (preventive, detective, corrective, deterrent, compensating, directive)",
-      "Defense in depth uses multiple overlapping layers so no single failure results in complete compromise",
-      "Control selection balances security effectiveness against cost, operational impact, and feasibility",
-      "Frameworks like NIST CSF, CIS Controls, and ISO 27001 provide structured approaches to implementing controls",
-      "Regular assessment and documentation are essential for maintaining control effectiveness"
+      "Security controls are categorized by implementation: Technical (technology), Managerial (policies), Operational (day-to-day processes), Physical (tangible protections)",
+      "Control types define function: Preventive (stop), Detective (identify), Corrective (fix), Deterrent (discourage), Compensating (alternatives), Directive (specify)",
+      "Defense in depth uses multiple layers so single failures don't mean total compromise",
+      "Control selection balances effectiveness, cost, operational impact, and organizational constraints",
+      "Compensating controls are legitimate alternatives—not inferior substitutes",
+      "Frameworks (NIST CSF, CIS Controls, ISO 27001) provide structured approaches to control implementation"
     ],
     "exam_essentials": [
-      "Be able to categorize any control by both category AND function",
-      "Know the difference between IDS (detective) and IPS (preventive)",
-      "Understand compensating controls as legitimate alternatives, not inferior substitutes",
-      "Remember defense in depth = multiple layers with no single point of failure",
-      "Know major frameworks by name and general purpose"
+      "Categorize controls by HOW they're implemented (technical, managerial, operational, physical)",
+      "Identify control types by WHAT they accomplish (preventive, detective, corrective, deterrent, compensating, directive)",
+      "Know that IDS is DETECTIVE, IPS is PREVENTIVE",
+      "Know NIST CSF's five functions: Identify, Protect, Detect, Respond, Recover",
+      "Remember compensating controls are ALTERNATIVES—not inferior",
+      "CIS Controls are PRIORITIZED into Implementation Groups"
     ],
-    "connection_to_next": "Now that you understand security controls, the next lesson covers the CIA Triad - the fundamental principles (confidentiality, integrity, availability) that controls are designed to protect."
+    "career_connections": {
+      "soc_analyst": "You work with detective controls daily (SIEM, IDS). Understanding control categories helps you recommend improvements.",
+      "incident_responder": "You identify which controls failed during incidents and recommend corrective and compensating controls.",
+      "security_engineer": "You design and implement technical controls across all layers. This lesson is your foundation.",
+      "grc_analyst": "You map controls to frameworks and compliance requirements. Control categorization is your daily work.",
+      "penetration_tester": "Understanding control types helps you test them effectively and report on gaps."
+    },
+    "connection_to_next": "Now that you understand how controls are categorized and how they work together, the next lesson explores what these controls protect: the CIA Triad (Confidentiality, Integrity, Availability). You'll learn why we implement controls and what security properties they preserve."
   },
 
   "related_content": {
-    "simulations": ["D1-SIM-001_Security_Controls"],
-    "remediation": ["D1-REM-001_Policy_Fundamentals"],
-    "next_lesson": "D1-LESSON-002_CIA_Triad_Fundamentals",
-    "previous_lesson": null
+    "simulations": ["D1-SIM-001"],
+    "remediation": ["D1-REM-001"],
+    "next_lesson": "D1-LESSON-002",
+    "previous_lesson": null,
+    "related_topics": [
+      {"topic": "CIA Triad", "lesson": "D1-LESSON-002", "relationship": "Controls protect CIA properties"},
+      {"topic": "Risk Management", "lesson": "D5-LESSON-002", "relationship": "Risk drives control selection"},
+      {"topic": "Security Governance", "lesson": "D5-LESSON-001", "relationship": "Governance mandates controls"},
+      {"topic": "Security Monitoring", "lesson": "D4-LESSON-001", "relationship": "Detective controls in action"}
+    ]
   }
 }

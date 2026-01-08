@@ -2,424 +2,147 @@
   "lesson_id": "D2-LESSON-011",
   "domain": 2,
   "title": "Attack Frameworks and Methodologies",
-  "objectives_covered": ["2.1", "2.4"],
-  "estimated_duration": "80-95 minutes (Core: 45 min, Deep Dives: 35-50 min)",
-  "difficulty": "intermediate",
-  "prerequisites": ["D2-LESSON-001", "D2-LESSON-008"],
+  "subtitle": "Understanding How Attackers Think: MITRE ATT&CK, Kill Chain, and More",
   "version": "2.0-enhanced",
+  "objectives_covered": ["2.1"],
+  "estimated_duration": "75-90 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": ["D2-LESSON-001"],
+
+  "skill_tree": {
+    "position": {"domain": 2, "sequence": 11, "tier": "intermediate"},
+    "prerequisites": [{"lesson_id": "D2-LESSON-001", "title": "Threat Actors", "why_needed": "Frameworks describe actor behaviors"}],
+    "unlocks": [{"lesson_id": "D4-LESSON-001", "title": "Security Monitoring", "connection": "Framework-based detection"}]
+  },
+
+  "role_relevance": {
+    "soc_analyst": {"relevance": "critical", "percentage_of_job": "45-55%", "daily_tasks": ["Map alerts to ATT&CK", "Identify tactics", "Track TTPs"]},
+    "incident_responder": {"relevance": "critical", "percentage_of_job": "50-60%", "daily_tasks": ["Trace attack path", "Predict next moves", "Document using frameworks"]},
+    "security_engineer": {"relevance": "high", "percentage_of_job": "30-40%", "daily_tasks": ["Design defenses using ATT&CK", "Identify coverage gaps"]},
+    "penetration_tester": {"relevance": "critical", "percentage_of_job": "55-65%", "daily_tasks": ["Follow attack methodologies", "Emulate adversary TTPs"]}
+  },
 
   "introduction": {
-    "hook": "When security researchers analyzed the SolarWinds attack, they didn't just list indicators—they mapped the entire attack to the MITRE ATT&CK framework, revealing 18 distinct techniques across 9 tactics. This systematic analysis helped thousands of organizations understand exactly where to look for compromise. Attack frameworks transform chaotic incident data into structured intelligence, enabling defenders to think like attackers and disrupt attacks at any stage.",
-    
-    "learning_goals": [
-      "Apply the Cyber Kill Chain to understand attack progression",
-      "Navigate MITRE ATT&CK to analyze techniques and map defenses",
-      "Use the Diamond Model for intrusion analysis and attribution",
-      "Understand penetration testing methodologies",
-      "Apply frameworks to improve threat detection"
-    ],
-    
-    "why_it_matters": "Attackers follow patterns. Understanding these patterns helps defenders anticipate threats, detect intrusions earlier, and build comprehensive defenses. Expect 4-6 Security+ questions on the Cyber Kill Chain, MITRE ATT&CK, and attack methodologies.",
-    
-    "career_relevance": {
-      "soc_analyst": "You'll map alerts to MITRE ATT&CK techniques to understand attack context. Framework knowledge helps you identify what stage an attacker is in and what might come next.",
-      "incident_responder": "Frameworks structure your investigation—mapping to kill chain shows attack timeline; ATT&CK helps identify other techniques to look for.",
-      "grc_analyst": "Frameworks provide vocabulary for risk discussions. You'll assess security controls against ATT&CK coverage and report gaps.",
-      "penetration_tester": "You'll follow methodologies like PTES or OWASP. Understanding ATT&CK helps you test specific techniques and report findings in industry-standard language.",
-      "security_engineer": "Map detection rules to ATT&CK techniques to identify coverage gaps. Design defenses that address each kill chain stage."
-    }
+    "hook": "Attackers follow patterns. Understanding their playbooks—from the Cyber Kill Chain to MITRE ATT&CK—helps defenders anticipate moves, detect intrusions, and respond effectively.",
+    "exam_weight": {"estimated_questions": "4-6", "high_yield_topics": ["MITRE ATT&CK structure", "Kill Chain stages", "Diamond Model", "TTPs"]}
   },
 
   "sections": [
     {
       "section_id": "D2-L011-S01",
-      "title": "The Cyber Kill Chain",
-      "estimated_time": "15 minutes",
-      
-      "content": {
-        "overview": "The Cyber Kill Chain, developed by Lockheed Martin, describes stages of a targeted attack. Breaking any link disrupts the attack.",
-        
-        "kill_chain_stages": [
-          {
-            "stage": "1. Reconnaissance",
-            "description": "Attacker gathers information about target",
-            "activities": ["OSINT research", "Social media mining", "Network scanning", "Identify people and technologies"],
-            "timing": "Often months before attack",
-            "defenses": ["Limit public information", "Monitor for reconnaissance", "Honeypots"]
-          },
-          {
-            "stage": "2. Weaponization",
-            "description": "Create attack payload",
-            "activities": ["Combine exploit with malware", "Develop delivery mechanism", "Test against defenses"],
-            "note": "Happens on attacker infrastructure—hard to detect",
-            "defenses": ["Threat intelligence", "Understand attacker capabilities"]
-          },
-          {
-            "stage": "3. Delivery",
-            "description": "Transmit weapon to target",
-            "methods": ["Phishing emails", "Malicious websites", "USB drives", "Supply chain", "Watering hole"],
-            "defenses": ["Email filtering", "Web filtering", "User awareness training"]
-          },
-          {
-            "stage": "4. Exploitation",
-            "description": "Trigger the vulnerability",
-            "activities": ["Execute attacker's code", "Exploit browser, document, or service vulnerability"],
-            "defenses": ["Patching", "Endpoint protection", "Exploit mitigations (DEP, ASLR)"]
-          },
-          {
-            "stage": "5. Installation",
-            "description": "Establish persistence",
-            "activities": ["Install backdoor/malware", "Create accounts", "Scheduled tasks", "Registry modifications"],
-            "defenses": ["Application whitelisting", "Host-based IDS", "Baseline monitoring"]
-          },
-          {
-            "stage": "6. Command and Control (C2)",
-            "description": "Establish communication channel",
-            "activities": ["Receive commands", "Exfiltrate data", "Blend into normal traffic"],
-            "protocols": ["HTTP/HTTPS", "DNS tunneling", "Social media"],
-            "defenses": ["Network monitoring", "Egress filtering", "DNS analysis"]
-          },
-          {
-            "stage": "7. Actions on Objectives",
-            "description": "Achieve attacker's goals",
-            "activities": ["Data exfiltration", "System destruction", "Lateral movement", "Ransomware deployment"],
-            "defenses": ["DLP", "Network segmentation", "User behavior analytics"]
-          }
-        ],
-        
-        "defensive_concepts": {
-          "breaking_the_chain": "Stop attack at any stage; earlier is better",
-          "left_of_boom": "Detection/prevention before exploitation (stages 1-3)",
-          "right_of_boom": "Detection/response after initial compromise (stages 4-7)",
-          "defense_in_depth": "Controls at multiple stages provide redundancy"
-        },
-        
-        "visualization": {
-          "type": "ascii_diagram",
-          "title": "Cyber Kill Chain",
-          "diagram": [
-            "╔══════════════════════════════════════════════════════════════════════════════╗",
-            "║                           CYBER KILL CHAIN                                   ║",
-            "╠══════════════════════════════════════════════════════════════════════════════╣",
-            "║                                                                               ║",
-            "║  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐                          ║",
-            "║  │  RECON  │─▶│ WEAPON  │─▶│ DELIVER │─▶│ EXPLOIT │─▶                       ║",
-            "║  └─────────┘  └─────────┘  └─────────┘  └─────────┘                          ║",
-            "║       │            │            │            │                               ║",
-            "║       │            │            │            │                               ║",
-            "║  ◄────┴────────────┴────────────┴────────────┴─────────────────────────►    ║",
-            "║           LEFT OF BOOM                    RIGHT OF BOOM                      ║",
-            "║        (Prevention focus)              (Detection focus)                     ║",
-            "║                                                                               ║",
-            "║                         ┌─────────┐  ┌─────────┐  ┌─────────┐               ║",
-            "║                      ─▶│ INSTALL │─▶│   C2    │─▶│ ACTIONS │               ║",
-            "║                         └─────────┘  └─────────┘  └─────────┘               ║",
-            "║                                                                               ║",
-            "║  DEFENSE OPPORTUNITY AT EVERY STAGE:                                        ║",
-            "║  • Breaking ANY link disrupts the attack                                    ║",
-            "║  • Earlier detection = less damage                                           ║",
-            "║  • Multiple chances to catch attacker                                       ║",
-            "║                                                                               ║",
-            "╚══════════════════════════════════════════════════════════════════════════════╝"
-          ]
-        }
-      },
-      
-      "key_points": [
-        "7 stages: Recon → Weaponization → Delivery → Exploitation → Installation → C2 → Actions",
-        "Breaking ANY link disrupts the attack",
-        "Earlier detection (left of boom) prevents more damage",
-        "Each stage has specific defensive controls",
-        "Map defenses to stages for gap analysis"
-      ],
-      
-      "exam_tips": [
-        "Know all 7 stages in order",
-        "Reconnaissance = information gathering BEFORE attack",
-        "Delivery = how weapon reaches target (email, web)",
-        "C2 = Command and Control (communication channel)",
-        "Breaking any stage disrupts attack"
-      ],
-      
-      "glossary_terms": [
-        {
-          "term": "Cyber Kill Chain",
-          "definition": "Lockheed Martin's framework describing 7 stages of a targeted cyber attack.",
-          "exam_note": "Recon, Weapon, Deliver, Exploit, Install, C2, Actions."
-        },
-        {
-          "term": "Left of Boom",
-          "definition": "Prevention-focused activities before initial compromise occurs (early kill chain stages).",
-          "exam_note": "Focus on reconnaissance, delivery prevention."
-        }
-      ]
-    },
-
-    {
-      "section_id": "D2-L011-S02",
       "title": "MITRE ATT&CK Framework",
       "estimated_time": "15 minutes",
-      
       "content": {
-        "overview": "MITRE ATT&CK is a knowledge base of adversary tactics and techniques based on real-world observations. It's the industry standard for describing attack behaviors.",
-        
-        "framework_structure": {
-          "matrices": [
-            {"matrix": "Enterprise", "covers": "Windows, macOS, Linux, Cloud, Network"},
-            {"matrix": "Mobile", "covers": "iOS, Android"},
-            {"matrix": "ICS", "covers": "Industrial Control Systems"}
-          ],
-          "hierarchy": {
-            "tactics": {
-              "description": "The 'why' - adversary's goal",
-              "examples": ["Initial Access", "Execution", "Persistence", "Privilege Escalation", "Defense Evasion"]
-            },
-            "techniques": {
-              "description": "The 'how' - method to achieve goal",
-              "examples": ["Phishing (T1566)", "PowerShell (T1059.001)", "Scheduled Task (T1053)"]
-            },
-            "sub_techniques": {
-              "description": "Specific variants of techniques",
-              "example": "Phishing: Spearphishing Attachment (T1566.001), Spearphishing Link (T1566.002)"
-            },
-            "procedures": {
-              "description": "Specific implementations by threat groups",
-              "example": "APT29 uses Phishing with malicious links to Google Drive"
-            }
-          }
-        },
-        
-        "enterprise_tactics": [
-          {"tactic": "Reconnaissance", "goal": "Gather information for planning"},
-          {"tactic": "Resource Development", "goal": "Establish resources (infrastructure, capabilities)"},
-          {"tactic": "Initial Access", "goal": "Get into the network"},
-          {"tactic": "Execution", "goal": "Run malicious code"},
-          {"tactic": "Persistence", "goal": "Maintain foothold"},
-          {"tactic": "Privilege Escalation", "goal": "Gain higher permissions"},
-          {"tactic": "Defense Evasion", "goal": "Avoid detection"},
-          {"tactic": "Credential Access", "goal": "Steal credentials"},
-          {"tactic": "Discovery", "goal": "Learn about environment"},
-          {"tactic": "Lateral Movement", "goal": "Move through network"},
-          {"tactic": "Collection", "goal": "Gather data of interest"},
-          {"tactic": "Command and Control", "goal": "Communicate with compromised systems"},
-          {"tactic": "Exfiltration", "goal": "Steal data"},
-          {"tactic": "Impact", "goal": "Disrupt, destroy, manipulate"}
-        ],
-        
-        "using_attack": {
-          "detection": "Map detection rules to techniques for coverage analysis",
-          "hunting": "Search for specific technique artifacts",
-          "assessment": "Test defenses against specific techniques",
-          "reporting": "Common language for describing attacks",
-          "intelligence": "Map threat actor TTPs to techniques"
-        }
-      },
-      
-      "key_points": [
-        "MITRE ATT&CK is industry standard for describing adversary behaviors",
-        "Tactics = 'why' (goal); Techniques = 'how' (method)",
-        "14 enterprise tactics from Reconnaissance to Impact",
-        "Each technique has ID (T####), detection guidance, and mitigations",
-        "Use for detection mapping, threat hunting, and gap analysis"
-      ],
-      
-      "deep_dive": {
-        "title": "Using MITRE ATT&CK Navigator",
-        "estimated_time": "15 minutes",
-        "content": {
-          "description": "MITRE ATT&CK Navigator lets you visualize technique coverage.",
-          
-          "lab_attack_navigator": {
-            "title": "Lab: Map Defenses to ATT&CK",
-            "objective": "Visualize detection coverage gaps",
-            "steps": [
-              {
-                "step": 1,
-                "action": "Access ATT&CK Navigator",
-                "url": "https://mitre-attack.github.io/attack-navigator/"
-              },
-              {
-                "step": 2,
-                "action": "Create new layer",
-                "purpose": "Start mapping your detection coverage"
-              },
-              {
-                "step": 3,
-                "action": "Color techniques by coverage",
-                "example": [
-                  "Green = Good detection",
-                  "Yellow = Partial detection",
-                  "Red = No detection",
-                  "Leave blank = Unknown"
-                ]
-              },
-              {
-                "step": 4,
-                "action": "Identify gaps",
-                "analysis": "Look for tactics with many red/blank techniques"
-              },
-              {
-                "step": 5,
-                "action": "Compare to threat actors",
-                "method": "Load APT group layer, overlay with your detection",
-                "result": "See where gaps align with real threats"
-              }
-            ],
-            "example_findings": [
-              "Strong Initial Access detection (email security)",
-              "Weak Defense Evasion detection (limited EDR)",
-              "No Credential Access monitoring (no privileged access monitoring)"
+        "core_concepts": [
+          {
+            "concept": "ATT&CK Structure",
+            "definition": "Knowledge base of adversary tactics and techniques",
+            "components": [
+              {"component": "Tactics", "definition": "WHY - the adversary's goal", "count": "14 tactics"},
+              {"component": "Techniques", "definition": "HOW - method to achieve goal", "count": "Hundreds"},
+              {"component": "Procedures", "definition": "Specific implementation of technique"}
+            ]
+          },
+          {
+            "concept": "The 14 Tactics",
+            "tactics": [
+              "Reconnaissance", "Resource Development", "Initial Access", "Execution",
+              "Persistence", "Privilege Escalation", "Defense Evasion", "Credential Access",
+              "Discovery", "Lateral Movement", "Collection", "Command and Control",
+              "Exfiltration", "Impact"
+            ]
+          },
+          {
+            "concept": "ATT&CK Use Cases",
+            "uses": [
+              {"use": "Threat Intelligence", "description": "Map observed behaviors to known TTPs"},
+              {"use": "Detection Development", "description": "Build detections for specific techniques"},
+              {"use": "Gap Analysis", "description": "Identify undefended techniques"},
+              {"use": "Red Team Planning", "description": "Emulate specific adversaries"}
             ]
           }
-        }
+        ]
       },
-      
-      "exam_tips": [
-        "ATT&CK = Adversarial Tactics, Techniques, and Common Knowledge",
-        "Tactics = goal (why); Techniques = method (how)",
-        "Technique IDs start with T (e.g., T1566 = Phishing)",
-        "Used for detection mapping and threat intelligence",
-        "Three matrices: Enterprise, Mobile, ICS"
+      "must_remember_for_exam": [
+        {"fact": "ATT&CK: Tactics = WHY, Techniques = HOW", "why_tested": "Framework structure"},
+        {"fact": "14 tactics from Reconnaissance to Impact", "why_tested": "Framework scope"},
+        {"fact": "TTPs = Tactics, Techniques, Procedures", "why_tested": "Terminology"}
       ],
-      
-      "knowledge_check": {
-        "question": "In MITRE ATT&CK, what is the relationship between tactics and techniques?",
-        "options": [
-          "Tactics are specific; techniques are general categories",
-          "Tactics are goals; techniques are methods to achieve those goals",
-          "Tactics describe detection; techniques describe prevention",
-          "Tactics are for attackers; techniques are for defenders"
-        ],
-        "correct": 1,
-        "explanation": "Tactics represent the 'why'—the adversary's goal (e.g., Initial Access, Persistence). Techniques represent the 'how'—the methods used to achieve that goal (e.g., Phishing, Scheduled Task). Multiple techniques can achieve the same tactical goal."
-      }
+      "key_points": ["Tactics = goals (why), Techniques = methods (how)", "14 tactics cover full attack lifecycle", "Used for detection, gap analysis, red teaming"]
     },
-
+    {
+      "section_id": "D2-L011-S02",
+      "title": "Cyber Kill Chain",
+      "estimated_time": "12 minutes",
+      "content": {
+        "core_concepts": [
+          {
+            "concept": "Kill Chain Stages",
+            "stages": [
+              {"stage": "1. Reconnaissance", "description": "Research targets, gather intel"},
+              {"stage": "2. Weaponization", "description": "Create attack tools, package exploits"},
+              {"stage": "3. Delivery", "description": "Transmit weapon (email, web, USB)"},
+              {"stage": "4. Exploitation", "description": "Trigger vulnerability"},
+              {"stage": "5. Installation", "description": "Install malware, establish persistence"},
+              {"stage": "6. Command & Control", "description": "Establish remote communication"},
+              {"stage": "7. Actions on Objectives", "description": "Achieve goals (steal, disrupt)"}
+            ]
+          },
+          {
+            "concept": "Defensive Application",
+            "principle": "Break the chain at any stage to stop the attack",
+            "earlier_is_better": "Earlier detection = less damage"
+          }
+        ]
+      },
+      "must_remember_for_exam": [
+        {"fact": "7 stages: Recon → Weaponize → Deliver → Exploit → Install → C2 → Actions", "why_tested": "Sequence"},
+        {"fact": "Breaking chain at ANY stage stops attack", "why_tested": "Defense principle"}
+      ],
+      "key_points": ["7 sequential stages from Recon to Actions", "Break chain anywhere to stop attack", "Earlier detection = less damage"]
+    },
     {
       "section_id": "D2-L011-S03",
       "title": "Diamond Model and Other Frameworks",
       "estimated_time": "10 minutes",
-      
       "content": {
-        "overview": "The Diamond Model focuses on intrusion analysis and attribution. Other frameworks provide additional perspectives on attacks.",
-        
-        "diamond_model": {
-          "description": "Framework for analyzing intrusions based on four core features",
-          "features": [
-            {
-              "feature": "Adversary",
-              "description": "The threat actor conducting the attack",
-              "analysis": "Who is attacking? What are their capabilities and motivations?"
-            },
-            {
-              "feature": "Capability",
-              "description": "Tools and techniques used",
-              "analysis": "What malware, exploits, or TTPs are being used?"
-            },
-            {
-              "feature": "Infrastructure",
-              "description": "Resources attacker uses",
-              "analysis": "What C2 servers, domains, IPs are involved?"
-            },
-            {
-              "feature": "Victim",
-              "description": "Target of the attack",
-              "analysis": "Who is being targeted? What assets?"
-            }
-          ],
-          "relationships": "Events connect features; patterns emerge across events",
-          "use": "Intrusion analysis, attribution, campaign tracking"
-        },
-        
-        "other_frameworks": [
+        "core_concepts": [
           {
-            "framework": "PTES (Penetration Testing Execution Standard)",
-            "purpose": "Standard methodology for penetration testing",
-            "phases": ["Pre-engagement", "Intelligence Gathering", "Threat Modeling", "Vulnerability Analysis", "Exploitation", "Post-Exploitation", "Reporting"]
+            "concept": "Diamond Model of Intrusion Analysis",
+            "components": [
+              {"vertex": "Adversary", "description": "Who is attacking"},
+              {"vertex": "Capability", "description": "Tools and techniques used"},
+              {"vertex": "Infrastructure", "description": "Resources (IPs, domains, servers)"},
+              {"vertex": "Victim", "description": "Target of the attack"}
+            ],
+            "use": "Analyze and track intrusion events"
           },
           {
-            "framework": "OWASP Testing Guide",
-            "purpose": "Web application security testing methodology",
-            "use": "Comprehensive web app testing"
-          },
-          {
-            "framework": "NIST Cybersecurity Framework",
-            "purpose": "Organizational cybersecurity risk management",
-            "functions": ["Identify", "Protect", "Detect", "Respond", "Recover"]
+            "concept": "OWASP Top 10",
+            "definition": "Most critical web application security risks",
+            "use": "Prioritize web security efforts"
           }
         ]
       },
-      
-      "key_points": [
-        "Diamond Model has 4 features: Adversary, Capability, Infrastructure, Victim",
-        "Diamond Model useful for intrusion analysis and attribution",
-        "PTES provides penetration testing methodology",
-        "NIST CSF: Identify, Protect, Detect, Respond, Recover",
-        "Different frameworks serve different purposes"
+      "must_remember_for_exam": [
+        {"fact": "Diamond Model: Adversary, Capability, Infrastructure, Victim", "why_tested": "Framework"},
+        {"fact": "OWASP Top 10 = critical web app risks", "why_tested": "Standard reference"}
       ],
-      
-      "exam_tips": [
-        "Diamond Model features: Adversary, Capability, Infrastructure, Victim",
-        "Diamond Model = intrusion analysis and attribution",
-        "PTES = penetration testing standard",
-        "NIST CSF functions: Identify, Protect, Detect, Respond, Recover",
-        "Know which framework fits which use case"
-      ]
+      "key_points": ["Diamond Model has 4 vertices for analysis", "OWASP Top 10 guides web security priorities"]
     }
   ],
 
-  "tool_spotlights": {
-    "tools": [
-      {
-        "name": "MITRE ATT&CK Navigator",
-        "category": "Visualization",
-        "description": "Visualize ATT&CK coverage and techniques",
-        "free_tier": "Completely free",
-        "url": "https://mitre-attack.github.io/attack-navigator/",
-        "career_relevance": "Detection gap analysis"
-      },
-      {
-        "name": "Atomic Red Team",
-        "category": "Testing",
-        "description": "Library of ATT&CK-mapped tests",
-        "free_tier": "Open source",
-        "url": "https://github.com/redcanaryco/atomic-red-team",
-        "career_relevance": "Test detection capabilities"
-      }
+  "summary": {
+    "exam_essentials": [
+      "MITRE ATT&CK: Tactics = WHY, Techniques = HOW",
+      "14 ATT&CK tactics from Recon to Impact",
+      "Kill Chain: 7 stages, break anywhere to stop attack",
+      "Diamond Model: Adversary, Capability, Infrastructure, Victim",
+      "TTPs = Tactics, Techniques, Procedures"
     ]
   },
 
-  "summary": {
-    "key_takeaways": [
-      "Cyber Kill Chain: 7 stages from Recon to Actions on Objectives",
-      "Breaking any kill chain link disrupts the attack",
-      "MITRE ATT&CK: Tactics (goals) contain Techniques (methods)",
-      "ATT&CK is industry standard for describing adversary behaviors",
-      "Diamond Model: Adversary, Capability, Infrastructure, Victim",
-      "Use frameworks for detection mapping, threat hunting, gap analysis"
-    ],
-    
-    "exam_essentials": [
-      "Kill Chain stages in order",
-      "ATT&CK tactics vs techniques distinction",
-      "Diamond Model four features",
-      "NIST CSF five functions",
-      "Framework use cases"
-    ],
-    
-    "skills_gained": [
-      "Map attacks to Cyber Kill Chain",
-      "Navigate MITRE ATT&CK for techniques",
-      "Use ATT&CK Navigator for gap analysis",
-      "Apply Diamond Model for analysis"
-    ],
-    
-    "connection_to_next": "Frameworks help structure attack understanding. The final Domain 2 lesson covers Security Assessments—the methods for testing your defenses including vulnerability assessments and penetration testing."
-  },
-
   "related_content": {
-    "simulations": ["D2-SIM-001"],
-    "remediation": ["D2-REM-001"],
     "next_lesson": "D2-LESSON-012",
     "previous_lesson": "D2-LESSON-010"
   }

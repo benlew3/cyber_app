@@ -1,671 +1,1189 @@
 {
   "lesson_id": "D1-LESSON-003",
   "domain": 1,
-  "title": "Authentication Methods",
+  "title": "Authentication Methods and Factors",
+  "subtitle": "Verifying Identity: From Passwords to Passwordless",
+  "version": "2.0-enhanced",
   "objectives_covered": ["1.2"],
-  "estimated_duration": "50-60 minutes",
+  "estimated_duration": "90-120 minutes (core: 60 min, labs: 30-60 min)",
   "difficulty": "beginner",
   "prerequisites": ["D1-LESSON-002"],
 
-  "introduction": {
-    "hook": "In 2023, over 80% of data breaches involved compromised credentials. Passwords alone are no longer enough - yet many organizations still rely on them as their only authentication method. From biometrics that can't be shared to hardware tokens that can't be phished, modern authentication provides layers of identity verification. Understanding these methods isn't just about passing the exam - it's about protecting the front door to every system you'll ever manage.",
-    "learning_goals": [
-      "Compare and contrast authentication factors (something you know, have, are, somewhere, do)",
-      "Implement multi-factor authentication strategies appropriate for different risk levels",
-      "Evaluate authentication protocols and their security properties",
-      "Identify authentication vulnerabilities and appropriate countermeasures",
-      "Select authentication methods based on security requirements and usability constraints"
+  "skill_tree": {
+    "position": {
+      "domain": 1,
+      "sequence": 3,
+      "tier": "foundation"
+    },
+    "prerequisites": [
+      {
+        "lesson_id": "D1-LESSON-002",
+        "title": "CIA Triad Fundamentals",
+        "why_needed": "AAA framework introduced - authentication is the first 'A'"
+      }
     ],
-    "why_it_matters": "Authentication is the foundation of access control - every permission decision starts with 'who is this user?' As a security professional, you'll configure authentication systems, investigate authentication failures, and recommend authentication improvements. Weak authentication is the #1 attack vector. On the exam, expect 5-8 questions on authentication factors, protocols, and implementations.",
-    "career_relevance": {
-      "soc_analyst": "You'll investigate failed authentications, detect brute force attacks, and identify compromised credentials",
-      "incident_responder": "Credential theft and authentication bypass are common attack vectors you'll need to understand",
-      "grc_analyst": "You'll assess authentication controls against compliance requirements like PCI DSS and HIPAA",
-      "penetration_tester": "Testing authentication is a core skill - password spraying, token theft, MFA bypass",
-      "security_engineer": "You'll design and implement authentication systems, federated identity, and SSO"
+    "unlocks": [
+      {
+        "lesson_id": "D1-LESSON-004",
+        "title": "Cryptographic Fundamentals",
+        "connection": "Cryptography underpins many authentication methods (digital signatures, certificates)"
+      },
+      {
+        "lesson_id": "D4-LESSON-005",
+        "title": "Identity and Access Management",
+        "connection": "IAM builds on authentication fundamentals"
+      }
+    ],
+    "related_concepts": [
+      {
+        "topic": "Zero Trust Architecture",
+        "lesson": "D1-LESSON-005",
+        "relationship": "Zero Trust requires continuous authentication verification"
+      },
+      {
+        "topic": "Security Operations",
+        "lesson": "D4-LESSON-001",
+        "relationship": "SOC monitors authentication anomalies"
+      }
+    ],
+    "builds_toward": [
+      "CompTIA Security+ SY0-701 Certification",
+      "CompTIA CySA+ (authentication monitoring)",
+      "CISSP Domain 5: Identity and Access Management"
+    ],
+    "cascade_learning": {
+      "this_lesson_establishes": [
+        "Five authentication factors (knowledge, possession, inherence, location, behavior)",
+        "Multi-factor authentication requirements and implementations",
+        "Biometric metrics (FAR, FRR, CER)",
+        "Token and certificate-based authentication",
+        "Authentication attacks and countermeasures"
+      ],
+      "builds_on_previous": {
+        "D1-LESSON-002": "AAA framework - this lesson deep-dives the first A (Authentication)"
+      },
+      "concepts_used_later": {
+        "D1-LESSON-004": "Cryptographic foundations for digital signatures and certificates",
+        "D1-LESSON-005": "Zero Trust requires strong, continuous authentication",
+        "D4-LESSON-005": "IAM builds on authentication as the entry point to access",
+        "D2-LESSON-003": "Social engineering attacks target authentication"
+      }
     }
   },
 
-  "linux_fundamentals": {
-    "why_linux": "Linux authentication forms the backbone of enterprise security. Understanding PAM, SSH keys, and local authentication is essential for any security role.",
-    "essential_commands_this_lesson": [
-      {
-        "command": "cat /etc/passwd",
-        "purpose": "View user account information",
-        "example_output": "root:x:0:0:root:/root:/bin/bash"
-      },
-      {
-        "command": "sudo cat /etc/shadow",
-        "purpose": "View password hashes (requires root)",
-        "example_output": "user:$6$salt$hash...:19000:0:99999:7:::"
-      },
-      {
-        "command": "ssh-keygen -t ed25519",
-        "purpose": "Generate SSH key pair (something you have)",
-        "example_output": "Generating public/private ed25519 key pair..."
-      },
-      {
-        "command": "passwd username",
-        "purpose": "Change user password",
-        "example_output": "Enter new UNIX password:"
-      },
-      {
-        "command": "faillock --user username",
-        "purpose": "Check failed login attempts (account lockout)",
-        "example_output": "username: failures=3"
-      }
-    ]
+  "role_relevance": {
+    "soc_analyst": {
+      "relevance": "critical",
+      "percentage_of_job": "30-40%",
+      "daily_usage": "Monitor authentication logs, investigate failed logins, detect credential attacks",
+      "specific_tasks": [
+        "Investigate impossible travel (logins from distant locations)",
+        "Detect credential stuffing and password spraying attacks",
+        "Monitor MFA bypass attempts",
+        "Respond to account lockouts and compromised credentials"
+      ],
+      "tools_youll_use": [
+        "SIEM (authentication log analysis)",
+        "UEBA (user behavior analytics)",
+        "Identity threat detection platforms"
+      ]
+    },
+    "incident_responder": {
+      "relevance": "high",
+      "percentage_of_job": "25-35%",
+      "daily_usage": "Investigate credential compromises, determine attack vectors",
+      "specific_tasks": [
+        "Determine how credentials were compromised",
+        "Identify scope of credential-based attacks",
+        "Recommend authentication hardening post-incident",
+        "Investigate MFA bypass incidents"
+      ],
+      "tools_youll_use": [
+        "Log analysis tools",
+        "Identity provider admin consoles",
+        "Credential breach databases"
+      ]
+    },
+    "security_engineer": {
+      "relevance": "critical",
+      "percentage_of_job": "40-50%",
+      "daily_usage": "Design and implement authentication systems",
+      "specific_tasks": [
+        "Deploy MFA solutions organization-wide",
+        "Configure identity providers (Azure AD, Okta, etc.)",
+        "Implement FIDO2/passwordless authentication",
+        "Design certificate-based authentication",
+        "Configure authentication policies"
+      ],
+      "tools_youll_use": [
+        "Identity providers (Azure AD, Okta, Ping)",
+        "PKI systems for certificate management",
+        "MFA platforms",
+        "Directory services (Active Directory)"
+      ]
+    },
+    "grc_analyst": {
+      "relevance": "high",
+      "percentage_of_job": "25-35%",
+      "daily_usage": "Audit authentication controls, verify compliance requirements",
+      "specific_tasks": [
+        "Verify MFA compliance for regulated systems",
+        "Audit password policies against standards",
+        "Assess authentication controls for frameworks (NIST, ISO)",
+        "Review authentication logs for compliance evidence"
+      ],
+      "tools_youll_use": [
+        "GRC platforms",
+        "Audit management tools",
+        "Compliance scanners"
+      ]
+    },
+    "penetration_tester": {
+      "relevance": "critical",
+      "percentage_of_job": "40-50%",
+      "daily_usage": "Test authentication mechanisms, attempt credential attacks",
+      "specific_tasks": [
+        "Test password policies and cracking resistance",
+        "Attempt credential stuffing and password spraying",
+        "Evaluate MFA bypass possibilities",
+        "Test for authentication vulnerabilities"
+      ],
+      "tools_youll_use": [
+        "Hydra, Hashcat, John the Ripper",
+        "Burp Suite (authentication testing)",
+        "Custom credential testing scripts",
+        "Social engineering for credential harvesting"
+      ]
+    }
+  },
+
+  "introduction": {
+    "hook": "The Colonial Pipeline ransomware attack that disrupted fuel supplies across the Eastern United States in 2021 started with a single compromised password on a VPN account that didn't use multi-factor authentication. One weak authentication control led to $4.4 million in ransom payments and days of fuel shortages. Authentication isn't just an IT checkbox—it's often the difference between a secure organization and a headline-making breach.",
+    
+    "learning_goals": [
+      "Identify and categorize the five authentication factors (knowledge, possession, inherence, location, behavior)",
+      "Design multi-factor authentication implementations using factors from different categories",
+      "Compare authentication technologies including biometrics, tokens, and certificates",
+      "Evaluate biometric systems using FAR, FRR, and CER metrics",
+      "Recognize common authentication attacks and appropriate countermeasures",
+      "Implement password best practices including salting and appropriate hashing algorithms"
+    ],
+    
+    "why_it_matters": {
+      "career_impact": "Authentication is the gateway to every system you'll protect. As a SOC analyst, you'll investigate authentication anomalies. As a security engineer, you'll implement MFA solutions. As a penetration tester, you'll test authentication weaknesses.",
+      "business_connection": "Microsoft reports that MFA blocks 99.9% of automated account attacks. Yet the 2023 Verizon DBIR shows 74% of breaches involve the human element—often through compromised credentials.",
+      "exam_relevance": "Expect 5-8 questions testing your understanding of authentication factors, MFA requirements, biometric metrics, and attack countermeasures."
+    },
+    
+    "exam_weight": {
+      "domain": "Domain 1: General Security Concepts (12%)",
+      "estimated_questions": "5-8 questions on authentication",
+      "question_types": [
+        "Factor classification: 'What type of factor is X?'",
+        "MFA validation: 'Is this combination MFA?'",
+        "Biometrics: 'FAR vs FRR - which is security vs usability?'",
+        "Attacks: 'What attack does X describe?'"
+      ],
+      "high_yield_topics": [
+        "Five authentication factors classification",
+        "MFA requires DIFFERENT factor categories",
+        "FAR (security) vs FRR (usability) distinction",
+        "TOTP vs HOTP difference",
+        "Password spraying vs credential stuffing"
+      ]
+    }
   },
 
   "sections": [
     {
       "section_id": "D1-L003-S01",
-      "title": "Authentication Factors: The Five Types",
-      "content": "Authentication verifies identity by confirming one or more factors. Each factor type has different security properties, usability characteristics, and vulnerabilities.\n\n**Factor 1: Something You Know**\nSecrets that exist only in your memory.\n\nExamples:\n- Passwords\n- PINs\n- Security questions\n- Passphrases\n\nStrengths:\n- Easy to implement\n- No hardware required\n- Users are familiar with them\n\nWeaknesses:\n- Can be guessed or cracked\n- Can be phished or socially engineered\n- Users choose weak passwords or reuse them\n- Can be forgotten\n\n**Factor 2: Something You Have**\nPhysical objects that prove possession.\n\nExamples:\n- Hardware tokens (YubiKey, RSA SecurID)\n- Smart cards\n- Mobile phones (for SMS or authenticator apps)\n- ID badges\n\nStrengths:\n- Can't be guessed remotely\n- Provides physical evidence\n- Hardware tokens are phishing-resistant\n\nWeaknesses:\n- Can be lost, stolen, or forgotten\n- Hardware costs money\n- Replacement process needed\n- Some methods (SMS) can be intercepted\n\n**Factor 3: Something You Are**\nBiometric characteristics unique to you.\n\nExamples:\n- Fingerprints\n- Facial recognition\n- Iris/retina scans\n- Voice recognition\n- Vein patterns\n\nStrengths:\n- Can't be forgotten or lost\n- Difficult to share or transfer\n- Convenient (always with you)\n\nWeaknesses:\n- Can't be changed if compromised\n- Privacy concerns\n- False acceptance/rejection rates\n- Requires special hardware\n- Can be fooled with sufficient effort\n\n**Factor 4: Somewhere You Are**\nLocation-based authentication.\n\nExamples:\n- GPS location\n- IP address geolocation\n- Network location (on corporate network)\n- Physical presence (badge reader location)\n\nStrengths:\n- Adds context to authentication decisions\n- Can detect impossible travel\n- Transparent to users\n\nWeaknesses:\n- Location can be spoofed (VPN, GPS spoofing)\n- Privacy implications\n- May block legitimate travel\n- Not reliable as sole factor\n\n**Factor 5: Something You Do**\nBehavioral patterns unique to individuals.\n\nExamples:\n- Typing patterns (keystroke dynamics)\n- Mouse movement patterns\n- Gait analysis\n- Signature dynamics\n\nStrengths:\n- Continuous authentication possible\n- Hard to impersonate\n- Transparent to users\n\nWeaknesses:\n- High false rejection rates\n- Patterns change over time\n- Requires learning period\n- Still emerging technology",
+      "title": "The Five Authentication Factors",
+      "estimated_time": "18 minutes",
+      
+      "content": {
+        "overview": "Authentication factors are categories of evidence used to verify identity. Understanding these categories is essential for designing effective authentication systems and recognizing what does—and doesn't—constitute multi-factor authentication.",
+        
+        "core_concepts": [
+          {
+            "concept": "Something You Know (Knowledge Factor)",
+            "definition": "Information only the legitimate user should know",
+            "examples": [
+              {"example": "Passwords and passphrases", "common": true},
+              {"example": "PINs (Personal Identification Numbers)", "common": true},
+              {"example": "Security questions", "common": true},
+              {"example": "Pattern locks", "common": true}
+            ],
+            "strengths": [
+              "Easy to implement - no hardware required",
+              "Users understand the concept",
+              "Easy to change if compromised"
+            ],
+            "weaknesses": [
+              "Can be guessed, stolen, or phished",
+              "Users choose weak passwords",
+              "Users reuse passwords across sites",
+              "Vulnerable to keyloggers and shoulder surfing"
+            ],
+            "how_it_works": {
+              "mechanism": "User provides secret information → System compares to stored value → Match = authenticated",
+              "what_would_happen_if": "If an attacker learns your password through phishing, they can authenticate as you from anywhere in the world. There's no physical barrier—knowledge can be transferred instantly."
+            }
+          },
+          {
+            "concept": "Something You Have (Possession Factor)",
+            "definition": "Physical items the user must possess",
+            "examples": [
+              {"example": "Smart cards and PIV/CAC cards", "common": true},
+              {"example": "Hardware tokens (YubiKey, RSA SecurID)", "common": true},
+              {"example": "Mobile phones (SMS codes, authenticator apps)", "common": true},
+              {"example": "Badge cards and proximity cards", "common": true}
+            ],
+            "strengths": [
+              "Physical possession required—remote attacks harder",
+              "Can be combined with other factors (card + PIN)",
+              "Lost/stolen items can be deactivated"
+            ],
+            "weaknesses": [
+              "Can be lost, stolen, or forgotten",
+              "Cost to deploy and manage",
+              "SMS can be intercepted (SIM swapping)"
+            ],
+            "how_it_works": {
+              "mechanism": "User presents physical token → Token proves possession (cryptographic response, OTP code) → System verifies → Authenticated",
+              "what_would_happen_if": "If an attacker wants to authenticate, they need physical access to the token. This is much harder than just knowing a password—they'd need to steal, clone, or intercept the physical factor."
+            }
+          },
+          {
+            "concept": "Something You Are (Inherence Factor)",
+            "definition": "Biological characteristics unique to the user",
+            "examples": [
+              {"example": "Fingerprints", "common": true},
+              {"example": "Facial recognition", "common": true},
+              {"example": "Iris/retina scans", "common": true},
+              {"example": "Voice recognition", "common": true}
+            ],
+            "strengths": [
+              "Can't be forgotten or lost",
+              "Difficult to share or transfer",
+              "Unique to each individual",
+              "Convenient for users"
+            ],
+            "weaknesses": [
+              "CAN'T BE CHANGED if compromised (critical limitation)",
+              "Privacy concerns",
+              "False positives/negatives (FAR/FRR)",
+              "Can be spoofed with effort"
+            ],
+            "how_it_works": {
+              "mechanism": "User presents biometric → Sensor captures and creates template → System compares to stored template → Match = authenticated",
+              "what_would_happen_if": "If your fingerprint data is stolen, you can't get new fingerprints. Unlike passwords, biometric compromise is permanent. This is why biometric templates (not raw data) should be stored, and biometrics should be combined with other factors."
+            }
+          },
+          {
+            "concept": "Somewhere You Are (Location Factor)",
+            "definition": "Geographic or network location of the user",
+            "examples": [
+              {"example": "GPS coordinates", "common": true},
+              {"example": "IP address geolocation", "common": true},
+              {"example": "Network location (on-premises vs. remote)", "common": true},
+              {"example": "Bluetooth proximity to registered devices", "common": false}
+            ],
+            "strengths": [
+              "Adds context to authentication decisions",
+              "Can detect anomalies (impossible travel)",
+              "Transparent to users"
+            ],
+            "weaknesses": [
+              "Can be spoofed (VPN, GPS spoofing)",
+              "Legitimate travel creates false positives",
+              "Less reliable than other factors"
+            ],
+            "how_it_works": {
+              "mechanism": "System determines user location → Compares to expected/allowed locations → Location matches policy → Contributes to authentication decision",
+              "what_would_happen_if": "Location alone is weak because VPNs and GPS spoofing exist. But detecting 'impossible travel' (login from New York, then London 10 minutes later) is valuable for detecting compromised credentials."
+            }
+          },
+          {
+            "concept": "Something You Do (Behavior Factor)",
+            "definition": "Unique patterns in how users interact with systems",
+            "examples": [
+              {"example": "Typing patterns (keystroke dynamics)", "common": true},
+              {"example": "Mouse movement patterns", "common": false},
+              {"example": "Gait analysis (how you walk)", "common": false},
+              {"example": "Usage patterns (typical login times)", "common": true}
+            ],
+            "strengths": [
+              "Continuous authentication possible",
+              "Transparent to users",
+              "Difficult to replicate exactly"
+            ],
+            "weaknesses": [
+              "Can change (injury, stress, new keyboard)",
+              "Requires learning period",
+              "Higher false positive rates"
+            ],
+            "how_it_works": {
+              "mechanism": "System learns user's behavioral patterns → Monitors ongoing behavior → Significant deviation triggers alert or re-authentication",
+              "what_would_happen_if": "Behavioral analysis enables continuous authentication—even after login, the system can detect if someone else takes over (typing differently, unusual actions). This catches session hijacking that password-only systems miss."
+            }
+          }
+        ]
+      },
 
-      "key_points": [
-        "Five authentication factors: Know, Have, Are, Somewhere, Do",
-        "Each factor has distinct security properties and vulnerabilities",
-        "Something you know is most common but most vulnerable to remote attacks",
-        "Something you are (biometrics) can't be changed if compromised",
-        "Something you have (hardware tokens) provides phishing resistance"
+      "deep_dive": {
+        "title": "Technical Deep Dive: Authentication Factor Security Analysis",
+        "expandable": true,
+        "content": {
+          "factor_comparison_matrix": {
+            "headers": ["Factor", "Attack Resistance", "Convenience", "Cost", "Spoofability"],
+            "data": [
+              ["Knowledge", "Low (phishing, guessing)", "High", "None", "Easy (sharing, stealing)"],
+              ["Possession", "Medium (theft, cloning)", "Medium", "Medium-High", "Moderate (physical access needed)"],
+              ["Inherence", "Medium-High", "High", "Medium", "Difficult but possible"],
+              ["Location", "Low (VPN, GPS spoof)", "High (transparent)", "Low", "Easy"],
+              ["Behavior", "Medium-High", "High (transparent)", "Low-Medium", "Difficult"]
+            ]
+          },
+          "real_attack_scenarios": [
+            {
+              "attack": "Phishing with fake login page",
+              "factor_defeated": "Knowledge (password captured)",
+              "factor_that_would_help": "Possession (FIDO2 key bound to real domain)"
+            },
+            {
+              "attack": "SIM swapping",
+              "factor_defeated": "Possession (SMS codes intercepted)",
+              "factor_that_would_help": "Possession (authenticator app on device, not phone number)"
+            },
+            {
+              "attack": "Session hijacking after login",
+              "factor_defeated": "All initial factors (already authenticated)",
+              "factor_that_would_help": "Behavior (continuous monitoring detects different user)"
+            }
+          ]
+        }
+      },
+
+      "career_spotlight": {
+        "role": "SOC Analyst",
+        "title": "A Day in the Life: Investigating Impossible Travel",
+        "scenario": {
+          "time": "Tuesday, 2:15 PM",
+          "situation": "Your SIEM alerts: User 'jsmith' logged in from New York at 2:00 PM, then from Moscow at 2:10 PM.",
+          "your_actions": [
+            {
+              "step": 1,
+              "action": "Assess the alert",
+              "details": "10 minutes between New York and Moscow is impossible travel. Either credentials are compromised or there's a technical explanation (VPN, proxy)."
+            },
+            {
+              "step": 2,
+              "action": "Check user context",
+              "details": "You check jsmith's profile: based in NYC office, no travel scheduled, no approved VPN to Moscow region."
+            },
+            {
+              "step": 3,
+              "action": "Analyze the Moscow login",
+              "details": "Moscow IP is from a known bulletproof hosting provider commonly used by attackers. Source suggests compromised credentials."
+            },
+            {
+              "step": 4,
+              "action": "Check for MFA",
+              "details": "You verify: did MFA occur? Log shows password authentication only—no MFA challenge. This account wasn't enrolled in MFA."
+            },
+            {
+              "step": 5,
+              "action": "Respond",
+              "details": "You immediately disable the account, document the incident, notify jsmith to verify the login wasn't legitimate, and escalate for credential reset."
+            }
+          ],
+          "outcome": "Location factor (somewhere you are) detected the anomaly. If jsmith had MFA, the attacker couldn't have logged in with just the stolen password.",
+          "lesson_learned": "Impossible travel detection is a key SOC capability. It catches credential compromise that password-only authentication misses."
+        }
+      },
+
+      "memory_hooks": {
+        "mnemonic": "Know, Have, Are, Where, Do - 5 authentication factors",
+        "alternative_mnemonic": "KHAWDO - Keep Hackers Away With Diverse Options",
+        "analogy": {
+          "concept": "Authentication factors are like different types of keys",
+          "mapping": [
+            {"factor": "Knowledge", "analogy": "Combination lock - anyone who knows the combo can open it"},
+            {"factor": "Possession", "analogy": "Physical key - must have the key in hand"},
+            {"factor": "Inherence", "analogy": "Fingerprint lock - only you can provide your fingerprint"},
+            {"factor": "Location", "analogy": "Geofenced lock - only works in certain places"},
+            {"factor": "Behavior", "analogy": "Voice-activated lock - knows your unique voice pattern"}
+          ]
+        },
+        "common_mistakes": [
+          {
+            "mistake": "Thinking security questions are a different factor than passwords",
+            "why_wrong": "Both are 'something you know' - same category. Security question + password is NOT MFA.",
+            "memory_aid": "If you can tell someone the answer, it's knowledge. Security questions = knowledge."
+          },
+          {
+            "mistake": "Thinking SMS codes are inherently secure",
+            "why_wrong": "SMS can be intercepted via SIM swapping. It's still 'something you have' (the phone), but the channel is vulnerable.",
+            "memory_aid": "SMS = Someone Might Steal it (via SIM swap)"
+          }
+        ]
+      },
+
+      "micro_checks": [
+        {
+          "type": "fill_in_blank",
+          "position": "after_knowledge",
+          "question": "Passwords and PINs are examples of the __________ factor.",
+          "answer": "knowledge (or something you know)",
+          "hint": "Information you keep in your head"
+        },
+        {
+          "type": "fill_in_blank",
+          "position": "after_inherence",
+          "question": "Biometrics like fingerprints are the __________ factor and cannot be __________ if compromised.",
+          "answer": "inherence; changed",
+          "hint": "Something you ARE - you can't get new fingerprints"
+        }
       ],
 
-      "real_world_example": {
-        "scenario": "Multi-factor authentication implementation",
-        "company": "Pinnacle Financial Services",
-        "application": "Pinnacle implemented different authentication levels based on risk: STANDARD ACCESS (email, intranet) - Password + authenticator app (know + have). PRIVILEGED ACCESS (admin systems) - Password + hardware token + IP restriction (know + have + somewhere). CRITICAL ACCESS (wire transfers) - All above + manager approval + behavioral analysis (all five factors engaged). This tiered approach balances security with usability."
-      },
+      "key_points": [
+        "Five authentication factors: Knowledge (know), Possession (have), Inherence (are), Location (where), Behavior (do)",
+        "Each factor has distinct strengths and weaknesses",
+        "Biometrics CAN'T BE CHANGED if compromised—critical limitation",
+        "Location and behavior add context but are less reliable standalone",
+        "Security questions are KNOWLEDGE factor (same as passwords)"
+      ],
 
-      "career_callout": {
-        "role": "Security Engineer",
-        "insight": "When designing authentication systems, you'll balance security against usability. Requiring hardware tokens for every login might be more secure but could impact productivity and frustrate users. Understanding factor strengths helps you select appropriate authentication for each risk level."
-      },
-
-      "exam_tips": [
-        "Know all five factor types and examples of each",
-        "Password = something you KNOW (most common exam answer)",
-        "Smart card = something you HAVE",
-        "Fingerprint = something you ARE",
-        "IP address restriction = somewhere you ARE",
-        "Keystroke dynamics = something you DO"
+      "must_remember_for_exam": [
+        {
+          "fact": "Five factors: Knowledge, Possession, Inherence, Location, Behavior",
+          "why_tested": "Must categorize any authentication method into correct factor"
+        },
+        {
+          "fact": "Security questions = Knowledge factor (NOT separate)",
+          "why_tested": "Common exam trap testing factor classification"
+        },
+        {
+          "fact": "SMS codes = Possession factor (having the phone)",
+          "why_tested": "Tests understanding of what possession means"
+        },
+        {
+          "fact": "Biometrics cannot be changed if compromised",
+          "why_tested": "Key limitation of inherence factor"
+        }
       ],
 
       "glossary_terms": [
         {
           "term": "Authentication Factor",
-          "definition": "A category of evidence used to verify identity, including something you know, have, are, somewhere you are, or something you do.",
-          "exam_note": "Five types. Know all examples. Multi-factor uses 2+ DIFFERENT factor types."
+          "definition": "A category of evidence used to verify identity: knowledge (know), possession (have), inherence (are), location (where), behavior (do).",
+          "exam_note": "Know all five and be able to categorize any authentication method."
         },
         {
-          "term": "Biometric Authentication",
-          "definition": "Authentication based on unique physical or behavioral characteristics of an individual.",
-          "exam_note": "Something you ARE. Can't change if compromised. FAR/FRR are key metrics."
+          "term": "Inherence Factor",
+          "definition": "Authentication based on biological characteristics unique to an individual (biometrics).",
+          "also_known_as": "Biometric factor",
+          "exam_note": "Key weakness: can't be changed if compromised."
         },
         {
-          "term": "Hardware Token",
-          "definition": "A physical device that generates or stores authentication credentials, such as one-time passwords or cryptographic keys.",
-          "exam_note": "Something you HAVE. Phishing-resistant. YubiKey, RSA SecurID are examples."
+          "term": "Possession Factor",
+          "definition": "Authentication based on something the user physically possesses (smart card, token, phone).",
+          "exam_note": "Includes hardware tokens AND phones (for SMS or authenticator apps)."
         }
       ],
 
       "knowledge_check": {
-        "question": "A company requires employees to authenticate using a password and a code from their mobile authenticator app. Which authentication factors are being used?",
+        "question": "A user authenticates by swiping their badge card and then entering a PIN. How many authentication factors are involved?",
         "options": [
-          "Two instances of something you know",
-          "Something you know and something you have",
-          "Something you know and something you are",
-          "Something you have and somewhere you are"
+          "One factor—the badge and PIN work together as a single authentication",
+          "Two factors—something you have (badge) and something you know (PIN)",
+          "Two factors—something you are (badge is personalized) and something you know (PIN)",
+          "Three factors—the badge, the PIN, and the card reader location"
         ],
         "correct": 1,
-        "explanation": "The password is something you KNOW. The mobile authenticator app represents something you HAVE (possession of the enrolled phone). The code itself is generated by the device you possess. This is true multi-factor authentication using two different factor types."
+        "explanation": "This is two-factor authentication: badge = possession (have), PIN = knowledge (know). The badge isn't 'something you are'—that would be biometric. The card reader location isn't used as an authentication factor here.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "They work together in one process",
+            "why_wrong": "Working together doesn't make them one factor. They're two distinct verification types."
+          },
+          {
+            "option": 2,
+            "why_tempting": "Badge is personalized to user",
+            "why_wrong": "Personalization doesn't make it 'inherence.' The badge is a physical object you possess, not a biological characteristic."
+          },
+          {
+            "option": 3,
+            "why_tempting": "Location might seem to add a factor",
+            "why_wrong": "Using a card reader at a specific location isn't the same as using location as an authentication factor."
+          }
+        ]
       }
     },
+
     {
       "section_id": "D1-L003-S02",
       "title": "Multi-Factor Authentication (MFA)",
-      "content": "Multi-factor authentication requires two or more different authentication factor types. Using two passwords would be two-step authentication, but NOT multi-factor because both are 'something you know.'\n\n**MFA Requirements**\nTrue MFA requires factors from DIFFERENT categories:\n- Password + Fingerprint (know + are) = MFA\n- Password + SMS code (know + have) = MFA\n- Password + Security question (know + know) = NOT MFA\n- Fingerprint + Iris scan (are + are) = NOT MFA (same category)\n\n**Common MFA Implementations**\n\n**SMS-Based**\n- How it works: Code sent via text message\n- Pros: Widely supported, no app needed\n- Cons: SIM swapping, SS7 vulnerabilities, social engineering\n- Security rating: Weak - better than nothing, but vulnerable\n\n**Authenticator Apps (TOTP)**\n- How it works: Time-based codes generated locally\n- Examples: Google Authenticator, Microsoft Authenticator, Authy\n- Pros: No network needed, more secure than SMS\n- Cons: Phone must be enrolled, backup codes needed\n- Security rating: Good - phishing-resistant to most attacks\n\n**Push Notifications**\n- How it works: Approve/deny prompt sent to phone\n- Examples: Duo Push, Microsoft Authenticator push\n- Pros: Convenient, shows context (location, app)\n- Cons: MFA fatigue attacks, requires internet\n- Security rating: Good - but vulnerable to prompt bombing\n\n**Hardware Tokens (FIDO2/WebAuthn)**\n- How it works: Cryptographic challenge-response\n- Examples: YubiKey, Titan Key\n- Pros: Phishing-proof, no shared secrets\n- Cons: Cost, loss/replacement procedures\n- Security rating: Excellent - gold standard\n\n**MFA Bypass Attacks**\n\n1. **Phishing**: Steal password and intercept MFA code in real-time\n2. **SIM Swapping**: Port victim's number to attacker's SIM\n3. **MFA Fatigue**: Spam push notifications until user approves\n4. **Man-in-the-Middle**: Proxy entire session including MFA\n5. **Session Hijacking**: Steal session token after MFA completes\n6. **Social Engineering**: Call support to bypass MFA\n\n**MFA Best Practices**\n- Prefer hardware tokens for privileged accounts\n- Use phishing-resistant methods (FIDO2)\n- Implement number matching for push notifications\n- Have backup methods and recovery procedures\n- Monitor for MFA bypass attempts",
+      "estimated_time": "15 minutes",
+      
+      "content": {
+        "overview": "Multi-factor authentication requires users to provide two or more authentication factors from DIFFERENT categories. MFA significantly increases security because an attacker must compromise multiple factor types—much harder than stealing just a password.",
+        
+        "core_concepts": [
+          {
+            "concept": "The Critical MFA Distinction",
+            "explanation": "MFA requires factors from DIFFERENT categories. This is the most tested concept.",
+            "is_mfa": [
+              {"combo": "Password + Authenticator app code", "factors": "Know + Have"},
+              {"combo": "Smart card + Fingerprint", "factors": "Have + Are"},
+              {"combo": "Password + SMS code + Face scan", "factors": "Know + Have + Are"}
+            ],
+            "is_not_mfa": [
+              {"combo": "Password + Security question", "factors": "Know + Know = NOT MFA", "why": "Both are knowledge"},
+              {"combo": "Two passwords", "factors": "Know + Know = NOT MFA", "why": "Both are knowledge"},
+              {"combo": "Two fingerprints", "factors": "Are + Are = NOT MFA", "why": "Both are inherence"}
+            ]
+          },
+          {
+            "concept": "Common MFA Implementations",
+            "implementations": [
+              {
+                "method": "Password + SMS/Voice OTP",
+                "how_it_works": "User enters password, receives code via text or call",
+                "security_level": "Low-Medium",
+                "weakness": "SMS vulnerable to SIM swapping, SS7 attacks",
+                "note": "NIST considers SMS 'deprecated' for high-security contexts"
+              },
+              {
+                "method": "Password + Authenticator App (TOTP)",
+                "how_it_works": "Time-based One-Time Password apps generate 6-digit codes every 30 seconds",
+                "security_level": "Medium-High",
+                "examples": ["Google Authenticator", "Microsoft Authenticator", "Authy"],
+                "advantage": "Works offline, no interception risk"
+              },
+              {
+                "method": "Password + Hardware Token (FIDO2)",
+                "how_it_works": "Cryptographic keys bound to specific domains, phishing-resistant",
+                "security_level": "High",
+                "examples": ["YubiKey", "Google Titan Key"],
+                "advantage": "Phishing resistant—won't authenticate to fake sites"
+              },
+              {
+                "method": "Password + Push Notification",
+                "how_it_works": "Approval request sent to registered mobile app",
+                "security_level": "Medium",
+                "weakness": "Vulnerable to MFA fatigue attacks (push bombing)"
+              }
+            ]
+          },
+          {
+            "concept": "MFA Attacks",
+            "attacks": [
+              {
+                "attack": "SIM Swapping",
+                "how_it_works": "Attacker convinces carrier to transfer victim's phone number to attacker's SIM",
+                "result": "Attacker receives SMS codes meant for victim",
+                "countermeasure": "Use authenticator apps instead of SMS, add carrier PIN"
+              },
+              {
+                "attack": "MFA Fatigue (Push Bombing)",
+                "how_it_works": "Attacker repeatedly sends push notifications until frustrated user approves",
+                "result": "User approves fraudulent login to stop the spam",
+                "countermeasure": "Number matching, limited attempts, user training"
+              },
+              {
+                "attack": "Real-Time Phishing (MITM)",
+                "how_it_works": "Attacker proxies between user and real site, captures OTP as entered",
+                "result": "Attacker uses captured OTP before it expires",
+                "countermeasure": "FIDO2 (domain-bound keys won't work on fake domain)"
+              }
+            ]
+          }
+        ],
 
-      "key_points": [
-        "True MFA requires factors from DIFFERENT categories",
-        "SMS-based MFA is weakest but better than nothing",
-        "Hardware tokens (FIDO2) are phishing-resistant - gold standard",
-        "MFA can be bypassed through phishing, SIM swapping, and fatigue attacks",
-        "Number matching helps prevent MFA fatigue attacks"
-      ],
-
-      "real_world_example": {
-        "scenario": "MFA fatigue attack leads to breach",
-        "company": "Global Tech Corporation (fictionalized real incident)",
-        "application": "Attackers obtained an employee's password through credential stuffing. They then triggered MFA push notifications repeatedly - over 100 in one hour - in the middle of the night. Exhausted and wanting the alerts to stop, the employee finally approved one. Attackers gained access and moved laterally for weeks before detection. LESSON: Implement rate limiting, number matching, and user education about MFA fatigue attacks."
+        "what_would_happen_if": {
+          "scenario": "What if you used password + security question instead of true MFA?",
+          "consequence": "You'd have two knowledge factors—both vulnerable to the same attacks. If an attacker can phish your password, they can phish your security questions too. True MFA forces attackers to use completely different attack methods for each factor.",
+          "lesson": "The power of MFA comes from requiring different TYPES of attacks. Password theft + device theft is much harder than password theft + security question theft."
+        }
       },
 
-      "career_callout": {
-        "role": "SOC Analyst",
-        "insight": "You'll monitor for MFA-related alerts: multiple failed MFA attempts, successful MFA from unusual locations, MFA enrollment changes. Understanding MFA attack patterns helps you distinguish between a user who forgot their token and an attacker trying to brute force MFA codes."
+      "deep_dive": {
+        "title": "Technical Deep Dive: TOTP Algorithm",
+        "expandable": true,
+        "content": {
+          "totp_mechanism": {
+            "description": "Time-based One-Time Password (RFC 6238)",
+            "how_it_works": [
+              "1. Shared secret established during enrollment (QR code scan)",
+              "2. Both sides have synchronized time (within 30-second windows)",
+              "3. Current time + shared secret → HMAC-SHA1 → 6-digit code",
+              "4. Code changes every 30 seconds",
+              "5. Server accepts current code plus one before/after (clock drift tolerance)"
+            ],
+            "security_properties": [
+              "Secret never transmitted after enrollment",
+              "Codes are single-use and time-limited",
+              "Works offline once set up"
+            ]
+          },
+          "totp_vs_hotp": {
+            "totp": {
+              "basis": "Time-based",
+              "code_validity": "30 seconds (configurable)",
+              "use_case": "Most authenticator apps"
+            },
+            "hotp": {
+              "basis": "Counter-based (HMAC)",
+              "code_validity": "Valid until used (then counter increments)",
+              "use_case": "Hardware tokens that don't track time"
+            }
+          }
+        }
       },
 
-      "visualization": {
-        "type": "ascii_diagram",
-        "title": "MFA Strength Comparison",
-        "diagram": [
-          "MFA METHOD SECURITY COMPARISON",
-          "================================",
-          "",
-          "WEAKEST                                         STRONGEST",
-          "  |                                                 |",
-          "  v                                                 v",
-          "[SMS] --> [Email] --> [TOTP App] --> [Push] --> [FIDO2/Hardware]",
-          "  |          |            |            |              |",
-          "  |          |            |            |              +-- Phishing-proof",
-          "  |          |            |            +-- Requires user action",
-          "  |          |            +-- Time-based, no network needed",
-          "  |          +-- Same issues as SMS",
-          "  +-- SIM swapping, SS7 attacks",
-          "",
-          "RECOMMENDATION: FIDO2 for privileged, TOTP minimum for standard"
+      "memory_hooks": {
+        "mnemonic": "Different Categories = Different Attack Methods Required",
+        "common_mistakes": [
+          {
+            "mistake": "Thinking 'two passwords is MFA because it's two things'",
+            "why_wrong": "Both passwords are 'something you know.' Same category = same attack defeats both.",
+            "memory_aid": "If both can be phished in the same email, it's not MFA."
+          },
+          {
+            "mistake": "Assuming all MFA is equally secure",
+            "why_wrong": "SMS is much weaker than FIDO2. SIM swapping defeats SMS; nothing defeats FIDO2 except physical theft.",
+            "memory_aid": "SMS = Susceptible. FIDO2 = Fortress."
+          }
         ]
       },
 
-      "exam_tips": [
-        "Two passwords is NOT MFA (same factor type)",
-        "SMS is weakest MFA but still counts as 'something you have'",
-        "FIDO2/WebAuthn/hardware tokens are phishing-resistant",
-        "MFA fatigue = spamming push notifications until user approves",
-        "Know the difference between 2FA, MFA, and two-step verification"
+      "key_points": [
+        "MFA requires factors from DIFFERENT categories—two passwords is NOT MFA",
+        "SMS-based MFA is vulnerable to SIM swapping; NIST considers it deprecated for high security",
+        "Authenticator apps (TOTP) are more secure than SMS and work offline",
+        "FIDO2/WebAuthn provides phishing resistance by binding keys to specific domains",
+        "MFA fatigue attacks exploit push notifications—use number matching as countermeasure"
       ],
 
-      "glossary_terms": [
+      "must_remember_for_exam": [
         {
-          "term": "Multi-Factor Authentication (MFA)",
-          "definition": "An authentication method requiring two or more different types of authentication factors to verify identity.",
-          "exam_note": "Must be DIFFERENT factor types. Two passwords is not MFA."
+          "fact": "Two items from same category ≠ MFA",
+          "why_tested": "Most common MFA question type"
         },
         {
-          "term": "TOTP (Time-based One-Time Password)",
-          "definition": "An algorithm that generates temporary codes based on current time and a shared secret, used in authenticator apps.",
-          "exam_note": "30-second codes typically. Google Authenticator, Authy. Better than SMS."
+          "fact": "SMS MFA is weak due to SIM swapping",
+          "why_tested": "Tests understanding of MFA vulnerabilities"
         },
         {
-          "term": "FIDO2/WebAuthn",
-          "definition": "A passwordless authentication standard using public-key cryptography to provide phishing-resistant authentication.",
-          "exam_note": "Phishing-proof. Hardware tokens or platform authenticators. Gold standard."
-        },
-        {
-          "term": "MFA Fatigue",
-          "definition": "An attack where adversaries repeatedly trigger MFA push notifications hoping the user will approve one out of frustration.",
-          "exam_note": "Counter with number matching, rate limiting, user education."
+          "fact": "FIDO2 is phishing-resistant (domain-bound)",
+          "why_tested": "Tests understanding of strongest MFA option"
         }
       ],
 
       "knowledge_check": {
-        "question": "An organization wants to implement the strongest possible MFA for their privileged administrator accounts. Which method should they choose?",
+        "question": "A company implements authentication requiring a password plus an answer to a randomly selected security question. Is this multi-factor authentication?",
         "options": [
-          "SMS-based codes because they're the most widely supported",
-          "Security questions as a backup to passwords",
-          "FIDO2 hardware security keys because they're phishing-resistant",
-          "Push notifications because they're convenient for users"
+          "Yes, because two different authentication challenges are required",
+          "Yes, because security questions are based on personal information",
+          "No, because both password and security questions are knowledge factors",
+          "No, because security questions can be easily guessed"
         ],
         "correct": 2,
-        "explanation": "FIDO2 hardware security keys provide phishing-resistant authentication through cryptographic challenge-response. Unlike SMS (vulnerable to SIM swapping), security questions (not even MFA), or push notifications (vulnerable to fatigue attacks), hardware keys cannot be phished because authentication is bound to the legitimate site."
+        "explanation": "This is NOT MFA because both elements are knowledge factors (something you know). True MFA requires factors from DIFFERENT categories.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "Two challenges sounds like two factors",
+            "why_wrong": "Number of challenges doesn't matter—factor CATEGORY matters"
+          },
+          {
+            "option": 1,
+            "why_tempting": "Personal information sounds unique",
+            "why_wrong": "Personal info you know is still 'knowledge' factor"
+          },
+          {
+            "option": 3,
+            "why_tempting": "Guessability is a real weakness",
+            "why_wrong": "Correct that it's not MFA, but wrong reason. Category duplication is the issue."
+          }
+        ]
       }
     },
+
     {
       "section_id": "D1-L003-S03",
-      "title": "Authentication Protocols",
-      "content": "Authentication protocols define how identity information is exchanged and verified. Understanding these protocols helps you configure systems securely and troubleshoot authentication issues.\n\n**Local Authentication**\nVerification against local system credentials.\n\n*Linux: PAM (Pluggable Authentication Modules)*\n- Modular authentication framework\n- Configurable per-application authentication\n- Supports various backends (local, LDAP, Kerberos)\n- Configuration in /etc/pam.d/\n\n*Windows: SAM and NTLM*\n- SAM: Security Account Manager (local accounts)\n- NTLM: NT LAN Manager (legacy protocol)\n- Still used for backward compatibility\n- Vulnerable to pass-the-hash attacks\n\n**Directory Services**\n\n*LDAP (Lightweight Directory Access Protocol)*\n- Standard protocol for directory services\n- Stores user accounts, groups, attributes\n- Used by Active Directory, OpenLDAP\n- Port 389 (LDAP), Port 636 (LDAPS - encrypted)\n\n*Active Directory*\n- Microsoft's directory service\n- Uses LDAP for queries\n- Uses Kerberos for authentication\n- Central management of Windows environments\n\n**Kerberos**\nTicket-based authentication protocol.\n\nComponents:\n- KDC (Key Distribution Center): Issues tickets\n- TGT (Ticket Granting Ticket): Initial ticket after login\n- Service Ticket: Access to specific services\n- Realm: Kerberos trust domain\n\nProcess:\n1. User authenticates to KDC, receives TGT\n2. TGT used to request service tickets\n3. Service tickets grant access to resources\n4. Single sign-on - no re-entering credentials\n\nStrengths:\n- No passwords sent over network\n- Mutual authentication\n- Single sign-on capability\n- Time-limited tickets\n\nWeaknesses:\n- Time synchronization critical\n- KDC is single point of failure\n- Pass-the-ticket attacks possible\n- Requires proper implementation\n\n**RADIUS and TACACS+**\n\n*RADIUS (Remote Authentication Dial-In User Service)*\n- Centralized authentication for network access\n- Used for VPN, Wi-Fi, network devices\n- UDP ports 1812/1813 (or legacy 1645/1646)\n- Encrypts only password, not full packet\n\n*TACACS+ (Terminal Access Controller Access-Control System Plus)*\n- Cisco-developed protocol\n- TCP port 49\n- Encrypts entire packet\n- Separates authentication, authorization, accounting\n- Preferred for network device administration",
+      "title": "Biometric Authentication",
+      "estimated_time": "15 minutes",
+      
+      "content": {
+        "overview": "Biometric authentication uses unique physical or behavioral characteristics to verify identity. As the 'something you are' factor, biometrics offer convenience and strong identity binding but come with unique challenges around accuracy, privacy, and irreversibility.",
+        
+        "core_concepts": [
+          {
+            "concept": "Biometric Types",
+            "physiological": [
+              {"type": "Fingerprint", "description": "Ridge patterns, minutiae points", "note": "Most widely deployed"},
+              {"type": "Facial Recognition", "description": "Facial geometry, distances between features", "note": "Affected by lighting, masks"},
+              {"type": "Iris Recognition", "description": "Colored ring patterns in eye", "note": "Very accurate, stable throughout life"},
+              {"type": "Retina Scan", "description": "Blood vessel patterns behind eye", "note": "Very accurate but intrusive"}
+            ],
+            "behavioral": [
+              {"type": "Voice Recognition", "description": "Vocal characteristics, speech patterns", "note": "Affected by illness"},
+              {"type": "Keystroke Dynamics", "description": "Typing rhythm and patterns", "note": "Enables continuous auth"},
+              {"type": "Gait Analysis", "description": "Walking patterns", "note": "Can work from surveillance"}
+            ]
+          },
+          {
+            "concept": "Biometric Performance Metrics",
+            "critical_exam_topic": true,
+            "metrics": [
+              {
+                "metric": "False Acceptance Rate (FAR)",
+                "also_called": "Type II Error, False Match Rate",
+                "definition": "Percentage of unauthorized users incorrectly ACCEPTED",
+                "concern": "SECURITY - attackers get in",
+                "tuning": "Lower FAR = more secure"
+              },
+              {
+                "metric": "False Rejection Rate (FRR)",
+                "also_called": "Type I Error, False Non-Match Rate",
+                "definition": "Percentage of authorized users incorrectly REJECTED",
+                "concern": "USABILITY - legitimate users locked out",
+                "tuning": "Lower FRR = more convenient"
+              },
+              {
+                "metric": "Crossover Error Rate (CER)",
+                "also_called": "Equal Error Rate (EER)",
+                "definition": "Point where FAR equals FRR",
+                "use": "Comparing biometric systems",
+                "key_point": "Lower CER = better overall performance"
+              }
+            ],
+            "tuning_guidance": {
+              "high_security": "Tune for low FAR (accept more false rejections to prevent unauthorized access)",
+              "high_convenience": "Tune for low FRR (accept more false acceptances for user experience)",
+              "balance_point": "CER represents the balance"
+            }
+          }
+        ],
 
-      "key_points": [
-        "Kerberos uses tickets - no passwords sent over network",
-        "LDAP is for directory queries; Kerberos is for authentication",
-        "RADIUS encrypts only password; TACACS+ encrypts entire packet",
-        "RADIUS for network access; TACACS+ for device administration",
-        "Active Directory uses both LDAP and Kerberos"
-      ],
-
-      "real_world_example": {
-        "scenario": "Kerberos golden ticket attack",
-        "company": "Meridian Manufacturing",
-        "application": "Attackers compromised Meridian's domain controller and extracted the KRBTGT account hash. With this, they created 'golden tickets' - forged Kerberos tickets granting unlimited access to any resource. The tickets had 10-year lifetimes and persisted even after password resets. DETECTION: Unusual service ticket requests, tickets with abnormally long lifetimes. REMEDIATION: KRBTGT password must be reset TWICE (due to password history) and all user passwords changed."
+        "what_would_happen_if": {
+          "scenario": "What if a biometric database was breached?",
+          "consequence": "Unlike passwords, you can't change your fingerprints. Every user whose biometric data was stolen is permanently compromised for that biometric type. This is why: (1) Store templates not raw data, (2) Use biometrics with another factor, (3) Consider biometrics as identifying WHO, not sole authentication.",
+          "real_example": "The 2015 OPM breach exposed 5.6 million fingerprint records. Those individuals' fingerprints remain compromised."
+        }
       },
 
-      "career_callout": {
-        "role": "Penetration Tester",
-        "insight": "Kerberos attacks (Kerberoasting, Golden Ticket, Silver Ticket, Pass-the-Ticket) are essential skills. Understanding how Kerberos works lets you identify attack opportunities and explain findings. Similarly, RADIUS and TACACS+ misconfigurations are common findings in network penetration tests."
-      },
-
-      "visualization": {
-        "type": "ascii_diagram",
-        "title": "Kerberos Authentication Flow",
-        "diagram": [
-          "      USER                    KDC                    SERVICE",
-          "        |                      |                        |",
-          "        |---(1) Request TGT--->|                        |",
-          "        |    (username)        |                        |",
-          "        |                      |                        |",
-          "        |<--(2) TGT Response---|                        |",
-          "        |    (encrypted TGT)   |                        |",
-          "        |                      |                        |",
-          "        |---(3) Request Svc--->|                        |",
-          "        |    Ticket (w/ TGT)   |                        |",
-          "        |                      |                        |",
-          "        |<--(4) Service Ticket-|                        |",
-          "        |                      |                        |",
-          "        |---(5) Access Request----------------------->|",
-          "        |    (with Service Ticket)                     |",
-          "        |                                               |",
-          "        |<--(6) Service Access Granted-----------------|",
-          "",
-          "KEY: Password NEVER sent over network - only encrypted tickets"
+      "memory_hooks": {
+        "mnemonic": "FAR = Fakers Accepted (security), FRR = Real Rejected (usability)",
+        "analogy": {
+          "concept": "Think of a nightclub bouncer",
+          "far_analogy": "FAR = Bouncer lets in underage people (security failure)",
+          "frr_analogy": "FRR = Bouncer turns away legitimate customers (usability failure)"
+        },
+        "common_mistakes": [
+          {
+            "mistake": "Confusing FAR and FRR",
+            "why_wrong": "FAR is security (bad guys in), FRR is usability (good guys out)",
+            "memory_aid": "FAR = False ACCEPTANCE = ATTACKERS accepted. FRR = False REJECTION = Real users REJECTED."
+          },
+          {
+            "mistake": "Thinking iris and retina scans are the same",
+            "why_wrong": "Iris = colored ring (external camera). Retina = blood vessels (invasive, close contact).",
+            "memory_aid": "Iris = I can see it. Retina = Requires close contact."
+          }
         ]
       },
 
-      "exam_tips": [
-        "Kerberos = tickets, port 88, requires time sync",
-        "LDAP = directory queries, ports 389/636, NOT authentication itself",
-        "RADIUS = encrypts PASSWORD only, UDP",
-        "TACACS+ = encrypts ENTIRE packet, TCP, separates AAA",
-        "Active Directory = LDAP + Kerberos together"
+      "key_points": [
+        "FAR (False Acceptance) = Security concern - unauthorized users accepted",
+        "FRR (False Rejection) = Usability concern - authorized users rejected",
+        "CER/EER = Where FAR equals FRR - lower is better for comparing systems",
+        "Biometrics CANNOT be changed if compromised - critical limitation",
+        "High-security environments tune for low FAR; convenience environments tune for low FRR"
       ],
 
-      "glossary_terms": [
+      "must_remember_for_exam": [
         {
-          "term": "Kerberos",
-          "definition": "A ticket-based network authentication protocol that uses symmetric key cryptography to provide secure authentication without sending passwords over the network.",
-          "exam_note": "Tickets, KDC, TGT. Port 88. Requires time sync within 5 minutes."
+          "fact": "FAR = Type II = security (unauthorized IN)",
+          "why_tested": "Definition and error type association"
         },
         {
-          "term": "LDAP",
-          "definition": "A protocol for accessing and maintaining distributed directory information services, commonly used to store and query user account information.",
-          "exam_note": "Directory queries, not authentication. Ports 389/636. Used by Active Directory."
+          "fact": "FRR = Type I = usability (authorized OUT)",
+          "why_tested": "Definition and error type association"
         },
         {
-          "term": "RADIUS",
-          "definition": "A networking protocol providing centralized authentication, authorization, and accounting for network access.",
-          "exam_note": "UDP. Encrypts password only. Network access (VPN, Wi-Fi)."
-        },
-        {
-          "term": "TACACS+",
-          "definition": "A Cisco protocol providing centralized AAA services with full packet encryption and separation of authentication, authorization, and accounting.",
-          "exam_note": "TCP port 49. Full encryption. Better for device admin. Cisco preferred."
+          "fact": "CER/EER: Lower = Better",
+          "why_tested": "System comparison metric"
         }
       ],
 
       "knowledge_check": {
-        "question": "A network administrator needs to centralize authentication for their network switches and routers. They need the protocol to separate authentication, authorization, and accounting functions and encrypt all communication. Which protocol should they choose?",
+        "question": "A biometric system has a False Acceptance Rate of 0.01% and a False Rejection Rate of 5%. For which environment would this system be MOST appropriate?",
         "options": [
-          "RADIUS because it's the industry standard for network device authentication",
-          "LDAP because it provides directory services for centralized management",
-          "TACACS+ because it encrypts the entire packet and separates AAA functions",
-          "Kerberos because it provides ticket-based authentication"
+          "A high-traffic retail store where speed is critical",
+          "A secure government facility where unauthorized access must be prevented",
+          "A fitness center where member convenience is priority",
+          "A hospital where both security and quick access are equally important"
         ],
-        "correct": 2,
-        "explanation": "TACACS+ is the correct answer because it encrypts the entire packet (not just the password like RADIUS) and separates authentication, authorization, and accounting functions. This is particularly important for network device administration where granular command authorization is needed. RADIUS encrypts only the password, LDAP is for directory queries, and Kerberos is for ticket-based domain authentication."
+        "correct": 1,
+        "explanation": "Very low FAR (0.01%) means almost no unauthorized users get in—high security. Higher FRR (5%) means some legitimate users are rejected—inconvenient but acceptable for security. This is appropriate for a secure government facility.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "Retail stores need authentication",
+            "why_wrong": "5% rejection rate would frustrate customers and slow traffic"
+          },
+          {
+            "option": 2,
+            "why_tempting": "Fitness centers use biometrics",
+            "why_wrong": "Convenience-focused environments need lower FRR"
+          },
+          {
+            "option": 3,
+            "why_tempting": "Hospitals need both",
+            "why_wrong": "Hospital staff need quick access—5% rejection rate would impede patient care"
+          }
+        ]
       }
     },
+
     {
       "section_id": "D1-L003-S04",
-      "title": "Single Sign-On and Federation",
-      "content": "Single Sign-On (SSO) and federation allow users to authenticate once and access multiple systems, improving usability while potentially improving security through stronger, centralized authentication.\n\n**Single Sign-On (SSO)**\nAuthenticate once, access many applications.\n\nBenefits:\n- User convenience (fewer passwords)\n- Reduced password fatigue (better password choices)\n- Centralized authentication control\n- Easier access revocation\n- Better logging and monitoring\n\nRisks:\n- Single point of failure\n- If compromised, attacker gets everything\n- Requires strong initial authentication\n- Session management critical\n\n**Federation**\nTrust between separate organizations/systems.\n\n*How It Works*:\n- Identity Provider (IdP): Authenticates users, issues assertions\n- Service Provider (SP): Relies on IdP for authentication\n- Trust relationship established between IdP and SP\n- User authenticates to IdP, receives token/assertion\n- Token presented to SP for access\n\n**Federation Protocols**\n\n*SAML (Security Assertion Markup Language)*\n- XML-based standard\n- Web browser SSO\n- Assertions contain identity and attributes\n- Common in enterprise environments\n- Uses HTTP redirects and POST\n\n*OAuth 2.0*\n- Authorization framework (not authentication)\n- Delegates access without sharing credentials\n- 'Login with Google/Facebook' uses OAuth\n- Access tokens, refresh tokens\n- Scope defines permissions\n\n*OpenID Connect (OIDC)*\n- Authentication layer on top of OAuth 2.0\n- Provides identity information\n- ID tokens contain user info\n- Modern replacement for SAML in many cases\n- REST/JSON based (easier than SAML XML)\n\n**Token Types**\n\n*Bearer Token*: Anyone with the token can use it\n*JWT (JSON Web Token)*: Self-contained token with claims\n*Refresh Token*: Long-lived token to get new access tokens\n*ID Token*: Contains identity information (OIDC)\n\n**Federated Identity Management**\n\n*SAML Flow*:\n1. User accesses Service Provider\n2. SP redirects to Identity Provider\n3. User authenticates to IdP\n4. IdP sends SAML assertion to SP\n5. SP grants access based on assertion\n\n*Common Use Cases*:\n- Enterprise SSO to cloud applications\n- Partner access to shared resources\n- Customer identity federation (social logins)\n- Cross-organization collaboration",
-
-      "key_points": [
-        "SSO = authenticate once, access many applications",
-        "Federation = trust between organizations using Identity/Service Providers",
-        "SAML = XML-based, enterprise SSO, assertions",
-        "OAuth = authorization (not authentication), access delegation",
-        "OIDC = authentication built on OAuth, modern alternative to SAML"
-      ],
-
-      "real_world_example": {
-        "scenario": "SSO implementation improves security and usability",
-        "company": "NexaTech Solutions",
-        "application": "NexaTech had 47 different applications, each with separate credentials. Users averaged 12 passwords, leading to weak passwords and frequent resets. They implemented SSO with SAML federation: Single password + MFA for all apps. Password resets dropped 85%. Help desk tickets down 40%. Security improved - now one strong password with MFA instead of 12 weak ones. Account deprovisioning instant - disable SSO account, access to all 47 apps revoked."
-      },
-
-      "career_callout": {
-        "role": "GRC Analyst",
-        "insight": "SSO and federation have significant compliance implications. You'll assess whether SSO implementations meet regulatory requirements - does the MFA strength satisfy PCI DSS? Are session timeouts appropriate for HIPAA? Is access logging comprehensive for SOX? Understanding these protocols helps you evaluate control effectiveness."
-      },
-
-      "visualization": {
-        "type": "ascii_diagram",
-        "title": "SAML Federation Flow",
-        "diagram": [
-          "    USER              SERVICE PROVIDER              IDENTITY PROVIDER",
-          "      |                      |                            |",
-          "      |---(1) Access App---->|                            |",
-          "      |                      |                            |",
-          "      |<-(2) Redirect to IdP-|                            |",
-          "      |                      |                            |",
-          "      |---(3) Authentication Request-------------------->|",
-          "      |                                                   |",
-          "      |                    [User enters credentials]      |",
-          "      |                                                   |",
-          "      |<--(4) SAML Assertion (signed)-------------------|",
-          "      |                      |                            |",
-          "      |---(5) Assertion----->|                            |",
-          "      |                      |                            |",
-          "      |<-(6) Access Granted--|                            |",
-          "",
-          "NOTE: SP trusts IdP's signed assertion - never sees password"
+      "title": "Token and Certificate-Based Authentication",
+      "estimated_time": "12 minutes",
+      
+      "content": {
+        "overview": "Token-based and certificate-based authentication represent the 'something you have' factor, providing strong security through physical devices or cryptographic credentials.",
+        
+        "core_concepts": [
+          {
+            "concept": "OTP Tokens",
+            "types": [
+              {
+                "type": "TOTP (Time-based OTP)",
+                "how_it_works": "Codes generated based on current time + shared secret",
+                "code_changes": "Every 30 seconds",
+                "examples": "Google Authenticator, Microsoft Authenticator",
+                "standard": "RFC 6238"
+              },
+              {
+                "type": "HOTP (HMAC-based OTP)",
+                "how_it_works": "Codes generated based on counter + shared secret",
+                "code_changes": "When used (counter increments)",
+                "examples": "Hardware tokens, legacy systems",
+                "standard": "RFC 4226"
+              }
+            ],
+            "key_distinction": "TOTP = Time-based. HOTP = Counter-based."
+          },
+          {
+            "concept": "FIDO2 / WebAuthn",
+            "description": "Modern phishing-resistant authentication standard",
+            "how_it_works": {
+              "registration": "Key generates unique key pair for that site. Private key never leaves device.",
+              "authentication": "Site sends challenge → Key signs with private key → Site verifies with stored public key",
+              "phishing_resistance": "Keys are cryptographically bound to specific domains. Won't work on fake sites."
+            },
+            "examples": ["YubiKey", "Google Titan Key", "Windows Hello"],
+            "key_benefit": "Phishing resistant - even if user visits fake site, key won't authenticate"
+          },
+          {
+            "concept": "Certificate-Based Authentication",
+            "how_it_works": {
+              "components": ["Private key (user holds)", "Certificate with public key + identity (signed by CA)"],
+              "authentication": "User proves possession of private key → Server validates certificate chain to trusted CA",
+              "validation_steps": ["Check certificate signature", "Check chain to trusted root", "Check revocation status (CRL/OCSP)"]
+            },
+            "use_cases": ["Smart cards (PIV/CAC)", "VPN authentication", "Mutual TLS", "Device authentication (802.1X)"]
+          }
         ]
       },
 
-      "exam_tips": [
-        "OAuth is AUTHORIZATION (not authentication) - delegating access",
-        "OIDC adds AUTHENTICATION to OAuth",
-        "SAML uses XML assertions; OIDC uses JSON tokens",
-        "IdP authenticates users; SP relies on IdP",
-        "SSO risk: if compromised, attacker accesses everything"
+      "key_points": [
+        "TOTP (time-based) and HOTP (counter-based) are the two main OTP algorithms",
+        "FIDO2/WebAuthn provides phishing resistance by binding keys to specific domains",
+        "Certificate-based auth proves possession of private key",
+        "Revocation checking (CRL/OCSP) is essential for certificate validation"
       ],
 
-      "glossary_terms": [
+      "must_remember_for_exam": [
         {
-          "term": "Single Sign-On (SSO)",
-          "definition": "An authentication scheme allowing users to authenticate once and gain access to multiple applications without re-entering credentials.",
-          "exam_note": "One login, many apps. Improves usability. Risk: single point of compromise."
+          "fact": "TOTP = Time-based, HOTP = Counter-based",
+          "why_tested": "Common algorithm distinction question"
         },
         {
-          "term": "SAML",
-          "definition": "Security Assertion Markup Language - an XML-based standard for exchanging authentication and authorization data between identity and service providers.",
-          "exam_note": "XML assertions. Enterprise SSO. IdP and SP relationship."
-        },
-        {
-          "term": "OAuth",
-          "definition": "An open standard for access delegation, commonly used to grant applications limited access to user accounts without exposing passwords.",
-          "exam_note": "AUTHORIZATION, not authentication. 'Login with Google' uses this."
-        },
-        {
-          "term": "OpenID Connect (OIDC)",
-          "definition": "An authentication layer built on OAuth 2.0 that enables identity verification and retrieval of basic profile information.",
-          "exam_note": "OAuth + authentication. JSON/REST based. Modern SAML alternative."
+          "fact": "FIDO2 is phishing-resistant (domain-bound)",
+          "why_tested": "Key differentiator from other MFA"
         }
       ],
 
       "knowledge_check": {
-        "question": "A web application wants to let users sign in using their Google accounts without the application ever seeing the user's Google password. Which protocol enables this?",
+        "question": "An organization wants phishing-resistant authentication. Which provides the BEST protection?",
         "options": [
-          "LDAP because Google uses directory services",
-          "Kerberos because it provides ticket-based authentication",
-          "OAuth/OpenID Connect because they allow delegated authentication without sharing credentials",
-          "RADIUS because it provides centralized authentication"
+          "SMS one-time passwords",
+          "Time-based authenticator apps (TOTP)",
+          "FIDO2 security keys",
+          "Knowledge-based security questions"
         ],
         "correct": 2,
-        "explanation": "OAuth (for authorization) and OpenID Connect (for authentication) enable 'Sign in with Google' functionality. The user authenticates directly to Google (the Identity Provider), and Google provides the application (Service Provider) with tokens confirming the user's identity - without the application ever seeing the Google password. This is federated identity in action."
+        "explanation": "FIDO2 keys are cryptographically bound to specific domains. They won't respond to fake sites—even if the user is on a perfect phishing page.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "OTP adds security",
+            "why_wrong": "SMS can be captured in real-time by phishing proxies"
+          },
+          {
+            "option": 1,
+            "why_tempting": "TOTP is better than SMS",
+            "why_wrong": "TOTP codes can still be captured by real-time phishing"
+          },
+          {
+            "option": 3,
+            "why_tempting": "Personal questions seem secure",
+            "why_wrong": "Knowledge factors are easily phished"
+          }
+        ]
       }
     },
+
     {
       "section_id": "D1-L003-S05",
-      "title": "Password Security and Management",
-      "content": "Despite their weaknesses, passwords remain the most common authentication method. Proper password security requires understanding attacks, implementing strong policies, and using password management tools.\n\n**Password Attacks**\n\n*Brute Force*: Try every possible combination\n- Time consuming for long passwords\n- Effective against short/simple passwords\n- Counter: Length requirements, lockout policies\n\n*Dictionary Attack*: Try common words and variations\n- Faster than brute force\n- Uses wordlists of common passwords\n- Counter: Complexity requirements, not using common words\n\n*Password Spraying*: Few passwords against many accounts\n- Avoids lockout policies\n- Uses most common passwords (Password1!, Summer2024!)\n- Counter: Detect distributed failures, ban common passwords\n\n*Credential Stuffing*: Leaked credentials from other sites\n- Exploits password reuse\n- Automated testing of breach databases\n- Counter: MFA, password managers, breach monitoring\n\n*Phishing*: Social engineering for credentials\n- User willingly enters password on fake site\n- Counters: User training, anti-phishing tools, FIDO2\n\n**Password Policy Best Practices**\n\n*Modern Guidance (NIST 800-63B)*:\n- Minimum 8 characters (12+ for privileged)\n- Check against breach databases\n- Don't force periodic changes without reason\n- Don't require complexity rules (they don't help)\n- Allow paste from password managers\n- Use passphrases\n\n*What Doesn't Work*:\n- Forced regular rotation (users just increment: Password1, Password2)\n- Complexity requirements (leads to Password1!)\n- Security questions (easily researched)\n- Short minimum length (brute force easy)\n\n**Password Storage**\n\nHow systems should store passwords:\n1. Never store plaintext\n2. Use slow hashing algorithms (bcrypt, scrypt, Argon2)\n3. Use unique salt per password\n4. Consider peppering (server-side secret)\n\n*Why Slow Hashing?*\nMD5/SHA1: Billions of hashes per second (bad)\nbcrypt: Thousands of hashes per second (good)\nSlow hashing makes brute force impractical.\n\n**Password Managers**\n\nBenefits:\n- Unique password for every site\n- Complex passwords without memorizing\n- Secure storage and autofill\n- Breach detection features\n\nPopular options:\n- 1Password, Bitwarden, LastPass\n- Enterprise: CyberArk, Keeper, HashiCorp Vault",
+      "title": "Authentication Attacks and Countermeasures",
+      "estimated_time": "15 minutes",
+      
+      "content": {
+        "overview": "Understanding how attackers compromise authentication helps you design stronger systems and recognize indicators of attack.",
+        
+        "core_concepts": [
+          {
+            "concept": "Password Attacks",
+            "attacks": [
+              {
+                "attack": "Brute Force",
+                "how_it_works": "Trying all possible combinations systematically",
+                "target": "Single account with all password combinations",
+                "countermeasure": "Account lockout, rate limiting, long passwords"
+              },
+              {
+                "attack": "Dictionary Attack",
+                "how_it_works": "Trying common words, phrases, known passwords from wordlists",
+                "target": "Single account with likely passwords",
+                "countermeasure": "Avoid common words, use passphrases"
+              },
+              {
+                "attack": "Password Spraying",
+                "how_it_works": "Trying FEW common passwords against MANY accounts",
+                "target": "Many accounts to avoid lockout",
+                "countermeasure": "Ban common passwords, detect distributed attempts",
+                "key_distinction": "Opposite of brute force - few passwords, many accounts"
+              },
+              {
+                "attack": "Credential Stuffing",
+                "how_it_works": "Using credentials from OTHER breaches to try here",
+                "target": "Users who reuse passwords across sites",
+                "countermeasure": "MFA, breach detection, password managers"
+              },
+              {
+                "attack": "Rainbow Table",
+                "how_it_works": "Precomputed tables of password→hash mappings",
+                "target": "Unsalted password hashes",
+                "countermeasure": "Salt each password with unique random value before hashing"
+              }
+            ]
+          },
+          {
+            "concept": "Password Best Practices",
+            "practices": [
+              {
+                "practice": "Salt before hashing",
+                "why": "Unique salt per password defeats rainbow tables",
+                "how": "password + random_salt → hash(password + salt)"
+              },
+              {
+                "practice": "Use slow hashing algorithms",
+                "why": "Slows down brute force attacks",
+                "algorithms": ["bcrypt", "scrypt", "Argon2 (recommended)"],
+                "not_for_passwords": ["MD5", "SHA-1", "SHA-256 (too fast)"]
+              },
+              {
+                "practice": "Check against breach databases",
+                "why": "Prevents use of already-compromised passwords",
+                "tools": ["Have I Been Pwned API", "Azure AD Password Protection"]
+              }
+            ]
+          }
+        ],
+
+        "what_would_happen_if": {
+          "scenario": "What if you stored passwords with unsalted MD5?",
+          "consequence": "Rainbow table attack recovers most passwords in seconds. Identical passwords have identical hashes (visible in breach). MD5 is fast—brute force is feasible.",
+          "correct_approach": "Use Argon2 or bcrypt with unique salt per password. Slow algorithms + unique salts = attackers can't precompute and must brute force each password individually (infeasible)."
+        }
+      },
+
+      "memory_hooks": {
+        "mnemonic": "Spraying = few passwords, many accounts. Stuffing = stolen credentials, reuse exploitation.",
+        "common_mistakes": [
+          {
+            "mistake": "Confusing password spraying and brute force",
+            "why_wrong": "Opposite approaches: Brute force = many passwords against one account. Spraying = few passwords against many accounts.",
+            "memory_aid": "SPRAY hits many targets (accounts). BRUTE FORCE pounds one target."
+          },
+          {
+            "mistake": "Using SHA-256 for password hashing",
+            "why_wrong": "SHA-256 is too fast—designed for data integrity, not password storage. Need slow algorithms.",
+            "memory_aid": "Fast hashing = fast cracking. For passwords, slow = good (bcrypt, Argon2)."
+          }
+        ]
+      },
 
       "key_points": [
-        "Modern guidance: length > complexity, don't force rotation, ban common passwords",
-        "Password spraying avoids lockouts by trying few passwords against many accounts",
-        "Credential stuffing exploits password reuse from previous breaches",
-        "Use slow hashing (bcrypt, Argon2) with unique salts for password storage",
-        "Password managers enable unique, complex passwords for every site"
+        "Password spraying avoids lockout by trying few passwords against many accounts",
+        "Credential stuffing exploits password reuse with breached credential lists",
+        "Rainbow tables are defeated by SALTING (unique salt per password)",
+        "Use slow hashing algorithms for passwords: bcrypt, scrypt, Argon2",
+        "SIM swapping intercepts SMS MFA—use authenticator apps instead"
       ],
 
-      "real_world_example": {
-        "scenario": "Password spraying attack against enterprise",
-        "company": "Coastal Community Bank",
-        "application": "Attackers used password spraying against Coastal's VPN, trying 'Summer2024!' and 'Coastal123!' against thousands of accounts - just 2 attempts per account to avoid lockouts. Over three weeks, they gained access to 14 accounts. Attackers bypassed MFA using SIM swapping for SMS codes. DETECTION FAILURE: Logs showed 2 failures per account - didn't trigger 5-attempt lockout. LESSON: Monitor for distributed low-volume failures, implement phishing-resistant MFA, ban company name and seasonal passwords."
-      },
-
-      "career_callout": {
-        "role": "SOC Analyst",
-        "insight": "You'll hunt for password attacks daily. Key indicators: distributed authentication failures (spray), single account rapid failures (brute force), logins from impossible locations after credential dumps. Build SIEM queries that detect these patterns. Also monitor dark web for company credentials in breach dumps."
-      },
-
-      "tool_spotlight": {
-        "name": "Have I Been Pwned",
-        "category": "Breach Monitoring",
-        "description": "Free service to check if credentials appear in known breaches",
-        "free_tier": "Yes - personal and API available",
-        "website": "https://haveibeenpwned.com",
-        "career_relevance": "SOC analysts use the API to check exposed credentials; security engineers integrate it into password policies"
-      },
-
-      "exam_tips": [
-        "NIST 800-63B: Length matters more than complexity",
-        "Password spraying = few passwords, many accounts (avoids lockout)",
-        "Credential stuffing = using leaked passwords from other breaches",
-        "bcrypt, scrypt, Argon2 are good for password hashing (intentionally slow)",
-        "MD5/SHA1 are BAD for password storage (too fast to hash)"
-      ],
-
-      "glossary_terms": [
+      "must_remember_for_exam": [
         {
-          "term": "Password Spraying",
-          "definition": "An attack that attempts a few common passwords against many accounts to avoid account lockout triggers.",
-          "exam_note": "Different from brute force. Distributed across accounts. Harder to detect."
+          "fact": "Password SPRAYING = few passwords, many accounts (avoids lockout)",
+          "why_tested": "Common attack distinction question"
         },
         {
-          "term": "Credential Stuffing",
-          "definition": "An attack using username/password pairs obtained from data breaches to gain unauthorized access to user accounts on other services.",
-          "exam_note": "Exploits password reuse. Use breach monitoring. MFA blocks this."
+          "fact": "SALT defeats rainbow tables",
+          "why_tested": "Key countermeasure to know"
         },
         {
-          "term": "Password Salting",
-          "definition": "Adding a unique random value to each password before hashing to prevent rainbow table attacks and ensure identical passwords have different hashes.",
-          "exam_note": "Each password gets unique salt. Prevents precomputed attacks."
-        },
-        {
-          "term": "bcrypt",
-          "definition": "A password hashing function designed to be computationally expensive, making brute force attacks impractical.",
-          "exam_note": "Slow by design. Better than MD5/SHA for passwords. Industry standard."
+          "fact": "bcrypt, scrypt, Argon2 are proper password hashing algorithms",
+          "why_tested": "Must know appropriate algorithms"
         }
       ],
 
       "knowledge_check": {
-        "question": "A security team notices that many accounts are receiving exactly 2 failed login attempts each, spread across the organization over several days. No account lockouts have triggered. What type of attack is this most likely?",
+        "question": "Multiple user accounts are compromised using credentials that don't match any passwords in the system—attackers used credentials from an unrelated company's breach. What attack is this?",
         "options": [
-          "Brute force attack targeting password complexity",
-          "Credential stuffing using leaked passwords",
-          "Password spraying trying common passwords below lockout threshold",
-          "Dictionary attack against a single high-value account"
+          "Brute force attack",
+          "Dictionary attack",
+          "Credential stuffing",
+          "Pass-the-hash attack"
         ],
         "correct": 2,
-        "explanation": "This pattern - a few failures per account across many accounts - is characteristic of password spraying. Attackers stay below the lockout threshold (often 5 attempts) by trying just 1-2 common passwords per account. The distributed nature across many accounts and days suggests systematic spraying. Brute force and dictionary attacks typically target single accounts with many attempts."
+        "explanation": "Credential stuffing uses credentials from OTHER breaches, exploiting password reuse. The key indicator: credentials came from an unrelated breach.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "Trying many credentials",
+            "why_wrong": "Brute force tries all combinations, not stolen credentials"
+          },
+          {
+            "option": 1,
+            "why_tempting": "Using a list of passwords",
+            "why_wrong": "Dictionary attacks use common words, not stolen credentials"
+          },
+          {
+            "option": 3,
+            "why_tempting": "Using credentials without cracking",
+            "why_wrong": "Pass-the-hash uses captured hashes from the TARGET system"
+          }
+        ]
       }
     }
   ],
 
-  "deep_dive": {
-    "title": "Hands-On Lab: Linux Authentication",
-    "introduction": "Practice configuring and testing authentication controls on Linux systems.",
-    "prerequisites": [
-      "Linux VM (Ubuntu 22.04 LTS recommended)",
-      "Sudo access",
-      "SSH installed"
-    ],
-    "labs": [
+  "hands_on_labs": {
+    "browser_labs": [
       {
-        "lab_id": "LAB-003-1",
-        "title": "Lab 1: SSH Key Authentication (Something You Have)",
-        "objective": "Configure passwordless SSH using key pairs",
-        "estimated_time": "15 minutes",
-        "steps": [
-          {
-            "step": 1,
-            "instruction": "Generate an SSH key pair",
-            "command": "ssh-keygen -t ed25519 -C 'security-lab-key'",
-            "expected_output": "Generating public/private ed25519 key pair...",
-            "explanation": "Creates a key pair - private key stays with you (something you have), public key goes to servers"
-          },
-          {
-            "step": 2,
-            "instruction": "View the public key",
-            "command": "cat ~/.ssh/id_ed25519.pub",
-            "expected_output": "ssh-ed25519 AAAA... security-lab-key",
-            "explanation": "This public key will be added to servers you want to access"
-          },
-          {
-            "step": 3,
-            "instruction": "Copy public key to authorized_keys (local test)",
-            "command": "cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys",
-            "expected_output": "(no output)",
-            "explanation": "Adding your public key to your own authorized_keys for testing"
-          },
-          {
-            "step": 4,
-            "instruction": "Test SSH key authentication",
-            "command": "ssh -i ~/.ssh/id_ed25519 localhost 'echo Key auth successful!'",
-            "expected_output": "Key auth successful!",
-            "explanation": "If you see the message, key authentication is working"
-          }
-        ],
-        "control_mapping": {
-          "principle": "Authentication - Something You Have",
-          "control_type": "Technical/Preventive",
-          "frameworks": ["CIS Control 5.2", "NIST 800-53 IA-2"]
-        }
+        "lab_id": "lab-factor-classification",
+        "title": "Authentication Factor Classification Challenge",
+        "type": "drag_and_drop",
+        "difficulty": "beginner",
+        "estimated_time": "10 minutes",
+        "description": "Classify 15 authentication methods into the correct factor category."
       },
       {
-        "lab_id": "LAB-003-2",
-        "title": "Lab 2: Password Policy Configuration",
-        "objective": "Configure password strength requirements using PAM",
-        "estimated_time": "15 minutes",
-        "steps": [
-          {
-            "step": 1,
-            "instruction": "Install password quality checking",
-            "command": "sudo apt install -y libpam-pwquality",
-            "expected_output": "(installation output)",
-            "explanation": "pwquality module enforces password complexity rules"
-          },
-          {
-            "step": 2,
-            "instruction": "View current password policy",
-            "command": "cat /etc/security/pwquality.conf",
-            "expected_output": "(default configuration)",
-            "explanation": "Current password policy settings"
-          },
-          {
-            "step": 3,
-            "instruction": "Configure minimum length (create backup first)",
-            "command": "sudo cp /etc/security/pwquality.conf /etc/security/pwquality.conf.bak && echo 'minlen = 12' | sudo tee -a /etc/security/pwquality.conf",
-            "expected_output": "minlen = 12",
-            "explanation": "Requiring 12-character minimum aligns with modern guidance"
-          },
-          {
-            "step": 4,
-            "instruction": "Test password policy",
-            "command": "echo 'short' | pwscore",
-            "expected_output": "Password quality check failed...",
-            "explanation": "Short passwords should now be rejected"
-          }
-        ],
-        "control_mapping": {
-          "principle": "Authentication - Something You Know",
-          "control_type": "Technical/Preventive",
-          "frameworks": ["CIS Control 5.3", "NIST 800-53 IA-5"]
-        }
-      }
-    ]
-  },
-
-  "practice_platforms": {
-    "title": "Where to Practice Authentication Concepts",
-    "platforms": [
-      {
-        "name": "TryHackMe",
-        "url": "https://tryhackme.com",
-        "relevant_rooms": ["Active Directory Basics", "Attacking Kerberos", "Password Attacks"]
+        "lab_id": "lab-mfa-validator",
+        "title": "Is This MFA? Validator",
+        "type": "scenario_quiz",
+        "difficulty": "beginner",
+        "estimated_time": "10 minutes",
+        "description": "Review authentication combinations and determine if they qualify as MFA."
       },
       {
-        "name": "HackTheBox Academy",
-        "url": "https://academy.hackthebox.com",
-        "relevant_modules": ["Introduction to Active Directory", "Password Attacks"]
-      },
-      {
-        "name": "LetsDefend",
-        "url": "https://letsdefend.io",
-        "relevant_paths": ["SOC Analyst path includes authentication monitoring"]
-      }
-    ]
-  },
-
-  "hands_on_activity": {
-    "title": "Authentication Risk Assessment",
-    "objective": "Assess authentication methods for different scenarios",
-    "scenario": "You're consulting for a company with three user groups: 1) General employees accessing email and files, 2) IT administrators with privileged system access, 3) Customers accessing an external portal. Design authentication requirements for each.",
-    "steps": [
-      "List authentication factors appropriate for each group",
-      "Recommend specific MFA methods for each",
-      "Identify risks if authentication is compromised",
-      "Document compensating controls for MFA bypass scenarios",
-      "Create a table comparing your recommendations"
-    ],
-    "expected_outcome": "A tiered authentication strategy with risk-appropriate controls for each user type",
-    "reflection_questions": [
-      "Why shouldn't all users have the same authentication requirements?",
-      "What's the cost (money and usability) of hardware tokens for each group?",
-      "How do you handle MFA for users who lose their device?",
-      "What monitoring should you implement for each authentication tier?"
-    ]
-  },
-
-  "what_would_you_do": {
-    "scenario": "The Password Debate",
-    "context": "Your company currently requires password changes every 90 days with complexity requirements (uppercase, lowercase, number, special character). IT leadership has read that NIST now recommends against forced rotation. Some executives are skeptical about changing 'what's always worked.' You need to present a recommendation.",
-    "question": "How do you approach modernizing the password policy?",
-    "options": [
-      {
-        "id": "a",
-        "text": "Keep the current policy - if it's not broken, don't fix it",
-        "is_best": false,
-        "feedback": "The current policy IS broken - it leads to predictable passwords (Company1!, Company2!) and user frustration. Keeping it ignores evidence-based guidance.",
-        "consequences": "Password spraying attacks succeed because users create predictable patterns. Password reset tickets remain high."
-      },
-      {
-        "id": "b",
-        "text": "Remove rotation AND complexity requirements immediately",
-        "is_best": false,
-        "feedback": "While NIST guidance is good, removing all requirements without compensating controls (like breach monitoring or MFA) could weaken security short-term.",
-        "consequences": "Some users choose very weak passwords. Without breach monitoring, compromised credentials go undetected."
-      },
-      {
-        "id": "c",
-        "text": "Implement NIST recommendations: longer minimum, breach monitoring, MFA, ban common passwords, remove forced rotation",
-        "is_best": true,
-        "feedback": "This comprehensive approach follows modern guidance: length > complexity, check against breach databases, add MFA, ban known bad passwords. Present data showing 90-day rotation leads to predictable patterns.",
-        "consequences": "Users create stronger passphrases. MFA blocks credential theft. Breach monitoring catches exposed passwords. Help desk tickets decrease."
-      },
-      {
-        "id": "d",
-        "text": "Let users choose their own password policy",
-        "is_best": false,
-        "feedback": "Users generally choose convenience over security. A consistent policy applied appropriately is necessary for organizational security.",
-        "consequences": "Inconsistent security posture. Some users choose strong passwords, many don't. No way to ensure minimum security baseline."
+        "lab_id": "lab-totp-demo",
+        "title": "TOTP Code Generator Demo",
+        "type": "interactive_demo",
+        "difficulty": "beginner",
+        "estimated_time": "10 minutes",
+        "description": "See how TOTP codes are generated and change every 30 seconds."
       }
     ],
-    "key_lesson": "Security policy changes should be evidence-based and comprehensive. NIST 800-63B recommendations work because they address real user behavior. But policy changes need compensating controls (MFA, breach monitoring) to succeed."
+    "external_labs": [
+      {
+        "resource": "TryHackMe",
+        "lab_name": "Authentication Bypass Room",
+        "url": "https://tryhackme.com/room/authenticationbypass",
+        "cost": "Free",
+        "estimated_time": "2 hours",
+        "description": "Learn about and practice authentication bypass techniques.",
+        "role_relevance": ["penetration_tester", "security_engineer"]
+      },
+      {
+        "resource": "PortSwigger Web Security Academy",
+        "lab_name": "Authentication Labs",
+        "url": "https://portswigger.net/web-security/authentication",
+        "cost": "Free",
+        "estimated_time": "3-4 hours",
+        "description": "Comprehensive authentication vulnerability labs.",
+        "role_relevance": ["penetration_tester", "security_engineer"]
+      }
+    ],
+    "tools_introduction": [
+      {
+        "tool": "Hydra",
+        "category": "Password Testing",
+        "purpose": "Network login cracker for testing authentication strength",
+        "role_relevance": ["penetration_tester"],
+        "note": "Only use with explicit authorization"
+      },
+      {
+        "tool": "Hashcat",
+        "category": "Password Cracking",
+        "purpose": "GPU-accelerated password hash cracking",
+        "role_relevance": ["penetration_tester", "incident_responder"],
+        "note": "For testing password policy effectiveness and incident investigation"
+      }
+    ]
   },
 
   "summary": {
     "key_takeaways": [
-      "Five authentication factors: know, have, are, somewhere, do - true MFA requires different types",
-      "Hardware tokens (FIDO2) provide phishing-resistant authentication - gold standard for privileged accounts",
-      "Kerberos uses tickets (not passwords over the wire); RADIUS encrypts password only; TACACS+ encrypts everything",
-      "OAuth is authorization (not authentication); OIDC adds authentication to OAuth; SAML is XML-based enterprise SSO",
-      "Modern password guidance: length > complexity, don't force rotation, ban common passwords, use slow hashing"
+      "Five authentication factors: Knowledge (know), Possession (have), Inherence (are), Location (where), Behavior (do)",
+      "MFA requires factors from DIFFERENT categories—two passwords is NOT MFA",
+      "SMS-based MFA is vulnerable to SIM swapping; authenticator apps and FIDO2 are more secure",
+      "FAR = security concern (attackers in); FRR = usability concern (users out); Lower CER = better",
+      "Password spraying avoids lockout (few passwords, many accounts); credential stuffing exploits reuse",
+      "Salt defeats rainbow tables; use slow hashing (bcrypt, Argon2) for passwords"
     ],
     "exam_essentials": [
-      "Know all five factor types and examples of each",
-      "Understand MFA vs. two-step verification (different factor types required)",
-      "Compare RADIUS (encrypts password) vs TACACS+ (encrypts all)",
-      "Know OAuth vs OIDC vs SAML differences",
-      "Password attacks: brute force, dictionary, spraying, stuffing - know the differences"
+      "Know all five authentication factors and categorize any method",
+      "Two items from same category ≠ MFA",
+      "FAR = Type II = unauthorized access; FRR = Type I = authorized user rejected",
+      "TOTP = time-based; HOTP = counter-based",
+      "FIDO2 provides phishing resistance (domain-bound keys)",
+      "Salt defeats rainbow tables; must be unique per password"
     ],
-    "connection_to_next": "Authentication verifies WHO you are. The next lesson covers Cryptographic Fundamentals - HOW we protect data using encryption, hashing, and digital signatures that underpin many authentication systems."
+    "connection_to_next": "Now that you understand how identity is verified through authentication, the next lesson explores cryptographic fundamentals—the mathematical foundations that make encryption, hashing, and digital signatures possible."
   },
 
   "related_content": {
-    "simulations": ["D1-SIM-002_Security_Concepts"],
-    "remediation": ["D1-REM-002_Authentication_Access"],
-    "next_lesson": "D1-LESSON-004_Cryptographic_Fundamentals",
-    "previous_lesson": "D1-LESSON-002_CIA_Triad_Fundamentals"
+    "simulations": ["D1-SIM-002"],
+    "remediation": ["D1-REM-002"],
+    "next_lesson": "D1-LESSON-004",
+    "previous_lesson": "D1-LESSON-002"
   }
 }

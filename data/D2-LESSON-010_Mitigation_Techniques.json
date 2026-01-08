@@ -2,478 +2,147 @@
   "lesson_id": "D2-LESSON-010",
   "domain": 2,
   "title": "Mitigation Techniques",
-  "objectives_covered": ["2.5"],
-  "estimated_duration": "80-95 minutes (Core: 45 min, Deep Dives: 35-50 min)",
-  "difficulty": "intermediate",
-  "prerequisites": ["D2-LESSON-009"],
+  "subtitle": "Defensive Strategies Against Common Attacks",
   "version": "2.0-enhanced",
+  "objectives_covered": ["2.5"],
+  "estimated_duration": "75-90 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": ["D2-LESSON-005", "D2-LESSON-006"],
 
-  "introduction": {
-    "hook": "In March 2021, Microsoft disclosed four zero-day vulnerabilities in Exchange Server being actively exploited. With no patch available initially, organizations relied on mitigation techniques: URL rewriting rules to block exploitation, network segmentation to limit access, and enhanced monitoring to detect compromise. Those who implemented mitigations quickly survived; those who waited often found themselves already breached. Mitigation techniques are your emergency toolkit.",
-    
-    "learning_goals": [
-      "Apply network-based mitigations including segmentation and isolation",
-      "Implement endpoint mitigations including application control",
-      "Deploy compensating controls when primary controls are unavailable",
-      "Select appropriate mitigations based on threat type",
-      "Implement containment strategies during incidents"
+  "skill_tree": {
+    "position": {"domain": 2, "sequence": 10, "tier": "intermediate"},
+    "prerequisites": [
+      {"lesson_id": "D2-LESSON-005", "title": "Network Attacks", "why_needed": "Understand attacks to mitigate"},
+      {"lesson_id": "D2-LESSON-006", "title": "Application Attacks", "why_needed": "Understand attacks to mitigate"}
     ],
-    
-    "why_it_matters": "You can't always patch immediately, and attackers won't wait. Mitigation techniques reduce risk when vulnerabilities exist and contain breaches when prevention fails. Expect 5-7 Security+ questions on mitigation strategies.",
-    
-    "career_relevance": {
-      "soc_analyst": "You'll implement emergency mitigations when new threats emerge—firewall rules, IOC blocks, and containment actions. Speed matters when stopping active attacks.",
-      "incident_responder": "Containment is a critical IR phase. You'll isolate compromised systems, block attacker infrastructure, and implement temporary controls to stop bleeding.",
-      "grc_analyst": "You'll evaluate compensating controls when primary controls aren't feasible, documenting risk acceptance and mitigation effectiveness.",
-      "penetration_tester": "Understanding mitigations helps you assess their effectiveness and identify bypass techniques during assessments.",
-      "security_engineer": "You'll design segmentation architectures, implement ACLs, and build automated containment playbooks."
-    }
+    "unlocks": [{"lesson_id": "D3-LESSON-003", "title": "Network Security", "connection": "Network defense implementations"}]
   },
 
-  "linux_fundamentals": {
-    "why_it_matters": "Implementing network mitigations often requires firewall and network configuration commands.",
-    
-    "essential_commands": {
-      "firewall_rules": [
-        {
-          "command": "iptables",
-          "purpose": "Linux firewall rules",
-          "examples": [
-            "iptables -A INPUT -s 192.168.1.100 -j DROP           # Block IP",
-            "iptables -A INPUT -p tcp --dport 445 -j DROP         # Block SMB",
-            "iptables -A OUTPUT -p tcp --dport 4444 -j DROP       # Block common C2 port",
-            "iptables -L -n                                        # List rules"
-          ]
-        },
-        {
-          "command": "ufw",
-          "purpose": "Simplified firewall management",
-          "examples": [
-            "ufw deny from 192.168.1.100                           # Block IP",
-            "ufw deny out 4444                                     # Block outbound port",
-            "ufw status numbered                                   # List rules"
-          ]
-        }
-      ],
-      "network_isolation": [
-        {
-          "command": "ip / ifconfig",
-          "purpose": "Network interface management",
-          "examples": [
-            "ip link set eth0 down                                 # Disable interface",
-            "ip addr del 192.168.1.100/24 dev eth0                # Remove IP"
-          ]
-        }
-      ]
-    }
+  "role_relevance": {
+    "soc_analyst": {"relevance": "high", "percentage_of_job": "30-40%", "daily_tasks": ["Recommend mitigations", "Verify controls working"]},
+    "security_engineer": {"relevance": "critical", "percentage_of_job": "55-65%", "daily_tasks": ["Implement mitigations", "Configure defenses"]},
+    "incident_responder": {"relevance": "high", "percentage_of_job": "35-45%", "daily_tasks": ["Apply emergency mitigations", "Contain attacks"]},
+    "penetration_tester": {"relevance": "high", "percentage_of_job": "30-40%", "daily_tasks": ["Test mitigation effectiveness"]}
+  },
+
+  "introduction": {
+    "hook": "Every attack has a countermeasure. Understanding how to mitigate specific attack types—from network segmentation to input validation—is essential for building effective defenses.",
+    "exam_weight": {"estimated_questions": "5-7", "high_yield_topics": ["Network segmentation", "Patch management", "Access control", "Encryption"]}
   },
 
   "sections": [
     {
       "section_id": "D2-L010-S01",
-      "title": "Network-Based Mitigations",
+      "title": "Network Attack Mitigations",
       "estimated_time": "15 minutes",
-      
       "content": {
-        "overview": "Network controls provide essential mitigations by controlling traffic flow, isolating systems, and blocking attack vectors.",
-        
-        "network_segmentation": {
-          "purpose": [
-            "Divide network into security zones",
-            "Limit lateral movement",
-            "Contain breaches",
-            "Enable focused monitoring"
-          ],
-          "methods": [
-            {
-              "method": "VLANs",
-              "description": "Logical network separation at Layer 2",
-              "pros": ["Cost-effective", "Flexible", "Easy to implement"],
-              "cons": ["Can be bypassed if misconfigured", "Requires inter-VLAN routing control"],
-              "key": "Must have firewall/ACL between VLANs"
-            },
-            {
-              "method": "Physical Segmentation",
-              "description": "Completely separate network infrastructure",
-              "pros": ["Highest security", "True isolation"],
-              "cons": ["Expensive", "Complex management"],
-              "use_case": "Critical systems, air-gapped environments"
-            },
-            {
-              "method": "Micro-segmentation",
-              "description": "Granular workload-level isolation",
-              "pros": ["Fine-grained control", "Zero Trust aligned"],
-              "cons": ["Complex implementation", "Requires automation"],
-              "use_case": "Data centers, cloud environments"
-            }
-          ]
-        },
-        
-        "network_isolation": [
+        "core_concepts": [
           {
-            "type": "DMZ (Demilitarized Zone)",
-            "purpose": "Isolate public-facing services from internal network",
-            "architecture": "Dual firewall—internet-DMZ-internal",
-            "services": ["Web servers", "Email gateways", "VPN endpoints"]
+            "concept": "Network Segmentation",
+            "definition": "Dividing network into isolated segments",
+            "benefits": ["Limits lateral movement", "Contains breaches", "Enables granular control"],
+            "implementation": ["VLANs", "Firewalls", "Microsegmentation"]
           },
           {
-            "type": "Quarantine Network",
-            "purpose": "Isolate suspicious or compromised systems",
-            "use": "Investigation without allowing spread"
+            "concept": "DoS/DDoS Mitigations",
+            "mitigations": [
+              {"mitigation": "Rate limiting", "purpose": "Restrict requests per source"},
+              {"mitigation": "DDoS protection services", "purpose": "Absorb volumetric attacks"},
+              {"mitigation": "SYN cookies", "purpose": "Defend against SYN floods"},
+              {"mitigation": "Anycast", "purpose": "Distribute traffic across locations"}
+            ]
           },
           {
-            "type": "Air Gap",
-            "purpose": "Complete network isolation",
-            "use": "Critical infrastructure, classified systems",
-            "limitation": "Data transfer requires physical media"
-          }
-        ],
-        
-        "access_control_lists": {
-          "description": "Firewall rules controlling traffic flow",
-          "principle": "Default deny—only allow what's explicitly required",
-          "common_mitigations": [
-            "Block known malicious IPs",
-            "Restrict lateral movement ports (445, 3389, 22)",
-            "Limit outbound connections",
-            "Segment management traffic"
-          ]
-        },
-        
-        "egress_filtering": {
-          "description": "Control outbound traffic",
-          "importance": "Often neglected but critical for blocking C2 and exfiltration",
-          "implementations": [
-            "Proxy all web traffic",
-            "Block direct internet access",
-            "DNS filtering",
-            "Restrict unauthorized protocols"
-          ]
-        },
-        
-        "visualization": {
-          "type": "ascii_diagram",
-          "title": "Network Segmentation Impact",
-          "diagram": [
-            "╔══════════════════════════════════════════════════════════════════════════════╗",
-            "║              RANSOMWARE SPREAD: FLAT vs SEGMENTED NETWORK                    ║",
-            "╠══════════════════════════════════════════════════════════════════════════════╣",
-            "║                                                                               ║",
-            "║   FLAT NETWORK (No Segmentation)     SEGMENTED NETWORK                       ║",
-            "║   ══════════════════════════════     ════════════════                       ║",
-            "║                                                                               ║",
-            "║   ┌─────────────────────────┐        ┌─────────────────────────┐            ║",
-            "║   │ [X] [X] [X] [X] [X]     │        │ VLAN 10: Users         │            ║",
-            "║   │ [X] [X] [X] [X] [X]     │        │ [X] [○] [○] [○] [○]    │ ←Firewall  ║",
-            "║   │ [X] [X] [X] [X] [X]     │        ├─────────────────────────┤            ║",
-            "║   │ [X] [X] [X] [X] [X]     │        │ VLAN 20: Servers       │            ║",
-            "║   │ [X] [X] [X] [X] [X]     │        │ [○] [○] [○] [○] [○]    │ ←Protected ║",
-            "║   └─────────────────────────┘        └─────────────────────────┘            ║",
-            "║                                                                               ║",
-            "║   Result: 25 systems encrypted       Result: 1 system encrypted             ║",
-            "║   Recovery: 3 weeks                  Recovery: 2 hours                       ║",
-            "║                                                                               ║",
-            "║   [X] = Encrypted    [○] = Protected                                        ║",
-            "║                                                                               ║",
-            "╚══════════════════════════════════════════════════════════════════════════════╝"
-          ]
-        }
-      },
-      
-      "key_points": [
-        "Network segmentation limits lateral movement and contains breaches",
-        "VLANs require firewall/ACL between them for security",
-        "DMZ isolates public-facing services from internal network",
-        "Egress filtering blocks C2 and exfiltration (often neglected)",
-        "Default deny on ACLs—only allow what's required"
-      ],
-      
-      "exam_tips": [
-        "Segmentation = divide network into zones",
-        "DMZ = public services isolated from internal",
-        "Air gap = complete physical isolation",
-        "Egress filtering = control outbound traffic",
-        "Default deny = block everything not explicitly allowed"
-      ],
-      
-      "glossary_terms": [
-        {
-          "term": "Network Segmentation",
-          "definition": "Dividing a network into smaller zones to limit lateral movement and contain breaches.",
-          "exam_note": "Can use VLANs, firewalls, or physical separation."
-        },
-        {
-          "term": "DMZ",
-          "definition": "Demilitarized Zone - network segment for public-facing services isolated from internal network.",
-          "exam_note": "Typically uses dual firewall architecture."
-        },
-        {
-          "term": "Egress Filtering",
-          "definition": "Controlling outbound network traffic to prevent data exfiltration and C2 communication.",
-          "exam_note": "Often neglected but critical for containing compromises."
-        }
-      ]
-    },
-
-    {
-      "section_id": "D2-L010-S02",
-      "title": "Endpoint and Application Mitigations",
-      "estimated_time": "12 minutes",
-      
-      "content": {
-        "overview": "Endpoint controls provide host-level protection that complements network mitigations.",
-        
-        "endpoint_mitigations": [
-          {
-            "control": "Application Control / Whitelisting",
-            "description": "Only allow approved applications to run",
-            "effectiveness": "Very high—blocks unknown malware",
-            "challenge": "Operational complexity",
-            "tools": ["Windows AppLocker", "SRP", "Third-party solutions"]
-          },
-          {
-            "control": "Host-Based Firewall",
-            "description": "Control network traffic at endpoint level",
-            "benefits": ["Defense in depth", "Protects mobile devices", "Granular control"],
-            "examples": ["Windows Firewall", "iptables", "ufw"]
-          },
-          {
-            "control": "Disable Unnecessary Services",
-            "description": "Reduce attack surface by removing unneeded functionality",
-            "examples": ["Print Spooler on non-print systems", "Remote Desktop if not needed"]
-          },
-          {
-            "control": "EDR/Endpoint Protection",
-            "description": "Real-time monitoring and response capability",
-            "capabilities": ["Behavioral detection", "Isolation", "Forensics"]
-          }
-        ],
-        
-        "application_mitigations": [
-          {
-            "control": "Web Application Firewall (WAF)",
-            "description": "Filter malicious web requests",
-            "protects_against": ["SQL injection", "XSS", "OWASP Top 10"]
-          },
-          {
-            "control": "Input Validation",
-            "description": "Sanitize all user input",
-            "principle": "Never trust user input"
-          },
-          {
-            "control": "Secure Configuration",
-            "description": "Apply hardening to applications",
-            "actions": ["Disable debug modes", "Remove default content", "Enable logging"]
-          }
-        ],
-        
-        "compensating_controls": {
-          "definition": "Alternative controls when primary controls aren't possible",
-          "when_needed": [
-            "Patch not available",
-            "System can't be patched (legacy)",
-            "Business constraint prevents primary control"
-          ],
-          "examples": [
-            {"situation": "Can't patch vulnerable server", "compensating": "Network isolation + enhanced monitoring"},
-            {"situation": "Can't disable SMB", "compensating": "Restrict to necessary IPs + monitor for abuse"},
-            {"situation": "Legacy system can't encrypt", "compensating": "Network encryption (VPN/TLS) + segmentation"}
-          ],
-          "documentation": "Must document: risk, compensating control, residual risk, review date"
-        }
-      },
-      
-      "key_points": [
-        "Application whitelisting is highly effective but operationally complex",
-        "Host-based firewall provides defense in depth",
-        "WAF protects web applications from common attacks",
-        "Compensating controls are alternatives when primary controls aren't possible",
-        "Document compensating controls with risk acceptance"
-      ],
-      
-      "exam_tips": [
-        "Application whitelisting = only approved apps can run",
-        "Compensating control = alternative when primary not possible",
-        "WAF = protects web apps from SQL injection, XSS",
-        "Host firewall = defense in depth at endpoint",
-        "Always document compensating controls"
-      ],
-      
-      "knowledge_check": {
-        "question": "A critical legacy system cannot be patched due to vendor support issues, but it contains sensitive data. What is the BEST approach?",
-        "options": [
-          "Accept the risk since patching isn't possible",
-          "Take the system offline immediately",
-          "Implement compensating controls and document the risk",
-          "Replace the system immediately regardless of cost"
-        ],
-        "correct": 2,
-        "explanation": "Implement compensating controls (network isolation, enhanced monitoring, restricted access) and document the risk with management approval. This addresses the risk while maintaining business operations. Simply accepting risk without controls is inadequate. Taking offline or immediate replacement may not be feasible."
-      }
-    },
-
-    {
-      "section_id": "D2-L010-S03",
-      "title": "Incident Containment",
-      "estimated_time": "12 minutes",
-      
-      "content": {
-        "overview": "During active incidents, containment mitigations stop the attack from spreading while preserving evidence.",
-        
-        "containment_strategies": [
-          {
-            "strategy": "Network Isolation",
-            "actions": [
-              "Disconnect compromised system from network",
-              "Block at switch port or VLAN",
-              "Maintain power for forensics"
-            ],
-            "consideration": "Balance containment vs evidence preservation"
-          },
-          {
-            "strategy": "Account Disabling",
-            "actions": [
-              "Disable compromised accounts",
-              "Reset passwords",
-              "Revoke sessions/tokens"
-            ],
-            "consideration": "May alert attacker; coordinate timing"
-          },
-          {
-            "strategy": "Firewall Blocks",
-            "actions": [
-              "Block attacker IPs at perimeter",
-              "Block C2 domains in DNS",
-              "Block malicious file hashes at endpoint"
-            ],
-            "note": "Quick to implement, can block ongoing attack"
-          },
-          {
-            "strategy": "Service/Application Shutdown",
-            "actions": [
-              "Take vulnerable service offline",
-              "Disable exploited feature"
-            ],
-            "consideration": "Business impact vs security"
-          }
-        ],
-        
-        "containment_considerations": {
-          "preserve_evidence": [
-            "Don't power off if possible (preserves memory)",
-            "Document actions taken",
-            "Capture volatile data first",
-            "Maintain chain of custody"
-          ],
-          "attacker_awareness": [
-            "Containment may alert attacker",
-            "Attacker may have backup access",
-            "Coordinate containment actions",
-            "Execute rapidly once started"
-          ]
-        },
-        
-        "deception_as_mitigation": {
-          "description": "Active defense using decoys",
-          "techniques": [
-            {"technique": "Honeypots", "purpose": "Attract and detect attackers"},
-            {"technique": "Honeytokens", "purpose": "Detect credential theft"},
-            {"technique": "Deceptive content", "purpose": "Mislead attackers, waste time"}
-          ],
-          "benefit": "Near-zero false positives—legitimate users don't interact with decoys"
-        }
-      },
-      
-      "key_points": [
-        "Containment stops spread while preserving evidence",
-        "Network isolation is primary containment action",
-        "Don't power off—preserve volatile memory evidence",
-        "Coordinate containment actions—execute rapidly once started",
-        "Deception (honeypots) provides high-fidelity detection"
-      ],
-      
-      "career_callout": {
-        "role": "Incident Responder",
-        "note": "Containment is where seconds count. Have playbooks ready: which switch ports to disable, which firewall rules to add, which accounts to lock. Practice your containment procedures before you need them. Know your network architecture so you can isolate quickly."
-      },
-      
-      "deep_dive": {
-        "title": "Building a Containment Playbook",
-        "estimated_time": "15 minutes",
-        "content": {
-          "description": "Essential containment actions for common scenarios.",
-          
-          "playbook_examples": {
-            "ransomware": [
-              "1. Isolate affected systems (disconnect network, don't power off)",
-              "2. Block lateral movement ports (445, 3389) organization-wide",
-              "3. Disable compromised accounts",
-              "4. Block known ransomware C2 domains/IPs",
-              "5. Snapshot/backup unaffected systems",
-              "6. Activate backup restoration procedures"
-            ],
-            "compromised_account": [
-              "1. Disable account immediately",
-              "2. Revoke all active sessions/tokens",
-              "3. Review recent activity logs",
-              "4. Check for persistence (forwarding rules, delegations)",
-              "5. Reset password with new strong password",
-              "6. Review systems account had access to"
-            ],
-            "c2_communication_detected": [
-              "1. Block C2 domain/IP at firewall and DNS",
-              "2. Identify all systems communicating with C2",
-              "3. Isolate affected systems",
-              "4. Search for malware/persistence",
-              "5. Check for data exfiltration",
-              "6. Determine initial access vector"
+            "concept": "MITM Mitigations",
+            "mitigations": [
+              {"mitigation": "Encryption (TLS)", "purpose": "Prevent eavesdropping"},
+              {"mitigation": "Certificate validation", "purpose": "Verify identity"},
+              {"mitigation": "HSTS", "purpose": "Force HTTPS"},
+              {"mitigation": "Dynamic ARP inspection", "purpose": "Prevent ARP poisoning"}
             ]
           }
-        }
+        ]
       },
-      
-      "exam_tips": [
-        "Containment priority = stop spread while preserving evidence",
-        "Don't power off—preserve volatile memory",
-        "Honeypot = decoy system to detect attackers",
-        "Honeytoken = fake credential that alerts when used",
-        "Execute containment rapidly once decision made"
+      "must_remember_for_exam": [
+        {"fact": "Network segmentation limits lateral movement", "why_tested": "Key defense"},
+        {"fact": "SYN cookies defend against SYN floods", "why_tested": "Specific mitigation"},
+        {"fact": "HSTS forces HTTPS, prevents SSL stripping", "why_tested": "Web security"},
+        {"fact": "Dynamic ARP inspection prevents ARP poisoning", "why_tested": "Network defense"}
+      ],
+      "key_points": ["Segmentation contains breaches", "SYN cookies defend SYN floods", "HSTS prevents SSL stripping", "DAI prevents ARP poisoning"]
+    },
+    {
+      "section_id": "D2-L010-S02",
+      "title": "Application Attack Mitigations",
+      "estimated_time": "12 minutes",
+      "content": {
+        "core_concepts": [
+          {
+            "concept": "Injection Mitigations",
+            "sql_injection": ["Parameterized queries", "Input validation", "Least privilege DB accounts"],
+            "command_injection": ["Avoid shell commands", "Input validation", "Whitelisting"],
+            "xss": ["Output encoding", "CSP", "HttpOnly cookies"]
+          },
+          {
+            "concept": "Access Control Mitigations",
+            "controls": [
+              {"control": "Least privilege", "purpose": "Minimum necessary access"},
+              {"control": "MFA", "purpose": "Additional authentication factor"},
+              {"control": "Session management", "purpose": "Secure session handling"},
+              {"control": "Account lockout", "purpose": "Prevent brute force"}
+            ]
+          }
+        ]
+      },
+      "must_remember_for_exam": [
+        {"fact": "Parameterized queries prevent SQL injection", "why_tested": "Primary defense"},
+        {"fact": "Output encoding prevents XSS", "why_tested": "Primary defense"},
+        {"fact": "MFA mitigates credential attacks", "why_tested": "Authentication"},
+        {"fact": "Least privilege limits damage from compromise", "why_tested": "Access control"}
+      ],
+      "key_points": ["Parameterized queries for SQLi", "Output encoding for XSS", "MFA for authentication", "Least privilege everywhere"]
+    },
+    {
+      "section_id": "D2-L010-S03",
+      "title": "General Mitigation Strategies",
+      "estimated_time": "10 minutes",
+      "content": {
+        "core_concepts": [
+          {
+            "concept": "Patch Management",
+            "importance": "Fix known vulnerabilities before exploitation",
+            "process": ["Inventory assets", "Monitor for patches", "Test patches", "Deploy patches", "Verify deployment"]
+          },
+          {
+            "concept": "Defense in Depth",
+            "definition": "Multiple layers of security controls",
+            "principle": "No single control is perfect; layers compensate for individual failures"
+          },
+          {
+            "concept": "Security Monitoring",
+            "components": ["Log collection", "SIEM correlation", "Alerting", "Incident response"]
+          }
+        ]
+      },
+      "must_remember_for_exam": [
+        {"fact": "Patch management fixes known vulnerabilities", "why_tested": "Essential process"},
+        {"fact": "Defense in depth = multiple layers", "why_tested": "Core principle"}
       ]
     }
   ],
 
   "summary": {
-    "key_takeaways": [
-      "Network segmentation limits lateral movement and contains breaches",
-      "Default deny on ACLs—only allow what's required",
-      "Egress filtering blocks C2 and exfiltration (often neglected)",
-      "Application whitelisting is effective but operationally complex",
-      "Compensating controls are alternatives when primary controls aren't possible",
-      "Containment stops spread while preserving evidence",
-      "Don't power off compromised systems—preserve volatile memory"
-    ],
-    
     "exam_essentials": [
-      "Segmentation vs isolation vs air gap",
-      "DMZ purpose and architecture",
-      "Compensating control definition and use",
-      "Containment priorities",
-      "Egress filtering importance"
-    ],
-    
-    "skills_gained": [
-      "Implement firewall rules for containment",
-      "Design network segmentation",
-      "Select appropriate mitigations for scenarios",
-      "Build containment playbooks"
-    ],
-    
-    "connection_to_next": "Mitigations address specific threats. The next lesson covers Attack Frameworks—structured methodologies like MITRE ATT&CK and the Cyber Kill Chain that help understand and defend against the full attack lifecycle."
+      "Network segmentation limits lateral movement",
+      "Parameterized queries prevent SQL injection",
+      "Output encoding prevents XSS",
+      "MFA mitigates credential compromise",
+      "Patch management fixes known vulnerabilities",
+      "Defense in depth = multiple layers"
+    ]
   },
 
   "related_content": {
-    "simulations": ["D2-SIM-003"],
-    "remediation": ["D2-REM-003"],
     "next_lesson": "D2-LESSON-011",
     "previous_lesson": "D2-LESSON-009"
   }

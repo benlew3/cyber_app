@@ -2,96 +2,34 @@
   "lesson_id": "D2-LESSON-005",
   "domain": 2,
   "title": "Network-Based Attacks",
-  "objectives_covered": ["2.4"],
-  "estimated_duration": "90-105 minutes (Core: 50 min, Deep Dives: 40-55 min)",
-  "difficulty": "intermediate",
-  "prerequisites": ["D2-LESSON-004"],
+  "subtitle": "Network Exploitation: From Sniffing to DDoS",
   "version": "2.0-enhanced",
+  "objectives_covered": ["2.4"],
+  "estimated_duration": "90-120 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": ["D2-LESSON-002"],
 
-  "introduction": {
-    "hook": "In October 2016, the Mirai botnet launched the largest DDoS attack in history, taking down Twitter, Netflix, Reddit, and CNN by flooding Dyn's DNS infrastructure with traffic from millions of compromised IoT devices. Network attacks strike at the foundation of connectivity itself—without networks, modern organizations simply cannot function. Understanding how attackers exploit network protocols, intercept traffic, and overwhelm services is essential for defending the digital highways that connect everything.",
-    
-    "learning_goals": [
-      "Identify DoS, DDoS, and amplification attack techniques",
-      "Analyze man-in-the-middle attacks (ARP poisoning, DNS spoofing)",
-      "Understand on-path attacks and session hijacking",
-      "Detect network attacks using packet analysis",
-      "Implement appropriate defenses against network-based threats"
-    ],
-    
-    "why_it_matters": "Networks carry all data and enable all communication. Network attacks can intercept sensitive data, disrupt operations, and redirect traffic. As a security professional, you'll configure firewalls, implement segmentation, and respond to network incidents. The Security+ exam covers network attacks extensively—expect 6-8 questions.",
-    
-    "career_relevance": {
-      "soc_analyst": "You'll investigate alerts for network attacks like DDoS, ARP spoofing, and DNS anomalies. Understanding attack patterns helps you distinguish real attacks from false positives and assess severity.",
-      "incident_responder": "Network forensics is crucial for investigations. You'll analyze packet captures, trace attack origins, and determine what data may have been intercepted or exfiltrated.",
-      "grc_analyst": "Understanding network attack risks helps you assess controls and compliance. DDoS resilience, network segmentation, and encryption requirements are common audit topics.",
-      "penetration_tester": "Network attacks are part of your toolkit. You'll conduct ARP spoofing, MITM attacks, and network reconnaissance during engagements to test defenses.",
-      "security_engineer": "You'll implement IDS/IPS, configure firewalls, design network segmentation, and deploy DDoS protection. Understanding attacks helps you tune detection and prevention."
+  "skill_tree": {
+    "position": {"domain": 2, "sequence": 5, "tier": "intermediate"},
+    "prerequisites": [{"lesson_id": "D2-LESSON-002", "title": "Threat Vectors", "why_needed": "Network is a key attack vector"}],
+    "unlocks": [{"lesson_id": "D3-LESSON-003", "title": "Network Security", "connection": "Defenses against network attacks"}],
+    "cascade_learning": {
+      "this_lesson_establishes": ["Network attack types", "Protocol vulnerabilities", "DoS/DDoS mechanisms", "MITM techniques"],
+      "concepts_used_later": {"D3-LESSON-003": "Network security controls", "D4-LESSON-001": "Network-based detection"}
     }
   },
 
-  "linux_fundamentals": {
-    "why_it_matters": "Network analysis and monitoring are essential security skills. These commands help you capture, analyze, and troubleshoot network traffic.",
-    
-    "essential_commands": {
-      "packet_capture": [
-        {
-          "command": "tcpdump",
-          "purpose": "Command-line packet capture",
-          "examples": [
-            "sudo tcpdump -i eth0                    # Capture on interface",
-            "sudo tcpdump -i eth0 -w capture.pcap   # Save to file",
-            "sudo tcpdump -i eth0 port 80           # Filter by port",
-            "sudo tcpdump -i eth0 host 192.168.1.1  # Filter by host",
-            "sudo tcpdump -i eth0 'tcp[tcpflags] & (tcp-syn) != 0'  # SYN packets"
-          ]
-        },
-        {
-          "command": "tshark",
-          "purpose": "Wireshark CLI for scripted analysis",
-          "examples": [
-            "tshark -i eth0 -f 'port 53'            # Capture DNS",
-            "tshark -r capture.pcap -Y 'http'      # Filter pcap for HTTP"
-          ]
-        }
-      ],
-      "network_monitoring": [
-        {
-          "command": "iftop",
-          "purpose": "Real-time bandwidth monitoring by connection",
-          "example": "sudo iftop -i eth0"
-        },
-        {
-          "command": "nethogs",
-          "purpose": "Bandwidth by process",
-          "example": "sudo nethogs eth0"
-        },
-        {
-          "command": "arpwatch",
-          "purpose": "Monitor ARP table for changes (detects ARP spoofing)",
-          "example": "sudo arpwatch -i eth0"
-        }
-      ],
-      "arp_and_dns": [
-        {
-          "command": "arp",
-          "purpose": "View and manage ARP cache",
-          "examples": [
-            "arp -a                                  # View ARP table",
-            "sudo arp -d 192.168.1.1               # Delete entry"
-          ]
-        },
-        {
-          "command": "dig",
-          "purpose": "DNS queries and troubleshooting",
-          "examples": [
-            "dig example.com                        # A record lookup",
-            "dig @8.8.8.8 example.com              # Query specific server",
-            "dig example.com +trace               # Trace resolution path"
-          ]
-        }
-      ]
-    }
+  "role_relevance": {
+    "soc_analyst": {"relevance": "critical", "percentage_of_job": "45-55%", "daily_tasks": ["Monitor network alerts", "Identify attack patterns", "Analyze network anomalies"]},
+    "incident_responder": {"relevance": "high", "percentage_of_job": "35-45%", "daily_tasks": ["Trace network attacks", "Contain compromised systems", "Analyze packet captures"]},
+    "security_engineer": {"relevance": "critical", "percentage_of_job": "50-60%", "daily_tasks": ["Configure network defenses", "Implement segmentation", "Deploy IDS/IPS"]},
+    "grc_analyst": {"relevance": "medium", "percentage_of_job": "15-25%", "daily_tasks": ["Assess network security controls", "Document network risks"]},
+    "penetration_tester": {"relevance": "critical", "percentage_of_job": "55-65%", "daily_tasks": ["Conduct network attacks", "Test network defenses", "Identify network vulnerabilities"]}
+  },
+
+  "introduction": {
+    "hook": "In 2016, the Mirai botnet launched a DDoS attack that took down major websites including Twitter, Netflix, and Reddit. The attack generated traffic from millions of compromised IoT devices—cameras, routers, DVRs. Network attacks can paralyze organizations and even impact internet infrastructure.",
+    "exam_weight": {"estimated_questions": "6-8", "high_yield_topics": ["DoS vs DDoS", "ARP poisoning", "DNS attacks", "On-path/MITM attacks"]}
   },
 
   "sections": [
@@ -99,549 +37,209 @@
       "section_id": "D2-L005-S01",
       "title": "Denial of Service Attacks",
       "estimated_time": "15 minutes",
-      
       "content": {
-        "overview": "Denial of Service (DoS) attacks make systems unavailable by overwhelming resources or exploiting vulnerabilities. DDoS attacks use multiple sources, making them much harder to mitigate.",
-        
-        "dos_categories": [
+        "overview": "DoS attacks overwhelm systems to deny legitimate access. DDoS uses multiple sources for greater impact.",
+        "core_concepts": [
           {
-            "category": "Volumetric Attacks",
-            "description": "Flood target with traffic to consume bandwidth",
-            "measurement": "Bits per second (Gbps, Tbps)",
-            "examples": ["UDP flood", "ICMP flood", "Amplification attacks"],
-            "defense": "Upstream filtering, DDoS mitigation services, overprovisioning"
+            "concept": "DoS vs DDoS",
+            "dos": {"sources": "Single source", "mitigation": "Block source IP"},
+            "ddos": {"sources": "Multiple distributed sources (botnet)", "mitigation": "Much harder—many IPs"},
+            "key_distinction": "DDoS = Distributed, uses many compromised systems"
           },
           {
-            "category": "Protocol Attacks",
-            "description": "Exploit protocol weaknesses to exhaust server resources",
-            "measurement": "Packets per second (pps)",
-            "examples": ["SYN flood", "Ping of Death", "Smurf attack"],
-            "defense": "SYN cookies, rate limiting, firewall rules"
+            "concept": "Attack Categories",
+            "categories": [
+              {"category": "Volumetric", "method": "Flood bandwidth", "examples": "UDP flood, ICMP flood, Amplification"},
+              {"category": "Protocol", "method": "Exploit protocol weaknesses", "examples": "SYN flood, Ping of Death"},
+              {"category": "Application", "method": "Target application layer", "examples": "HTTP flood, Slowloris"}
+            ]
           },
           {
-            "category": "Application Layer Attacks",
-            "description": "Target application vulnerabilities with legitimate-looking requests",
-            "measurement": "Requests per second (rps)",
-            "examples": ["HTTP flood", "Slowloris", "DNS query flood"],
-            "defense": "WAF, rate limiting, behavioral analysis"
+            "concept": "Amplification Attacks",
+            "mechanism": "Small request → Large response; Spoof source IP",
+            "amplifiers": [
+              {"protocol": "DNS", "amplification": "Up to 70x"},
+              {"protocol": "NTP", "amplification": "Up to 556x"},
+              {"protocol": "Memcached", "amplification": "Up to 51,000x"}
+            ],
+            "key": "Response sent to spoofed victim IP"
+          },
+          {
+            "concept": "SYN Flood",
+            "mechanism": "Send SYN packets, never complete handshake",
+            "impact": "Exhausts server connection resources",
+            "defense": "SYN cookies, rate limiting"
           }
-        ],
-        
-        "common_techniques": [
-          {
-            "attack": "SYN Flood",
-            "mechanism": "Exploits TCP three-way handshake",
-            "how_it_works": [
-              "1. Attacker sends many SYN packets",
-              "2. Server responds with SYN-ACK, allocates resources",
-              "3. Attacker never sends ACK (half-open connection)",
-              "4. Server connection table fills up",
-              "5. Legitimate connections rejected"
-            ],
-            "detection": "Many half-open connections, high SYN packet rate",
-            "defense": "SYN cookies, SYN proxy, connection rate limiting"
-          },
-          {
-            "attack": "UDP Flood",
-            "mechanism": "Sends large volumes of UDP packets",
-            "how_it_works": [
-              "1. Attacker sends UDP to random ports",
-              "2. Server checks for listening service",
-              "3. Returns ICMP 'port unreachable' (if no service)",
-              "4. Resources exhausted processing packets"
-            ],
-            "detection": "High UDP traffic, many ICMP unreachable responses",
-            "defense": "Rate limiting, UDP traffic filtering"
-          },
-          {
-            "attack": "Slowloris",
-            "mechanism": "Keeps HTTP connections open with partial requests",
-            "how_it_works": [
-              "1. Opens many HTTP connections",
-              "2. Sends partial headers very slowly",
-              "3. Never completes requests",
-              "4. Keeps connections alive indefinitely",
-              "5. Web server connection pool exhausted"
-            ],
-            "advantage": "Very low bandwidth required",
-            "detection": "Many long-lived HTTP connections, partial headers",
-            "defense": "Request timeout, connection limits, reverse proxy"
-          }
-        ],
-        
-        "ddos_characteristics": {
-          "description": "Distributed DoS uses multiple attack sources",
-          "sources": [
-            "Compromised computers (botnets)",
-            "IoT devices (cameras, routers, DVRs)",
-            "DDoS-for-hire services",
-            "Reflected traffic from legitimate services"
-          ],
-          "challenges": [
-            "No single source to block",
-            "Can generate massive traffic (Tbps)",
-            "Geographically distributed",
-            "Mix of attack types"
-          ]
-        },
-        
-        "amplification_attacks": {
-          "concept": "Small request generates large response sent to spoofed victim IP",
-          "vectors": [
-            {"protocol": "Memcached", "factor": "51,000x", "port": 11211},
-            {"protocol": "NTP", "factor": "556x", "port": 123},
-            {"protocol": "DNS", "factor": "70x", "port": 53},
-            {"protocol": "SSDP", "factor": "30x", "port": 1900},
-            {"protocol": "SNMP", "factor": "6x", "port": 161}
-          ],
-          "prevention": "Don't expose amplifiable services to internet, BCP38 (source address validation)"
-        },
-        
-        "visualization": {
-          "type": "ascii_diagram",
-          "title": "DDoS Attack Flow",
-          "diagram": [
-            "╔══════════════════════════════════════════════════════════════════════════════╗",
-            "║                       DDoS ATTACK STRUCTURE                                  ║",
-            "╠══════════════════════════════════════════════════════════════════════════════╣",
-            "║                                                                               ║",
-            "║       ┌──────────┐                                                           ║",
-            "║       │ ATTACKER │                                                           ║",
-            "║       │  (C2)    │                                                           ║",
-            "║       └────┬─────┘                                                           ║",
-            "║            │ Commands                                                        ║",
-            "║   ┌────────┼────────┐                                                        ║",
-            "║   ▼        ▼        ▼                                                        ║",
-            "║ ┌────┐  ┌────┐  ┌────┐                                                       ║",
-            "║ │Bot │  │Bot │  │Bot │  ... thousands of bots                               ║",
-            "║ │ 1  │  │ 2  │  │ 3  │                                                       ║",
-            "║ └──┬─┘  └──┬─┘  └──┬─┘                                                       ║",
-            "║    │       │       │                                                         ║",
-            "║    └───────┼───────┘                                                         ║",
-            "║            │ Traffic flood                                                   ║",
-            "║            ▼                                                                 ║",
-            "║       ┌──────────┐                                                           ║",
-            "║       │  TARGET  │ ← Overwhelmed                                            ║",
-            "║       │ (Victim) │                                                           ║",
-            "║       └──────────┘                                                           ║",
-            "║                                                                               ║",
-            "║   AMPLIFICATION VARIANT:                                                    ║",
-            "║   Bot sends small request with SPOOFED source IP (victim's IP)             ║",
-            "║   Reflector (DNS/NTP server) sends LARGE response to victim                ║",
-            "║   Result: Attack traffic multiplied 50x - 51,000x                           ║",
-            "║                                                                               ║",
-            "╚══════════════════════════════════════════════════════════════════════════════╝"
-          ]
-        }
+        ]
       },
-      
-      "key_points": [
-        "DoS = single source; DDoS = distributed (multiple sources/botnet)",
-        "Categories: volumetric (bandwidth), protocol (resources), application (requests)",
-        "SYN flood exploits TCP handshake with half-open connections",
-        "Amplification attacks use spoofed IPs to multiply attack volume",
-        "Memcached offers 51,000x amplification; NTP 556x; DNS 70x"
+      "memory_hooks": {
+        "mnemonic": "VPA = Volumetric, Protocol, Application (DoS types)",
+        "analogy": "DoS is like one person blocking a door. DDoS is like a flash mob blocking all entrances."
+      },
+      "must_remember_for_exam": [
+        {"fact": "DoS = single source; DDoS = distributed (multiple sources)", "why_tested": "Key distinction"},
+        {"fact": "Amplification uses spoofed IPs and protocols that give large responses", "why_tested": "Attack mechanism"},
+        {"fact": "SYN flood exhausts connection resources", "why_tested": "Common attack"},
+        {"fact": "Three categories: Volumetric, Protocol, Application", "why_tested": "Classification"}
       ],
-      
-      "exam_tips": [
-        "DoS vs DDoS: D = Distributed (many sources)",
-        "SYN flood = half-open connections exhausting table",
-        "Slowloris = slow HTTP requests, low bandwidth required",
-        "Amplification = small request → large response to victim",
-        "Know amplification factors: Memcached > NTP > DNS"
-      ],
-      
-      "glossary_terms": [
-        {
-          "term": "SYN Flood",
-          "definition": "DoS attack exploiting TCP handshake by sending SYN packets without completing connection.",
-          "exam_note": "Creates half-open connections. Defense: SYN cookies."
-        },
-        {
-          "term": "Amplification Attack",
-          "definition": "DDoS technique using protocols that generate large responses to small requests, directed at spoofed victim IP.",
-          "exam_note": "Uses DNS, NTP, Memcached. Multiplies attacker bandwidth."
-        }
-      ],
-      
+      "key_points": ["DoS = single source; DDoS = distributed botnet", "Amplification: small request → large response to spoofed victim", "SYN flood exhausts connection table", "Three types: volumetric, protocol, application"],
       "knowledge_check": {
-        "question": "An attacker sends small DNS queries to many open resolvers with the source IP spoofed to the victim's address. What type of attack is this?",
-        "options": [
-          "SYN Flood",
-          "DNS Amplification Attack",
-          "Slowloris",
-          "ARP Spoofing"
-        ],
+        "question": "Attackers send small DNS queries to open resolvers with the victim's spoofed IP. The resolvers send large responses to the victim. This is:",
+        "options": ["SYN flood", "DNS amplification attack", "ARP poisoning", "DNS hijacking"],
         "correct": 1,
-        "explanation": "This is a DNS amplification attack. Small DNS queries generate large responses (up to 70x amplification). By spoofing the source IP to the victim's address, all responses are sent to the victim, multiplying the attacker's bandwidth."
+        "explanation": "DNS amplification uses open resolvers to multiply traffic. Small query generates large response sent to spoofed victim IP.",
+        "wrong_answer_analysis": [
+          {"option": 0, "why_wrong": "SYN flood uses TCP handshake, not DNS"},
+          {"option": 2, "why_wrong": "ARP poisoning is for MITM, not DoS"},
+          {"option": 3, "why_wrong": "DNS hijacking redirects queries, not amplifies"}
+        ]
       }
     },
-
     {
       "section_id": "D2-L005-S02",
-      "title": "Man-in-the-Middle and On-Path Attacks",
+      "title": "Man-in-the-Middle (On-Path) Attacks",
       "estimated_time": "15 minutes",
-      
       "content": {
-        "overview": "Man-in-the-Middle (MITM) or on-path attacks position the attacker between communicating parties, allowing interception, modification, or injection of traffic.",
-        
-        "mitm_concept": {
-          "description": "Attacker intercepts communication between two parties",
-          "capabilities": [
-            "Eavesdrop on communications",
-            "Modify data in transit",
-            "Inject malicious content",
-            "Steal credentials and session tokens",
-            "Downgrade encryption"
-          ],
-          "prerequisites": [
-            "Ability to intercept traffic (network position)",
-            "Victims don't detect interception",
-            "Often requires being on same network segment"
-          ]
-        },
-        
-        "mitm_techniques": [
+        "overview": "Attacker positions between two parties to intercept or modify communications.",
+        "core_concepts": [
           {
-            "technique": "ARP Spoofing/Poisoning",
-            "layer": "Layer 2",
-            "how_it_works": [
-              "1. Attacker sends fake ARP replies",
-              "2. Associates attacker's MAC with gateway IP",
-              "3. Victim's traffic goes to attacker instead of gateway",
-              "4. Attacker forwards to real gateway (transparent)",
-              "5. All victim traffic passes through attacker"
-            ],
-            "detection": ["Duplicate MAC addresses", "ARP table changes", "arpwatch alerts"],
-            "defense": ["Static ARP entries", "Dynamic ARP Inspection (DAI)", "802.1X", "Network segmentation"]
+            "concept": "On-Path Attack (MITM)",
+            "definition": "Attacker intercepts communications between two parties",
+            "capabilities": ["Eavesdrop on traffic", "Modify data in transit", "Inject malicious content", "Steal credentials"],
+            "note": "CompTIA now prefers 'on-path attack' over 'man-in-the-middle'"
           },
           {
-            "technique": "DNS Spoofing/Poisoning",
-            "layer": "Application (DNS)",
-            "how_it_works": [
-              "1. Attacker intercepts DNS queries (via MITM)",
-              "2. Returns malicious IP instead of real IP",
-              "3. Victim connects to attacker's server",
-              "4. Attacker can phish credentials or serve malware"
-            ],
-            "variants": [
-              {"name": "Local DNS Spoofing", "method": "Responds to queries on local network"},
-              {"name": "DNS Cache Poisoning", "method": "Poisons upstream DNS resolver cache"},
-              {"name": "Hosts File Modification", "method": "Malware modifies local hosts file"}
-            ],
-            "defense": ["DNSSEC", "DNS over HTTPS (DoH)", "DNS over TLS (DoT)", "Encrypted DNS"]
+            "concept": "ARP Poisoning/Spoofing",
+            "mechanism": "Send fake ARP responses to associate attacker's MAC with gateway IP",
+            "result": "Traffic intended for gateway goes through attacker",
+            "detection": "Static ARP entries, ARP inspection"
           },
           {
-            "technique": "SSL/TLS Stripping",
-            "layer": "Transport",
-            "how_it_works": [
-              "1. Attacker intercepts initial HTTP request",
-              "2. Establishes HTTPS with real server",
-              "3. Serves HTTP version to victim",
-              "4. Victim thinks connection is secure",
-              "5. Attacker sees plaintext credentials"
-            ],
-            "detection": "Missing HTTPS, no padlock icon",
-            "defense": ["HSTS (HTTP Strict Transport Security)", "HTTPS everywhere", "User awareness"]
-          },
-          {
-            "technique": "Evil Twin (Wireless)",
-            "layer": "Physical/Data Link",
-            "how_it_works": [
-              "1. Attacker creates fake WiFi AP with same name",
-              "2. Stronger signal attracts victims",
-              "3. Victims connect thinking it's legitimate",
-              "4. All traffic passes through attacker"
-            ],
-            "defense": ["Certificate-based WiFi auth", "VPN on public WiFi", "Verify network authenticity"]
-          }
-        ],
-        
-        "session_hijacking": {
-          "description": "Taking over an authenticated session",
-          "techniques": [
-            {"name": "Session Token Theft", "method": "Steal cookie/token via MITM or XSS"},
-            {"name": "Session Fixation", "method": "Force victim to use attacker-known session ID"},
-            {"name": "Session Prediction", "method": "Guess weak session tokens"}
-          ],
-          "defense": ["Secure session management", "HTTPOnly cookies", "Session timeout", "Re-auth for sensitive actions"]
-        },
-        
-        "replay_attacks": {
-          "description": "Capturing and retransmitting valid authentication or commands",
-          "how_it_works": [
-            "1. Attacker captures valid authentication",
-            "2. Later replays captured data",
-            "3. System accepts as legitimate"
-          ],
-          "defense": ["Timestamps", "Nonces", "Sequence numbers", "Challenge-response protocols"]
-        }
-      },
-      
-      "key_points": [
-        "MITM/On-path attacks intercept communication between parties",
-        "ARP spoofing redirects LAN traffic through attacker (Layer 2)",
-        "DNS spoofing returns malicious IPs for domain lookups",
-        "SSL stripping downgrades HTTPS to HTTP to intercept credentials",
-        "Session hijacking takes over authenticated sessions"
-      ],
-      
-      "career_callout": {
-        "role": "Penetration Tester",
-        "note": "ARP spoofing and MITM are common internal network assessment techniques. Tools like Ettercap, Bettercap, and arpspoof enable these attacks. Always ensure you have explicit authorization and limit scope to avoid impacting production systems."
-      },
-      
-      "exam_tips": [
-        "ARP spoofing = Layer 2, redirects LAN traffic via fake ARP replies",
-        "DNS spoofing = returns wrong IP for domain name",
-        "SSL stripping = HTTPS → HTTP downgrade",
-        "Evil Twin = fake WiFi access point",
-        "Replay attack = capture and retransmit valid auth"
-      ],
-      
-      "deep_dive": {
-        "title": "Detecting ARP Spoofing",
-        "estimated_time": "20 minutes",
-        "content": {
-          "description": "Learn to detect ARP spoofing attacks on your network.",
-          
-          "lab_arp_detection": {
-            "title": "Lab: Monitor for ARP Spoofing",
-            "objective": "Detect potential ARP spoofing on local network",
-            "steps": [
-              {
-                "step": 1,
-                "action": "View current ARP table",
-                "command": "arp -a",
-                "what_to_look_for": "Duplicate MAC addresses for different IPs = ARP spoofing indicator"
-              },
-              {
-                "step": 2,
-                "action": "Install and run arpwatch",
-                "commands": [
-                  "sudo apt install arpwatch",
-                  "sudo arpwatch -i eth0",
-                  "# Check logs for changes:",
-                  "tail -f /var/log/syslog | grep arpwatch"
-                ],
-                "alerts": ["flip flop = MAC changed for IP", "new station = new device on network"]
-              },
-              {
-                "step": 3,
-                "action": "Use tcpdump to monitor ARP",
-                "command": "sudo tcpdump -i eth0 arp",
-                "suspicious": "Many ARP replies from same MAC, ARP for gateway IP"
-              },
-              {
-                "step": 4,
-                "action": "Check for MAC/IP inconsistencies",
-                "commands": [
-                  "# Compare gateway MAC in ARP table to expected",
-                  "arp -a | grep gateway",
-                  "# Verify against documented/known MAC"
-                ]
-              }
-            ],
-            "defensive_actions": [
-              "Enable Dynamic ARP Inspection (DAI) on switches",
-              "Use static ARP entries for critical systems",
-              "Implement 802.1X port authentication",
-              "Segment sensitive networks"
+            "concept": "DNS Attacks",
+            "attacks": [
+              {"attack": "DNS Poisoning", "mechanism": "Insert false records in DNS cache", "result": "Users redirected to malicious sites"},
+              {"attack": "DNS Hijacking", "mechanism": "Compromise DNS server or settings", "result": "Control over name resolution"}
             ]
-          }
-        }
-      },
-      
-      "knowledge_check": {
-        "question": "An attacker on a local network sends fake ARP replies to associate their MAC address with the default gateway's IP. What attack is this?",
-        "options": [
-          "DNS Poisoning",
-          "ARP Spoofing",
-          "SSL Stripping",
-          "Session Hijacking"
-        ],
-        "correct": 1,
-        "explanation": "This is ARP spoofing (also called ARP poisoning). By sending fake ARP replies, the attacker causes victims to send traffic to the attacker's MAC address instead of the real gateway. This enables man-in-the-middle attacks on the local network."
-      }
-    },
-
-    {
-      "section_id": "D2-L005-S03",
-      "title": "Other Network Attacks",
-      "estimated_time": "12 minutes",
-      
-      "content": {
-        "overview": "Beyond DoS and MITM, attackers use various techniques to exploit network infrastructure, routing, and wireless communications.",
-        
-        "infrastructure_attacks": [
-          {
-            "attack": "VLAN Hopping",
-            "description": "Bypassing VLAN segmentation to access other VLANs",
-            "techniques": [
-              {"name": "Switch Spoofing", "method": "Attacker negotiates trunk link with switch"},
-              {"name": "Double Tagging", "method": "Packet with two VLAN tags; outer stripped, inner processed"}
-            ],
-            "defense": ["Disable DTP", "Native VLAN not used for data", "Explicit trunk configuration"]
           },
           {
-            "attack": "MAC Flooding",
-            "description": "Overwhelming switch MAC table to cause broadcast behavior",
-            "how_it_works": [
-              "1. Attacker sends frames with many random source MACs",
-              "2. Switch MAC table fills up",
-              "3. Switch fails open—broadcasts all traffic",
-              "4. Attacker can sniff all traffic on segment"
-            ],
-            "defense": ["Port security", "MAC address limits per port"]
-          },
-          {
-            "attack": "BGP Hijacking",
-            "description": "Advertising false routing information to redirect internet traffic",
-            "how_it_works": [
-              "1. Attacker announces routes for IP blocks they don't own",
-              "2. BGP propagates false routes",
-              "3. Traffic for hijacked IPs goes to attacker"
-            ],
-            "real_example": "2018 cryptocurrency traffic hijacking, 2008 Pakistan YouTube hijack",
-            "defense": ["RPKI (Resource Public Key Infrastructure)", "BGP monitoring"]
-          },
-          {
-            "attack": "DNS Tunneling",
-            "description": "Using DNS queries/responses to tunnel data or C2 traffic",
-            "how_it_works": [
-              "1. Data encoded in DNS query (subdomain)",
-              "2. Response contains encoded reply",
-              "3. Bypasses firewalls that allow DNS"
-            ],
-            "detection": ["Long subdomains", "High query volume", "Unusual record types"],
-            "defense": ["DNS traffic analysis", "Block external DNS", "DNS filtering"]
-          }
-        ],
-        
-        "wireless_attacks": [
-          {
-            "attack": "Evil Twin",
-            "description": "Fake access point impersonating legitimate network",
-            "purpose": "MITM, credential theft, malware delivery"
-          },
-          {
-            "attack": "Deauthentication Attack",
-            "description": "Force clients to disconnect from legitimate AP",
-            "purpose": "Capture handshake for cracking, force connection to evil twin"
-          },
-          {
-            "attack": "WPS Attack",
-            "description": "Brute force WPS PIN to recover WiFi password",
-            "defense": "Disable WPS"
-          },
-          {
-            "attack": "Bluetooth Attacks",
-            "types": [
-              {"name": "Bluejacking", "description": "Sending unsolicited messages"},
-              {"name": "Bluesnarfing", "description": "Stealing data from Bluetooth device"},
-              {"name": "Bluebugging", "description": "Taking control of Bluetooth device"}
+            "concept": "SSL/TLS Attacks",
+            "attacks": [
+              {"attack": "SSL Stripping", "mechanism": "Downgrade HTTPS to HTTP", "defense": "HSTS"},
+              {"attack": "Certificate Spoofing", "mechanism": "Present fake certificate", "defense": "Certificate pinning, CA verification"}
             ]
           }
         ]
       },
-      
-      "key_points": [
-        "VLAN hopping bypasses network segmentation",
-        "MAC flooding causes switch to broadcast all traffic",
-        "BGP hijacking redirects internet traffic at routing level",
-        "DNS tunneling uses DNS to bypass firewalls for data exfiltration/C2",
-        "Evil twin creates fake AP for MITM attacks"
+      "must_remember_for_exam": [
+        {"fact": "On-path attack = MITM (attacker between two parties)", "why_tested": "Terminology"},
+        {"fact": "ARP poisoning associates attacker's MAC with gateway IP", "why_tested": "Attack mechanism"},
+        {"fact": "DNS poisoning inserts false records in cache", "why_tested": "Attack mechanism"},
+        {"fact": "SSL stripping downgrades HTTPS to HTTP", "why_tested": "Attack technique"}
       ],
-      
-      "exam_tips": [
-        "VLAN hopping: switch spoofing or double tagging",
-        "MAC flooding fills switch table → broadcasts everything",
-        "DNS tunneling = data/C2 over DNS (bypasses firewalls)",
-        "Bluejacking = unsolicited messages; Bluesnarfing = data theft",
-        "Defense against evil twin: certificate-based WiFi, VPN"
-      ],
-      
+      "key_points": ["On-path (MITM) intercepts communications between parties", "ARP poisoning redirects traffic through attacker", "DNS poisoning inserts false records", "SSL stripping downgrades encryption"],
       "knowledge_check": {
-        "question": "An attacker floods a switch with frames containing random source MAC addresses until the switch's MAC table is full. What happens next?",
-        "options": [
-          "The switch blocks all traffic",
-          "The switch broadcasts all traffic to all ports",
-          "The switch requests authentication",
-          "The switch reboots"
-        ],
+        "question": "An attacker sends false ARP responses, making systems believe the attacker's MAC is the default gateway. This is:",
+        "options": ["DNS poisoning", "ARP spoofing", "MAC flooding", "VLAN hopping"],
         "correct": 1,
-        "explanation": "When a switch's MAC table is full (MAC flooding), it 'fails open' and broadcasts frames to all ports instead of forwarding to specific ports. This allows the attacker to sniff all traffic on the segment. Defense: port security with MAC limits."
+        "explanation": "ARP spoofing/poisoning sends fake ARP responses to redirect traffic through attacker.",
+        "wrong_answer_analysis": [
+          {"option": 0, "why_wrong": "DNS poisoning affects name resolution, not ARP"},
+          {"option": 2, "why_wrong": "MAC flooding overwhelms switch tables"},
+          {"option": 3, "why_wrong": "VLAN hopping crosses VLAN boundaries"}
+        ]
       }
+    },
+    {
+      "section_id": "D2-L005-S03",
+      "title": "Network Reconnaissance and Sniffing",
+      "estimated_time": "10 minutes",
+      "content": {
+        "overview": "Attackers gather network information and capture traffic for analysis.",
+        "core_concepts": [
+          {
+            "concept": "Network Scanning",
+            "techniques": [
+              {"technique": "Port Scanning", "purpose": "Identify open ports/services", "tools": "Nmap"},
+              {"technique": "Service Enumeration", "purpose": "Identify service versions", "risk": "Reveals vulnerabilities"},
+              {"technique": "OS Fingerprinting", "purpose": "Identify operating systems", "risk": "Target-specific attacks"}
+            ]
+          },
+          {
+            "concept": "Packet Sniffing",
+            "definition": "Capture and analyze network traffic",
+            "requirements": ["Promiscuous mode (capture all traffic)", "Network position (hub, span port, ARP poisoning)"],
+            "tools": "Wireshark, tcpdump"
+          },
+          {
+            "concept": "Passive vs Active Reconnaissance",
+            "passive": "Observe without interaction (harder to detect)",
+            "active": "Interact with target systems (more detectable)"
+          }
+        ]
+      },
+      "must_remember_for_exam": [
+        {"fact": "Port scanning identifies open ports/services", "why_tested": "Reconnaissance technique"},
+        {"fact": "Promiscuous mode captures all network traffic", "why_tested": "Sniffing requirement"},
+        {"fact": "Passive recon = observe without interaction", "why_tested": "Recon distinction"}
+      ],
+      "key_points": ["Port scanning finds open services", "Packet sniffing requires promiscuous mode or network position", "Passive recon is harder to detect than active"]
+    },
+    {
+      "section_id": "D2-L005-S04",
+      "title": "Other Network Attacks",
+      "estimated_time": "10 minutes",
+      "content": {
+        "overview": "Additional network-layer attacks targeting various protocols and services.",
+        "core_concepts": [
+          {
+            "concept": "Replay Attack",
+            "mechanism": "Capture and retransmit valid data",
+            "example": "Retransmit captured authentication token",
+            "defense": "Timestamps, nonces, session tokens"
+          },
+          {
+            "concept": "MAC Attacks",
+            "attacks": [
+              {"attack": "MAC Flooding", "mechanism": "Overwhelm switch CAM table", "result": "Switch acts like hub (broadcasts all)"},
+              {"attack": "MAC Spoofing", "mechanism": "Change MAC address", "purpose": "Bypass MAC filtering, impersonation"}
+            ]
+          },
+          {
+            "concept": "VLAN Hopping",
+            "mechanism": "Access traffic on other VLANs",
+            "techniques": ["Switch spoofing (fake trunk)", "Double tagging"],
+            "defense": "Disable auto-trunking, native VLAN not used"
+          }
+        ]
+      },
+      "must_remember_for_exam": [
+        {"fact": "Replay attack = capture and retransmit valid data", "why_tested": "Attack type"},
+        {"fact": "MAC flooding makes switch broadcast all traffic", "why_tested": "Attack result"},
+        {"fact": "VLAN hopping accesses other VLAN traffic", "why_tested": "Attack technique"}
+      ],
+      "key_points": ["Replay attacks retransmit captured valid data", "MAC flooding overwhelms switch, causes broadcast", "VLAN hopping crosses VLAN boundaries"]
     }
   ],
 
-  "tool_spotlights": {
-    "tools": [
-      {
-        "name": "Wireshark",
-        "category": "Packet Analysis",
-        "description": "The standard for network protocol analysis",
-        "free_tier": "Completely free",
-        "url": "https://wireshark.org",
-        "career_relevance": "Essential skill for any network security role"
-      },
-      {
-        "name": "tcpdump",
-        "category": "Packet Capture",
-        "description": "Command-line packet capture utility",
-        "free_tier": "Included with Linux",
-        "career_relevance": "Remote capture and scripting"
-      },
-      {
-        "name": "Ettercap",
-        "category": "MITM Tool",
-        "description": "Suite for MITM attacks on LAN",
-        "free_tier": "Open source",
-        "url": "https://www.ettercap-project.org",
-        "career_relevance": "Penetration testing, educational"
-      },
-      {
-        "name": "arpwatch",
-        "category": "ARP Monitoring",
-        "description": "Monitors ARP changes on network",
-        "free_tier": "Open source",
-        "career_relevance": "Detecting ARP spoofing"
-      }
-    ]
-  },
-
   "summary": {
     "key_takeaways": [
-      "DoS = single source; DDoS = distributed (botnets)",
-      "Amplification attacks multiply attack bandwidth (Memcached 51,000x)",
-      "SYN flood exploits TCP handshake with half-open connections",
-      "ARP spoofing redirects LAN traffic through attacker",
-      "DNS spoofing returns malicious IPs for domain lookups",
-      "SSL stripping downgrades HTTPS to HTTP",
-      "VLAN hopping and MAC flooding bypass network controls"
+      "DoS = single source; DDoS = distributed (botnet)",
+      "Amplification: small request → large response to spoofed victim",
+      "On-path (MITM) intercepts communications between two parties",
+      "ARP poisoning associates attacker MAC with gateway IP",
+      "DNS poisoning inserts false records in cache"
     ],
-    
     "exam_essentials": [
-      "SYN flood = half-open connections; Slowloris = slow HTTP",
-      "Amplification = small request → large response to spoofed IP",
-      "ARP spoofing = Layer 2 MITM via fake ARP replies",
-      "DNS spoofing = wrong IP for domain name",
-      "VLAN hopping = switch spoofing or double tagging"
-    ],
-    
-    "skills_gained": [
-      "Use tcpdump for packet capture",
-      "Detect ARP spoofing with arpwatch",
-      "Analyze network attacks in packet captures",
-      "Understand DDoS mitigation strategies"
-    ],
-    
-    "connection_to_next": "Network attacks often target applications to exploit vulnerabilities. The next lesson covers Application Attacks—SQL injection, XSS, and other techniques that target the software layer."
+      "DoS = single source; DDoS = distributed",
+      "Amplification attacks use DNS, NTP, Memcached",
+      "ARP spoofing = redirect traffic through attacker",
+      "DNS poisoning = false cache entries",
+      "Replay attack = retransmit captured data"
+    ]
   },
 
   "related_content": {
     "simulations": ["D2-SIM-002"],
-    "remediation": ["D2-REM-002"],
     "next_lesson": "D2-LESSON-006",
     "previous_lesson": "D2-LESSON-004"
   }

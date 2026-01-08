@@ -1,576 +1,112 @@
 {
   "lesson_id": "D2-LESSON-008",
   "domain": 2,
-  "title": "Indicators of Compromise and Attack Detection",
-  "objectives_covered": ["2.4"],
-  "estimated_duration": "85-100 minutes (Core: 45 min, Deep Dives: 40-55 min)",
-  "difficulty": "intermediate",
-  "prerequisites": ["D2-LESSON-004", "D2-LESSON-005"],
+  "title": "Indicators of Compromise and Detection",
+  "subtitle": "Finding Evil: IOCs, IOAs, and Threat Detection",
   "version": "2.0-enhanced",
+  "objectives_covered": ["2.4"],
+  "estimated_duration": "75-90 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": ["D2-LESSON-004"],
 
-  "introduction": {
-    "hook": "The average time for organizations to detect a breach is 197 days—over six months of attackers roaming freely through networks. Organizations that detect breaches quickly know what to look for. They monitor for Indicators of Compromise (IOCs) and Indicators of Attack (IOAs), correlate suspicious events, and hunt for threats that evade automated detection. The difference between a minor incident and a catastrophic breach often comes down to detection speed.",
-    
-    "learning_goals": [
-      "Differentiate between IOCs (forensic) and IOAs (behavioral)",
-      "Identify common network, host, and behavioral indicators",
-      "Understand detection technologies: SIEM, EDR, NDR, XDR",
-      "Apply threat intelligence to improve detection",
-      "Analyze alerts to identify true vs false positives",
-      "Perform basic threat hunting techniques"
-    ],
-    
-    "why_it_matters": "Prevention will eventually fail—attackers are creative and persistent. Detection is your safety net, giving you opportunity to respond before attackers achieve their objectives. Security analysts spend most of their time monitoring, investigating alerts, and hunting for threats. Expect 5-7 Security+ questions on indicators and detection.",
-    
-    "career_relevance": {
-      "soc_analyst": "This is your core work. You'll monitor dashboards, investigate alerts, distinguish true positives from false positives, and escalate confirmed incidents. Understanding indicators is essential for effective triage.",
-      "incident_responder": "You'll use IOCs to scope incidents—find all affected systems, identify attack timeline, and determine attacker actions. IOCs help you hunt for additional compromise.",
-      "grc_analyst": "Detection capabilities are audit requirements. You'll assess whether monitoring covers required systems, retention meets compliance needs, and detection is effective.",
-      "penetration_tester": "Understanding what defenders look for helps you test detection capabilities and evade monitoring during red team engagements.",
-      "security_engineer": "You'll configure SIEM rules, tune EDR policies, and implement detection logic. Understanding what to detect helps you build effective monitoring."
-    }
+  "skill_tree": {
+    "position": {"domain": 2, "sequence": 8, "tier": "intermediate"},
+    "prerequisites": [{"lesson_id": "D2-LESSON-004", "title": "Malware Types", "why_needed": "Understand what creates indicators"}],
+    "unlocks": [{"lesson_id": "D4-LESSON-001", "title": "Security Monitoring", "connection": "Detection in SOC operations"}]
   },
 
-  "linux_fundamentals": {
-    "why_it_matters": "Log analysis and IOC investigation are core detection skills.",
-    
-    "essential_commands": {
-      "log_analysis": [
-        {
-          "command": "grep / egrep",
-          "purpose": "Search logs for indicators",
-          "examples": [
-            "grep '192.168.1.100' /var/log/auth.log      # Search for IP",
-            "grep -i 'failed' /var/log/auth.log          # Failed logins",
-            "egrep '(error|warning|critical)' /var/log/syslog"
-          ]
-        },
-        {
-          "command": "awk",
-          "purpose": "Parse structured log data",
-          "examples": [
-            "awk '{print $1, $4}' /var/log/apache2/access.log  # IP and timestamp",
-            "awk '$9 == 404' /var/log/apache2/access.log       # 404 errors"
-          ]
-        },
-        {
-          "command": "sort / uniq",
-          "purpose": "Aggregate and count occurrences",
-          "examples": [
-            "cat access.log | awk '{print $1}' | sort | uniq -c | sort -rn | head",
-            "# Top IPs by request count"
-          ]
-        }
-      ],
-      "process_investigation": [
-        {
-          "command": "ps / pstree",
-          "purpose": "View running processes and relationships",
-          "examples": [
-            "ps auxf                                      # Full process tree",
-            "pstree -p                                    # Process tree with PIDs"
-          ]
-        },
-        {
-          "command": "lsof",
-          "purpose": "Open files and network connections",
-          "examples": [
-            "lsof -i                                      # Network connections",
-            "lsof -p <PID>                                # Files opened by process"
-          ]
-        }
-      ],
-      "hash_checking": [
-        {
-          "command": "sha256sum / md5sum",
-          "purpose": "Generate hashes for IOC lookup",
-          "examples": [
-            "sha256sum suspicious_file",
-            "find /tmp -type f -exec sha256sum {} \\;     # Hash all files in /tmp"
-          ]
-        }
-      ]
-    }
+  "role_relevance": {
+    "soc_analyst": {"relevance": "critical", "percentage_of_job": "60-70%", "daily_tasks": ["Hunt for IOCs", "Analyze indicators", "Correlate events"]},
+    "incident_responder": {"relevance": "critical", "percentage_of_job": "55-65%", "daily_tasks": ["Identify compromise indicators", "Track attacker activity", "Document findings"]},
+    "security_engineer": {"relevance": "high", "percentage_of_job": "30-40%", "daily_tasks": ["Implement detection rules", "Configure alerting"]},
+    "penetration_tester": {"relevance": "medium", "percentage_of_job": "25-35%", "daily_tasks": ["Understand detection capabilities", "Evade indicators"]}
+  },
+
+  "introduction": {
+    "hook": "When SolarWinds was compromised, security teams worldwide scrambled to find indicators of compromise in their environments. Knowing what to look for—and finding it before damage is done—is the essence of threat detection.",
+    "exam_weight": {"estimated_questions": "4-6", "high_yield_topics": ["IOC vs IOA", "Common indicators", "Detection methods"]}
   },
 
   "sections": [
     {
       "section_id": "D2-L008-S01",
-      "title": "Understanding Indicators",
+      "title": "Indicators of Compromise (IOCs)",
       "estimated_time": "15 minutes",
-      
       "content": {
-        "overview": "Indicators provide evidence of potential security incidents. Understanding different types helps focus detection and investigation.",
-        
-        "ioc_vs_ioa": {
-          "ioc": {
-            "name": "Indicators of Compromise",
-            "description": "Evidence that a breach has occurred",
-            "characteristics": ["Forensic artifacts", "Known malicious signatures", "Historical evidence", "After-the-fact detection"],
-            "examples": [
-              "Malware file hashes",
-              "Known malicious IP addresses",
-              "Command and control domains",
-              "Registry keys created by malware",
-              "Specific file names/paths"
-            ],
-            "strengths": ["Fast detection of known threats", "Easy to implement", "Share across organizations"],
-            "weaknesses": ["Can't detect new/unknown threats", "Attackers change infrastructure", "Require constant updates"]
+        "core_concepts": [
+          {
+            "concept": "IOC Definition",
+            "definition": "Evidence that a security incident may have occurred",
+            "note": "Forensic artifacts left by attackers"
           },
-          "ioa": {
-            "name": "Indicators of Attack",
-            "description": "Evidence of ongoing attack activity",
-            "characteristics": ["Behavioral patterns", "Attack techniques in progress", "Proactive detection", "Not signature-dependent"],
-            "examples": [
-              "PowerShell spawned from Office application",
-              "Privilege escalation attempts",
-              "Lateral movement patterns",
-              "Data staging for exfiltration",
-              "Defense evasion techniques"
-            ],
-            "strengths": ["Can detect unknown attacks", "Not dependent on signatures", "Proactive"],
-            "weaknesses": ["More false positives", "Complex to implement", "Requires behavioral baseline"]
+          {
+            "concept": "Common IOC Types",
+            "types": [
+              {"type": "File-based", "examples": "Malware hashes (MD5, SHA256), malicious filenames"},
+              {"type": "Network-based", "examples": "Malicious IPs, domains, URLs, unusual ports"},
+              {"type": "Host-based", "examples": "Registry changes, unusual processes, scheduled tasks"},
+              {"type": "Behavioral", "examples": "Unusual login times, data exfiltration patterns"}
+            ]
+          },
+          {
+            "concept": "IOC vs IOA",
+            "ioc": "Indicator of Compromise - evidence breach occurred (reactive)",
+            "ioa": "Indicator of Attack - evidence attack is occurring (proactive)",
+            "key_difference": "IOC = what happened; IOA = what's happening"
           }
-        },
-        
-        "indicator_types": [
-          {
-            "type": "Atomic Indicators",
-            "description": "Single data points that can be checked",
-            "examples": ["IP addresses", "Domain names", "File hashes (MD5, SHA256)", "Email addresses", "URLs", "Mutex names"],
-            "usage": "Quick lookups, blocklists, signatures"
-          },
-          {
-            "type": "Behavioral Indicators",
-            "description": "Patterns of activity that suggest malicious intent",
-            "examples": ["Process spawning patterns", "Network traffic anomalies", "User activity deviations", "File access patterns"],
-            "usage": "Detect unknown threats, identify TTPs"
-          },
-          {
-            "type": "Computed Indicators",
-            "description": "Derived from analysis of multiple data points",
-            "examples": ["Statistical anomalies", "Correlation of events", "Machine learning outputs", "Risk scores"],
-            "usage": "Advanced detection, reduce noise"
-          }
-        ],
-        
-        "common_iocs": {
-          "network": [
-            "Connections to known malicious IPs/domains",
-            "DNS requests to suspicious domains",
-            "Unusual ports or protocols",
-            "Beaconing patterns (regular interval connections)",
-            "Large data transfers to external hosts",
-            "Connections to Tor exit nodes"
-          ],
-          "host": [
-            "Known malware hashes",
-            "Suspicious file locations (/tmp, AppData\\Local\\Temp)",
-            "Registry persistence mechanisms",
-            "Scheduled tasks/cron jobs",
-            "Unusual service installations",
-            "Modified system binaries"
-          ],
-          "behavioral": [
-            "PowerShell encoded commands",
-            "Process injection patterns",
-            "Credential dumping activity",
-            "Unusual parent-child process relationships",
-            "Mass file encryption",
-            "Clearing of security logs"
-          ]
-        },
-        
-        "visualization": {
-          "type": "ascii_diagram",
-          "title": "IOC vs IOA Detection",
-          "diagram": [
-            "╔══════════════════════════════════════════════════════════════════════════════╗",
-            "║                    IOC vs IOA DETECTION COMPARISON                           ║",
-            "╠══════════════════════════════════════════════════════════════════════════════╣",
-            "║                                                                               ║",
-            "║   IOC (Indicator of Compromise)        IOA (Indicator of Attack)             ║",
-            "║   ═══════════════════════════════      ══════════════════════════            ║",
-            "║                                                                               ║",
-            "║   WHAT: Evidence breach occurred       WHAT: Ongoing attack behavior         ║",
-            "║   WHEN: After-the-fact                 WHEN: Real-time/proactive             ║",
-            "║   HOW:  Signature matching             HOW:  Behavioral analysis             ║",
-            "║                                                                               ║",
-            "║   Examples:                            Examples:                             ║",
-            "║   • Known bad IP: 203.0.113.50        • PowerShell from Excel                ║",
-            "║   • Malware hash: a1b2c3d4...         • Privilege escalation pattern         ║",
-            "║   • C2 domain: evil.com               • Lateral movement behavior            ║",
-            "║                                                                               ║",
-            "║   ┌────────────────────────────────────────────────────────────────────┐     ║",
-            "║   │  BEST PRACTICE: Combine both approaches                           │     ║",
-            "║   │  • IOCs catch known threats quickly                               │     ║",
-            "║   │  • IOAs catch new/unknown threats                                 │     ║",
-            "║   │  • Together = comprehensive detection                              │     ║",
-            "║   └────────────────────────────────────────────────────────────────────┘     ║",
-            "║                                                                               ║",
-            "╚══════════════════════════════════════════════════════════════════════════════╝"
-          ]
-        }
+        ]
       },
-      
-      "key_points": [
-        "IOC = evidence breach occurred (forensic, signature-based)",
-        "IOA = evidence of ongoing attack (behavioral, proactive)",
-        "Atomic indicators are single data points (IPs, hashes, domains)",
-        "Behavioral indicators detect patterns regardless of signatures",
-        "Best detection combines IOCs (known bad) with IOAs (suspicious behavior)"
+      "must_remember_for_exam": [
+        {"fact": "IOC = evidence of past compromise", "why_tested": "Definition"},
+        {"fact": "IOA = evidence of ongoing attack", "why_tested": "Definition"},
+        {"fact": "Common IOCs: hashes, IPs, domains, registry changes", "why_tested": "Types"},
+        {"fact": "IOCs are reactive; IOAs enable proactive detection", "why_tested": "Distinction"}
       ],
-      
-      "exam_tips": [
-        "IOC = Indicator of Compromise (post-breach evidence)",
-        "IOA = Indicator of Attack (ongoing activity, behavioral)",
-        "IOCs can miss new attacks; IOAs can detect unknown threats",
-        "Atomic indicators: IP, domain, hash, email",
-        "Indicators age—attackers change infrastructure"
-      ],
-      
-      "glossary_terms": [
-        {
-          "term": "Indicator of Compromise (IOC)",
-          "definition": "Forensic artifact or observable evidence that a security breach has occurred.",
-          "exam_note": "Signature-based, reactive. Examples: hashes, IPs, domains."
-        },
-        {
-          "term": "Indicator of Attack (IOA)",
-          "definition": "Behavioral pattern indicating an attack is in progress, regardless of specific malware or tools.",
-          "exam_note": "Behavior-based, proactive. Can detect unknown threats."
-        }
-      ],
-      
-      "knowledge_check": {
-        "question": "An EDR solution alerts when PowerShell is spawned by Microsoft Excel and attempts to download content from the internet. This detection is based on:",
-        "options": [
-          "Indicator of Compromise (IOC)",
-          "Indicator of Attack (IOA)",
-          "Atomic indicator",
-          "Computed indicator"
-        ],
-        "correct": 1,
-        "explanation": "This is an Indicator of Attack (IOA). It detects suspicious BEHAVIOR (PowerShell spawned from Excel, downloading content) regardless of specific malware signatures. This pattern is unusual and suggests malicious macro activity. IOCs would match specific hashes, IPs, or domains."
-      }
+      "key_points": ["IOC = evidence of compromise (reactive)", "IOA = evidence of attack in progress (proactive)", "Types: file-based, network-based, host-based, behavioral"]
     },
-
     {
       "section_id": "D2-L008-S02",
-      "title": "Detection Technologies",
-      "estimated_time": "15 minutes",
-      
-      "content": {
-        "overview": "Multiple technologies work together to detect threats. Understanding their capabilities and limitations helps build effective detection coverage.",
-        
-        "detection_technologies": [
-          {
-            "technology": "SIEM (Security Information and Event Management)",
-            "function": "Centralize logs, correlate events, detect threats",
-            "capabilities": [
-              "Log aggregation from multiple sources",
-              "Real-time correlation and alerting",
-              "Historical search and investigation",
-              "Compliance reporting",
-              "Dashboards and visualization"
-            ],
-            "data_sources": ["Firewalls", "Servers", "Endpoints", "Applications", "Cloud services", "Network devices"],
-            "examples": ["Splunk", "Microsoft Sentinel", "QRadar", "Elastic SIEM"],
-            "limitation": "Only as good as the logs you collect and rules you write"
-          },
-          {
-            "technology": "EDR (Endpoint Detection and Response)",
-            "function": "Monitor endpoints for threats, enable response",
-            "capabilities": [
-              "Real-time process monitoring",
-              "Behavioral detection",
-              "File and registry monitoring",
-              "Remote investigation/response",
-              "Threat hunting"
-            ],
-            "data_collected": ["Process execution", "File changes", "Network connections", "Registry modifications", "Memory activity"],
-            "examples": ["CrowdStrike Falcon", "Microsoft Defender for Endpoint", "SentinelOne", "Carbon Black"],
-            "limitation": "Requires agent on endpoint; can miss network-only attacks"
-          },
-          {
-            "technology": "NDR (Network Detection and Response)",
-            "function": "Monitor network traffic for threats",
-            "capabilities": [
-              "Traffic analysis and anomaly detection",
-              "Protocol analysis",
-              "Lateral movement detection",
-              "Encrypted traffic analysis (metadata)",
-              "East-West traffic visibility"
-            ],
-            "examples": ["Darktrace", "ExtraHop", "Vectra AI", "Corelight"],
-            "limitation": "Can't see encrypted payload content; endpoint blind spots"
-          },
-          {
-            "technology": "XDR (Extended Detection and Response)",
-            "function": "Unified detection across endpoint, network, cloud",
-            "capabilities": [
-              "Cross-domain correlation",
-              "Unified investigation",
-              "Automated response",
-              "Single pane of glass"
-            ],
-            "benefit": "Correlates signals that individual tools might miss",
-            "examples": ["Palo Alto Cortex XDR", "Microsoft 365 Defender", "Trend Micro Vision One"]
-          },
-          {
-            "technology": "IDS/IPS (Intrusion Detection/Prevention System)",
-            "function": "Detect (IDS) or block (IPS) known attack patterns",
-            "types": [
-              {"type": "Signature-based", "description": "Match known attack patterns"},
-              {"type": "Anomaly-based", "description": "Detect deviation from baseline"}
-            ],
-            "deployment": ["Network-based (NIDS/NIPS)", "Host-based (HIDS/HIPS)"],
-            "examples": ["Snort", "Suricata", "Zeek (Bro)"],
-            "limitation": "Signature-based can miss new attacks"
-          }
-        ],
-        
-        "detection_layers": {
-          "description": "Defense in depth applies to detection",
-          "layers": [
-            {"layer": "Network perimeter", "tools": "Firewall logs, IDS/IPS, NDR"},
-            {"layer": "Internal network", "tools": "NDR, network flow analysis, DNS monitoring"},
-            {"layer": "Endpoints", "tools": "EDR, AV logs, host-based IDS"},
-            {"layer": "Applications", "tools": "Application logs, WAF, database activity monitoring"},
-            {"layer": "Identity", "tools": "Authentication logs, UEBA, privileged access monitoring"},
-            {"layer": "Cloud", "tools": "Cloud security logs, CASB, cloud-native SIEM"}
-          ]
-        }
-      },
-      
-      "key_points": [
-        "SIEM centralizes logs and correlates events",
-        "EDR monitors endpoints with behavioral detection",
-        "NDR monitors network traffic for threats",
-        "XDR unifies detection across multiple domains",
-        "Defense in depth: multiple detection layers"
-      ],
-      
-      "career_callout": {
-        "role": "SOC Analyst",
-        "note": "You'll work primarily in SIEM and EDR consoles. Learn to write effective queries, understand correlation rules, and navigate investigation workflows. Master keyboard shortcuts—efficiency matters when handling many alerts."
-      },
-      
-      "exam_tips": [
-        "SIEM = log aggregation, correlation, alerting",
-        "EDR = endpoint monitoring with response capability",
-        "NDR = network traffic analysis",
-        "XDR = extended/unified detection across domains",
-        "IDS detects; IPS detects AND blocks"
-      ],
-      
-      "deep_dive": {
-        "title": "SIEM Query Fundamentals",
-        "estimated_time": "20 minutes",
-        "content": {
-          "description": "Learn basic SIEM query techniques for investigation.",
-          
-          "lab_log_analysis": {
-            "title": "Lab: Analyze Logs for Indicators",
-            "objective": "Search logs for suspicious activity",
-            "splunk_style_queries": [
-              {
-                "query": "index=windows EventCode=4625",
-                "purpose": "Find failed login attempts (Windows)",
-                "analysis": "High volume from one source = brute force"
-              },
-              {
-                "query": "index=windows EventCode=4688 CommandLine=*powershell* *-enc*",
-                "purpose": "Find encoded PowerShell execution",
-                "analysis": "Encoded commands often indicate malicious activity"
-              },
-              {
-                "query": "index=firewall action=blocked | stats count by src_ip | sort -count",
-                "purpose": "Top blocked source IPs",
-                "analysis": "Identify scanning or attack sources"
-              },
-              {
-                "query": "index=dns query=*.xyz OR query=*.top | stats count by query",
-                "purpose": "DNS queries to suspicious TLDs",
-                "analysis": "New/unusual TLDs often used by malware"
-              }
-            ],
-            "linux_log_analysis": [
-              {
-                "command": "grep 'Failed password' /var/log/auth.log | awk '{print $11}' | sort | uniq -c | sort -rn",
-                "purpose": "Count failed SSH logins by user"
-              },
-              {
-                "command": "grep 'Accepted' /var/log/auth.log | awk '{print $9, $11}' | sort | uniq",
-                "purpose": "List successful login user/IP combinations"
-              },
-              {
-                "command": "cat /var/log/apache2/access.log | awk '{print $1}' | sort | uniq -c | sort -rn | head -20",
-                "purpose": "Top 20 IPs by request count"
-              }
-            ]
-          }
-        }
-      }
-    },
-
-    {
-      "section_id": "D2-L008-S03",
-      "title": "Threat Intelligence and Hunting",
+      "title": "Detection Methods",
       "estimated_time": "12 minutes",
-      
       "content": {
-        "overview": "Threat intelligence enhances detection with external knowledge. Threat hunting proactively searches for threats that evade automated detection.",
-        
-        "threat_intelligence": {
-          "description": "Information about threats used to improve detection and response",
-          "types": [
-            {"type": "Strategic", "description": "High-level trends, threat landscape", "audience": "Executives"},
-            {"type": "Tactical", "description": "TTPs, attack patterns", "audience": "Security teams"},
-            {"type": "Operational", "description": "Campaign details, actor profiles", "audience": "Analysts"},
-            {"type": "Technical", "description": "IOCs, signatures", "audience": "Detection systems"}
-          ],
-          "sources": [
-            {"source": "Commercial feeds", "examples": "Recorded Future, Mandiant, CrowdStrike"},
-            {"source": "Open source", "examples": "AlienVault OTX, MISP, Abuse.ch"},
-            {"source": "Government", "examples": "CISA, FBI, sector ISACs"},
-            {"source": "Vendor", "examples": "Microsoft, Cisco Talos"},
-            {"source": "Internal", "description": "From your own incidents and investigations"}
-          ],
-          "integration": [
-            "Enrich alerts with context",
-            "Block known-bad indicators",
-            "Prioritize based on relevance",
-            "Hunt for indicators in environment"
-          ]
-        },
-        
-        "threat_hunting": {
-          "description": "Proactive search for threats that evade automated detection",
-          "approaches": [
-            {"approach": "Hypothesis-driven", "method": "Form hypothesis about potential threat, search for evidence"},
-            {"approach": "IOC-driven", "method": "Search for specific indicators from intelligence"},
-            {"approach": "TTP-driven", "method": "Search for attack techniques (MITRE ATT&CK)"},
-            {"approach": "Anomaly-driven", "method": "Look for deviations from normal baseline"}
-          ],
-          "hunt_examples": [
-            {"hunt": "Living off the land", "search": "PowerShell, WMI, WMIC spawned by Office apps"},
-            {"hunt": "Persistence mechanisms", "search": "New scheduled tasks, services, run keys"},
-            {"hunt": "Lateral movement", "search": "Remote execution tools (PsExec, WMI, WinRM)"},
-            {"hunt": "Data exfiltration", "search": "Large outbound transfers, DNS tunneling patterns"}
-          ]
-        },
-        
-        "alert_triage": {
-          "description": "Process for evaluating alerts",
-          "steps": [
-            {"step": "1. Gather context", "actions": ["What triggered?", "What asset?", "What user?", "When?"]},
-            {"step": "2. Assess severity", "actions": ["Asset criticality", "Potential impact", "Threat intelligence context"]},
-            {"step": "3. Investigate", "actions": ["Examine related events", "Check for other indicators", "Timeline analysis"]},
-            {"step": "4. Determine disposition", "options": ["True Positive (confirm incident)", "Benign True Positive (expected activity)", "False Positive (tune detection)"]}
-          ],
-          "false_positive_handling": "Document, tune detection rule, prevent recurrence"
-        }
+        "core_concepts": [
+          {
+            "concept": "Detection Approaches",
+            "approaches": [
+              {"approach": "Signature-based", "method": "Match known bad patterns", "strength": "Fast, low false positives", "weakness": "Misses unknown threats"},
+              {"approach": "Anomaly-based", "method": "Detect deviations from baseline", "strength": "Can find unknown threats", "weakness": "Higher false positives"},
+              {"approach": "Behavior-based", "method": "Identify suspicious behaviors", "strength": "Detects evasive malware", "weakness": "Requires tuning"},
+              {"approach": "Heuristic", "method": "Rules-based analysis", "strength": "Balances detection methods", "weakness": "May miss novel attacks"}
+            ]
+          },
+          {
+            "concept": "Threat Hunting",
+            "definition": "Proactively searching for threats that evaded detection",
+            "method": "Hypothesis-driven investigation using IOCs and behavioral analysis",
+            "key": "Assumes breach—looks for evidence of compromise"
+          }
+        ]
       },
-      
-      "key_points": [
-        "Threat intelligence enriches detection with external context",
-        "Intelligence types: strategic, tactical, operational, technical",
-        "Threat hunting proactively searches for undetected threats",
-        "Hunt approaches: hypothesis-driven, IOC-driven, TTP-driven",
-        "Alert triage: gather context → assess severity → investigate → determine disposition"
+      "must_remember_for_exam": [
+        {"fact": "Signature-based = match known patterns (fast, misses unknown)", "why_tested": "Detection method"},
+        {"fact": "Anomaly-based = detect deviations (finds unknown, higher FP)", "why_tested": "Detection method"},
+        {"fact": "Threat hunting = proactive search assuming breach", "why_tested": "Concept"}
       ],
-      
-      "exam_tips": [
-        "Strategic intelligence = executives; Technical = detection systems",
-        "Threat hunting = proactive search (not waiting for alerts)",
-        "MITRE ATT&CK useful for TTP-based hunting",
-        "False positive = incorrect alert; tune to prevent recurrence",
-        "True positive = confirmed incident; escalate and respond"
-      ],
-      
-      "knowledge_check": {
-        "question": "A security analyst receives a new threat intelligence report about a nation-state actor targeting their industry. The report includes C2 domain IOCs. What should the analyst do FIRST?",
-        "options": [
-          "Wait for the SIEM to alert if the domains are seen",
-          "Search historical logs for the domains",
-          "Block the domains at the firewall",
-          "Report to management"
-        ],
-        "correct": 1,
-        "explanation": "Search historical logs first to determine if you've already been compromised. If the domains were accessed before you knew they were malicious, you may have an active incident. After checking historical data, then block the domains and set up alerts for future detection."
-      }
+      "key_points": ["Signature = known patterns; Anomaly = baseline deviations", "Behavior-based detects evasive techniques", "Threat hunting proactively searches for hidden threats"]
     }
   ],
 
-  "tool_spotlights": {
-    "tools": [
-      {
-        "name": "Splunk",
-        "category": "SIEM",
-        "description": "Leading enterprise SIEM platform",
-        "free_tier": "Splunk Free (500MB/day)",
-        "url": "https://www.splunk.com",
-        "career_relevance": "Most requested SIEM skill"
-      },
-      {
-        "name": "Elastic Security",
-        "category": "SIEM",
-        "description": "Open-source security analytics",
-        "free_tier": "Basic tier free",
-        "url": "https://www.elastic.co/security",
-        "career_relevance": "Popular open-source option"
-      },
-      {
-        "name": "MISP",
-        "category": "Threat Intelligence",
-        "description": "Open-source threat intelligence platform",
-        "free_tier": "Completely free",
-        "url": "https://www.misp-project.org",
-        "career_relevance": "Share and consume IOCs"
-      },
-      {
-        "name": "AlienVault OTX",
-        "category": "Threat Intelligence",
-        "description": "Open threat exchange community",
-        "free_tier": "Free",
-        "url": "https://otx.alienvault.com",
-        "career_relevance": "Free threat intelligence"
-      }
+  "summary": {
+    "exam_essentials": [
+      "IOC = evidence of compromise (reactive)",
+      "IOA = evidence of ongoing attack (proactive)",
+      "Signature-based = known patterns, fast, misses unknown",
+      "Anomaly-based = baseline deviations, finds unknown, more FPs",
+      "Threat hunting = proactive search assuming breach"
     ]
   },
 
-  "summary": {
-    "key_takeaways": [
-      "IOC = evidence breach occurred (forensic); IOA = ongoing attack (behavioral)",
-      "Best detection combines IOCs (known bad) with IOAs (suspicious behavior)",
-      "SIEM aggregates logs and correlates events; EDR monitors endpoints; NDR monitors network",
-      "Threat intelligence enriches detection with external context",
-      "Threat hunting proactively searches for undetected threats",
-      "Alert triage: gather context, assess severity, investigate, determine disposition"
-    ],
-    
-    "exam_essentials": [
-      "IOC vs IOA distinction and examples",
-      "SIEM, EDR, NDR, XDR purposes",
-      "IDS detects; IPS detects AND prevents",
-      "Threat intelligence types (strategic through technical)",
-      "False positive vs true positive"
-    ],
-    
-    "skills_gained": [
-      "Identify IOCs and IOAs in scenarios",
-      "Write basic log queries for investigation",
-      "Understand detection technology capabilities",
-      "Apply threat intelligence to detection"
-    ],
-    
-    "connection_to_next": "Detection finds threats, but systems must be hardened to reduce the attack surface. The next lesson covers Hardening and Configurations—how to secure systems before attacks occur."
-  },
-
   "related_content": {
-    "simulations": ["D2-SIM-004"],
-    "remediation": ["D2-REM-002"],
     "next_lesson": "D2-LESSON-009",
     "previous_lesson": "D2-LESSON-007"
   }

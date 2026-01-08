@@ -2,584 +2,334 @@
   "lesson_id": "D2-LESSON-002",
   "domain": 2,
   "title": "Threat Vectors and Attack Surfaces",
+  "subtitle": "Entry Points: Understanding How Attackers Get In",
+  "version": "2.0-enhanced",
   "objectives_covered": ["2.2"],
-  "estimated_duration": "80-95 minutes (Core: 45 min, Deep Dives: 35-50 min)",
+  "estimated_duration": "90-120 minutes",
   "difficulty": "intermediate",
   "prerequisites": ["D2-LESSON-001"],
-  "version": "2.0-enhanced",
 
-  "introduction": {
-    "hook": "Every door, window, and opening in a building is a potential entry point for a burglar. In cybersecurity, those entry points are called threat vectors—the paths attackers use to reach your systems. Your attack surface is the total of all those entry points: every internet-facing server, every user who might click a phishing link, every API endpoint, every USB port. The 2021 Colonial Pipeline attack started with a single compromised VPN password. The 2017 Equifax breach came through one unpatched web server. Understanding where attackers can get in is the first step to keeping them out.",
-    
-    "learning_goals": [
-      "Identify common threat vectors including message-based, file-based, and network attacks",
-      "Evaluate attack surfaces across networks, applications, humans, and physical access",
-      "Analyze supply chain attack vectors and third-party risks",
-      "Use reconnaissance tools to discover attack surface components",
-      "Apply attack surface reduction techniques to minimize exposure"
+  "skill_tree": {
+    "position": {"domain": 2, "sequence": 2, "tier": "foundation"},
+    "prerequisites": [{"lesson_id": "D2-LESSON-001", "title": "Threat Actors and Motivations", "why_needed": "Understand WHO attacks before HOW they attack"}],
+    "unlocks": [
+      {"lesson_id": "D2-LESSON-003", "title": "Social Engineering", "connection": "Human vector attacks in depth"},
+      {"lesson_id": "D2-LESSON-005", "title": "Network Attacks", "connection": "Network vector attacks in depth"}
     ],
-    
-    "why_it_matters": "You can't defend what you don't know exists. Security professionals must identify all the ways attackers can reach an organization—then prioritize defenses for the most likely vectors. The Security+ exam tests threat vectors extensively—expect 6-8 questions on vector types and attack surfaces.",
-    
-    "career_relevance": {
-      "soc_analyst": "You'll triage alerts based on vector—email-based attacks are most common, so you'll analyze phishing attempts daily. Understanding vectors helps prioritize which alerts to investigate first.",
-      "incident_responder": "When investigating breaches, determining the initial access vector is critical. Was it phishing? Vulnerable web app? Compromised credentials? This shapes the investigation.",
-      "grc_analyst": "Risk assessments require understanding attack surface. You'll evaluate controls against each vector type and ensure adequate coverage.",
-      "penetration_tester": "Reconnaissance to map attack surface is the first phase of any engagement. Tools and techniques in this lesson are your daily toolkit.",
-      "security_engineer": "Attack surface reduction is a key responsibility. You'll implement controls to reduce exposure—disable USB ports, segment networks, patch internet-facing systems."
+    "builds_toward": ["CompTIA Security+ SY0-701", "Attack Surface Management", "Vulnerability Assessment"],
+    "cascade_learning": {
+      "this_lesson_establishes": ["Threat vector classification", "Attack surface components", "Supply chain risks", "Vector mitigation strategies"],
+      "concepts_used_later": {"D2-LESSON-003": "Social engineering vectors", "D2-LESSON-005": "Network attack vectors", "D3-LESSON-002": "Infrastructure security"}
     }
   },
 
-  "linux_fundamentals": {
-    "why_it_matters": "Reconnaissance and attack surface discovery are core security skills. These tools help you see what attackers see.",
-    
-    "essential_commands": {
-      "network_reconnaissance": [
-        {
-          "command": "nmap",
-          "purpose": "Network discovery and port scanning",
-          "examples": [
-            "nmap -sn 192.168.1.0/24           # Ping sweep - discover live hosts",
-            "nmap -p- 192.168.1.100            # All port scan",
-            "nmap -sV -sC 192.168.1.100        # Version detection + default scripts",
-            "nmap -O 192.168.1.100             # OS detection"
-          ]
-        },
-        {
-          "command": "netcat",
-          "purpose": "TCP/UDP connections and banner grabbing",
-          "examples": [
-            "nc -v 192.168.1.100 80            # Connect to port 80",
-            "nc -zv 192.168.1.100 1-1000       # Port scan range"
-          ]
-        }
-      ],
-      "dns_reconnaissance": [
-        {
-          "command": "dig / nslookup",
-          "purpose": "DNS queries",
-          "examples": [
-            "dig example.com                   # A records",
-            "dig example.com MX                # Mail servers",
-            "dig example.com ANY               # All records",
-            "dig @8.8.8.8 example.com          # Query specific DNS server"
-          ]
-        },
-        {
-          "command": "host",
-          "purpose": "Simple DNS lookup",
-          "examples": [
-            "host example.com",
-            "host -t mx example.com"
-          ]
-        }
-      ],
-      "web_reconnaissance": [
-        {
-          "command": "curl",
-          "purpose": "HTTP requests and header analysis",
-          "examples": [
-            "curl -I https://example.com       # Headers only",
-            "curl -v https://example.com       # Verbose (see headers, TLS)",
-            "curl -X OPTIONS https://example.com  # Check allowed methods"
-          ]
-        },
-        {
-          "command": "whatweb",
-          "purpose": "Web technology fingerprinting",
-          "examples": [
-            "whatweb https://example.com"
-          ]
-        }
-      ]
-    }
+  "role_relevance": {
+    "soc_analyst": {"relevance": "critical", "percentage_of_job": "45-55%", "daily_tasks": ["Monitor for vector-based attacks", "Analyze phishing attempts", "Track attack surface changes"]},
+    "incident_responder": {"relevance": "high", "percentage_of_job": "35-45%", "daily_tasks": ["Identify initial access vector", "Trace attack paths", "Document vector exploitation"]},
+    "security_engineer": {"relevance": "critical", "percentage_of_job": "40-50%", "daily_tasks": ["Implement vector defenses", "Reduce attack surface", "Configure email/web security"]},
+    "grc_analyst": {"relevance": "high", "percentage_of_job": "30-40%", "daily_tasks": ["Assess third-party risk", "Document attack surface", "Evaluate supply chain exposure"]},
+    "penetration_tester": {"relevance": "critical", "percentage_of_job": "50-60%", "daily_tasks": ["Discover attack surface", "Test vector defenses", "Exploit identified weaknesses"]}
+  },
+
+  "introduction": {
+    "hook": "The 2021 Colonial Pipeline ransomware attack started with a single compromised VPN password. The 2017 Equifax breach came through one unpatched web server. Every door, window, and opening is a potential entry point. In cybersecurity, those entry points are called threat vectors—the paths attackers use to reach your systems.",
+    "learning_goals": [
+      "Identify common threat vectors: message, file, image, voice, removable media, network",
+      "Evaluate attack surfaces across digital, physical, human, and supply chain components",
+      "Analyze supply chain attack vectors and third-party risks",
+      "Apply attack surface reduction techniques"
+    ],
+    "why_it_matters": {
+      "career_impact": "You'll map attack surfaces, implement vector defenses, assess third-party risk, and prioritize security investments.",
+      "business_connection": "You can't defend what you don't know exists. Unknown attack surface is undefended attack surface.",
+      "exam_relevance": "Expect 6-8 questions on vector types, attack surfaces, and mitigation approaches."
+    },
+    "exam_weight": {"estimated_questions": "6-8", "high_yield_topics": ["Phishing vs spear phishing vs BEC", "Smishing/vishing", "Supply chain attacks", "Attack surface components"]}
   },
 
   "sections": [
     {
       "section_id": "D2-L002-S01",
-      "title": "Threat Vectors Overview",
-      "estimated_time": "15 minutes",
-      
+      "title": "Threat Vectors and Attack Surface Fundamentals",
+      "estimated_time": "12 minutes",
       "content": {
-        "overview": "A threat vector is the method or pathway an attacker uses to gain access. The attack surface is the sum of all potential vectors—every point where an attacker might gain entry.",
-        
-        "threat_vector_categories": [
+        "overview": "A threat vector is the method attackers use to gain access. Attack surface is the sum of all potential entry points.",
+        "core_concepts": [
           {
-            "category": "Message-Based Vectors",
-            "description": "Attacks delivered through communication channels",
-            "vectors": [
-              {"vector": "Email", "methods": ["Phishing", "Malware attachments", "Business Email Compromise"], "prevalence": "Most common initial access vector"},
-              {"vector": "SMS/Text (Smishing)", "methods": ["Fake delivery notifications", "Bank alerts", "MFA bypass"], "prevalence": "Rapidly increasing"},
-              {"vector": "Instant Messaging", "methods": ["Malicious links in Slack/Teams", "Impersonation"], "prevalence": "Growing with remote work"},
-              {"vector": "Social Media", "methods": ["Direct messages", "Watering hole via ads"], "prevalence": "Targeted attacks"}
+            "concept": "Threat Vector Categories",
+            "categories": [
+              {"category": "Message-Based", "examples": "Email (phishing), SMS (smishing), IM, social media"},
+              {"category": "File-Based", "examples": "Malicious documents, infected downloads, drive-by downloads"},
+              {"category": "Image-Based", "examples": "Steganography, malicious image files, QR codes"},
+              {"category": "Voice-Based", "examples": "Vishing, robocalls, deepfake voice"},
+              {"category": "Removable Media", "examples": "USB drives, SD cards, external drives"},
+              {"category": "Network", "examples": "Vulnerable services, wireless attacks, MITM"}
             ]
           },
           {
-            "category": "File-Based Vectors",
-            "description": "Attacks via malicious files",
-            "vectors": [
-              {"vector": "Document Attachments", "methods": ["Macro-enabled Office docs", "PDF exploits"], "defense": "Disable macros, sandboxing"},
-              {"vector": "Software Downloads", "methods": ["Trojanized applications", "Fake updates"], "defense": "Application whitelisting"},
-              {"vector": "Drive-by Downloads", "methods": ["Malicious ads", "Compromised websites"], "defense": "Browser security, ad blocking"}
+            "concept": "Attack Surface Components",
+            "components": [
+              {"component": "Digital", "includes": "Internet-facing systems, web apps, APIs, email, VPN, cloud, mobile"},
+              {"component": "Physical", "includes": "Building access, hardware ports, discarded equipment"},
+              {"component": "Human", "includes": "Employees, contractors, help desk, executives"},
+              {"component": "Supply Chain", "includes": "Software vendors, hardware suppliers, service providers"}
             ]
           },
           {
-            "category": "Network-Based Vectors",
-            "description": "Attacks against network services",
-            "vectors": [
-              {"vector": "Vulnerable Services", "methods": ["Exploiting unpatched software", "Misconfigurations"], "example": "Equifax breach via Apache Struts"},
-              {"vector": "Remote Access", "methods": ["Compromised VPN credentials", "RDP brute force"], "example": "Colonial Pipeline via VPN"},
-              {"vector": "Wireless", "methods": ["Evil twin attacks", "WPA cracking"], "defense": "WPA3, certificate-based auth"},
-              {"vector": "Man-in-the-Middle", "methods": ["ARP spoofing", "DNS hijacking"], "defense": "Encryption, certificate pinning"}
-            ]
-          },
-          {
-            "category": "Physical Vectors",
-            "description": "Attacks requiring physical access",
-            "vectors": [
-              {"vector": "USB/Removable Media", "methods": ["BadUSB attacks", "Malware autorun"], "defense": "Disable USB, endpoint protection"},
-              {"vector": "Hardware Implants", "methods": ["Keyloggers", "Network taps"], "defense": "Physical security, inspections"},
-              {"vector": "Tailgating", "methods": ["Following employees into secure areas"], "defense": "Mantraps, badge policies"}
-            ]
-          },
-          {
-            "category": "Supply Chain Vectors",
-            "description": "Attacks through trusted third parties",
-            "vectors": [
-              {"vector": "Software Supply Chain", "methods": ["Compromised updates", "Malicious packages"], "example": "SolarWinds, Codecov"},
-              {"vector": "Hardware Supply Chain", "methods": ["Pre-installed malware", "Compromised firmware"], "defense": "Verified suppliers, inspections"},
-              {"vector": "Service Providers", "methods": ["Compromised MSPs", "Cloud provider breaches"], "defense": "Vendor assessments, monitoring"}
+            "concept": "Attack Surface Discovery Challenges",
+            "challenges": [
+              {"challenge": "Shadow IT", "description": "Unauthorized cloud services, unapproved apps"},
+              {"challenge": "Forgotten Assets", "description": "Legacy systems, exposed test environments"},
+              {"challenge": "Third-Party Exposure", "description": "Vendor connections, partner integrations"}
             ]
           }
-        ],
-        
-        "visualization": {
-          "type": "ascii_diagram",
-          "title": "Threat Vector Categories",
-          "diagram": [
-            "╔══════════════════════════════════════════════════════════════════════════╗",
-            "║                       THREAT VECTOR OVERVIEW                             ║",
-            "╠══════════════════════════════════════════════════════════════════════════╣",
-            "║                                                                           ║",
-            "║   MESSAGE-BASED          NETWORK-BASED           PHYSICAL               ║",
-            "║   ═════════════          ═════════════           ════════               ║",
-            "║   • Email (phishing)     • Vulnerable services   • USB drives           ║",
-            "║   • SMS (smishing)       • Remote access (VPN)   • Hardware implants    ║",
-            "║   • IM/Chat             • Wireless attacks       • Tailgating           ║",
-            "║   • Social media        • Man-in-the-middle      • Dumpster diving      ║",
-            "║                                                                           ║",
-            "║   FILE-BASED             SUPPLY CHAIN            HUMAN                  ║",
-            "║   ══════════             ════════════            ═════                  ║",
-            "║   • Malicious docs       • Software updates      • Social engineering   ║",
-            "║   • Trojanized apps      • Hardware supply       • Insider threat       ║",
-            "║   • Drive-by downloads   • Service providers     • Help desk attacks    ║",
-            "║                                                                           ║",
-            "║   ┌─────────────────────────────────────────────────────────────────┐    ║",
-            "║   │  #1 INITIAL ACCESS VECTOR: Email phishing (>90% of attacks)    │    ║",
-            "║   └─────────────────────────────────────────────────────────────────┘    ║",
-            "║                                                                           ║",
-            "╚══════════════════════════════════════════════════════════════════════════╝"
-          ]
-        }
+        ]
       },
-      
-      "key_points": [
-        "Threat vector = method/path attackers use to gain access",
-        "Attack surface = total of all potential entry points",
-        "Email phishing is the #1 initial access vector (>90% of attacks)",
-        "Supply chain attacks are increasingly common and hard to detect",
-        "Physical vectors are often overlooked but can bypass technical controls"
+      "memory_hooks": {
+        "mnemonic": "MFIV-RN: Message, File, Image, Voice, Removable, Network (vector types)",
+        "analogy": "Attack surface is like all the doors and windows of a building. Threat vectors are the ways burglars might enter—through doors, windows, or maybe the chimney."
+      },
+      "must_remember_for_exam": [
+        {"fact": "Threat vector = HOW attackers get in", "why_tested": "Definition"},
+        {"fact": "Attack surface = WHERE attackers can get in (total entry points)", "why_tested": "Definition"},
+        {"fact": "Attack surface has 4 components: digital, physical, human, supply chain", "why_tested": "Framework"},
+        {"fact": "Shadow IT expands attack surface without security awareness", "why_tested": "Common risk"}
       ],
-      
-      "exam_tips": [
-        "Threat vector = HOW; Attack surface = WHERE",
-        "Email/message-based vectors are most common",
-        "Supply chain attacks go through trusted third parties",
-        "Smishing = SMS phishing; Vishing = voice phishing",
-        "Know all vector types: message, file, network, physical, supply chain"
-      ],
-      
-      "glossary_terms": [
-        {
-          "term": "Threat Vector",
-          "definition": "The method or pathway an attacker uses to gain access to a target system.",
-          "exam_note": "Categories: message, file, network, physical, supply chain."
-        },
-        {
-          "term": "Attack Surface",
-          "definition": "The total of all potential entry points where an attacker could gain access.",
-          "exam_note": "Includes digital, physical, human, and supply chain components."
-        },
-        {
-          "term": "Supply Chain Attack",
-          "definition": "An attack that targets an organization through its vendors, suppliers, or partners.",
-          "exam_note": "Examples: SolarWinds (software update), hardware implants."
-        }
-      ],
-      
+      "key_points": ["Threat vector = method/path, Attack surface = total entry points", "Vector types: message, file, image, voice, removable, network", "Surface components: digital, physical, human, supply chain"],
       "knowledge_check": {
-        "question": "An attacker compromises a software vendor and inserts malware into a legitimate update that is then distributed to thousands of customers. What type of attack is this?",
-        "options": [
-          "Message-based vector using phishing",
-          "Supply chain attack",
-          "Drive-by download",
-          "Man-in-the-middle attack"
-        ],
+        "question": "Employees are using unapproved cloud storage to share files with partners. This represents expansion of the organization's:",
+        "options": ["Threat landscape", "Attack surface", "Security perimeter", "Compliance scope"],
         "correct": 1,
-        "explanation": "This is a supply chain attack—the attacker compromises a trusted third party (software vendor) to reach the ultimate targets (customers). The SolarWinds attack is a famous example. It's not phishing (no deceptive message), drive-by (not web-based), or MITM (not intercepting traffic)."
+        "explanation": "Shadow IT expands the attack surface—new entry points that security doesn't monitor or protect.",
+        "wrong_answer_analysis": [
+          {"option": 0, "why_wrong": "Threat landscape is about WHO might attack, not entry points"},
+          {"option": 2, "why_wrong": "Perimeter is about boundaries, not the total of all entry points"},
+          {"option": 3, "why_wrong": "Compliance scope is regulatory concern, not security entry points"}
+        ]
       }
     },
-
     {
       "section_id": "D2-L002-S02",
-      "title": "Attack Surface Components",
-      "estimated_time": "12 minutes",
-      
+      "title": "Message-Based Attack Vectors",
+      "estimated_time": "15 minutes",
       "content": {
-        "overview": "The attack surface includes every potential entry point across digital systems, physical access, human vulnerabilities, and supply chain relationships.",
-        
-        "digital_attack_surface": {
-          "description": "Internet-accessible systems and services",
-          "components": [
-            {
-              "component": "Internet-Facing Systems",
-              "examples": ["Web servers", "Email gateways", "VPN endpoints", "DNS servers"],
-              "risk": "Directly accessible by attackers worldwide"
-            },
-            {
-              "component": "Web Applications and APIs",
-              "examples": ["Customer portals", "REST APIs", "GraphQL endpoints"],
-              "risk": "Common target for application-level attacks"
-            },
-            {
-              "component": "Cloud Services",
-              "examples": ["SaaS applications", "IaaS workloads", "Cloud storage"],
-              "risk": "Misconfigurations, exposed buckets, identity attacks"
-            },
-            {
-              "component": "Remote Access",
-              "examples": ["VPN", "RDP", "SSH", "Remote desktop tools"],
-              "risk": "Credential attacks, brute force"
-            },
-            {
-              "component": "Shadow IT",
-              "description": "Unauthorized systems unknown to security team",
-              "examples": ["Personal cloud storage", "Unapproved SaaS", "Test systems"],
-              "risk": "No security controls, no monitoring"
-            }
-          ]
-        },
-        
-        "physical_attack_surface": {
-          "description": "Physical entry points and access",
-          "components": [
-            {"component": "Building Access", "risk": "Tailgating, social engineering"},
-            {"component": "Network Jacks", "risk": "Rogue device connection"},
-            {"component": "USB Ports", "risk": "Malicious USB attacks"},
-            {"component": "Server Rooms", "risk": "Direct hardware access"},
-            {"component": "Discarded Equipment", "risk": "Data recovery from drives"}
-          ]
-        },
-        
-        "human_attack_surface": {
-          "description": "People as potential attack vectors",
-          "components": [
-            {"component": "Employees", "risk": "Phishing, social engineering"},
-            {"component": "Help Desk", "risk": "Password reset social engineering"},
-            {"component": "Executives", "risk": "Whale phishing, BEC"},
-            {"component": "Contractors", "risk": "Less security awareness, temporary access"},
-            {"component": "Former Employees", "risk": "Retained access, insider knowledge"}
-          ]
-        },
-        
-        "supply_chain_attack_surface": {
-          "description": "Third-party relationships",
-          "components": [
-            {"component": "Software Vendors", "risk": "Compromised updates (SolarWinds)"},
-            {"component": "Cloud Providers", "risk": "Shared infrastructure attacks"},
-            {"component": "Managed Service Providers", "risk": "Access to multiple customers"},
-            {"component": "Hardware Suppliers", "risk": "Pre-compromised equipment"},
-            {"component": "Open Source Dependencies", "risk": "Malicious packages (npm, PyPI)"}
-          ]
-        },
-        
-        "attack_surface_discovery_challenges": {
-          "shadow_it": "Systems deployed without IT/security knowledge",
-          "forgotten_assets": "Legacy systems, decommissioned servers still online",
-          "cloud_sprawl": "Untracked cloud resources across accounts",
-          "api_proliferation": "Undocumented APIs exposing data",
-          "merger_acquisitions": "Inherited systems not fully inventoried"
-        }
-      },
-      
-      "key_points": [
-        "Attack surface has four components: digital, physical, human, supply chain",
-        "Shadow IT expands attack surface without security knowledge",
-        "Human attack surface includes employees, contractors, and executives",
-        "Supply chain attacks target trusted third parties",
-        "Organizations often don't know their full attack surface"
-      ],
-      
-      "real_world_example": {
-        "scenario": "Attack surface discovery reveals unknown risks",
-        "company": "Pinnacle Financial Services",
-        "findings": {
-          "digital": "47 internet-facing systems—12 unknown to IT, 3 with critical vulnerabilities",
-          "physical": "USB ports enabled on all workstations, network jacks in public lobby",
-          "human": "3,200 employees, executives frequently targeted by spear phishing",
-          "supply_chain": "187 vendors with network access, 2 former contractors still with active access"
-        },
-        "remediation": "Reduced internet-facing systems by 40%, disabled unnecessary USB ports, revoked stale vendor access"
-      },
-      
-      "deep_dive": {
-        "title": "Attack Surface Discovery with Reconnaissance Tools",
-        "estimated_time": "25 minutes",
-        "content": {
-          "description": "Use common tools to discover what attackers see when they look at your organization.",
-          
-          "lab_external_recon": {
-            "title": "Lab: External Attack Surface Discovery",
-            "objective": "Discover publicly exposed assets using passive and active reconnaissance",
-            "note": "Only perform on systems you own or have authorization to test!",
-            "steps": [
-              {
-                "step": 1,
-                "action": "Passive DNS reconnaissance",
-                "commands": [
-                  "# Find subdomains using public DNS data",
-                  "dig example.com ANY",
-                  "dig example.com MX",
-                  "dig example.com TXT",
-                  "",
-                  "# Use subfinder for subdomain enumeration (if installed)",
-                  "subfinder -d example.com"
-                ]
-              },
-              {
-                "step": 2,
-                "action": "WHOIS and registration info",
-                "commands": [
-                  "whois example.com",
-                  "# Look for: registrant info, name servers, dates"
-                ]
-              },
-              {
-                "step": 3,
-                "action": "Certificate transparency logs",
-                "method": "Visit https://crt.sh/?q=%25.example.com",
-                "purpose": "Find subdomains from SSL certificate issuance"
-              },
-              {
-                "step": 4,
-                "action": "Port scanning (authorized targets only!)",
-                "commands": [
-                  "# Quick scan of common ports",
-                  "nmap -F target.example.com",
-                  "",
-                  "# Service version detection",
-                  "nmap -sV -p 80,443,22,21,25 target.example.com",
-                  "",
-                  "# Full port scan (slow)",
-                  "nmap -p- target.example.com"
-                ]
-              },
-              {
-                "step": 5,
-                "action": "Web technology fingerprinting",
-                "commands": [
-                  "# HTTP headers reveal server info",
-                  "curl -I https://example.com",
-                  "",
-                  "# Check security headers",
-                  "curl -I https://example.com | grep -iE 'x-frame|x-xss|x-content|strict-transport|content-security'"
-                ]
-              },
-              {
-                "step": 6,
-                "action": "Check for exposed services",
-                "services_to_look_for": [
-                  "RDP (3389) - should never be internet-exposed",
-                  "SMB (445) - should never be internet-exposed",
-                  "SSH (22) - limit to known IPs if possible",
-                  "Database ports (3306, 5432, 1433) - should be internal only"
-                ]
-              }
+        "overview": "Message-based attacks use communication channels to deliver malicious content or manipulate victims. Most common initial access vector.",
+        "core_concepts": [
+          {
+            "concept": "Email Attack Types",
+            "types": [
+              {"type": "Phishing", "description": "Mass emails impersonating trusted entities", "goal": "Volume-based success"},
+              {"type": "Spear Phishing", "description": "Targeted emails for specific individuals", "goal": "Higher success rate through personalization"},
+              {"type": "Whaling", "description": "Spear phishing targeting executives", "goal": "High-value targets"},
+              {"type": "BEC", "description": "Impersonating executives for wire fraud", "goal": "Financial theft, $2.7B annually"}
             ],
-            "online_tools": [
-              {"tool": "Shodan.io", "purpose": "Search for exposed devices/services"},
-              {"tool": "Censys.io", "purpose": "Internet-wide scanning data"},
-              {"tool": "SecurityTrails", "purpose": "Historical DNS data"},
-              {"tool": "BuiltWith", "purpose": "Technology stack detection"}
-            ]
+            "critical_distinction": "Phishing = mass, Spear Phishing = targeted, Whaling = executives, BEC = financial fraud"
+          },
+          {
+            "concept": "SMS-Based Attacks (Smishing)",
+            "characteristics": ["Short, urgent messages", "Links to credential harvesting", "Impersonate banks, delivery services"],
+            "common_lures": ["Account locked", "Package delivery problem", "Verify your identity"]
+          },
+          {
+            "concept": "Voice-Based Attacks (Vishing)",
+            "characteristics": ["Phone calls impersonating IT support, banks", "Urgency to bypass skepticism", "May use caller ID spoofing"],
+            "emerging_threat": "Deepfake voice impersonation"
           }
+        ],
+        "what_would_happen_if": {
+          "scenario": "What if you only trained employees on phishing but not smishing/vishing?",
+          "consequence": "Attackers adapt. They'll switch to SMS or phone calls where employees are less suspicious. Multi-channel awareness is essential—attackers use whatever works."
         }
+      },
+      "memory_hooks": {
+        "mnemonic": "PSWB: Phishing (mass), Spear phishing (targeted), Whaling (executives), BEC (fraud)",
+        "common_mistakes": [{"mistake": "Thinking BEC always involves malware", "correction": "BEC is often pure social engineering—no malware, just convincing emails requesting money transfers."}]
+      },
+      "must_remember_for_exam": [
+        {"fact": "Phishing = mass, Spear phishing = targeted, Whaling = executives", "why_tested": "Attack classification"},
+        {"fact": "BEC = Business Email Compromise ($2.7B annual losses)", "why_tested": "Major threat category"},
+        {"fact": "Smishing = SMS phishing, Vishing = voice phishing", "why_tested": "Terminology"},
+        {"fact": "Spear phishing is more sophisticated and successful than mass phishing", "why_tested": "Threat comparison"}
+      ],
+      "key_points": ["Phishing (mass) vs Spear phishing (targeted) vs BEC (executive fraud)", "Smishing = SMS attacks, Vishing = voice attacks", "BEC causes $2.7B in annual losses", "Multi-channel attacks bypass single-vector defenses"],
+      "knowledge_check": {
+        "question": "A CFO receives an email appearing to be from the CEO requesting an urgent wire transfer to a new vendor. This is MOST likely:",
+        "options": ["Phishing", "Spear phishing", "Business Email Compromise", "Smishing"],
+        "correct": 2,
+        "explanation": "BEC specifically involves impersonating executives to request financial transfers. While it's targeted (like spear phishing), the financial fraud aspect makes it BEC.",
+        "wrong_answer_analysis": [
+          {"option": 0, "why_wrong": "Phishing is mass targeting, not specifically impersonating executives"},
+          {"option": 1, "why_wrong": "Spear phishing is targeted but BEC specifically involves financial fraud impersonation"},
+          {"option": 3, "why_wrong": "Smishing uses SMS, not email"}
+        ]
       }
     },
-
     {
       "section_id": "D2-L002-S03",
-      "title": "Attack Surface Reduction",
-      "estimated_time": "10 minutes",
-      
+      "title": "File-Based and Removable Media Vectors",
+      "estimated_time": "12 minutes",
       "content": {
-        "overview": "Attack surface reduction (ASR) minimizes the number of potential entry points attackers can exploit.",
-        
-        "reduction_strategies": [
+        "overview": "File-based attacks embed malicious code in files. Removable media provides physical delivery mechanism bypassing network controls.",
+        "core_concepts": [
           {
-            "strategy": "Reduce Internet Exposure",
-            "actions": [
-              "Remove unnecessary internet-facing services",
-              "Move services behind VPN/Zero Trust",
-              "Use WAF for web applications",
-              "Implement network segmentation"
+            "concept": "Malicious Document Types",
+            "types": [
+              {"type": "Office Documents", "mechanism": "VBA macros, DDE attacks, template injection"},
+              {"type": "PDF Files", "mechanism": "JavaScript execution, embedded files"},
+              {"type": "Archive Files (ZIP/RAR)", "mechanism": "Hidden executables, nested archives, password-protected to evade scanning"}
             ]
           },
           {
-            "strategy": "Harden Systems",
-            "actions": [
-              "Disable unused services and ports",
-              "Remove default accounts",
-              "Apply security baselines (CIS benchmarks)",
-              "Keep systems patched"
+            "concept": "Drive-by Downloads",
+            "process": ["User visits compromised site", "Malicious code exploits browser vulnerability", "Malware downloads without user action"],
+            "key_point": "No clicks required—just visiting the site"
+          },
+          {
+            "concept": "Removable Media Attacks",
+            "methods": [
+              {"method": "USB Drop", "description": "Plant infected USBs in parking lots/lobbies"},
+              {"method": "Promotional Items", "description": "Infected devices given as gifts"},
+              {"method": "Supply Chain", "description": "Compromised devices before delivery"}
+            ],
+            "famous_example": "Stuxnet spread via USB drives to air-gapped Iranian nuclear facility"
+          }
+        ]
+      },
+      "must_remember_for_exam": [
+        {"fact": "Drive-by downloads require no user action—just visiting a site", "why_tested": "Attack mechanism"},
+        {"fact": "Office macros are common malware delivery method", "why_tested": "File-based vector"},
+        {"fact": "USB drives can bridge air-gapped networks (Stuxnet)", "why_tested": "Physical vector capability"}
+      ],
+      "key_points": ["Office macros, PDFs, and archives commonly deliver malware", "Drive-by downloads require no clicks", "USB drives bypass network security", "Password-protected archives evade email scanning"],
+      "knowledge_check": {
+        "question": "A user visits a legitimate website that was compromised. Without clicking anything, malware is downloaded to their system. This is:",
+        "options": ["Phishing attack", "Drive-by download", "Watering hole attack", "Trojan infection"],
+        "correct": 1,
+        "explanation": "Drive-by downloads exploit browser vulnerabilities to install malware without user action. The key indicator is 'without clicking anything.'",
+        "wrong_answer_analysis": [
+          {"option": 0, "why_wrong": "Phishing requires user action (clicking link, entering credentials)"},
+          {"option": 2, "why_wrong": "Watering hole is the strategy of compromising sites visitors trust; drive-by is the technical mechanism"},
+          {"option": 3, "why_wrong": "Trojan describes the malware type, not the delivery method"}
+        ]
+      }
+    },
+    {
+      "section_id": "D2-L002-S04",
+      "title": "Supply Chain and Third-Party Vectors",
+      "estimated_time": "12 minutes",
+      "content": {
+        "overview": "Supply chain attacks target trusted third parties to reach ultimate victims. Increasingly common and devastating.",
+        "core_concepts": [
+          {
+            "concept": "Supply Chain Attack Types",
+            "types": [
+              {"type": "Software Supply Chain", "method": "Compromise vendor's development/build process", "example": "SolarWinds (2020)"},
+              {"type": "Hardware Supply Chain", "method": "Implant malicious components in manufacturing", "example": "Firmware tampering"},
+              {"type": "Service Provider", "method": "Compromise MSP to reach their customers", "example": "Kaseya attack (2021)"}
             ]
           },
           {
-            "strategy": "Control Physical Access",
-            "actions": [
-              "Disable USB ports where not needed",
-              "Secure network jacks in public areas",
-              "Implement badge access logging",
-              "Shred documents, sanitize drives"
+            "concept": "Why Supply Chain Attacks Work",
+            "reasons": [
+              "Trusted relationship—victims install updates willingly",
+              "Signed code appears legitimate",
+              "Wide reach—one compromise affects thousands",
+              "Detection difficult—malware in 'trusted' software"
             ]
           },
           {
-            "strategy": "Reduce Human Risk",
-            "actions": [
-              "Security awareness training",
-              "Phishing simulations",
-              "Limit privileged access",
-              "Implement MFA everywhere"
-            ]
-          },
-          {
-            "strategy": "Manage Supply Chain",
-            "actions": [
-              "Vendor security assessments",
-              "Limit third-party access",
-              "Monitor for supply chain compromises",
-              "Verify software integrity (signatures, SBOMs)"
+            "concept": "Third-Party Risk",
+            "risks": [
+              {"risk": "Vendor Network Access", "description": "Direct connection to your systems"},
+              {"risk": "Data Sharing", "description": "Your data on their systems"},
+              {"risk": "Software Dependencies", "description": "Libraries and components from others"},
+              {"risk": "Physical Access", "description": "Contractors, service technicians"}
             ]
           }
         ],
-        
-        "continuous_monitoring": {
-          "description": "Attack surface changes constantly—monitoring is essential",
-          "methods": [
-            "Automated asset discovery scans",
-            "Cloud configuration monitoring",
-            "Certificate transparency monitoring",
-            "Vulnerability scanning",
-            "Third-party risk monitoring"
-          ],
-          "tools": ["Attack Surface Management (ASM) platforms", "Cloud Security Posture Management (CSPM)"]
+        "what_would_happen_if": {
+          "scenario": "What if your security software vendor was compromised?",
+          "consequence": "Like SolarWinds—you'd install malicious updates thinking you're improving security. The trusted update mechanism becomes the attack vector. This is why supply chain security is critical."
         }
       },
-      
-      "key_points": [
-        "Attack surface reduction minimizes potential entry points",
-        "Remove unnecessary internet-facing services",
-        "Harden systems using security baselines (CIS)",
-        "Monitor continuously—attack surface changes constantly",
-        "Supply chain management is increasingly critical"
+      "must_remember_for_exam": [
+        {"fact": "SolarWinds = software supply chain attack (2020)", "why_tested": "Major example"},
+        {"fact": "Supply chain attacks leverage trusted relationships", "why_tested": "Why they work"},
+        {"fact": "MSP compromise can affect all their customers", "why_tested": "Cascading impact"}
       ],
-      
-      "exam_tips": [
-        "Attack surface reduction = minimizing entry points",
-        "CIS Benchmarks provide hardening guidelines",
-        "Disable unused services, ports, and accounts",
-        "ASM = Attack Surface Management (continuous discovery)",
-        "SBOM = Software Bill of Materials (supply chain transparency)"
-      ],
-      
+      "key_points": ["Supply chain attacks compromise trusted vendors to reach victims", "SolarWinds showed devastating impact of software supply chain compromise", "Third-party risk includes vendor access, data sharing, and software dependencies"],
       "knowledge_check": {
-        "question": "Which action BEST reduces an organization's attack surface?",
-        "options": [
-          "Installing additional security monitoring tools",
-          "Disabling unnecessary services and closing unused ports",
-          "Purchasing cyber insurance",
-          "Hiring more security analysts"
-        ],
+        "question": "A software vendor's build process is compromised, causing malicious code to be included in updates sent to customers. This is:",
+        "options": ["Watering hole attack", "Supply chain attack", "Man-in-the-middle attack", "Zero-day exploit"],
         "correct": 1,
-        "explanation": "Disabling unnecessary services and closing unused ports directly reduces the attack surface by eliminating potential entry points. Monitoring tools detect attacks but don't reduce surface. Insurance transfers risk financially. More analysts don't reduce what attackers can target."
+        "explanation": "Supply chain attacks compromise the software development/distribution process to deliver malware through trusted updates.",
+        "wrong_answer_analysis": [
+          {"option": 0, "why_wrong": "Watering hole compromises websites visitors trust, not software vendors"},
+          {"option": 2, "why_wrong": "MITM intercepts communications, not software builds"},
+          {"option": 3, "why_wrong": "Zero-day is an unknown vulnerability, not a delivery method"}
+        ]
       }
+    },
+    {
+      "section_id": "D2-L002-S05",
+      "title": "Attack Surface Reduction",
+      "estimated_time": "10 minutes",
+      "content": {
+        "overview": "Reducing attack surface minimizes entry points available to attackers. Fundamental security principle.",
+        "core_concepts": [
+          {
+            "concept": "Attack Surface Reduction Strategies",
+            "strategies": [
+              {"strategy": "Remove Unnecessary Services", "description": "Disable/uninstall what's not needed"},
+              {"strategy": "Limit Network Exposure", "description": "Minimize internet-facing systems, use firewalls"},
+              {"strategy": "Implement Least Privilege", "description": "Users only get access they need"},
+              {"strategy": "Segment Networks", "description": "Separate critical systems from general network"},
+              {"strategy": "Control Third-Party Access", "description": "Limit and monitor vendor connections"},
+              {"strategy": "Manage Shadow IT", "description": "Discover and control unauthorized services"}
+            ]
+          },
+          {
+            "concept": "Attack Surface Management (ASM)",
+            "definition": "Continuous process of discovering, inventorying, and monitoring external digital assets",
+            "activities": ["Asset discovery", "Vulnerability scanning", "Risk prioritization", "Continuous monitoring"]
+          }
+        ]
+      },
+      "must_remember_for_exam": [
+        {"fact": "Attack surface reduction = minimize entry points", "why_tested": "Fundamental concept"},
+        {"fact": "Remove unnecessary services, limit exposure, implement least privilege", "why_tested": "Reduction strategies"},
+        {"fact": "ASM = continuous external asset discovery and monitoring", "why_tested": "Modern discipline"}
+      ],
+      "key_points": ["Reduce surface by removing unnecessary services and limiting exposure", "Least privilege limits what attackers can reach", "ASM continuously discovers and monitors external assets"]
     }
   ],
 
-  "tool_spotlights": {
-    "tools": [
-      {
-        "name": "Nmap",
-        "category": "Network Scanner",
-        "description": "The standard for network discovery and security auditing",
-        "free_tier": "Completely free",
-        "url": "https://nmap.org",
-        "career_relevance": "Essential skill for any security role"
-      },
-      {
-        "name": "Shodan",
-        "category": "Internet Scanner",
-        "description": "Search engine for internet-connected devices",
-        "free_tier": "Free tier with limited searches",
-        "url": "https://shodan.io",
-        "career_relevance": "Attack surface discovery, threat intelligence"
-      },
-      {
-        "name": "Subfinder",
-        "category": "Subdomain Discovery",
-        "description": "Fast passive subdomain enumeration",
-        "free_tier": "Open source",
-        "url": "https://github.com/projectdiscovery/subfinder",
-        "career_relevance": "Reconnaissance, attack surface discovery"
-      },
-      {
-        "name": "SecurityTrails",
-        "category": "DNS Intelligence",
-        "description": "Historical DNS data and attack surface mapping",
-        "free_tier": "Free tier available",
-        "url": "https://securitytrails.com",
-        "career_relevance": "OSINT, reconnaissance"
-      }
+  "hands_on_labs": {
+    "browser_labs": [
+      {"lab_id": "lab-vector-identifier", "title": "Attack Vector Identifier", "type": "scenario_quiz", "description": "Identify attack vectors in incident descriptions"},
+      {"lab_id": "lab-surface-mapper", "title": "Attack Surface Mapper", "type": "interactive", "description": "Map an organization's attack surface components"}
+    ],
+    "external_labs": [
+      {"resource": "TryHackMe", "lab_name": "Phishing", "url": "https://tryhackme.com", "description": "Analyze phishing emails and techniques"}
     ]
   },
 
   "summary": {
     "key_takeaways": [
-      "Threat vector = method attackers use; Attack surface = all potential entry points",
-      "Email phishing is the #1 initial access vector",
-      "Attack surface includes: digital, physical, human, supply chain",
-      "Shadow IT expands attack surface without security knowledge",
-      "Attack surface reduction: remove services, harden systems, limit access",
-      "Continuous monitoring is essential—attack surface changes constantly"
+      "Threat vector = HOW (method); Attack surface = WHERE (all entry points)",
+      "Vector types: message, file, image, voice, removable media, network",
+      "Attack surface: digital, physical, human, supply chain",
+      "Phishing (mass) vs Spear phishing (targeted) vs BEC (fraud)",
+      "Supply chain attacks leverage trusted relationships",
+      "Reduce surface by removing unnecessary services and limiting exposure"
     ],
-    
     "exam_essentials": [
-      "Vector categories: message, file, network, physical, supply chain",
-      "Supply chain attacks target trusted third parties",
-      "Shadow IT = unauthorized systems unknown to security",
-      "Attack surface reduction = minimizing entry points",
-      "Smishing = SMS phishing; Vishing = voice phishing"
-    ],
-    
-    "skills_gained": [
-      "Identify and categorize threat vectors",
-      "Use reconnaissance tools (nmap, dig, curl)",
-      "Discover attack surface components",
-      "Apply attack surface reduction strategies"
-    ],
-    
-    "connection_to_next": "Now that you understand threat vectors and attack surfaces, the next lesson dives deep into the most common vector: Social Engineering. You'll learn the psychological techniques attackers use to manipulate people."
+      "Phishing = mass, Spear phishing = targeted, Whaling = executives",
+      "BEC = Business Email Compromise ($2.7B losses)",
+      "Smishing = SMS, Vishing = voice",
+      "Drive-by download = no user action required",
+      "Supply chain attacks use trusted update mechanisms"
+    ]
   },
 
   "related_content": {

@@ -2,636 +2,875 @@
   "lesson_id": "D1-LESSON-005",
   "domain": 1,
   "title": "Zero Trust Architecture",
+  "subtitle": "Never Trust, Always Verify: Modern Security Architecture",
+  "version": "2.0-enhanced",
   "objectives_covered": ["1.2"],
-  "estimated_duration": "50-60 minutes",
+  "estimated_duration": "90-120 minutes (core: 60 min, labs: 30-60 min)",
   "difficulty": "intermediate",
-  "prerequisites": ["D1-LESSON-001", "D1-LESSON-003"],
+  "prerequisites": ["D1-LESSON-002", "D1-LESSON-003", "D1-LESSON-004"],
 
-  "introduction": {
-    "hook": "In 2020, the SolarWinds attack proved that being 'inside the network' means nothing. Attackers spent months inside government and corporate networks, moving laterally with trusted credentials, completely invisible to perimeter defenses. The breach demonstrated what security experts had been saying for years: the castle-and-moat model is dead. Zero Trust - 'never trust, always verify' - is the future of security architecture. Understanding Zero Trust isn't optional anymore; it's becoming the baseline expectation.",
-    "learning_goals": [
-      "Explain the core principles of Zero Trust architecture",
-      "Compare Zero Trust to traditional perimeter-based security",
-      "Identify the key components of a Zero Trust implementation",
-      "Evaluate Zero Trust maturity and implementation strategies",
-      "Apply Zero Trust concepts to common security scenarios"
+  "skill_tree": {
+    "position": {
+      "domain": 1,
+      "sequence": 5,
+      "tier": "intermediate"
+    },
+    "prerequisites": [
+      {
+        "lesson_id": "D1-LESSON-003",
+        "title": "Authentication Methods",
+        "why_needed": "Zero Trust requires strong, continuous authentication"
+      },
+      {
+        "lesson_id": "D1-LESSON-004",
+        "title": "Cryptographic Fundamentals",
+        "why_needed": "Encryption underlies Zero Trust data protection and verification"
+      }
     ],
-    "why_it_matters": "Zero Trust is rapidly becoming the standard security model. The U.S. government mandated Zero Trust for federal agencies. Major enterprises are migrating from perimeter-based to Zero Trust architectures. As a security professional, you'll implement Zero Trust controls, assess Zero Trust maturity, and explain Zero Trust concepts to stakeholders. On the exam, expect 3-5 questions on Zero Trust principles and components.",
-    "career_relevance": {
-      "soc_analyst": "Zero Trust means more authentication events and context to analyze - understanding the model helps you identify anomalies",
-      "incident_responder": "Zero Trust architectures limit blast radius - you'll leverage these controls during containment",
-      "grc_analyst": "You'll assess Zero Trust implementations against frameworks like NIST 800-207 and CISA Zero Trust Maturity Model",
-      "penetration_tester": "Testing Zero Trust implementations requires understanding the control points and trust decisions",
-      "security_engineer": "You'll design and implement Zero Trust components: identity systems, micro-segmentation, policy engines"
+    "unlocks": [
+      {
+        "lesson_id": "D1-LESSON-006",
+        "title": "Physical Security Controls",
+        "connection": "Zero Trust principles apply to physical access too"
+      },
+      {
+        "lesson_id": "D3-LESSON-002",
+        "title": "Infrastructure Security",
+        "connection": "Implementing Zero Trust across infrastructure"
+      }
+    ],
+    "related_concepts": [
+      {
+        "topic": "Network Security",
+        "lesson": "D3-LESSON-003",
+        "relationship": "Micro-segmentation and ZTNA are network controls"
+      },
+      {
+        "topic": "Identity and Access Management",
+        "lesson": "D4-LESSON-005",
+        "relationship": "Identity is the foundation of Zero Trust"
+      }
+    ],
+    "builds_toward": [
+      "CompTIA Security+ SY0-701 Certification",
+      "CompTIA CASP+ (enterprise architecture)",
+      "CISSP Domain 4: Communication and Network Security"
+    ],
+    "cascade_learning": {
+      "this_lesson_establishes": [
+        "Zero Trust core principles (verify explicitly, least privilege, assume breach)",
+        "ZTNA vs VPN comparison",
+        "Micro-segmentation concepts",
+        "Policy engine/enforcement architecture",
+        "Zero Trust maturity model"
+      ],
+      "builds_on_previous": {
+        "D1-LESSON-003": "Strong authentication is foundation of Zero Trust",
+        "D1-LESSON-004": "Cryptography enables verification and data protection"
+      },
+      "concepts_used_later": {
+        "D3-LESSON-003": "Network security implements Zero Trust controls",
+        "D4-LESSON-005": "IAM is the foundation pillar",
+        "D4-LESSON-007": "Security automation supports continuous verification"
+      }
     }
   },
 
-  "linux_fundamentals": {
-    "why_linux": "Zero Trust principles apply to Linux systems: verifying identity, enforcing least privilege, and logging all access. Linux provides tools to implement these controls.",
-    "essential_commands_this_lesson": [
-      {
-        "command": "sudo iptables -L -n",
-        "purpose": "View firewall rules (micro-segmentation)",
-        "example_output": "Chain INPUT (policy DROP)..."
-      },
-      {
-        "command": "ss -tuln",
-        "purpose": "View listening ports (minimize attack surface)",
-        "example_output": "LISTEN 0 128 0.0.0.0:22"
-      },
-      {
-        "command": "ausearch -k authentication",
-        "purpose": "Search audit logs for authentication events",
-        "example_output": "type=USER_AUTH msg=audit..."
-      },
-      {
-        "command": "sudo visudo",
-        "purpose": "Configure sudo (least privilege)",
-        "example_output": "(opens sudoers file for editing)"
-      }
-    ]
+  "role_relevance": {
+    "soc_analyst": {
+      "relevance": "high",
+      "percentage_of_job": "25-35%",
+      "daily_usage": "Monitor Zero Trust policy decisions, investigate access anomalies",
+      "specific_tasks": [
+        "Monitor policy engine decision logs",
+        "Investigate denied access requests",
+        "Detect behavioral anomalies flagged by Zero Trust analytics",
+        "Respond to continuous verification failures"
+      ],
+      "tools_youll_use": ["SIEM with Zero Trust integration", "UEBA platforms", "Identity threat detection"]
+    },
+    "incident_responder": {
+      "relevance": "high",
+      "percentage_of_job": "20-30%",
+      "daily_usage": "Investigate breaches in Zero Trust environments, assess containment effectiveness",
+      "specific_tasks": [
+        "Assess if micro-segmentation contained breach",
+        "Analyze lateral movement attempts blocked by Zero Trust",
+        "Investigate compromised credentials in ZTNA environments",
+        "Validate Zero Trust controls post-incident"
+      ],
+      "tools_youll_use": ["Forensic tools", "Network traffic analysis", "Identity provider logs"]
+    },
+    "security_engineer": {
+      "relevance": "critical",
+      "percentage_of_job": "40-50%",
+      "daily_usage": "Design and implement Zero Trust architecture",
+      "specific_tasks": [
+        "Deploy and configure ZTNA solutions",
+        "Implement micro-segmentation policies",
+        "Configure identity provider integrations",
+        "Design policy engine rules",
+        "Implement continuous verification"
+      ],
+      "tools_youll_use": ["ZTNA platforms (Zscaler, Cloudflare)", "Identity providers", "Micro-segmentation tools", "SDN controllers"]
+    },
+    "grc_analyst": {
+      "relevance": "high",
+      "percentage_of_job": "30-40%",
+      "daily_usage": "Assess Zero Trust maturity, verify compliance with ZT mandates",
+      "specific_tasks": [
+        "Assess Zero Trust maturity against NIST SP 800-207",
+        "Audit Zero Trust controls for compliance",
+        "Verify least privilege implementation",
+        "Document Zero Trust architecture for auditors"
+      ],
+      "tools_youll_use": ["GRC platforms", "Zero Trust maturity assessments", "Compliance frameworks"]
+    },
+    "penetration_tester": {
+      "relevance": "high",
+      "percentage_of_job": "30-40%",
+      "daily_usage": "Test Zero Trust controls, attempt lateral movement",
+      "specific_tasks": [
+        "Test micro-segmentation effectiveness",
+        "Attempt lateral movement in ZT environments",
+        "Test continuous verification mechanisms",
+        "Validate ZTNA access controls"
+      ],
+      "tools_youll_use": ["Network scanning tools", "Lateral movement frameworks", "Credential testing tools"]
+    }
+  },
+
+  "introduction": {
+    "hook": "In 2020, the SolarWinds breach demonstrated the catastrophic failure of perimeter security. Attackers compromised a trusted software vendor, and because organizations implicitly trusted 'inside' traffic, malware spread across thousands of government agencies and Fortune 500 companies. This wasn't a firewall failure—it was a failure of the assumption that anything inside the perimeter can be trusted. Zero Trust is the answer: trust nothing, verify everything.",
+    
+    "learning_goals": [
+      "Explain Zero Trust principles and why perimeter security is insufficient",
+      "Implement 'never trust, always verify' across identity, network, and data",
+      "Design micro-segmentation to limit lateral movement",
+      "Apply continuous verification and least privilege access",
+      "Evaluate Zero Trust maturity and plan implementation"
+    ],
+    
+    "why_it_matters": {
+      "career_impact": "Zero Trust is now mandatory for US federal agencies (Executive Order 14028) and increasingly expected in enterprise. You'll design ZT architectures, evaluate solutions, and implement continuous verification.",
+      "business_connection": "Organizations with Zero Trust experience 50% lower breach costs (IBM 2023). Zero Trust is the modern security architecture standard.",
+      "exam_relevance": "Expect 3-5 questions on Zero Trust principles, components, and implementation."
+    },
+    
+    "exam_weight": {
+      "domain": "Domain 1: General Security Concepts (12%)",
+      "estimated_questions": "3-5 questions on Zero Trust",
+      "question_types": [
+        "Principles: 'Which principle does this describe?'",
+        "Components: 'What does the Policy Engine do?'",
+        "Comparison: 'ZTNA vs VPN difference?'",
+        "Implementation: 'What should be implemented first?'"
+      ],
+      "high_yield_topics": [
+        "'Never trust, always verify' mantra",
+        "Three principles: Verify explicitly, Least privilege, Assume breach",
+        "Policy Engine vs Policy Enforcement Point",
+        "ZTNA = application-level; VPN = network-level",
+        "Identity is the foundation"
+      ]
+    }
   },
 
   "sections": [
     {
       "section_id": "D1-L005-S01",
-      "title": "The End of Perimeter Security",
-      "content": "Traditional security assumed a clear boundary: inside the network was trusted, outside was not. This 'castle and moat' model has failed.\n\n**The Traditional Model**\n\n*Castle and Moat*:\n- Strong perimeter defenses (firewall = moat)\n- Once inside, relatively free movement\n- Trust based on network location\n- VPN extends the trusted network\n- Focus on keeping attackers out\n\n*Why It Worked (Briefly)*:\n- Clear physical boundaries\n- Most resources inside the network\n- Fewer remote workers\n- Less cloud adoption\n- Simpler threat landscape\n\n**Why Perimeter Security Failed**\n\n*The Perimeter Dissolved*:\n- Cloud services exist outside the network\n- Remote work became permanent (COVID accelerated this)\n- BYOD (Bring Your Own Device) blurred boundaries\n- Mobile workforce needs access from anywhere\n- SaaS applications bypass traditional controls\n\n*Attackers Adapted*:\n- Phishing bypasses perimeter (user brings threat inside)\n- Credential theft grants 'trusted' access\n- Lateral movement after initial compromise\n- Supply chain attacks start 'inside'\n- Insider threats were always inside\n\n*High-Profile Failures*:\n- SolarWinds: Trusted software update was backdoored\n- Colonial Pipeline: VPN credentials led to full compromise\n- Target: HVAC vendor access led to POS breach\n- Countless breaches: 'They got credentials and moved laterally'\n\n**The Trust Problem**\n\nPerimeter security's fatal flaw: implicit trust.\n- Inside network = trusted\n- Valid credentials = trusted\n- Known device = trusted\n- But attackers exploit this trust\n\n**The Zero Trust Answer**\n\nTrust nothing. Verify everything.\n- Network location doesn't grant trust\n- Valid credentials aren't enough\n- Every access request is evaluated\n- Continuous verification, not one-time",
-
-      "key_points": [
-        "Traditional perimeter security assumed inside = trusted, outside = untrusted",
-        "Cloud, remote work, and mobile dissolved the clear perimeter",
-        "Attackers bypass perimeters through phishing, credential theft, supply chain",
-        "Implicit trust is the fundamental weakness of perimeter security",
-        "Zero Trust removes implicit trust - verify every access request"
-      ],
-
-      "real_world_example": {
-        "scenario": "VPN credentials lead to full network compromise",
-        "company": "Colonial Pipeline (real incident, 2021)",
-        "application": "Attackers obtained VPN credentials for an account without MFA. Once 'inside' via VPN, they moved laterally through the trusted network, eventually deploying ransomware that shut down 5,500 miles of pipeline. PERIMETER FAILURE: VPN was the moat. Once across, attackers had trusted access. No segmentation stopped lateral movement. ZERO TRUST LESSON: A Zero Trust architecture would have required continuous verification, limited lateral movement through micro-segmentation, and detected anomalous behavior."
-      },
-
-      "career_callout": {
-        "role": "Security Engineer",
-        "insight": "When proposing Zero Trust to leadership, you'll often face 'but our perimeter is strong' objections. Use these real incidents to illustrate why perimeter-only thinking fails. The question isn't whether attackers will get credentials - it's what happens when they do."
-      },
-
-      "exam_tips": [
-        "Traditional model = castle and moat = trust based on network location",
-        "Cloud, remote work, BYOD dissolved the perimeter",
-        "Zero Trust = never trust, always verify",
-        "Lateral movement is what happens AFTER perimeter fails",
-        "VPN extends trusted network (doesn't solve the trust problem)"
-      ],
-
-      "glossary_terms": [
-        {
-          "term": "Perimeter Security",
-          "definition": "A security model that focuses on defending network boundaries, assuming that internal network traffic is trusted.",
-          "exam_note": "Castle and moat. Inside = trusted. Failed model due to cloud, remote work."
-        },
-        {
-          "term": "Lateral Movement",
-          "definition": "Techniques attackers use to move through a network after initial compromise, accessing additional systems and data.",
-          "exam_note": "What happens after initial access. Zero Trust limits this through segmentation."
-        },
-        {
-          "term": "Implicit Trust",
-          "definition": "Trust automatically granted based on network location, credentials, or device without additional verification.",
-          "exam_note": "The fundamental weakness Zero Trust eliminates."
-        }
-      ],
-
-      "knowledge_check": {
-        "question": "An organization relies heavily on their firewall and VPN for security. Employees connect via VPN and then have broad access to internal resources. A phishing attack compromises an employee's VPN credentials. Why doesn't the perimeter security model protect against this?",
-        "options": [
-          "The firewall should have blocked the phishing email",
-          "VPN encryption should prevent credential theft",
-          "Once valid credentials are used, the attacker is 'inside' the trusted perimeter with implicit trust",
-          "The employee's antivirus should have detected the phishing attempt"
-        ],
-        "correct": 2,
-        "explanation": "This illustrates the fundamental flaw of perimeter security: implicit trust based on network location. Once the attacker uses valid VPN credentials, they're 'inside the moat' and treated as trusted. The perimeter model has no answer for trusted credentials used maliciously. Zero Trust would require additional verification beyond just credentials."
-      }
-    },
-    {
-      "section_id": "D1-L005-S02",
-      "title": "Zero Trust Core Principles",
-      "content": "Zero Trust is a security model based on the principle of maintaining strict access controls and not trusting anyone by default, even those already inside the network perimeter.\n\n**The Three Core Tenets**\n\n**1. Never Trust, Always Verify**\n- No implicit trust based on network location\n- Every access request is authenticated and authorized\n- Trust is established per session, not permanent\n- Verify explicitly using all available data points\n\n**2. Assume Breach**\n- Design as if attackers are already inside\n- Minimize blast radius of any compromise\n- Segment access to limit lateral movement\n- Detect and respond quickly\n\n**3. Least Privilege Access**\n- Grant minimum permissions needed\n- Just-in-time access (temporary, not standing)\n- Just-enough access (specific, not broad)\n- Regularly review and revoke unnecessary access\n\n**Zero Trust Decision Points**\n\nEvery access request considers:\n\n*Identity*:\n- Who is making the request?\n- Is the identity verified (MFA)?\n- What's their role and normal behavior?\n\n*Device*:\n- Is the device known/managed?\n- Is it compliant with security policies?\n- What's its health status?\n\n*Context*:\n- Where is the request coming from?\n- What time is it (normal hours)?\n- Is this behavior typical?\n\n*Resource*:\n- How sensitive is the resource?\n- What type of access is requested?\n- What's the risk of granting access?\n\n**The Policy Decision Point**\n\nZero Trust architectures use a Policy Engine:\n1. Access request received\n2. Policy Engine evaluates all signals\n3. Risk score calculated\n4. Decision made: Allow, Deny, or Step-Up\n5. Decision enforced by Policy Enforcement Points\n6. Session continuously monitored\n\n**Continuous Verification**\n\nUnlike traditional auth (verify once, trust forever):\n- Verification happens throughout the session\n- Behavior is monitored for anomalies\n- Context changes trigger re-evaluation\n- Session can be terminated if risk increases",
-
-      "key_points": [
-        "Three tenets: Never Trust/Always Verify, Assume Breach, Least Privilege",
-        "Every access decision considers identity, device, context, and resource sensitivity",
-        "Policy Engine evaluates signals and makes access decisions",
-        "Verification is continuous, not one-time",
-        "Just-in-time, just-enough access replaces standing privileges"
-      ],
-
-      "real_world_example": {
-        "scenario": "Zero Trust prevents lateral movement",
-        "company": "NexaTech Solutions",
-        "application": "An employee's credentials were phished. Under their old perimeter model, this would have granted broad network access. With Zero Trust implemented: The attacker's login triggered MFA (they didn't have the phone). Even with MFA bypass, the unrecognized device failed device health checks. Anomalous behavior (login from new location at unusual time) triggered step-up authentication. Micro-segmentation meant even successful access wouldn't reach sensitive systems. RESULT: Attack contained at first access attempt. No lateral movement possible."
-      },
-
-      "career_callout": {
-        "role": "GRC Analyst",
-        "insight": "NIST Special Publication 800-207 defines Zero Trust Architecture. CISA's Zero Trust Maturity Model provides assessment criteria. You'll evaluate implementations against these frameworks, identify gaps, and track maturity progression. Understanding the principles helps you assess whether implementations are truly Zero Trust or just marketing."
-      },
-
-      "visualization": {
-        "type": "ascii_diagram",
-        "title": "Zero Trust Access Decision",
-        "diagram": [
-          "                    ACCESS REQUEST",
-          "                          |",
-          "                          v",
-          "    +--------------------------------------------+",
-          "    |              POLICY ENGINE                 |",
-          "    |                                            |",
-          "    |   +--------+  +--------+  +--------+      |",
-          "    |   |Identity|  | Device |  |Context |      |",
-          "    |   | Check  |  | Health |  | Check  |      |",
-          "    |   +--------+  +--------+  +--------+      |",
-          "    |        \\          |          /            |",
-          "    |         \\         |         /             |",
-          "    |          v        v        v              |",
-          "    |        +-------------------+              |",
-          "    |        |   RISK SCORING    |              |",
-          "    |        +-------------------+              |",
-          "    |                  |                        |",
-          "    +------------------|------------------------+",
-          "                       |",
-          "         +-------------+-------------+",
-          "         |             |             |",
-          "         v             v             v",
-          "      [ALLOW]      [STEP-UP]      [DENY]",
-          "         |             |             |",
-          "         v             v             v",
-          "     Access        Additional    Access",
-          "     Granted       Auth Req'd    Blocked"
-        ]
-      },
-
-      "exam_tips": [
-        "Never trust, always verify = core Zero Trust principle",
-        "Assume breach = design for attackers already inside",
-        "Least privilege = minimum access, just-in-time, just-enough",
-        "Continuous verification, not one-time authentication",
-        "Policy Engine makes access decisions based on multiple signals"
-      ],
-
-      "glossary_terms": [
-        {
-          "term": "Zero Trust",
-          "definition": "A security model requiring strict identity verification for every person and device attempting to access resources, regardless of network location.",
-          "exam_note": "Never trust, always verify. Assume breach. Least privilege."
-        },
-        {
-          "term": "Policy Engine",
-          "definition": "The Zero Trust component that evaluates access requests against policies and makes allow/deny decisions based on identity, device, and context.",
-          "exam_note": "Makes access decisions. Evaluates multiple signals. Central to Zero Trust."
-        },
-        {
-          "term": "Just-in-Time Access",
-          "definition": "Providing access only when needed and automatically revoking it after a specified time or task completion.",
-          "exam_note": "Temporary, not standing privileges. Reduces risk window."
-        }
-      ],
-
-      "knowledge_check": {
-        "question": "A Zero Trust architecture evaluates an access request and determines the risk is elevated due to an unrecognized device. Rather than immediately denying access, the system requires the user to complete additional authentication. What is this called?",
-        "options": [
-          "Least privilege enforcement",
-          "Step-up authentication based on risk scoring",
-          "Micro-segmentation at the device level",
-          "Implicit trust verification"
-        ],
-        "correct": 1,
-        "explanation": "Step-up authentication is when additional verification is required based on risk assessment. Rather than binary allow/deny, Zero Trust systems can require additional proof when risk is elevated. This balances security with usability - higher risk = more verification required."
-      }
-    },
-    {
-      "section_id": "D1-L005-S03",
-      "title": "Zero Trust Components",
-      "content": "Implementing Zero Trust requires specific technologies and controls working together. No single product provides 'Zero Trust' - it's an architecture of integrated components.\n\n**Identity Pillar**\n\nStrong identity is the foundation:\n\n*Identity Provider (IdP)*:\n- Centralized identity management\n- Single source of truth for identities\n- Azure AD, Okta, Ping Identity\n\n*Multi-Factor Authentication*:\n- Required for all access\n- Phishing-resistant methods preferred (FIDO2)\n- Risk-based authentication\n\n*Privileged Access Management (PAM)*:\n- Just-in-time privileged access\n- Session recording and monitoring\n- Password vaulting\n\n**Device Pillar**\n\nDevice health affects trust decisions:\n\n*Mobile Device Management (MDM)*:\n- Enforce device policies\n- Track compliance status\n- Remote wipe capability\n\n*Endpoint Detection and Response (EDR)*:\n- Real-time threat detection\n- Device health attestation\n- Behavioral monitoring\n\n*Device Compliance*:\n- Patching status\n- Encryption enabled\n- Security software running\n\n**Network Pillar**\n\nNetwork controls limit movement:\n\n*Micro-segmentation*:\n- Workload-level isolation\n- East-west traffic control\n- Software-defined boundaries\n\n*Software-Defined Perimeter (SDP)*:\n- Resources invisible until authenticated\n- Direct application access\n- No broad network access\n\n*Encrypted Communications*:\n- TLS everywhere\n- End-to-end encryption\n- No trusted networks\n\n**Application and Workload Pillar**\n\nSecuring what users access:\n\n*Secure Access Service Edge (SASE)*:\n- Cloud-delivered security\n- Combines network and security\n- Consistent policy anywhere\n\n*Cloud Access Security Broker (CASB)*:\n- Visibility into cloud app usage\n- Policy enforcement for SaaS\n- Data protection\n\n**Data Pillar**\n\nProtecting the ultimate target:\n\n*Data Classification*:\n- Know what data exists\n- Assign sensitivity levels\n- Apply appropriate controls\n\n*Data Loss Prevention (DLP)*:\n- Prevent unauthorized exfiltration\n- Monitor data movement\n- Policy-based blocking\n\n*Encryption*:\n- At rest and in transit\n- Key management\n- Rights management",
-
-      "key_points": [
-        "Zero Trust has five pillars: Identity, Device, Network, Application/Workload, Data",
-        "Strong identity (IdP + MFA + PAM) is the foundation",
-        "Micro-segmentation controls lateral movement",
-        "Device health affects trust decisions",
-        "No single product = Zero Trust; it's an integrated architecture"
-      ],
-
-      "real_world_example": {
-        "scenario": "Implementing Zero Trust component by component",
-        "company": "Pinnacle Financial Services",
-        "application": "Pinnacle's Zero Trust journey: YEAR 1 - Identity foundation: Deployed Azure AD, enforced MFA everywhere, implemented Conditional Access policies. YEAR 2 - Device trust: MDM for all endpoints, EDR deployment, device compliance requirements. YEAR 3 - Network segmentation: Micro-segmentation for critical systems, ZTNA replacing VPN. YEAR 4 - Data protection: Classification program, DLP implementation, encryption everywhere. RESULT: Three years in, a compromised credential no longer means network-wide access."
-      },
-
-      "career_callout": {
-        "role": "Security Engineer",
-        "insight": "Zero Trust implementation is a multi-year journey, not a product purchase. You'll likely work on one pillar at a time, starting with identity (highest impact). Understanding all components helps you create a roadmap and avoid vendors who claim their single product 'is Zero Trust.'"
-      },
-
-      "tool_spotlight": {
-        "name": "Microsoft Entra (Azure AD)",
-        "category": "Identity Provider",
-        "description": "Cloud identity platform with Conditional Access for Zero Trust decisions",
-        "free_tier": "Limited free tier available",
-        "website": "https://www.microsoft.com/en-us/security/business/microsoft-entra",
-        "career_relevance": "Primary identity platform for many enterprises. Conditional Access is a key Zero Trust control."
-      },
-
-      "exam_tips": [
-        "Five pillars: Identity, Device, Network, Application/Workload, Data",
-        "Identity is the foundation - start Zero Trust journey here",
-        "Micro-segmentation = network Zero Trust (limits lateral movement)",
-        "SASE = cloud-delivered network + security",
-        "CASB = visibility and control for cloud applications"
-      ],
-
-      "glossary_terms": [
-        {
-          "term": "Micro-segmentation",
-          "definition": "A security technique creating fine-grained security zones around individual workloads to limit lateral movement.",
-          "exam_note": "Zero Trust network control. Workload-level isolation. East-west traffic control."
-        },
-        {
-          "term": "Software-Defined Perimeter (SDP)",
-          "definition": "A security framework that dynamically creates one-to-one network connections between users and resources after verification.",
-          "exam_note": "Resources invisible until authenticated. Also called 'Black Cloud.' ZTNA implementation."
-        },
-        {
-          "term": "SASE (Secure Access Service Edge)",
-          "definition": "A cloud-delivered architecture combining network security functions with WAN capabilities to support Zero Trust.",
-          "exam_note": "Cloud-delivered. Combines SD-WAN + security. Consistent policy anywhere."
-        },
-        {
-          "term": "CASB (Cloud Access Security Broker)",
-          "definition": "A security policy enforcement point between cloud service consumers and providers for visibility and control.",
-          "exam_note": "SaaS visibility and control. Shadow IT discovery. DLP for cloud."
-        }
-      ],
-
-      "knowledge_check": {
-        "question": "An organization wants to ensure that even after a user authenticates successfully, if their laptop becomes non-compliant (antivirus disabled, missing patches), access to sensitive resources is blocked. Which Zero Trust pillar addresses this?",
-        "options": [
-          "Identity pillar through stronger MFA",
-          "Device pillar through continuous compliance checking",
-          "Network pillar through micro-segmentation",
-          "Data pillar through encryption"
-        ],
-        "correct": 1,
-        "explanation": "The Device pillar in Zero Trust ensures that device health and compliance status affect access decisions. Continuous compliance checking means that even after initial authentication, if a device becomes non-compliant, access can be revoked. This is different from identity (who you are), network controls (where you can go), or data protection (what's protected)."
-      }
-    },
-    {
-      "section_id": "D1-L005-S04",
-      "title": "Implementing Zero Trust",
-      "content": "Zero Trust implementation is a journey, not a destination. Organizations progress through maturity levels over years.\n\n**Zero Trust Maturity Model (CISA)**\n\n*Traditional (Starting Point)*:\n- Perimeter-based security\n- Network location determines trust\n- Static policies\n- Limited visibility\n\n*Initial*:\n- Some automation\n- Basic identity controls\n- Beginning segmentation\n- Improved visibility\n\n*Advanced*:\n- Centralized identity and policy\n- Cross-pillar coordination\n- Enhanced analytics\n- Automated responses\n\n*Optimal*:\n- Full automation\n- Continuous verification\n- Dynamic policies\n- Real-time adaptation\n\n**Implementation Strategy**\n\n*Phase 1: Foundation (Identity)*\n1. Deploy cloud identity provider\n2. Enforce MFA for all users\n3. Implement Conditional Access/risk-based auth\n4. Consolidate identity sources\n5. Begin privileged access management\n\n*Phase 2: Device Trust*\n1. Deploy MDM/endpoint management\n2. Define device compliance policies\n3. Integrate device health into access decisions\n4. Deploy EDR for visibility\n5. Block non-compliant devices\n\n*Phase 3: Network Transformation*\n1. Implement ZTNA/SDP for remote access\n2. Begin micro-segmentation for critical systems\n3. Encrypt all internal traffic\n4. Phase out VPN dependency\n5. Deploy SASE for distributed workforce\n\n*Phase 4: Data Protection*\n1. Classify sensitive data\n2. Implement DLP policies\n3. Deploy encryption for data at rest\n4. Rights management for documents\n5. Monitor data movement\n\n**Common Implementation Challenges**\n\n*Legacy Systems*:\n- Can't support modern authentication\n- Compensating controls needed\n- Network isolation as alternative\n\n*User Resistance*:\n- More authentication steps\n- Change management essential\n- Communicate benefits clearly\n\n*Integration Complexity*:\n- Multiple vendors and platforms\n- Policy consistency across tools\n- Skills gap in implementation\n\n*Cost and Resources*:\n- Multi-year investment\n- Training requirements\n- Operational changes",
-
-      "key_points": [
-        "Zero Trust maturity: Traditional -> Initial -> Advanced -> Optimal",
-        "Start with identity - highest impact, foundation for everything",
-        "Implementation is phased over years, not a single project",
-        "Legacy systems require compensating controls or isolation",
-        "User change management is critical for adoption"
-      ],
-
-      "real_world_example": {
-        "scenario": "Federal Zero Trust mandate implementation",
-        "company": "U.S. Federal Agencies (Executive Order 14028)",
-        "application": "In 2021, the U.S. government mandated Zero Trust for federal agencies with specific milestones: BY 2024: MFA for all users, encrypted DNS and HTTP traffic, begin network segmentation. BY 2027: Full Zero Trust architecture with continuous verification. LESSONS: Even with mandates, implementation takes years. Starting with identity is universal. Legacy system migration is the hardest part. Budget and staffing are real constraints."
-      },
-
-      "career_callout": {
-        "role": "GRC Analyst",
-        "insight": "You'll likely be involved in Zero Trust maturity assessments using CISA's model or similar frameworks. This means evaluating current state across all pillars, identifying gaps, and creating roadmaps. Understanding the maturity levels helps you set realistic expectations and measure progress."
-      },
-
-      "visualization": {
-        "type": "ascii_diagram",
-        "title": "Zero Trust Implementation Roadmap",
-        "diagram": [
-          "YEAR 1          YEAR 2          YEAR 3          YEAR 4+",
-          "  |               |               |               |",
-          "  v               v               v               v",
-          "+------------+ +------------+ +------------+ +------------+",
-          "| IDENTITY   | | DEVICE     | | NETWORK    | | DATA       |",
-          "|            | |            | |            | |            |",
-          "| - IdP      | | - MDM      | | - ZTNA     | | - Classify |",
-          "| - MFA      | | - EDR      | | - Micro-   | | - DLP      |",
-          "| - Cond.    | | - Comply   |  | segment  | | - Encrypt  |",
-          "|   Access   | | - Health   | | - SASE     | | - Rights   |",
-          "+------------+ +------------+ +------------+ +------------+",
-          "",
-          "FOUNDATION -----> EXPANDING -----> MATURING -----> OPTIMIZING",
-          "",
-          "Note: Phases overlap; identity work continues throughout"
-        ]
-      },
-
-      "exam_tips": [
-        "CISA Zero Trust Maturity Model: Traditional -> Initial -> Advanced -> Optimal",
-        "Start implementation with identity (foundation)",
-        "Zero Trust is a journey (years), not a product purchase",
-        "Legacy systems need compensating controls",
-        "U.S. federal mandate (EO 14028) set Zero Trust deadlines"
-      ],
-
-      "glossary_terms": [
-        {
-          "term": "Zero Trust Maturity Model",
-          "definition": "A framework for assessing an organization's progress in implementing Zero Trust across pillars, from Traditional to Optimal.",
-          "exam_note": "CISA model. Four levels. Assesses all pillars. Used for roadmap planning."
-        },
-        {
-          "term": "Conditional Access",
-          "definition": "Policies that make access decisions based on conditions like user identity, device health, location, and risk level.",
-          "exam_note": "Key Zero Trust control. Microsoft term. Makes dynamic access decisions."
-        },
-        {
-          "term": "ZTNA (Zero Trust Network Access)",
-          "definition": "A technology that creates identity and context-based logical access boundaries around applications or sets of applications.",
-          "exam_note": "Replaces VPN. Application-level access. SDP implementation."
-        }
-      ],
-
-      "knowledge_check": {
-        "question": "An organization is beginning their Zero Trust journey. They have traditional perimeter security, no centralized identity, and limited cloud adoption. According to best practices, what should be their first implementation focus?",
-        "options": [
-          "Deploy micro-segmentation across all network segments",
-          "Implement a cloud identity provider with MFA and Conditional Access",
-          "Replace all VPNs with ZTNA solutions",
-          "Deploy DLP across all endpoints and cloud applications"
-        ],
-        "correct": 1,
-        "explanation": "Identity is the foundation of Zero Trust and should be the first focus. Deploying a cloud IdP with MFA and Conditional Access provides the strongest immediate security improvement and enables all subsequent Zero Trust controls. Micro-segmentation, ZTNA, and DLP are important but depend on having strong identity controls first."
-      }
-    },
-    {
-      "section_id": "D1-L005-S05",
-      "title": "Zero Trust in Practice",
-      "content": "Understanding how Zero Trust principles apply to common scenarios helps you design and evaluate implementations.\n\n**Scenario 1: Remote Work**\n\n*Traditional Approach*:\n- VPN connects user to corporate network\n- Once connected, broad network access\n- Trust based on VPN authentication\n\n*Zero Trust Approach*:\n- ZTNA provides application-specific access\n- Device health checked before any access\n- Continuous verification during session\n- No broad network access granted\n- Each application access evaluated separately\n\n**Scenario 2: Cloud Application Access**\n\n*Traditional Approach*:\n- Firewall allows outbound to cloud apps\n- Username/password for app login\n- No visibility into data in cloud\n\n*Zero Trust Approach*:\n- SSO through identity provider\n- MFA required for all cloud apps\n- CASB monitors and controls access\n- DLP prevents data exfiltration\n- Session behavior monitored\n\n**Scenario 3: Insider Threat**\n\n*Traditional Approach*:\n- Employees trusted because they're 'inside'\n- Broad access based on role\n- Limited monitoring of normal activity\n\n*Zero Trust Approach*:\n- No implicit trust for any user\n- Just-enough, just-in-time access\n- All access logged and analyzed\n- Behavioral anomalies trigger alerts\n- Least privilege limits damage\n\n**Scenario 4: Third-Party Access**\n\n*Traditional Approach*:\n- VPN account for vendor\n- Broad access to troubleshoot systems\n- Often standing access (not revoked)\n\n*Zero Trust Approach*:\n- Specific application access only\n- Time-limited (just-in-time)\n- All sessions monitored/recorded\n- No lateral movement possible\n- Access expires automatically\n\n**Zero Trust and Compliance**\n\nZero Trust supports compliance requirements:\n\n*PCI DSS*:\n- Segment cardholder data environment\n- Strong authentication\n- Access logging\n\n*HIPAA*:\n- Access controls for PHI\n- Audit trails\n- Minimum necessary access\n\n*SOX*:\n- Privileged access controls\n- Segregation of duties\n- Access monitoring",
-
-      "key_points": [
-        "ZTNA replaces VPN for remote access - application-specific, not network access",
-        "CASB + SSO + MFA provide Zero Trust for cloud applications",
-        "Zero Trust limits insider threat through least privilege and monitoring",
-        "Third-party access should be time-limited and application-specific",
-        "Zero Trust principles align with major compliance frameworks"
-      ],
-
-      "real_world_example": {
-        "scenario": "Zero Trust stopping compromised vendor access",
-        "company": "MedCare Health Systems",
-        "application": "A third-party software vendor's credentials were phished. Under the old model, the vendor had VPN access for support. With Zero Trust: ZTNA limited access to only the specific application they supported. Just-in-time access meant the stolen credentials had already expired. Even if active, micro-segmentation prevented access to patient data systems. Session monitoring would have detected anomalous behavior. RESULT: Phished vendor credentials were useless - no access to anything."
-      },
-
-      "career_callout": {
-        "role": "Penetration Tester",
-        "insight": "Testing Zero Trust implementations requires a different approach. Traditional 'get on the network, pivot everywhere' tactics won't work. You'll test individual application access controls, try to bypass device compliance checks, look for exceptions in segmentation, and test behavioral detection. Understanding Zero Trust helps you craft more relevant test scenarios."
-      },
-
-      "framework_reference": {
-        "title": "Key Zero Trust Resources",
-        "resources": [
+      "title": "The Fall of Perimeter Security",
+      "estimated_time": "12 minutes",
+      
+      "content": {
+        "overview": "Traditional 'castle and moat' security assumed inside = trusted, outside = untrusted. Cloud, remote work, and sophisticated attacks have destroyed this model.",
+        
+        "core_concepts": [
           {
-            "framework": "NIST SP 800-207",
-            "url": "https://csrc.nist.gov/publications/detail/sp/800-207/final",
-            "key_use": "Zero Trust Architecture definition and concepts"
+            "concept": "Why Perimeter Security Failed",
+            "reasons": [
+              {
+                "factor": "Dissolving Perimeter",
+                "explanation": "Cloud puts data outside networks. Remote work connects from anywhere. Mobile blurs personal/corporate. IoT creates countless entry points."
+              },
+              {
+                "factor": "Lateral Movement",
+                "explanation": "Once attackers breach perimeter (phishing, supply chain), flat networks offer no resistance. Internal traffic is unmonitored. Compromised accounts access everything."
+              }
+            ],
+            "high_profile_failures": [
+              {"breach": "Target (2013)", "vector": "HVAC vendor → payment systems"},
+              {"breach": "SolarWinds (2020)", "vector": "Trusted software update delivered malware"},
+              {"breach": "Colonial Pipeline (2021)", "vector": "Single VPN credential → ransomware"}
+            ]
           },
           {
-            "framework": "CISA Zero Trust Maturity Model",
-            "url": "https://www.cisa.gov/zero-trust-maturity-model",
-            "key_use": "Maturity assessment and implementation guidance"
-          },
+            "concept": "The Trust Problem",
+            "traditional_model": {
+              "approach": "Trust but verify",
+              "flaws": [
+                "Authenticate once at perimeter",
+                "Assume internal traffic is legitimate",
+                "Grant broad access based on network location"
+              ]
+            },
+            "zero_trust_model": {
+              "approach": "Never trust, always verify",
+              "principles": [
+                "No implicit trust based on network location",
+                "Every access request verified regardless of source",
+                "Least privilege enforced continuously",
+                "Assume breach and limit blast radius"
+              ]
+            }
+          }
+        ],
+
+        "what_would_happen_if": {
+          "scenario": "What if an attacker compromises a VPN credential in a traditional environment?",
+          "consequence": "They appear to be 'inside' the network. Traditional security implicitly trusts internal traffic. The attacker moves freely—accessing file shares, databases, sensitive systems—because no one questions traffic from a 'trusted' source.",
+          "with_zero_trust": "Even with valid VPN credentials, every access would be verified. Device health checked. Behavior compared to baseline. Access limited to specific applications. Anomalous patterns trigger alerts."
+        }
+      },
+
+      "memory_hooks": {
+        "mnemonic": "Zero Trust = Zero Assumptions. Never trust, ALWAYS verify.",
+        "analogy": {
+          "concept": "Traditional security is like a castle",
+          "explanation": "Once you cross the drawbridge (firewall), you have free reign of the castle. Zero Trust is like a modern building where every door requires a badge, every access is logged, and your permissions change based on where you are and what you're doing."
+        },
+        "common_mistakes": [
           {
-            "framework": "DoD Zero Trust Reference Architecture",
-            "url": "https://dodcio.defense.gov/Library/",
-            "key_use": "Detailed implementation architecture"
+            "mistake": "Thinking Zero Trust is a product you can buy",
+            "why_wrong": "Zero Trust is an architectural approach, not a single product. It requires changes across identity, network, data, and applications.",
+            "memory_aid": "Zero Trust = Architecture. Zero Products = Wrong."
           }
         ]
       },
 
-      "exam_tips": [
-        "ZTNA = application access, not network access (VPN replacement)",
-        "Zero Trust + least privilege = insider threat mitigation",
-        "Third-party access: time-limited, application-specific, monitored",
-        "Zero Trust aligns with PCI DSS, HIPAA, SOX requirements",
-        "Micro-segmentation prevents lateral movement even with valid credentials"
+      "key_points": [
+        "Traditional perimeter security: inside = trusted, outside = untrusted",
+        "Cloud, remote work, and mobile have dissolved the perimeter",
+        "Lateral movement after breach causes most damage",
+        "Zero Trust: Never trust, always verify—regardless of location",
+        "Zero Trust is an architecture, not a product"
       ],
 
-      "glossary_terms": [
+      "must_remember_for_exam": [
         {
-          "term": "Insider Threat",
-          "definition": "A security threat originating from within the organization, from employees, contractors, or partners with authorized access.",
-          "exam_note": "Zero Trust addresses through least privilege, monitoring, behavioral analysis."
+          "fact": "Zero Trust = 'Never trust, always verify'",
+          "why_tested": "Exact phrase appears on exam"
         },
         {
-          "term": "Third-Party Risk",
-          "definition": "Security risks introduced by vendors, contractors, and partners with access to organizational systems or data.",
-          "exam_note": "Zero Trust: time-limited access, application-specific, monitored sessions."
+          "fact": "Network location does NOT grant trust in Zero Trust",
+          "why_tested": "Core principle distinction"
         }
       ],
 
       "knowledge_check": {
-        "question": "A company is replacing their traditional VPN with a Zero Trust Network Access (ZTNA) solution. What is the key difference in how users will access corporate applications?",
+        "question": "An organization allows all internal network traffic to flow freely without inspection, assuming the firewall prevents unauthorized external access. This is MOST vulnerable to:",
         "options": [
-          "ZTNA requires stronger passwords than VPN",
-          "ZTNA grants broad network access once authenticated, just like VPN",
-          "ZTNA provides access to specific applications rather than placing users on the network",
-          "ZTNA eliminates the need for any authentication"
+          "DDoS attacks overwhelming the firewall",
+          "SQL injection against web applications",
+          "Lateral movement after initial compromise",
+          "Brute force against external services"
         ],
         "correct": 2,
-        "explanation": "The key difference is that ZTNA provides application-level access, not network access. With VPN, users are 'on the network' and can reach anything the network allows. With ZTNA, users access only specific applications they're authorized for, and they're never placed on the internal network. This is a fundamental shift from network-centric to application-centric access."
+        "explanation": "Once an attacker bypasses the perimeter (phishing, compromised credentials), the lack of internal controls allows free lateral movement. The other options are external attacks—this model specifically fails at internal security.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "DDoS attacks firewalls",
+            "why_wrong": "DDoS is external; question asks about internal trust weakness"
+          },
+          {
+            "option": 1,
+            "why_tempting": "SQL injection is serious",
+            "why_wrong": "Application attack, not related to internal trust model"
+          },
+          {
+            "option": 3,
+            "why_tempting": "Brute force is common",
+            "why_wrong": "External attack against perimeter, not internal weakness"
+          }
+        ]
+      }
+    },
+
+    {
+      "section_id": "D1-L005-S02",
+      "title": "Zero Trust Core Principles",
+      "estimated_time": "15 minutes",
+      
+      "content": {
+        "overview": "Zero Trust is built on three foundational principles that change how we approach security.",
+        
+        "core_concepts": [
+          {
+            "concept": "Principle 1: Verify Explicitly",
+            "description": "Always authenticate and authorize based on ALL available data points",
+            "signals_to_evaluate": [
+              {"category": "Identity", "signals": ["Who is requesting?", "Strong authentication?"]},
+              {"category": "Device", "signals": ["Is device managed?", "Is it compliant/patched?"]},
+              {"category": "Location", "signals": ["Expected location?", "Impossible travel?"]},
+              {"category": "Behavior", "signals": ["Normal pattern?", "Anomalous activity?"]}
+            ],
+            "key_point": "Continuous verification throughout session, not just at login"
+          },
+          {
+            "concept": "Principle 2: Use Least Privilege Access",
+            "description": "Limit access with just-in-time and just-enough-access",
+            "implementations": [
+              {
+                "method": "Just-In-Time (JIT) Access",
+                "how": "Grant access only when needed, auto-revoke after time limit",
+                "example": "Admin requests elevated access, approved for 4 hours, auto-expires"
+              },
+              {
+                "method": "Just-Enough-Access (JEA)",
+                "how": "Grant minimum permissions for the task",
+                "example": "HR user accesses HR systems only, not finance or engineering"
+              }
+            ],
+            "key_point": "No standing privileges—access requested, justified, time-limited"
+          },
+          {
+            "concept": "Principle 3: Assume Breach",
+            "description": "Design systems expecting breaches will occur",
+            "implementations": [
+              {"approach": "Minimize blast radius", "how": "Segment networks, encrypt all traffic, limit access"},
+              {"approach": "Detect and respond", "how": "Monitor all access, use analytics, automate response"},
+              {"approach": "Defense in depth", "how": "Multiple layers, no single point of failure"}
+            ],
+            "key_point": "Contain breaches rather than prevent all breaches"
+          },
+          {
+            "concept": "Control Plane vs Data Plane",
+            "control_plane": {
+              "components": ["Policy Engine", "Policy Administrator"],
+              "function": "Makes access decisions based on policy"
+            },
+            "data_plane": {
+              "components": ["Policy Enforcement Points (PEPs)"],
+              "function": "Enforces access decisions"
+            }
+          }
+        ],
+
+        "what_would_happen_if": {
+          "scenario": "What if an admin account is compromised but you have JIT access?",
+          "consequence": "The attacker has credentials but NO standing privileges. They can't do anything without requesting elevated access through the PAM system, which requires MFA approval on a separate device and justification. The attack is stopped before it starts.",
+          "without_jit": "The admin account has permanent admin rights. Attacker immediately has full control."
+        }
+      },
+
+      "deep_dive": {
+        "title": "Technical Deep Dive: NIST SP 800-207",
+        "expandable": true,
+        "content": {
+          "nist_reference": "NIST Special Publication 800-207 is the authoritative Zero Trust Architecture document",
+          "key_tenets": [
+            "All data sources and computing services are considered resources",
+            "All communication is secured regardless of network location",
+            "Access to individual enterprise resources is granted on a per-session basis",
+            "Access is determined by dynamic policy",
+            "Enterprise monitors and measures integrity of all owned assets",
+            "All resource authentication and authorization are dynamic and strictly enforced",
+            "Enterprise collects information about assets and uses it to improve security"
+          ]
+        }
+      },
+
+      "career_spotlight": {
+        "role": "Security Engineer",
+        "title": "A Day in the Life: Implementing Zero Trust PAM",
+        "scenario": {
+          "time": "Project Week 3",
+          "situation": "You're deploying Privileged Access Management as part of Zero Trust implementation.",
+          "your_actions": [
+            {
+              "step": 1,
+              "action": "Remove standing admin privileges",
+              "details": "All admin accounts have permanent rights revoked. Admins must now request access."
+            },
+            {
+              "step": 2,
+              "action": "Configure JIT workflow",
+              "details": "Requests require: reason, target system, duration (max 4 hours), manager approval for sensitive systems."
+            },
+            {
+              "step": 3,
+              "action": "Enable session recording",
+              "details": "All privileged sessions are recorded for audit and investigation."
+            },
+            {
+              "step": 4,
+              "action": "Deploy MFA for access requests",
+              "details": "Approving a JIT request requires MFA on a separate device (out-of-band)."
+            }
+          ],
+          "outcome": "When an admin's credentials are later compromised through phishing, the attacker can't use them—no standing privileges exist, and they can't complete the JIT workflow.",
+          "lesson_learned": "Least privilege through JIT transforms compromised credentials from critical incidents to blocked attempts."
+        }
+      },
+
+      "memory_hooks": {
+        "mnemonic": "VLA - Verify explicitly, Least privilege, Assume breach",
+        "common_mistakes": [
+          {
+            "mistake": "Thinking verification happens only at login",
+            "why_wrong": "Zero Trust requires CONTINUOUS verification throughout the session. Conditions change; verification must be ongoing.",
+            "memory_aid": "One-time verification = traditional. CONTINUOUS = Zero Trust."
+          }
+        ]
+      },
+
+      "key_points": [
+        "Verify Explicitly: Use ALL signals (identity, device, location, behavior)",
+        "Least Privilege: JIT (time-limited) + JEA (scope-limited) = no standing privileges",
+        "Assume Breach: Design for containment, encrypt everything, monitor continuously",
+        "Continuous verification throughout sessions, not just at login",
+        "Control plane decides; data plane enforces"
+      ],
+
+      "must_remember_for_exam": [
+        {
+          "fact": "Three principles: Verify Explicitly, Least Privilege, Assume Breach",
+          "why_tested": "Core Zero Trust framework"
+        },
+        {
+          "fact": "JIT = time-limited access; JEA = scope-limited access",
+          "why_tested": "Least privilege implementations"
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "Administrators must request access through a portal, provide justification, get approval, and access auto-expires after 2 hours. This BEST exemplifies:",
+        "options": [
+          "Verify explicitly through MFA",
+          "Assume breach by encrypting traffic",
+          "Least privilege through just-in-time access",
+          "Micro-segmentation of admin networks"
+        ],
+        "correct": 2,
+        "explanation": "This describes JIT access—a key implementation of least privilege. Access is not standing; it must be requested, justified, approved, and expires automatically.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "MFA might be involved",
+            "why_wrong": "The scenario highlights time-limited access, not authentication method"
+          },
+          {
+            "option": 1,
+            "why_tempting": "Assume breach is a principle",
+            "why_wrong": "This describes access control, not encryption"
+          },
+          {
+            "option": 3,
+            "why_tempting": "Admin networks might be segmented",
+            "why_wrong": "Scenario describes access workflow, not network design"
+          }
+        ]
+      }
+    },
+
+    {
+      "section_id": "D1-L005-S03",
+      "title": "Zero Trust Architecture Components",
+      "estimated_time": "15 minutes",
+      
+      "content": {
+        "overview": "Implementing Zero Trust requires specific components working together to verify every access request.",
+        
+        "core_concepts": [
+          {
+            "concept": "Policy Engine (PE)",
+            "role": "The 'brain' that makes access decisions",
+            "inputs": ["Identity provider data", "Device health", "Threat intelligence", "Behavior analytics"],
+            "outputs": "Allow/deny decisions based on policy",
+            "location": "Control plane"
+          },
+          {
+            "concept": "Policy Administrator (PA)",
+            "role": "Executes policy engine decisions",
+            "functions": ["Communicates decisions to PEPs", "Establishes/terminates sessions", "Distributes policies"],
+            "location": "Control plane"
+          },
+          {
+            "concept": "Policy Enforcement Point (PEP)",
+            "role": "The 'gates' that enforce decisions",
+            "types": [
+              {"type": "Network", "examples": "Next-gen firewalls, proxies, SDP"},
+              {"type": "Identity", "examples": "Identity-aware proxies, auth gateways"},
+              {"type": "Application", "examples": "API gateways, WAFs"},
+              {"type": "Endpoint", "examples": "Host agents, EDR"}
+            ],
+            "location": "Data plane"
+          },
+          {
+            "concept": "ZTNA vs VPN",
+            "critical_comparison": true,
+            "vpn": {
+              "access_level": "Network-level (entire network segment)",
+              "trust_model": "Implicit trust after VPN authentication",
+              "visibility": "User connected to network",
+              "granularity": "Difficult to apply per-app policies"
+            },
+            "ztna": {
+              "access_level": "Application-level (specific apps only)",
+              "trust_model": "Continuous verification throughout session",
+              "visibility": "User connected to specific applications",
+              "granularity": "Policies based on identity, device, context"
+            },
+            "key_benefit": "ZTNA reduces attack surface—no network exposure, only app access"
+          }
+        ],
+
+        "what_would_happen_if": {
+          "scenario": "What if you replace VPN with ZTNA for remote workers?",
+          "consequence": "Users connect directly to applications, not the network. Even if credentials are compromised, attackers can only access the specific apps that user is authorized for—not scan the network, not move laterally. The attack surface shrinks from 'entire network' to 'authorized apps only'.",
+          "additional_benefit": "Better user experience too—direct-to-app is faster than routing through VPN."
+        }
+      },
+
+      "memory_hooks": {
+        "mnemonic": "Policy Engine DECIDES. Policy Administrator COMMUNICATES. PEP ENFORCES.",
+        "analogy": {
+          "concept": "Like a courthouse",
+          "mapping": [
+            {"component": "Policy Engine", "analogy": "The judge who decides"},
+            {"component": "Policy Administrator", "analogy": "The clerk who communicates the ruling"},
+            {"component": "PEP", "analogy": "The bailiff who enforces the ruling"}
+          ]
+        },
+        "common_mistakes": [
+          {
+            "mistake": "Thinking ZTNA and VPN provide equivalent access",
+            "why_wrong": "VPN = network access. ZTNA = application access. Completely different attack surfaces.",
+            "memory_aid": "VPN = Visit the whole Place Network. ZTNA = Zero Trust Network (app-only) Access."
+          }
+        ]
+      },
+
+      "key_points": [
+        "Policy Engine makes decisions based on all context signals",
+        "Policy Administrator communicates decisions to enforcement points",
+        "PEPs are the 'gates' that allow/deny access",
+        "ZTNA = application-level access; VPN = network-level access",
+        "ZTNA provides continuous verification; VPN authenticates once"
+      ],
+
+      "must_remember_for_exam": [
+        {
+          "fact": "Policy Engine = decides; PEP = enforces",
+          "why_tested": "Component role distinction"
+        },
+        {
+          "fact": "ZTNA = application-level; VPN = network-level",
+          "why_tested": "Key comparison question"
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "Which Zero Trust component intercepts access requests and queries the control plane?",
+        "options": [
+          "Policy Engine",
+          "Policy Administrator",
+          "Policy Enforcement Point",
+          "Identity Provider"
+        ],
+        "correct": 2,
+        "explanation": "The PEP intercepts requests and queries the control plane for decisions. It's in the data plane—the 'gate' users encounter. Policy Engine decides, Policy Administrator communicates, IdP authenticates but doesn't enforce.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "Policy Engine is central",
+            "why_wrong": "PE makes decisions, doesn't intercept requests"
+          },
+          {
+            "option": 1,
+            "why_tempting": "PA communicates with components",
+            "why_wrong": "PA sends decisions, doesn't intercept requests"
+          },
+          {
+            "option": 3,
+            "why_tempting": "IdP handles authentication",
+            "why_wrong": "IdP authenticates but doesn't enforce access"
+          }
+        ]
+      }
+    },
+
+    {
+      "section_id": "D1-L005-S04",
+      "title": "Micro-Segmentation and Network Controls",
+      "estimated_time": "12 minutes",
+      
+      "content": {
+        "overview": "Micro-segmentation divides networks into small, isolated segments with granular controls at the workload level—not just broad network zones.",
+        
+        "core_concepts": [
+          {
+            "concept": "Traditional vs Micro-Segmentation",
+            "traditional": {
+              "level": "Zone-level (VLANs)",
+              "policies": "Based on IP addresses and ports",
+              "limitation": "Free movement within zones"
+            },
+            "micro_segmentation": {
+              "level": "Workload/application level",
+              "policies": "Based on identity and context",
+              "benefit": "Limits lateral movement at each workload"
+            }
+          },
+          {
+            "concept": "Implementation Approaches",
+            "approaches": [
+              {"type": "Network-based", "how": "NGFWs, SDN", "best_for": "Data centers"},
+              {"type": "Host-based", "how": "Agents on workloads", "best_for": "Cloud, containers"},
+              {"type": "Hypervisor-based", "how": "Virtual switch policies", "best_for": "Virtualized DCs"}
+            ]
+          },
+          {
+            "concept": "East-West vs North-South Traffic",
+            "north_south": {
+              "direction": "In/out of network (perimeter)",
+              "traditional_focus": "This is what firewalls protected"
+            },
+            "east_west": {
+              "direction": "Between internal systems (lateral)",
+              "zero_trust_focus": "Must be controlled too—this is where lateral movement happens"
+            },
+            "key_point": "Zero Trust requires controlling BOTH, but east-west was traditionally ignored"
+          },
+          {
+            "concept": "Implementation Steps",
+            "steps": [
+              {"step": 1, "action": "Discover", "details": "Map all applications and communication patterns"},
+              {"step": 2, "action": "Define", "details": "Create policies based on legitimate traffic"},
+              {"step": 3, "action": "Monitor", "details": "Deploy in monitoring mode first"},
+              {"step": 4, "action": "Enforce", "details": "Gradually enforce, starting with low-risk segments"}
+            ],
+            "critical_warning": "Never implement micro-segmentation without first understanding traffic patterns—you'll break production"
+          }
+        ],
+
+        "what_would_happen_if": {
+          "scenario": "What if ransomware hits a workstation in a micro-segmented environment?",
+          "consequence": "The ransomware can encrypt that workstation but cannot spread. Micro-segmentation blocks lateral movement—workstations can't reach servers directly. The attack is contained to one segment.",
+          "without_micro_segmentation": "Ransomware spreads freely, encrypting everything it can reach across the flat network."
+        }
+      },
+
+      "key_points": [
+        "Micro-segmentation = workload-level policies; traditional = zone-level (VLANs)",
+        "East-west = internal traffic; north-south = perimeter traffic",
+        "Zero Trust must control BOTH directions",
+        "Start in monitoring mode before enforcing",
+        "Never implement without understanding application dependencies first"
+      ],
+
+      "must_remember_for_exam": [
+        {
+          "fact": "East-west = internal; North-south = perimeter",
+          "why_tested": "Traffic direction terminology"
+        },
+        {
+          "fact": "Micro-segmentation limits lateral movement",
+          "why_tested": "Primary benefit of technique"
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An organization wants to limit malware spread between data center servers. All servers can currently communicate freely. Which approach is MOST effective?",
+        "options": [
+          "Deploy additional perimeter firewalls",
+          "Implement micro-segmentation limiting server-to-server communication",
+          "Enable NAT to hide internal IPs",
+          "Install antivirus on all servers"
+        ],
+        "correct": 1,
+        "explanation": "Micro-segmentation controls which servers can communicate, containing malware spread. Perimeter firewalls don't control internal traffic. NAT doesn't prevent internal communication. Antivirus might detect but doesn't prevent lateral movement if it fails.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "Firewalls protect",
+            "why_wrong": "Perimeter firewalls don't control internal (east-west) traffic"
+          },
+          {
+            "option": 2,
+            "why_tempting": "Hiding IPs sounds protective",
+            "why_wrong": "NAT is for address translation, not access control"
+          },
+          {
+            "option": 3,
+            "why_tempting": "AV detects malware",
+            "why_wrong": "AV can fail; segmentation prevents spread regardless"
+          }
+        ]
+      }
+    },
+
+    {
+      "section_id": "D1-L005-S05",
+      "title": "Zero Trust Implementation and Maturity",
+      "estimated_time": "10 minutes",
+      
+      "content": {
+        "overview": "Zero Trust is a journey with maturity stages. Organizations progress from traditional security through comprehensive Zero Trust.",
+        
+        "core_concepts": [
+          {
+            "concept": "Zero Trust Maturity Stages",
+            "stages": [
+              {"stage": "Traditional", "characteristics": "Perimeter security, implicit internal trust"},
+              {"stage": "Initial", "characteristics": "MFA deployed, basic segmentation, asset inventory started"},
+              {"stage": "Advanced", "characteristics": "Comprehensive identity, micro-segmentation, JIT access"},
+              {"stage": "Optimal", "characteristics": "Fully automated, real-time risk assessment, dynamic policies"}
+            ]
+          },
+          {
+            "concept": "Five Implementation Pillars",
+            "pillars": [
+              {"pillar": "Identity", "controls": "MFA, SSO, identity governance, PAM"},
+              {"pillar": "Devices", "controls": "MDM, health checking, EDR"},
+              {"pillar": "Networks", "controls": "Micro-segmentation, ZTNA, encryption"},
+              {"pillar": "Applications", "controls": "App-level access, API security"},
+              {"pillar": "Data", "controls": "Classification, DLP, encryption"}
+            ]
+          },
+          {
+            "concept": "Implementation Roadmap",
+            "phases": [
+              {"phase": "Foundation (0-6 months)", "focus": "Strong identity (MFA, SSO), asset inventory"},
+              {"phase": "Quick Wins (6-12 months)", "focus": "Device compliance, segment critical systems, PAM"},
+              {"phase": "Comprehensive (12-24 months)", "focus": "Full micro-segmentation, ZTNA everywhere"},
+              {"phase": "Optimization (Ongoing)", "focus": "Behavioral analytics, automated response"}
+            ],
+            "key_message": "Identity is the foundation—implement MFA and SSO FIRST"
+          }
+        ]
+      },
+
+      "key_points": [
+        "Zero Trust maturity: Traditional → Initial → Advanced → Optimal",
+        "Five pillars: Identity, Devices, Networks, Applications, Data",
+        "Identity is the FOUNDATION—implement MFA/SSO first",
+        "Incremental implementation reduces risk and demonstrates progress",
+        "NIST SP 800-207 is the authoritative Zero Trust reference"
+      ],
+
+      "must_remember_for_exam": [
+        {
+          "fact": "Identity (MFA, SSO) is the foundation—implement first",
+          "why_tested": "Implementation priority question"
+        },
+        {
+          "fact": "Five pillars: Identity, Devices, Networks, Applications, Data",
+          "why_tested": "Zero Trust framework components"
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An organization is beginning Zero Trust. They have traditional perimeter security with passwords only. What should be their FIRST priority?",
+        "options": [
+          "Implement micro-segmentation across the network",
+          "Deploy ZTNA to replace VPN",
+          "Establish strong identity foundation with MFA and SSO",
+          "Implement behavioral analytics"
+        ],
+        "correct": 2,
+        "explanation": "Strong identity is the foundation—you must know WHO is accessing before making intelligent decisions. MFA and SSO should be first because all other controls depend on reliable identity. Other options build on this foundation.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_tempting": "Micro-segmentation is powerful",
+            "why_wrong": "Can't implement effectively without identity foundation"
+          },
+          {
+            "option": 1,
+            "why_tempting": "ZTNA is modern",
+            "why_wrong": "ZTNA depends on strong identity"
+          },
+          {
+            "option": 3,
+            "why_tempting": "Analytics detect threats",
+            "why_wrong": "Need identity data first to analyze behavior"
+          }
+        ]
       }
     }
   ],
 
-  "deep_dive": {
-    "title": "Hands-On Lab: Zero Trust Controls on Linux",
-    "introduction": "Practice implementing Zero Trust principles using Linux security controls.",
-    "prerequisites": [
-      "Linux VM (Ubuntu 22.04 LTS recommended)",
-      "Sudo access"
-    ],
-    "labs": [
+  "hands_on_labs": {
+    "browser_labs": [
       {
-        "lab_id": "LAB-005-1",
-        "title": "Lab 1: Implementing Least Privilege with sudo",
-        "objective": "Configure granular sudo permissions following least privilege",
+        "lab_id": "lab-zt-principles",
+        "title": "Zero Trust Principle Matcher",
+        "type": "matching",
+        "difficulty": "beginner",
+        "estimated_time": "10 minutes",
+        "description": "Match Zero Trust scenarios to the principles they demonstrate."
+      },
+      {
+        "lab_id": "lab-zt-architecture",
+        "title": "Zero Trust Architecture Designer",
+        "type": "diagram_builder",
+        "difficulty": "intermediate",
         "estimated_time": "15 minutes",
-        "steps": [
-          {
-            "step": 1,
-            "instruction": "View current sudo configuration",
-            "command": "sudo cat /etc/sudoers",
-            "expected_output": "(sudoers file contents)",
-            "explanation": "Understanding current sudo setup before making changes"
-          },
-          {
-            "step": 2,
-            "instruction": "Create a specific sudo rule for web admin",
-            "command": "echo 'webadmin ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart nginx, /usr/bin/systemctl status nginx' | sudo tee /etc/sudoers.d/webadmin",
-            "expected_output": "(rule written)",
-            "explanation": "This grants ONLY nginx restart/status - not full sudo access"
-          },
-          {
-            "step": 3,
-            "instruction": "Validate the sudoers file",
-            "command": "sudo visudo -c",
-            "expected_output": "parsed OK",
-            "explanation": "Always validate sudoers files to prevent lockout"
-          }
-        ],
-        "control_mapping": {
-          "principle": "Least Privilege",
-          "zero_trust_pillar": "Identity",
-          "frameworks": ["NIST 800-207", "CIS Control 5.4"]
-        }
-      },
-      {
-        "lab_id": "LAB-005-2",
-        "title": "Lab 2: Network Micro-segmentation with iptables",
-        "objective": "Implement host-level micro-segmentation",
-        "estimated_time": "15 minutes",
-        "steps": [
-          {
-            "step": 1,
-            "instruction": "Set default deny policy",
-            "command": "sudo iptables -P INPUT DROP && sudo iptables -P FORWARD DROP",
-            "expected_output": "(no output)",
-            "explanation": "Zero Trust default: deny all, then explicitly allow"
-          },
-          {
-            "step": 2,
-            "instruction": "Allow established connections",
-            "command": "sudo iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT",
-            "expected_output": "(no output)",
-            "explanation": "Allow responses to outbound connections"
-          },
-          {
-            "step": 3,
-            "instruction": "Allow SSH from specific network only",
-            "command": "sudo iptables -A INPUT -p tcp -s 192.168.1.0/24 --dport 22 -j ACCEPT",
-            "expected_output": "(no output)",
-            "explanation": "SSH only from management network - micro-segmentation"
-          },
-          {
-            "step": 4,
-            "instruction": "View rules",
-            "command": "sudo iptables -L -n -v",
-            "expected_output": "(detailed rule listing)",
-            "explanation": "Verify your Zero Trust network controls"
-          }
-        ],
-        "control_mapping": {
-          "principle": "Micro-segmentation",
-          "zero_trust_pillar": "Network",
-          "frameworks": ["NIST 800-207", "CIS Control 13.4"]
-        }
-      }
-    ]
-  },
-
-  "practice_platforms": {
-    "title": "Where to Practice Zero Trust Concepts",
-    "platforms": [
-      {
-        "name": "Microsoft Learn",
-        "url": "https://learn.microsoft.com",
-        "relevant_paths": ["SC-900", "AZ-500 - covers Azure AD Conditional Access, Zero Trust"]
-      },
-      {
-        "name": "SANS Cyber Ranges",
-        "url": "https://www.sans.org/cyber-ranges/",
-        "best_for": "Practicing Zero Trust implementation scenarios"
-      }
-    ]
-  },
-
-  "hands_on_activity": {
-    "title": "Zero Trust Gap Analysis",
-    "objective": "Assess an organization's Zero Trust readiness",
-    "scenario": "Evaluate a company with: Active Directory on-premises, VPN for remote access, basic MFA (SMS), no MDM, flat internal network, and limited logging. Assess their Zero Trust maturity and create a roadmap.",
-    "steps": [
-      "Rate current maturity for each pillar (Identity, Device, Network, Application, Data)",
-      "Identify the biggest gaps in each pillar",
-      "Prioritize improvements by impact and effort",
-      "Create a 3-year implementation roadmap",
-      "Identify quick wins for Year 1"
-    ],
-    "expected_outcome": "A maturity assessment with prioritized roadmap",
-    "reflection_questions": [
-      "Which pillar needs the most immediate attention?",
-      "What are the dependencies between improvements?",
-      "How would you get executive buy-in for this journey?",
-      "What metrics would you use to track progress?"
-    ]
-  },
-
-  "what_would_you_do": {
-    "scenario": "The VPN Debate",
-    "context": "Your company relies heavily on VPN for remote access. Security leadership wants to implement Zero Trust Network Access (ZTNA) to replace VPN. IT operations is resistant - VPN works, they know it, and ZTNA seems complex. Users are worried about more authentication friction.",
-    "question": "How do you navigate this transition?",
-    "options": [
-      {
-        "id": "a",
-        "text": "Force immediate VPN shutdown and ZTNA implementation - security is priority",
-        "is_best": false,
-        "feedback": "Forcing rapid change without buy-in will create resistance, workarounds, and potentially break critical workflows. Users will find ways around security.",
-        "consequences": "IT ops is resentful. Users create workarounds. Security posture actually decreases due to shadow IT."
-      },
-      {
-        "id": "b",
-        "text": "Keep VPN forever - if it's working, don't change it",
-        "is_best": false,
-        "feedback": "VPN's broad network access is a security risk. Every VPN credential compromise could lead to network-wide access. This doesn't address the fundamental problem.",
-        "consequences": "Eventually a VPN credential is compromised. Attacker has broad network access. Major breach occurs."
-      },
-      {
-        "id": "c",
-        "text": "Pilot ZTNA alongside VPN for specific apps, demonstrate value, then gradually expand while sunsetting VPN",
-        "is_best": true,
-        "feedback": "A phased approach builds confidence, demonstrates value, and allows for learning. Starting with specific applications proves the concept. Gradual VPN sunset gives everyone time to adjust.",
-        "consequences": "IT ops sees ZTNA work and gains confidence. Users appreciate better experience for pilot apps. VPN is gradually retired with minimal disruption."
-      },
-      {
-        "id": "d",
-        "text": "Add MFA to VPN and call it Zero Trust",
-        "is_best": false,
-        "feedback": "MFA on VPN is better than no MFA, but it's not Zero Trust. Once authenticated, users still have broad network access. This is security theater.",
-        "consequences": "Leadership thinks they have Zero Trust. They don't. A phished VPN credential with MFA fatigue still leads to broad access."
+        "description": "Design a Zero Trust architecture for a given scenario."
       }
     ],
-    "key_lesson": "Zero Trust implementation requires change management, not just technology. Phased approaches with demonstrated value build organizational support. Force-fitting security creates resistance and workarounds."
+    "external_labs": [
+      {
+        "resource": "Microsoft Learn",
+        "lab_name": "Zero Trust Security Model",
+        "url": "https://learn.microsoft.com/en-us/security/zero-trust/",
+        "cost": "Free",
+        "estimated_time": "2 hours",
+        "role_relevance": ["security_engineer", "grc_analyst"]
+      }
+    ],
+    "tools_introduction": [
+      {
+        "tool": "Zscaler Private Access",
+        "category": "ZTNA",
+        "purpose": "Application-level Zero Trust access",
+        "role_relevance": ["security_engineer"]
+      },
+      {
+        "tool": "Microsoft Entra (Azure AD) Conditional Access",
+        "category": "Policy Engine",
+        "purpose": "Context-aware access decisions",
+        "role_relevance": ["security_engineer", "soc_analyst"]
+      }
+    ]
   },
 
   "summary": {
     "key_takeaways": [
-      "Zero Trust eliminates implicit trust - verify every access request regardless of network location",
-      "Core tenets: Never trust/always verify, Assume breach, Least privilege",
-      "Five pillars: Identity (foundation), Device, Network, Application/Workload, Data",
-      "Implementation is a multi-year journey starting with identity",
-      "ZTNA replaces VPN with application-specific, verified access"
+      "Zero Trust: 'Never trust, always verify'—no implicit trust from network location",
+      "Three principles: Verify Explicitly, Least Privilege, Assume Breach",
+      "Architecture: Policy Engine (decides), Policy Administrator (communicates), PEP (enforces)",
+      "ZTNA = application-level access; VPN = network-level access",
+      "Micro-segmentation limits lateral movement at workload level",
+      "Identity is the foundation—implement MFA/SSO first"
     ],
     "exam_essentials": [
-      "Zero Trust = never trust, always verify (not based on network location)",
-      "Three tenets: Never trust/always verify, Assume breach, Least privilege",
-      "Start implementation with Identity pillar (foundation)",
-      "Micro-segmentation limits lateral movement",
-      "ZTNA = application access; VPN = network access"
+      "Zero Trust = Never trust, always verify",
+      "Three principles: Verify Explicitly, Least Privilege, Assume Breach",
+      "Policy Engine decides; PEP enforces",
+      "ZTNA = application-level; VPN = network-level",
+      "East-west = internal; north-south = perimeter",
+      "Start with identity (MFA, SSO) as foundation"
     ],
-    "connection_to_next": "Zero Trust requires strong physical security controls as part of defense in depth. The next lesson covers Physical Security Controls - protecting facilities, devices, and people."
+    "connection_to_next": "Zero Trust architecture relies on controlling physical access as well as logical access. The next lesson explores physical security controls that protect facilities, hardware, and people."
   },
 
   "related_content": {
-    "simulations": ["D1-SIM-004_Zero_Trust_Migration"],
-    "remediation": ["D1-REM-001_Policy_Fundamentals"],
-    "next_lesson": "D1-LESSON-006_Physical_Security_Controls",
-    "previous_lesson": "D1-LESSON-004_Cryptographic_Fundamentals"
+    "simulations": ["D1-SIM-004"],
+    "remediation": ["D1-REM-001"],
+    "next_lesson": "D1-LESSON-006",
+    "previous_lesson": "D1-LESSON-004"
   }
 }

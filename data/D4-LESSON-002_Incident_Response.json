@@ -2,412 +2,656 @@
   "lesson_id": "D4-LESSON-002",
   "domain": 4,
   "title": "Incident Response",
-  "objectives_covered": ["4.8"],
+  "objectives_covered": ["4.2"],
   "estimated_duration": "55-65 minutes",
   "difficulty": "intermediate",
-  "prerequisites": ["D4-LESSON-001"],
+  "version": "2.0-enhanced",
+
+  "skill_tree": {
+    "prerequisites": ["D4-LESSON-001", "D3-LESSON-007"],
+    "unlocks": ["D4-LESSON-003", "D5-LESSON-002"],
+    "cascade_learning": {
+      "builds_on": [
+        {"lesson": "D4-LESSON-001", "concepts": ["Security monitoring", "Alert triage", "SOC operations"]},
+        {"lesson": "D3-LESSON-007", "concepts": ["Business continuity", "Recovery procedures"]}
+      ],
+      "enables": [
+        {"lesson": "D4-LESSON-003", "concepts": ["Digital forensics during incident investigation"]},
+        {"lesson": "D5-LESSON-002", "concepts": ["Risk management includes incident handling"]}
+      ]
+    }
+  },
+
+  "role_relevance": {
+    "soc_analyst": {
+      "importance": "critical",
+      "daily_tasks": [
+        "Initial incident triage and documentation",
+        "Escalating confirmed incidents",
+        "Supporting incident containment",
+        "Gathering evidence during response"
+      ],
+      "real_scenario": "Alert escalates to incident—document initial findings, notify IR team, assist with evidence collection while maintaining chain of custody"
+    },
+    "incident_responder": {
+      "importance": "critical",
+      "daily_tasks": [
+        "Leading incident response efforts",
+        "Coordinating containment and eradication",
+        "Managing incident communications",
+        "Conducting post-incident analysis"
+      ],
+      "real_scenario": "Ransomware incident confirmed—lead containment, coordinate with IT for isolation, manage executive communications, drive recovery"
+    },
+    "grc_analyst": {
+      "importance": "high",
+      "daily_tasks": [
+        "Ensuring IR procedures meet compliance requirements",
+        "Managing breach notification timelines",
+        "Documenting incidents for audit purposes",
+        "Reviewing incident metrics and trends"
+      ],
+      "real_scenario": "Data breach involves PII—determine notification requirements under GDPR (72 hours), CCPA, state laws; document timeline for regulators"
+    },
+    "penetration_tester": {
+      "importance": "medium",
+      "daily_tasks": [
+        "Testing IR procedures during exercises",
+        "Simulating attacks for tabletop exercises",
+        "Identifying gaps in detection and response",
+        "Recommending IR improvements"
+      ],
+      "real_scenario": "Red team exercise reveals IR team took 4 hours to detect lateral movement—recommend improved detection and faster escalation"
+    },
+    "security_engineer": {
+      "importance": "high",
+      "daily_tasks": [
+        "Implementing containment capabilities",
+        "Building automated response playbooks",
+        "Preparing isolation infrastructure",
+        "Supporting technical remediation"
+      ],
+      "real_scenario": "Building network segmentation that enables rapid containment—can isolate compromised VLAN in minutes during incident"
+    }
+  },
 
   "introduction": {
-    "hook": "When NotPetya ransomware hit Maersk in 2017, every single domain controller across the entire global enterprise was destroyed. 45,000 PCs and 4,000 servers were wiped. The company was essentially offline for 10 days, losing an estimated $300 million. But here's what made recovery possible: a single domain controller in Ghana had been offline during the attack due to a power outage. That accident saved the company. Incident response isn't just about detecting attacksâ€”it's about having the plans, processes, and practice to survive them.",
+    "hook": "When NotPetya hit Maersk in 2017, their entire global IT infrastructure was encrypted in minutes. 45,000 PCs, 4,000 servers, across 130 countries. They rebuilt everything in 10 days—a feat called 'heroic' by cybersecurity experts. The difference between organizations that survive incidents and those that don't? Preparation. Maersk had backups, they had people who knew what to do, and they had practiced. Incident response isn't about preventing every attack—it's about surviving the ones that get through.",
     "learning_goals": [
-      "Execute the incident response lifecycle from preparation through lessons learned",
-      "Implement containment strategies that limit damage while preserving evidence",
-      "Coordinate incident response teams and communication",
+      "Apply the incident response lifecycle: preparation, detection, containment, eradication, recovery, lessons learned",
+      "Execute containment strategies appropriate to different incident types",
       "Document incidents properly for legal, compliance, and improvement purposes",
-      "Conduct post-incident reviews to prevent recurrence"
+      "Coordinate incident response across technical and business stakeholders",
+      "Conduct effective post-incident analysis"
     ],
-    "why_it_matters": "Every organization will face security incidents. The difference between a minor disruption and a catastrophic breach often comes down to response quality. Security professionals must know how to lead and participate in incident responseâ€”it's not theoretical, it's immediate and high-pressure. Expect 5-7 Security+ questions on incident response phases, roles, documentation, and specific response procedures."
+    "why_it_matters": "Every organization will experience security incidents. The question is whether you're prepared. Effective incident response limits damage, reduces recovery time, and turns incidents into improvement opportunities. IR skills are essential for all security roles.",
+    "exam_weight": {
+      "percentage": "8-10% of Domain 4",
+      "question_count": "7-9 questions",
+      "question_types": ["IR phases", "Containment decisions", "Documentation requirements", "Post-incident activities"]
+    }
   },
 
   "sections": [
     {
       "section_id": "D4-L002-S01",
-      "title": "Incident Response Process",
-      "content": "Incident response follows a structured lifecycle to ensure consistent, effective handling of security incidents.\n\n**Incident Response Lifecycle (NIST)**\n\n*1. Preparation*\n- Develop IR plan\n- Build IR team\n- Acquire tools\n- Train personnel\n- Establish communication\n\n*2. Detection and Analysis*\n- Monitor for incidents\n- Validate alerts\n- Determine scope\n- Assess impact\n- Prioritize response\n\n*3. Containment, Eradication, Remediation*\n- Stop the spread (contain)\n- Remove the threat (eradicate)\n- Fix vulnerabilities (remediate)\n- Restore systems (recover)\n\n*4. Post-Incident Activity*\n- Lessons learned\n- Documentation\n- Process improvement\n- Metrics review\n\n**Incident Classification**\n\n*Severity Levels*\n- Critical: Business-threatening, immediate response\n- High: Significant impact, urgent response\n- Medium: Moderate impact, standard response\n- Low: Minimal impact, scheduled response\n\n*Incident Types*\n- Malware infection\n- Data breach\n- Denial of service\n- Unauthorized access\n- Insider threat\n- Account compromise\n\n**Incident Response Team**\n\n*Core Team*\n- IR Manager (leadership)\n- Security Analysts (investigation)\n- IT Operations (systems)\n- Network Team (network)\n\n*Extended Team*\n- Legal counsel\n- HR (insider incidents)\n- Public relations\n- Executive management\n- External consultants\n\n**Documentation Requirements**\n\n*What to Document*\n- Timeline of events\n- Actions taken\n- Evidence collected\n- People involved\n- Decisions made\n- Communications\n\n*Why Documentation Matters*\n- Legal proceedings\n- Insurance claims\n- Compliance requirements\n- Lessons learned\n- Forensic analysis",
+      "title": "Incident Response Lifecycle",
+      "content": "NIST defines a structured approach to handling security incidents.\n\n**NIST IR Lifecycle Phases**\n\n*1. Preparation*\n- Develop IR plan\n- Build IR team\n- Acquire tools and resources\n- Train personnel\n- Establish communications\n- Create playbooks\n\n*2. Detection and Analysis*\n- Monitor for indicators\n- Analyze alerts\n- Determine if incident occurred\n- Assess scope and impact\n- Document findings\n- Prioritize response\n\n*3. Containment, Eradication, and Recovery*\n- Contain to prevent spread\n- Eradicate threat components\n- Recover systems to normal\n- Verify successful remediation\n\n*4. Post-Incident Activity*\n- Lessons learned meeting\n- Documentation review\n- Process improvements\n- Metric analysis\n\n**Incident vs Event**\n\n*Security Event*\n- Observable occurrence\n- May or may not be security-related\n- Requires analysis to determine\n\n*Security Incident*\n- Violation of security policy\n- Threat to confidentiality, integrity, or availability\n- Requires response\n\n**Incident Classification**\n\n*By Type*\n- Malware infection\n- Unauthorized access\n- Denial of service\n- Data breach\n- Insider threat\n- Social engineering\n\n*By Severity*\n- Critical: Business-stopping, data breach\n- High: Significant impact, rapid response needed\n- Medium: Moderate impact, standard response\n- Low: Minimal impact, routine handling\n\n**IR Team Structure**\n\n*Core Team*\n- IR lead/manager\n- Security analysts\n- IT operations\n- Legal counsel\n- Communications/PR\n\n*Extended Team*\n- HR (insider incidents)\n- Finance (fraud, ransom)\n- Business unit leaders\n- External: forensics, law enforcement",
 
       "key_points": [
-        "NIST lifecycle: Preparation â†’ Detection/Analysis â†’ Containment/Eradication/Recovery â†’ Post-Incident",
-        "Preparation happens BEFORE incidents (plan, team, tools, training)",
-        "Classification determines response urgency and resources",
-        "IR team includes technical (analysts, IT) and non-technical (legal, HR, PR)",
-        "Documentation is critical for legal, compliance, and improvement"
+        "NIST IR phases: Preparation, Detection/Analysis, Containment/Eradication/Recovery, Post-Incident",
+        "Event = observable occurrence; Incident = confirmed security violation requiring response",
+        "Preparation is most important phase—happens before incidents occur",
+        "IR team includes technical (analysts) and non-technical (legal, PR, HR) members",
+        "Incident severity drives response urgency and resources"
       ],
 
-      "real_world_example": {
-        "scenario": "Structured IR process containing ransomware",
-        "company": "Pinnacle Financial Services",
-        "application": "Pinnacle's IR process activated during ransomware attack: DETECTION (EDR alerted on ransomware behavior, SOC validated and declared incident), CLASSIFICATION (Criticalâ€”ransomware with encryption starting), CONTAINMENT (immediate network isolation of affected segment, killed ransomware processes where possible), ERADICATION (identified entry point as phishing email, removed malware from all systems, reset compromised credentials), RECOVERY (restored encrypted systems from backups, verified integrity before reconnection), POST-INCIDENT (identified email filtering gap, updated detection rules, improved backup verification process), OUTCOME (3 systems encrypted vs. potential 500, no ransom paid, 8-hour recovery). Structured process limited damage."
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "name": "PICERL",
+            "expansion": "Preparation, Identification, Containment, Eradication, Recovery, Lessons learned",
+            "usage": "IR lifecycle phases (alternative to NIST's grouping)"
+          },
+          {
+            "name": "Event → Analysis → Incident",
+            "expansion": "Events become incidents after analysis confirms security violation",
+            "usage": "Event vs incident distinction"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "IR Lifecycle",
+            "analogy": "Like a fire department: Preparation (training, equipment), Detection (alarm), Containment (stop spread), Eradication (put out fire), Recovery (rebuild), Lessons (improve)",
+            "why_it_works": "Familiar emergency response model"
+          },
+          {
+            "concept": "Event vs Incident",
+            "analogy": "A smoke detector going off is an event. After you investigate and find an actual fire, it becomes an incident requiring response.",
+            "why_it_works": "Analysis determines if response needed"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Skipping preparation phase",
+            "correction": "Preparation is the most critical phase. During an incident is too late to build a team, get tools, or create procedures. Prepare NOW.",
+            "exam_trap": "Preparation happens BEFORE incidents"
+          },
+          {
+            "mistake": "Treating every alert as an incident",
+            "correction": "Events need analysis to determine if they're incidents. Not every alert requires full IR activation. Triage determines severity and response level.",
+            "exam_trap": "Analysis determines if event is an incident"
+          }
+        ]
       },
 
-      "exam_tips": [
-        "NIST phases: Preparation, Detection/Analysis, Containment/Eradication/Recovery, Post-Incident",
-        "Preparation happens BEFORE incident (plan, team, tools)",
-        "Document everythingâ€”timeline, actions, evidence, decisions",
-        "Legal and HR may be needed for insider threats",
-        "Post-incident = lessons learned + process improvement"
-      ],
+      "real_world_example": {
+        "scenario": "Structured incident response",
+        "company": "Meridian Healthcare",
+        "application": "When ransomware was detected at 3 AM, Meridian's prepared IR process activated: DETECTION (SOC analyst noticed encrypted files, escalated immediately), CONTAINMENT (IR lead activated, network segments isolated within 30 minutes), ERADICATION (forensics identified entry point—phishing email—malware removed from all systems), RECOVERY (systems restored from backups verified clean, 48-hour recovery), LESSONS LEARNED (improved email filtering, enhanced backup testing, updated playbook). Preparation paid off—similar incidents at unprepared organizations took weeks to recover."
+      },
 
-      "glossary_terms": [
+      "what_would_happen_if": [
         {
-          "term": "Incident Response Lifecycle",
-          "definition": "A structured approach to handling security incidents through phases of preparation, detection, containment, eradication, recovery, and post-incident review.",
-          "exam_note": "NIST model. 4 phases. Cyclicalâ€”lessons improve preparation."
+          "situation": "Organization has no IR plan when ransomware hits",
+          "consequence": "Chaos. No one knows who's in charge. No escalation path. No backup procedures. Recovery takes weeks. Business impact massive. May not survive.",
+          "lesson": "IR planning must happen before incidents. Create plan, build team, practice NOW."
         },
         {
-          "term": "Incident Classification",
-          "definition": "The process of categorizing security incidents by severity and type to determine appropriate response priority and resources.",
-          "exam_note": "Determines urgency. Critical/High/Medium/Low. Guides resource allocation."
-        },
-        {
-          "term": "Incident Response Team",
-          "definition": "A group of personnel responsible for responding to security incidents, including technical analysts and supporting roles like legal and communications.",
-          "exam_note": "Core team + extended team. Technical + non-technical. Pre-established."
-        },
-        {
-          "term": "Lessons Learned",
-          "definition": "A post-incident review process that identifies what worked, what didn't, and how to improve future incident response.",
-          "exam_note": "Post-incident phase. Blameless. Improves process. Required for maturity."
+          "situation": "Analysts skip directly from detection to eradication",
+          "consequence": "Threat not fully contained—spreads while you're cleaning one system. Eradication ineffective. Reinfection occurs. Back to square one.",
+          "lesson": "Phases exist for a reason. Contain BEFORE eradicate."
         }
       ],
 
       "knowledge_check": {
-        "question": "According to the NIST Incident Response lifecycle, which phase involves developing the IR plan, building the team, and conducting training exercises?",
+        "question": "During which phase of the NIST incident response lifecycle should an organization develop playbooks and train personnel?",
         "options": [
-          "Detection and Analysis because threats are identified",
-          "Preparation because it happens before incidents occur",
-          "Containment because it limits damage",
-          "Post-Incident Activity because processes are improved"
+          "Detection and Analysis",
+          "Containment, Eradication, and Recovery",
+          "Preparation",
+          "Post-Incident Activity"
         ],
-        "correct": 1,
-        "explanation": "Preparation is the phase that happens before incidents occur, including developing the IR plan, building and training the team, acquiring tools, and establishing communication procedures. Detection happens when incidents occur. Containment is during response. Post-Incident is after response."
-      }
+        "correct": 2,
+        "explanation": "Preparation phase is when playbooks are developed, teams are built, and personnel are trained—all before incidents occur. This readiness enables effective response when incidents happen.",
+        "wrong_answer_analysis": {
+          "0": "Detection/Analysis is when you identify and analyze incidents, not train.",
+          "1": "CER phase is active response, not planning and training.",
+          "3": "Post-incident is for lessons learned, not initial preparation."
+        }
+      },
+
+      "must_remember_for_exam": [
+        {
+          "point": "NIST IR: Preparation → Detection/Analysis → Containment/Eradication/Recovery → Post-Incident",
+          "why_tested": "Know the lifecycle phases and order."
+        },
+        {
+          "point": "Event = occurrence; Incident = confirmed violation requiring response",
+          "why_tested": "Distinction commonly tested."
+        },
+        {
+          "point": "Preparation is most important—happens BEFORE incidents",
+          "why_tested": "Emphasis on proactive preparation."
+        }
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Security Incident",
+          "definition": "A violation or imminent threat of violation of security policies, acceptable use policies, or standard security practices that requires response.",
+          "exam_note": "Confirmed violation. Requires response. Different from event."
+        },
+        {
+          "term": "Incident Response Plan",
+          "definition": "A documented set of procedures and guidelines for detecting, responding to, and recovering from security incidents.",
+          "exam_note": "Created during preparation. Guides response. Updated after incidents."
+        },
+        {
+          "term": "Playbook",
+          "definition": "A predefined set of actions for responding to specific types of incidents, providing step-by-step guidance for responders.",
+          "exam_note": "Specific incident types. Step-by-step. Enables consistent response."
+        },
+        {
+          "term": "NIST SP 800-61",
+          "definition": "NIST's Computer Security Incident Handling Guide, providing the framework for incident response lifecycle and best practices.",
+          "exam_note": "NIST IR framework. Four phases. Industry standard."
+        }
+      ]
     },
     {
       "section_id": "D4-L002-S02",
-      "title": "Detection and Analysis",
-      "content": "Detection and analysis determines what happened, how severe it is, and what systems are affected.\n\n**Detection Sources**\n\n*Technical Sources*\n- SIEM alerts\n- IDS/IPS alerts\n- EDR detections\n- Firewall logs\n- Antivirus alerts\n- Network monitoring\n\n*Human Sources*\n- User reports\n- Help desk tickets\n- IT observations\n- External notifications\n- Law enforcement\n- Vendor alerts\n\n**Incident Validation**\n\n*Triage Questions*\n- Is this a real incident?\n- What type of incident?\n- What is the scope?\n- What is the impact?\n- What is the priority?\n\n*False Positive Determination*\n- Known benign activity?\n- Legitimate user action?\n- Misconfigured detection?\n- Testing or scanning?\n\n**Scope Determination**\n\n*What to Assess*\n- Affected systems (count and type)\n- Affected users (number and role)\n- Affected data (sensitivity and volume)\n- Network segments impacted\n- Business processes affected\n\n*Indicators to Track*\n- IP addresses\n- Domain names\n- File hashes\n- User accounts\n- Network connections\n- File paths\n\n**Impact Assessment**\n\n*Functional Impact*\n- Business operations affected\n- Services unavailable\n- Customers impacted\n- Revenue implications\n\n*Information Impact*\n- Data confidentiality (exposed?)\n- Data integrity (modified?)\n- Data availability (destroyed?)\n- Regulatory implications\n\n**Priority Determination**\n\n*Priority Factors*\n- Functional impact\n- Information impact\n- Recoverability\n- Business criticality\n- Regulatory requirements\n\n*Escalation Triggers*\n- Critical data involved\n- Multiple systems affected\n- Active attacker present\n- Legal/regulatory implications\n- Media attention likely",
+      "title": "Containment Strategies",
+      "content": "Containment prevents incident spread while maintaining evidence and business operations.\n\n**Containment Approaches**\n\n*Short-term Containment*\n- Immediate actions\n- Stop bleeding\n- Preserve evidence\n- Maintain operations if possible\n\n*Long-term Containment*\n- More permanent controls\n- While preparing eradication\n- May involve rebuilding systems\n- Sustainable state\n\n**Containment Actions**\n\n*Network Isolation*\n- Disconnect from network\n- VLAN isolation\n- Firewall blocks\n- Disable switch ports\n\n*Account Actions*\n- Disable compromised accounts\n- Reset credentials\n- Revoke sessions/tokens\n- Increase monitoring\n\n*System Actions*\n- Disable services\n- Stop processes\n- Power off (extreme)\n- Snapshot for forensics\n\n**Containment Decisions**\n\n*Factors*\n- Potential damage of continued access\n- Business impact of containment\n- Evidence preservation needs\n- Resources available\n- Type of attacker\n\n*Risk Considerations*\n- Attacker may notice containment\n- May trigger destructive actions\n- Business disruption\n- Evidence destruction risk\n\n**Segmentation Strategies**\n\n*Network Segmentation*\n- Pre-planned zones\n- Enables rapid isolation\n- Limits lateral movement\n- Reduces containment impact\n\n*Micro-segmentation*\n- Workload-level isolation\n- Zero trust approach\n- Granular containment\n- Minimal business impact\n\n**Evidence Preservation**\n\n*During Containment*\n- Don't power off if possible (lose RAM)\n- Capture volatile data first\n- Document all actions\n- Maintain chain of custody\n\n*Memory Forensics*\n- Running processes\n- Network connections\n- Encryption keys\n- Malware in memory only",
 
       "key_points": [
-        "Detection sources: technical (SIEM, IDS, EDR) and human (user reports, help desk)",
-        "Validate incidents to distinguish real threats from false positives",
-        "Scope: what systems, users, data, and business processes are affected",
-        "Track indicators: IPs, domains, hashes, accounts, paths",
-        "Impact: functional (business operations) and information (CIA)"
+        "Short-term containment = immediate actions; Long-term = sustained while preparing eradication",
+        "Containment options: network isolation, account actions, system actions",
+        "Balance damage prevention vs business impact vs evidence preservation",
+        "Don't power off systems—lose volatile evidence (RAM, running processes)",
+        "Pre-planned segmentation enables faster, less disruptive containment"
       ],
 
-      "real_world_example": {
-        "scenario": "Incident analysis revealing supply chain compromise",
-        "company": "MedCare Health Systems",
-        "application": "MedCare's analysis process uncovered a sophisticated attack: INITIAL DETECTION (EDR flagged unusual processâ€”legitimate software making unexpected network connections), VALIDATION (not false positiveâ€”process was signed legitimate software but behaving abnormally), SCOPE ANALYSIS (found 47 systems with same anomalyâ€”all systems with same vendor software), INDICATOR EXTRACTION (identified malicious domain, file hashes of malicious update), IMPACT ASSESSMENT (systems had access to patient data, potentially sensitive data exposed), ROOT CAUSE (vendor's update mechanism compromisedâ€”supply chain attack), ESCALATION (involved legal, notified vendor, prepared breach notification). Initial detection of one anomaly led to discovering enterprise-wide compromise."
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "name": "NAS for containment",
+            "expansion": "Network (isolate), Accounts (disable), Systems (stop processes)",
+            "usage": "Three containment action categories"
+          },
+          {
+            "name": "Don't Pull the Plug",
+            "expansion": "Powering off destroys volatile evidence in RAM",
+            "usage": "Evidence preservation during containment"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "Short vs Long-term Containment",
+            "analogy": "Like a water leak: short-term is putting a bucket under it (stop immediate damage), long-term is shutting off the water valve (sustainable fix while preparing repair)",
+            "why_it_works": "Immediate action vs sustainable state"
+          },
+          {
+            "concept": "Evidence vs Containment Balance",
+            "analogy": "Like a crime scene—you want to stop the criminal but not destroy evidence in the process. Sometimes you have to choose priorities.",
+            "why_it_works": "Competing priorities require judgment"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Immediately powering off compromised systems",
+            "correction": "Powering off destroys volatile evidence (RAM, running processes, network connections). Isolate network first, capture memory, then power off if needed.",
+            "exam_trap": "Preserve volatile evidence before power off"
+          },
+          {
+            "mistake": "Alerting attacker through obvious containment",
+            "correction": "Sophisticated attackers may monitor for response. If they notice containment, may trigger destructive actions. Consider stealth containment when possible.",
+            "exam_trap": "Containment timing and approach matter"
+          }
+        ]
       },
 
-      "exam_tips": [
-        "Detection sources: SIEM, IDS, EDR (technical); users, help desk (human)",
-        "Validate before responseâ€”distinguish incidents from false positives",
-        "Indicators of Compromise (IOCs): IPs, hashes, domains, paths",
-        "Impact = functional (operations) + information (data CIA)",
-        "Escalate when: critical data, active attacker, legal implications"
-      ],
-
-      "glossary_terms": [
+      "what_would_happen_if": [
         {
-          "term": "Indicator of Compromise (IOC)",
-          "definition": "Forensic artifacts or observable evidence that indicates a security incident, including IP addresses, file hashes, domains, and unusual activity patterns.",
-          "exam_note": "Evidence of attack. IPs, hashes, domains. Used to find affected systems."
+          "situation": "IR team powers off ransomware-infected server immediately",
+          "consequence": "Lose running processes, network connections, and potentially encryption keys in memory. Forensic analysis limited. May have captured keys to decrypt files.",
+          "lesson": "Capture volatile data (memory dump) before power off. Evidence in RAM is lost forever."
         },
         {
-          "term": "Scope Determination",
-          "definition": "The process of identifying all systems, users, data, and business processes affected by a security incident.",
-          "exam_note": "How big is the incident? All affected systems. Critical for response planning."
-        },
-        {
-          "term": "Impact Assessment",
-          "definition": "Evaluating the functional and information impact of a security incident on business operations and data confidentiality, integrity, and availability.",
-          "exam_note": "Functional = business impact. Information = data impact. Determines severity."
-        },
-        {
-          "term": "Triage",
-          "definition": "The initial assessment process that validates an incident, determines its type, and assigns priority for response.",
-          "exam_note": "Initial assessment. Is it real? What type? Priority? First response step."
+          "situation": "No network segmentation exists when lateral movement detected",
+          "consequence": "Can't isolate compromised segment without affecting entire network. Containment = business shutdown. Attacker has free reign or business stops.",
+          "lesson": "Pre-planned segmentation enables surgical containment with minimal business impact."
         }
       ],
 
       "knowledge_check": {
-        "question": "During incident analysis, the IR team identifies affected IP addresses, file hashes, and domain names associated with the attack. These artifacts are known as:",
+        "question": "During a malware incident, the IR team needs to contain an infected workstation. What should they do BEFORE disconnecting it from the network?",
         "options": [
-          "Attack vectors because they show how the attack occurred",
-          "Indicators of Compromise because they are evidence of the incident",
-          "Threat actors because they identify who attacked",
-          "Vulnerability indicators because they show system weaknesses"
+          "Delete all malware files to prevent spread",
+          "Capture a memory dump to preserve volatile evidence",
+          "Reboot the system to clear the infection",
+          "Install updated antivirus software"
         ],
         "correct": 1,
-        "explanation": "These are Indicators of Compromise (IOCs)â€”forensic evidence that indicates a security incident occurred. IOCs include IP addresses, file hashes, domain names, file paths, and other observable artifacts. They're used to identify affected systems and search for the threat elsewhere. Attack vectors describe how attacks happen. Threat actors are the attackers themselves."
-      }
-    },
-    {
-      "section_id": "D4-L002-S03",
-      "title": "Containment Strategies",
-      "content": "Containment limits the damage and prevents further spread while allowing time for proper eradication.\n\n**Containment Goals**\n\n*Primary Goals*\n- Stop the spread\n- Prevent additional damage\n- Preserve evidence\n- Maintain business continuity (where possible)\n\n*Balance Considerations*\n- Speed vs. thoroughness\n- Containment vs. evidence\n- Security vs. business needs\n- Short-term vs. long-term\n\n**Containment Strategies**\n\n*Short-Term Containment*\n- Immediate actions\n- Limit damage quickly\n- May not be complete\n- Buys time for analysis\n\nExamples:\n- Network isolation\n- Disable compromised accounts\n- Block malicious IPs\n- Kill malicious processes\n\n*Long-Term Containment*\n- More thorough measures\n- Prepare for eradication\n- May involve rebuilding\n- Evidence preserved\n\nExamples:\n- Rebuild systems on clean network\n- Enhanced monitoring\n- Temporary security controls\n- Isolated recovery environment\n\n**Network-Based Containment**\n\n*Isolation Options*\n- Full network disconnect\n- VLAN isolation\n- Firewall rules\n- ACL changes\n- DNS sinkhole\n\n*Considerations*\n- Don't alert attacker (if monitoring)\n- Maintain forensic value\n- Business impact assessment\n- Recovery path planning\n\n**Host-Based Containment**\n\n*Options*\n- Disable network adapter\n- Kill processes\n- Disable services\n- Quarantine files\n- Take offline\n\n*EDR Capabilities*\n- Remote isolation\n- Process termination\n- File quarantine\n- Network blocking\n\n**Account-Based Containment**\n\n*Actions*\n- Disable compromised accounts\n- Force password reset\n- Revoke sessions/tokens\n- Remove privileges\n- Enable MFA\n\n**Evidence Preservation**\n\n*During Containment*\n- Memory capture before shutdown\n- Disk imaging when possible\n- Log preservation\n- Screenshot evidence\n- Document all actions",
-
-      "key_points": [
-        "Containment goals: stop spread, prevent damage, preserve evidence",
-        "Short-term containment = immediate (isolate, block); Long-term = thorough (rebuild)",
-        "Network containment: VLAN isolation, firewall rules, DNS sinkhole",
-        "EDR enables remote containment: isolation, process kill, quarantine",
-        "Preserve evidence during containmentâ€”memory before shutdown"
-      ],
-
-      "real_world_example": {
-        "scenario": "Layered containment stopping ransomware spread",
-        "company": "NexaTech Solutions",
-        "application": "NexaTech's containment prevented catastrophic ransomware damage: DETECTION (ransomware encryption detected on workstation), SHORT-TERM CONTAINMENT (EDR immediately isolated workstation from networkâ€”15 seconds after detection, blocked observed IOCs at firewall), SCOPE ASSESSMENT (determined 3 workstations affected, identified lateral movement attempt), LONG-TERM CONTAINMENT (moved affected segment to quarantine VLAN, disabled compromised service account, enhanced monitoring on all segments), EVIDENCE PRESERVED (captured memory from affected systems before remediation, imaged disks, preserved logs), ERADICATION (cleaned malware, restored from backup), OUTCOME (3 workstations encrypted vs. potential hundreds, no ransom, evidence available for forensics)."
+        "explanation": "Volatile evidence (running processes, network connections, encryption keys) exists only in RAM. Disconnecting network or rebooting loses this evidence. Capture memory dump first, then isolate. Delete/reboot destroys evidence.",
+        "wrong_answer_analysis": {
+          "0": "Deleting files destroys evidence needed for investigation.",
+          "2": "Rebooting clears RAM—destroys volatile evidence.",
+          "3": "Installing software changes the system state—forensic contamination."
+        }
       },
 
-      "exam_tips": [
-        "Short-term containment = immediate (isolate, block, kill processes)",
-        "Long-term containment = thorough (rebuild, enhanced monitoring)",
-        "VLAN isolation contains while preserving network forensic value",
-        "Capture memory BEFORE shutdown (volatile evidence)",
-        "EDR enables remote isolation without physical access"
+      "must_remember_for_exam": [
+        {
+          "point": "Capture volatile evidence (memory) before power off",
+          "why_tested": "Evidence preservation is critical concept."
+        },
+        {
+          "point": "Short-term containment = immediate; Long-term = sustainable",
+          "why_tested": "Two phases of containment."
+        },
+        {
+          "point": "Network isolation, account disabling, system actions are containment options",
+          "why_tested": "Know containment action types."
+        }
       ],
 
       "glossary_terms": [
         {
-          "term": "Short-Term Containment",
-          "definition": "Immediate containment actions taken to quickly limit damage and stop incident spread, even if incomplete.",
-          "exam_note": "Quick actions. Isolate, block, disable. Buys time. May not be complete."
+          "term": "Containment",
+          "definition": "Actions taken to limit the spread and impact of a security incident while preserving evidence for investigation.",
+          "exam_note": "Stop spread. Preserve evidence. Balance with business impact."
         },
         {
-          "term": "Long-Term Containment",
-          "definition": "Thorough containment measures that prepare for eradication, often involving system rebuilding or enhanced controls.",
-          "exam_note": "Thorough measures. Prepare for eradication. May involve rebuild."
+          "term": "Volatile Evidence",
+          "definition": "Evidence that exists only in temporary storage (RAM) and is lost when a system is powered off or rebooted.",
+          "exam_note": "RAM contents. Lost on power off. Capture first."
         },
         {
           "term": "Network Isolation",
-          "definition": "Disconnecting or segmenting affected systems from the network to prevent lateral movement while potentially preserving forensic evidence.",
-          "exam_note": "VLAN, firewall, disconnect. Stops spread. Preserve evidence if possible."
+          "definition": "A containment technique that disconnects compromised systems from the network to prevent lateral movement and data exfiltration.",
+          "exam_note": "Disconnect/VLAN/firewall. Stops spread. Preserves system state."
         },
         {
-          "term": "DNS Sinkhole",
-          "definition": "Redirecting DNS requests for malicious domains to a controlled server, preventing malware from communicating with command and control.",
-          "exam_note": "Redirect malicious DNS. Blocks C2. Identifies infected systems."
+          "term": "Chain of Custody",
+          "definition": "Documentation tracking who handled evidence, when, and what actions were taken, maintaining evidence integrity for legal proceedings.",
+          "exam_note": "Document everything. Who, when, what. Legal requirement."
+        }
+      ]
+    },
+    {
+      "section_id": "D4-L002-S03",
+      "title": "Eradication and Recovery",
+      "content": "Eradication removes threats; recovery restores normal operations.\n\n**Eradication Activities**\n\n*Malware Removal*\n- Identify all infected systems\n- Remove malware components\n- Delete persistence mechanisms\n- Clean registry entries\n- Verify complete removal\n\n*Vulnerability Remediation*\n- Patch exploited vulnerabilities\n- Fix misconfigurations\n- Close unauthorized access\n- Update security controls\n\n*Credential Reset*\n- Reset compromised passwords\n- Revoke and reissue certificates\n- Regenerate API keys\n- Update service accounts\n\n**Recovery Process**\n\n*System Restoration*\n- Restore from known-good backups\n- Rebuild if no clean backup\n- Apply all security patches\n- Harden configurations\n\n*Validation*\n- Verify systems are clean\n- Test functionality\n- Monitor for reinfection\n- Confirm business operations\n\n*Phased Return*\n- Critical systems first\n- Monitor each phase\n- Gradual restoration\n- Quick rollback capability\n\n**Recovery Priorities**\n\n*Factors*\n- Business criticality\n- Dependencies\n- Recovery complexity\n- Risk of reinfection\n\n*Typical Order*\n1. Directory services (AD)\n2. DNS, DHCP\n3. Core business applications\n4. Secondary systems\n5. User workstations\n\n**Reinfection Prevention**\n\n*Monitoring*\n- Enhanced logging\n- Increased alert sensitivity\n- Watch for IOCs\n- Behavior monitoring\n\n*Controls*\n- Block known indicators\n- Strengthen defenses\n- Validate eradication\n- Test detection rules\n\n**Documentation**\n\n*Record Everything*\n- Actions taken\n- Systems affected\n- Timeline\n- Personnel involved\n- Evidence collected",
+
+      "key_points": [
+        "Eradication removes all threat components including persistence mechanisms",
+        "Recovery restores from known-good backups with security patches applied",
+        "Validate systems are clean before returning to production",
+        "Recover in phases—critical systems first, monitor each phase",
+        "Enhanced monitoring during recovery to detect reinfection"
+      ],
+
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "name": "MVC for Eradication",
+            "expansion": "Malware removal, Vulnerability patching, Credential reset",
+            "usage": "Three eradication activities"
+          },
+          {
+            "name": "RVPM for Recovery",
+            "expansion": "Restore, Validate, Phase, Monitor",
+            "usage": "Recovery process steps"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "Eradication",
+            "analogy": "Like removing weeds from a garden—you have to get the roots (persistence mechanisms), not just the visible parts, or they grow back",
+            "why_it_works": "Incomplete eradication leads to reinfection"
+          },
+          {
+            "concept": "Phased Recovery",
+            "analogy": "Like reopening a restaurant after health inspection—start with core kitchen functions, verify safety, then gradually open dining areas",
+            "why_it_works": "Controlled return to normal operations"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Rushing back to normal operations",
+            "correction": "Recovery should be phased with validation at each step. Rushing risks reinfection or overlooking compromised systems. Take time to verify.",
+            "exam_trap": "Validate before returning systems to production"
+          },
+          {
+            "mistake": "Only removing malware executable",
+            "correction": "Attackers establish persistence (registry keys, scheduled tasks, services). Must remove all persistence mechanisms or malware returns after reboot.",
+            "exam_trap": "Remove persistence mechanisms during eradication"
+          }
+        ]
+      },
+
+      "what_would_happen_if": [
+        {
+          "situation": "Systems restored from backup without patching vulnerability that was exploited",
+          "consequence": "Attacker exploits same vulnerability again. Immediate reinfection. Recovery effort wasted. Back to containment phase.",
+          "lesson": "Eradication must include patching the exploited vulnerability before recovery."
+        },
+        {
+          "situation": "All systems brought back online simultaneously without monitoring",
+          "consequence": "If any system still compromised, can't identify which one. Reinfection spreads before detection. Must start over.",
+          "lesson": "Phased recovery with monitoring allows quick identification of remaining issues."
         }
       ],
 
       "knowledge_check": {
-        "question": "During an active ransomware incident, the IR team wants to immediately stop the encryption from spreading to additional systems while preserving evidence for forensic analysis. Which containment approach is MOST appropriate?",
+        "question": "After removing malware from an infected system, which action is MOST important before returning the system to production?",
         "options": [
-          "Immediately power off all systems to stop encryption",
-          "Use VLAN isolation to contain affected systems while preserving evidence",
-          "Wait for complete analysis before taking any action",
-          "Wipe and rebuild all potentially affected systems"
+          "Update the antivirus definitions",
+          "Patch the vulnerability that was exploited",
+          "Document the incident timeline",
+          "Notify affected users"
         ],
         "correct": 1,
-        "explanation": "VLAN isolation is most appropriate because it immediately stops network spread (short-term containment) while preserving forensic evidence on the systems. Powering off loses volatile memory evidence. Waiting allows continued damage. Wiping destroys all evidence. VLAN isolation balances containment urgency with evidence preservation."
-      }
-    },
-    {
-      "section_id": "D4-L002-S04",
-      "title": "Eradication and Recovery",
-      "content": "Eradication removes the threat completely, and recovery restores systems to normal operation.\n\n**Eradication Process**\n\n*Goals*\n- Remove malware/threat\n- Close vulnerabilities\n- Eliminate persistence mechanisms\n- Verify complete removal\n\n*Eradication Activities*\n- Remove malware from all systems\n- Delete malicious files\n- Remove unauthorized accounts\n- Patch exploited vulnerabilities\n- Reset compromised credentials\n- Remove persistence mechanisms\n\n**Root Cause Analysis**\n\n*Questions to Answer*\n- How did attacker gain access?\n- What vulnerability was exploited?\n- How did they move laterally?\n- What allowed persistence?\n- Why wasn't it detected sooner?\n\n*Entry Points*\n- Phishing email\n- Exploited vulnerability\n- Compromised credentials\n- Third-party compromise\n- Insider action\n\n**Recovery Process**\n\n*Goals*\n- Restore normal operations\n- Verify system integrity\n- Resume business functions\n- Ensure security posture\n\n*Recovery Options*\n\n*Rebuild*\n- Fresh installation\n- Most secure\n- Time-consuming\n- Loss of customization\n\n*Restore from Backup*\n- Pre-incident state\n- Faster than rebuild\n- Verify backup integrity\n- May restore vulnerabilities\n\n*Clean in Place*\n- Remove malware from existing system\n- Fastest option\n- Risk of incomplete removal\n- Not recommended for rootkits\n\n**Recovery Verification**\n\n*Before Reconnection*\n- Verify systems are clean\n- Vulnerability patched\n- Credentials reset\n- Monitoring enabled\n- Backup verified\n\n*Staged Reconnection*\n- Reconnect in phases\n- Monitor closely\n- Verify no reinfection\n- Business-critical first\n\n**Recovery Order**\n\n*Typical Priority*\n1. Critical infrastructure (AD, DNS)\n2. Core business systems\n3. Supporting systems\n4. End-user systems\n5. Non-essential systems\n\n*Business Continuity*\n- Coordinate with business\n- Communication plan\n- Customer notification if needed\n- Regulatory reporting",
-
-      "key_points": [
-        "Eradication removes threat completely including persistence mechanisms",
-        "Root cause analysis determines how attack succeeded (prevents recurrence)",
-        "Recovery options: rebuild (most secure), restore backup, clean in place (least secure)",
-        "Verify systems are clean BEFORE reconnecting to network",
-        "Recovery order: critical infrastructure â†’ core business â†’ supporting â†’ end-user"
-      ],
-
-      "real_world_example": {
-        "scenario": "Complete eradication and recovery after APT",
-        "company": "Coastal Community Bank",
-        "application": "Coastal performed thorough eradication after discovering APT: ROOT CAUSE (attacker entered via spear-phishing, exploited unpatched server, created backdoor accounts, installed custom malware), ERADICATION (removed malware from 23 systems, deleted 4 backdoor accounts, disabled compromised service accounts, patched vulnerability, removed scheduled tasks used for persistence, blocked C2 domains), RECOVERY APPROACH (critical servers rebuilt from golden images, workstations reimaged, all credentials rotated, MFA enforced everywhere), VERIFICATION (monitored for IOC recurrence, tested detection rules, vulnerability scanned before reconnection), STAGED RETURN (AD and critical systems first, then branch by branch, continuous monitoring), TIMELINE (2 days containment, 5 days eradication, 3 days recovery). Complete removal ensured no attacker foothold remained."
+        "explanation": "If the vulnerability that allowed initial compromise isn't patched, the attacker (or others) can exploit it again. Eradication must include remediation of the attack vector, not just removal of malware.",
+        "wrong_answer_analysis": {
+          "0": "Important but doesn't prevent reinfection via same vulnerability.",
+          "2": "Documentation is important but happens throughout—doesn't prevent reinfection.",
+          "3": "User notification may be required but doesn't prevent reinfection."
+        }
       },
 
-      "exam_tips": [
-        "Eradication = remove threat + patch vulnerability + eliminate persistence",
-        "Root cause = how did attacker get in (prevents recurrence)",
-        "Rebuild > restore > clean in place (security vs. speed tradeoff)",
-        "Verify clean BEFORE reconnecting to network",
-        "Recovery order: critical infrastructure first"
+      "must_remember_for_exam": [
+        {
+          "point": "Eradication includes removing persistence mechanisms",
+          "why_tested": "Incomplete eradication leads to reinfection."
+        },
+        {
+          "point": "Patch exploited vulnerability before recovery",
+          "why_tested": "Prevents reinfection via same vector."
+        },
+        {
+          "point": "Phased recovery with monitoring at each phase",
+          "why_tested": "Controlled recovery best practice."
+        }
       ],
 
       "glossary_terms": [
         {
           "term": "Eradication",
-          "definition": "The incident response phase that removes all elements of the threat, including malware, unauthorized access, and persistence mechanisms.",
-          "exam_note": "Remove threat completely. Patch vulnerabilities. Eliminate persistence."
-        },
-        {
-          "term": "Root Cause Analysis",
-          "definition": "The process of identifying the fundamental reason an incident occurred, enabling prevention of similar future incidents.",
-          "exam_note": "How did attacker get in? What failed? Prevents recurrence."
+          "definition": "The IR phase where all threat components are removed from affected systems, including malware, backdoors, and persistence mechanisms.",
+          "exam_note": "Remove all threats. Persistence mechanisms. Patch vulnerabilities."
         },
         {
           "term": "Recovery",
-          "definition": "The incident response phase that restores affected systems to normal operation after eradication of the threat.",
-          "exam_note": "Restore operations. Rebuild or restore. Verify before reconnect."
+          "definition": "The IR phase where systems are restored to normal operation, validated as clean, and returned to production.",
+          "exam_note": "Restore operations. Validate clean. Phased approach."
         },
         {
           "term": "Persistence Mechanism",
-          "definition": "Techniques attackers use to maintain access to compromised systems, such as scheduled tasks, services, or registry modifications.",
-          "exam_note": "Maintains attacker access. Scheduled tasks, services, startup. Must remove during eradication."
+          "definition": "A technique attackers use to maintain access to a compromised system even after reboot, such as registry keys, scheduled tasks, or services.",
+          "exam_note": "Maintains attacker access. Must remove during eradication."
+        },
+        {
+          "term": "Root Cause Analysis",
+          "definition": "Investigation to determine the fundamental reason an incident occurred, enabling prevention of similar future incidents.",
+          "exam_note": "Why did it happen? Enables prevention. Part of lessons learned."
+        }
+      ]
+    },
+    {
+      "section_id": "D4-L002-S04",
+      "title": "Post-Incident Activities",
+      "content": "Post-incident activities transform incidents into improvement opportunities.\n\n**Lessons Learned**\n\n*Meeting*\n- All stakeholders present\n- No-blame environment\n- Focus on improvement\n- Held within 2 weeks\n\n*Questions*\n- What happened?\n- What worked well?\n- What could be improved?\n- What do we need to change?\n- How do we prevent recurrence?\n\n*Outcomes*\n- Process improvements\n- Tool enhancements\n- Training needs identified\n- Policy updates\n- Detection rule improvements\n\n**Documentation Requirements**\n\n*Incident Report*\n- Executive summary\n- Timeline of events\n- Systems affected\n- Business impact\n- Response actions taken\n- Root cause analysis\n- Recommendations\n\n*Evidence Documentation*\n- Chain of custody\n- Evidence inventory\n- Collection methods\n- Analysis performed\n- Conclusions\n\n**Metrics and Reporting**\n\n*Key Metrics*\n- Number of incidents\n- MTTD (time to detect)\n- MTTR (time to respond)\n- Dwell time\n- Business impact (cost, downtime)\n- Root cause categories\n\n*Trend Analysis*\n- Incident types over time\n- Severity distribution\n- Response time trends\n- Recurring issues\n\n**Regulatory Considerations**\n\n*Breach Notification*\n- GDPR: 72 hours to supervisory authority\n- HIPAA: 60 days for affected individuals\n- State laws: varying requirements\n- PCI DSS: specific breach procedures\n\n*Legal Preservation*\n- Litigation hold if needed\n- Evidence preservation\n- Third-party notifications\n- Regulatory reporting\n\n**Communication**\n\n*Internal*\n- Executive briefing\n- IT teams\n- Affected business units\n- All employees (if appropriate)\n\n*External*\n- Customers (if data affected)\n- Regulators (if required)\n- Partners (if impacted)\n- Public/media (crisis communications)",
+
+      "key_points": [
+        "Lessons learned meeting held within 2 weeks with all stakeholders",
+        "No-blame environment focuses on improvement, not punishment",
+        "Document everything: timeline, actions, impact, root cause, recommendations",
+        "GDPR requires breach notification within 72 hours to supervisory authority",
+        "Metrics (MTTD, MTTR, dwell time) measure IR program effectiveness"
+      ],
+
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "name": "72 for GDPR",
+            "expansion": "72 hours to notify supervisory authority of breach",
+            "usage": "GDPR notification deadline"
+          },
+          {
+            "name": "DTTR for metrics",
+            "expansion": "Dwell Time, Time to Detect, Time to Respond",
+            "usage": "Key IR metrics"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "Lessons Learned",
+            "analogy": "Like a sports team reviewing game film—not to assign blame, but to understand what happened and improve for next time",
+            "why_it_works": "Focus on improvement, not punishment"
+          },
+          {
+            "concept": "Breach Notification",
+            "analogy": "Like a mandatory reporting requirement—certain incidents must be reported to authorities within specific timeframes, regardless of preference",
+            "why_it_works": "Regulatory compliance is non-negotiable"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Skipping lessons learned meeting",
+            "correction": "Without formal lessons learned, same mistakes repeat. Schedule meeting within 2 weeks while details are fresh. Document and follow up on action items.",
+            "exam_trap": "Lessons learned is essential post-incident activity"
+          },
+          {
+            "mistake": "Focusing on blame rather than improvement",
+            "correction": "Blame-focused reviews make people hide mistakes. No-blame environment encourages transparency and real improvement. Fix systems, not people.",
+            "exam_trap": "Lessons learned should be no-blame, improvement-focused"
+          }
+        ]
+      },
+
+      "what_would_happen_if": [
+        {
+          "situation": "Organization doesn't track IR metrics",
+          "consequence": "Can't demonstrate improvement. Can't justify budget requests. Can't identify recurring issues. Can't benchmark against industry. Flying blind.",
+          "lesson": "Metrics enable program improvement and demonstrate value."
+        },
+        {
+          "situation": "GDPR breach notification deadline missed",
+          "consequence": "Regulatory fine up to €10 million or 2% of global revenue. Regulatory scrutiny. Reputation damage. Shows inadequate IR process.",
+          "lesson": "Know notification requirements. Include legal in IR process."
         }
       ],
 
       "knowledge_check": {
-        "question": "After removing ransomware from systems, what should be done BEFORE reconnecting them to the production network?",
+        "question": "Under GDPR, how long does an organization have to notify the supervisory authority after discovering a personal data breach?",
         "options": [
-          "Immediately reconnect to resume business operations",
-          "Verify systems are clean, patch vulnerabilities, and enable monitoring",
-          "Wait 24 hours to ensure the threat is gone",
-          "Notify customers that the incident is resolved"
+          "24 hours",
+          "72 hours",
+          "7 days",
+          "30 days"
         ],
         "correct": 1,
-        "explanation": "Before reconnecting systems, you must verify they are clean (no malware remains), patch the vulnerabilities that were exploited, reset compromised credentials, and ensure monitoring is enabled to detect any recurrence. Immediate reconnection risks reinfection. Arbitrary waiting doesn't verify security. Customer notification is separate from technical recovery verification."
-      }
-    },
-    {
-      "section_id": "D4-L002-S05",
-      "title": "Post-Incident Activities",
-      "content": "Post-incident activities capture lessons learned and improve future incident response capabilities.\n\n**Lessons Learned Meeting**\n\n*Purpose*\n- Review what happened\n- Identify what worked\n- Identify what didn't\n- Develop improvements\n- Share knowledge\n\n*Timing*\n- Within 1-2 weeks of resolution\n- While memories fresh\n- After immediate pressure subsides\n- Before team disperses\n\n*Participation*\n- IR team members\n- Affected system owners\n- Supporting teams (IT, network)\n- Management stakeholders\n- External parties if involved\n\n**Lessons Learned Questions**\n\n*Detection*\n- How was the incident detected?\n- Could it have been detected earlier?\n- What detection gaps exist?\n\n*Response*\n- Was the response timely?\n- Were procedures followed?\n- Did tools work as expected?\n- Were communications effective?\n\n*Impact*\n- What was the actual damage?\n- Could damage have been reduced?\n- What was the business impact?\n\n*Improvements*\n- What process changes needed?\n- What tools needed?\n- What training needed?\n- What controls should be added?\n\n**Documentation Finalization**\n\n*Incident Report*\n- Executive summary\n- Timeline of events\n- Root cause analysis\n- Actions taken\n- Impact assessment\n- Recommendations\n\n*Evidence Package*\n- Forensic images\n- Log files\n- Screenshots\n- Chain of custody\n- Analysis notes\n\n**Improvement Implementation**\n\n*Priority Actions*\n- Address root cause immediately\n- Fix detection gaps\n- Update procedures\n- Conduct additional training\n\n*Longer-Term Improvements*\n- Tool enhancements\n- Architecture changes\n- Policy updates\n- Staffing adjustments\n\n**Metrics Review**\n\n*Incident Metrics*\n- Time to detect (MTTD)\n- Time to contain\n- Time to eradicate\n- Time to recover\n- Total incident duration\n\n*Process Metrics*\n- Escalation time\n- Communication effectiveness\n- Resource utilization\n- Documentation quality\n\n**Regulatory and Legal**\n\n*Reporting Requirements*\n- Breach notification laws\n- Regulatory reporting\n- Insurance notification\n- Law enforcement\n\n*Evidence Retention*\n- Legal hold requirements\n- Statute of limitations\n- Regulatory requirements\n- Insurance requirements",
-
-      "key_points": [
-        "Lessons learned meeting: within 1-2 weeks, while memories fresh",
-        "Questions: How detected? Response timely? What to improve?",
-        "Final incident report: summary, timeline, root cause, actions, recommendations",
-        "Implement improvements: address root cause, fix detection gaps, update procedures",
-        "Breach notification laws may require disclosure to affected parties"
-      ],
-
-      "real_world_example": {
-        "scenario": "Lessons learned driving security improvement",
-        "company": "GlobalRetail Inc.",
-        "application": "GlobalRetail's post-incident review transformed their security program: INCIDENT (supply chain attack via compromised vendor software update), LESSONS LEARNED FINDINGS (Detection: no monitoring of vendor software behavior, Response: incident playbook didn't cover supply chain attacks, Communication: unclear escalation path to vendor, Controls: no software integrity verification), IMPROVEMENTS IMPLEMENTED (added behavioral monitoring for all third-party software, created supply chain incident playbook, established vendor security hotlines, implemented software signing verification, added vendor security assessments to procurement), METRICS (detection time improved 60% for similar patterns, vendor communication time reduced from hours to minutes), OUTCOME (next vendor-related incident detected in 2 hours vs. 3 days, significantly reduced blast radius)."
+        "explanation": "GDPR requires notification to the supervisory authority within 72 hours of becoming aware of a personal data breach. This tight timeline emphasizes the importance of having breach notification procedures ready before incidents occur.",
+        "wrong_answer_analysis": {
+          "0": "24 hours is not the GDPR requirement (some other regulations may require this).",
+          "2": "7 days is too long for GDPR notification requirement.",
+          "3": "30 days might apply to notifying affected individuals in some cases, not supervisory authority."
+        }
       },
 
-      "exam_tips": [
-        "Lessons learned = blameless review (what happened, what to improve)",
-        "Hold meeting within 1-2 weeks while memories are fresh",
-        "Final report: summary, timeline, root cause, actions, recommendations",
-        "Implement improvementsâ€”don't just document them",
-        "Breach notification laws may require disclosure (varies by jurisdiction)"
+      "must_remember_for_exam": [
+        {
+          "point": "GDPR: 72 hours to notify supervisory authority",
+          "why_tested": "Key regulatory requirement."
+        },
+        {
+          "point": "Lessons learned = no-blame, improvement-focused",
+          "why_tested": "Core post-incident activity."
+        },
+        {
+          "point": "Document: timeline, actions, impact, root cause, recommendations",
+          "why_tested": "Essential documentation elements."
+        }
       ],
 
       "glossary_terms": [
         {
           "term": "Lessons Learned",
-          "definition": "A post-incident review process that identifies what worked, what didn't, and improvements needed, typically held as a blameless meeting.",
-          "exam_note": "Post-incident review. Blameless. What worked/didn't. Improves process."
+          "definition": "A post-incident meeting where stakeholders review what happened, what worked, and what needs improvement—conducted in a no-blame environment.",
+          "exam_note": "No-blame. All stakeholders. Within 2 weeks. Improvement focus."
         },
         {
-          "term": "Incident Report",
-          "definition": "A formal document summarizing a security incident including timeline, root cause, actions taken, impact, and recommendations.",
-          "exam_note": "Final documentation. Summary, timeline, root cause. For management and compliance."
+          "term": "Dwell Time",
+          "definition": "The time an attacker remains undetected in an environment, from initial compromise to detection.",
+          "exam_note": "Time attacker is undetected. Lower is better. Industry average ~200 days."
         },
         {
           "term": "Breach Notification",
-          "definition": "Legal requirements to notify affected individuals, regulators, or other parties when personal data has been compromised.",
-          "exam_note": "Legal requirement. Varies by jurisdiction. GDPR, state laws. Timeframes vary."
+          "definition": "The legal requirement to inform affected individuals, regulators, or other parties when a data breach occurs, with specific timelines depending on regulation.",
+          "exam_note": "GDPR 72 hours. HIPAA 60 days. Varies by regulation."
         },
         {
-          "term": "Evidence Retention",
-          "definition": "Preserving forensic evidence from an incident for potential legal proceedings, compliance, or future analysis.",
-          "exam_note": "Preserve for legal/compliance. Chain of custody. Retention periods vary."
+          "term": "Incident Report",
+          "definition": "A formal document capturing the incident timeline, impact, response actions, root cause, and recommendations for prevention.",
+          "exam_note": "Executive summary. Timeline. Root cause. Recommendations."
         }
-      ],
-
-      "knowledge_check": {
-        "question": "When should a lessons learned meeting be conducted after an incident is resolved?",
-        "options": [
-          "Immediately after containment is complete",
-          "Within 1-2 weeks while memories are still fresh",
-          "After 30 days to allow for complete analysis",
-          "Only if the incident resulted in significant damage"
-        ],
-        "correct": 1,
-        "explanation": "Lessons learned meetings should be held within 1-2 weeks of incident resolutionâ€”soon enough that memories are fresh but after the immediate pressure has subsided. Immediately after containment is too early (response still ongoing). Waiting 30 days allows memories to fade. All incidents should have lessons learned, not just major ones."
-      }
+      ]
     }
   ],
 
   "hands_on_activity": {
     "title": "Incident Response Tabletop Exercise",
-    "objective": "Practice incident response decision-making through a simulated scenario",
-    "scenario": "You're the IR lead at Apex Consulting Group. It's 2 PM on a Friday when you receive multiple alerts.",
+    "objective": "Practice incident response decision-making through a realistic scenario",
+    "scenario": "You're the IR lead at Apex Financial. At 9 PM on Friday, your SOC escalates an alert: ransomware detected on a file server. Initial indicators suggest lateral movement may have occurred.",
     "steps": [
-      "Step 1: Review the scenario:\n   - Alert: Ransomware detected on 3 workstations in accounting department\n   - Alert: Unusual outbound traffic to unknown IP\n   - User report: 'My files have weird extensions and I can't open them'\n   - It's Friday afternoon, most staff are preparing to leave",
-      "Step 2: Detection and Analysis:\n   - Is this a real incident? (Yesâ€”multiple indicators)\n   - What's the classification? (Criticalâ€”active ransomware)\n   - What's the scope? (At least 3 workstations, potentially more)\n   - What additional information do you need?",
-      "Step 3: Containment decision:\n   - What short-term containment actions?\n   - Network isolation approach?\n   - Account actions needed?\n   - Evidence to preserve?",
-      "Step 4: Communication plan:\n   - Who needs to be notified immediately?\n   - What do you tell employees?\n   - When do you notify executives?\n   - External notifications needed?",
-      "Step 5: Eradication plan:\n   - How will you identify all affected systems?\n   - What's the entry point (root cause)?\n   - How will you verify complete removal?\n   - Recovery approach (rebuild vs. restore)?",
-      "Step 6: Document your timeline:\n   - Create an incident timeline\n   - Document key decisions and rationale\n   - Note lessons learned",
-      "Step 7: Post-incident planning:\n   - What would you cover in lessons learned?\n   - What improvements would you recommend?"
+      "Step 1: Initial Assessment—What information do you need immediately? Who needs to be notified?",
+      "Step 2: Containment Decision—How do you contain without destroying evidence? What's the business impact?",
+      "Step 3: Scope Determination—How do you determine what else might be affected? What logs do you review?",
+      "Step 4: Communication—Draft initial executive notification. What do you include/exclude?",
+      "Step 5: Eradication Planning—What must be remediated before recovery? How do you verify eradication?",
+      "Step 6: Recovery Priorities—What systems come back first? How do you validate?",
+      "Step 7: Post-Incident Planning—Schedule lessons learned. List documentation requirements."
     ],
-    "expected_outcome": "Complete incident response plan documenting detection analysis, containment decisions with rationale, communication plan, eradication approach, and lessons learned items.",
-    "reflection_questions": [
-      "How did the Friday afternoon timing affect your decisions?",
-      "What tradeoffs did you make between speed and thoroughness?",
-      "What would you do differently with more resources?"
-    ]
+    "expected_outcome": "Complete tabletop exercise demonstrating structured IR decision-making across all lifecycle phases."
   },
 
   "what_would_you_do": {
-    "scenario": "You're the IR lead at Pinnacle Financial Services. Your team has contained a data breach where attackers accessed a database containing 50,000 customer records including names, addresses, and account numbers. The breach is contained, root cause identified (SQL injection), and you're in the eradication phase. Your CEO wants to announce that everything is under control and there's 'no evidence of data exfiltration.'",
-    "context": "Forensic analysis is ongoing. You've found no positive evidence of exfiltration, but logs are incomplete for a 3-day window. The CEO is under pressure from the board. Legal counsel notes breach notification laws require disclosure within 72 hours of becoming aware of a breach.",
-    "question": "How do you advise the CEO?",
+    "scenario": "You're responding to a ransomware incident. The attacker demands $500,000 in Bitcoin. Your backups exist but are 72 hours old. Critical business data created in the last 72 hours would be lost if you restore from backup.",
+    "context": "Executive team asking for recommendation. Legal and FBI involved. Business losing $100,000/hour while systems are down. Insurance might cover ransom.",
+    "question": "What do you recommend?",
     "options": [
       {
         "id": "a",
-        "text": "Support the CEO's messageâ€”you haven't found evidence of exfiltration",
+        "text": "Pay the ransom immediately to restore operations",
         "is_best": false,
-        "feedback": "Absence of evidence is not evidence of absence, especially with incomplete logs. If exfiltration occurred and is later discovered, the company faces additional legal liability for a misleading statement. 'No evidence' with a 3-day log gap is misleading.",
-        "consequences": "If exfiltration later confirmed, company faces additional liability. Misleading statement damages trust. Regulatory scrutiny increases. CEO's credibility damaged."
+        "feedback": "Paying ransom funds criminal enterprise, doesn't guarantee decryption works, and makes you a target for future attacks. FBI generally advises against payment.",
+        "consequences": "May not get keys. Funds criminals. Target for future attacks. No guarantee of recovery."
       },
       {
         "id": "b",
-        "text": "Advise the CEO to wait until forensic analysis is complete before any statement",
+        "text": "Restore from backup accepting 72-hour data loss",
         "is_best": false,
-        "feedback": "Waiting for complete analysis may violate breach notification laws that require disclosure within 72 hours. While forensics should continue, the company likely has legal obligations to notify that can't wait for complete analysis.",
-        "consequences": "Potential violation of breach notification laws. Fines for late notification. Regulatory action. Worse reputational damage when finally disclosed."
+        "feedback": "Potentially viable but decision should involve business impact analysis. 72 hours of critical data might have significant value. Explore all options first.",
+        "consequences": "Data loss may be significant. But clean recovery. No ransom payment."
       },
       {
         "id": "c",
-        "text": "Recommend accurate disclosure: data was accessed, investigation ongoing, cannot yet confirm or deny exfiltration",
+        "text": "Present options with risk/benefit analysis to executive team for decision",
         "is_best": true,
-        "feedback": "This is the correct approach. Be accurate: attackers accessed the database (fact), investigation is ongoing (fact), we cannot yet determine if data was exfiltrated (honest). This meets notification obligations, maintains credibility, and doesn't make claims that could later be contradicted.",
-        "consequences": "Legal obligations met. Credibility maintained. Honest communication. Positions company well regardless of what forensics finds."
+        "feedback": "Correct approach. This is a business decision, not just technical. Present options (pay, restore, negotiate), risks of each, and let leadership decide with legal and insurance input.",
+        "consequences": "Informed business decision. All options considered. Proper governance."
       },
       {
         "id": "d",
-        "text": "Recommend no public statementâ€”only notify regulators as required",
+        "text": "Negotiate with attackers to reduce the ransom amount",
         "is_best": false,
-        "feedback": "Breach notification laws typically require notification to affected individuals, not just regulators. Additionally, in today's environment, breaches often become public through other means, and being perceived as hiding information is worse than proactive disclosure.",
-        "consequences": "Potential violation of notification requirements. Appears to be hiding information if breach becomes public. Customer trust damaged. May not meet regulatory requirements."
+        "feedback": "Negotiation might be part of the strategy but shouldn't be done without executive approval and legal guidance. Not your unilateral decision to make.",
+        "consequences": "Engaging attackers has implications. Needs legal approval. May still not work."
       }
     ],
-    "key_lesson": "Incident communications must be accurate, especially with incomplete information. 'No evidence of exfiltration' with log gaps is misleading. Legal obligations (breach notification) often require disclosure before complete analysis. Honest communicationâ€”'data was accessed, investigation ongoing, cannot yet confirm exfiltration status'â€”maintains credibility and meets obligations. Work closely with legal counsel on disclosure requirements and timing."
+    "key_lesson": "Ransom payment is a business decision, not technical. IR team presents options with analysis; executives decide with legal, insurance, and law enforcement input. No single right answer—depends on specific circumstances."
   },
 
   "summary": {
     "key_takeaways": [
-      "NIST lifecycle: Preparation â†’ Detection/Analysis â†’ Containment/Eradication/Recovery â†’ Post-Incident",
-      "Preparation happens BEFORE incidents (plan, team, tools, training)",
-      "Containment: short-term (immediate isolation) and long-term (thorough preparation for eradication)",
-      "Eradication removes threat completely including persistence mechanisms",
-      "Recovery: rebuild > restore > clean in place (security vs. speed)",
-      "Lessons learned within 1-2 weeks; implement improvements"
+      "NIST IR lifecycle: Preparation, Detection/Analysis, Containment/Eradication/Recovery, Post-Incident",
+      "Preparation is most critical—happens before incidents occur",
+      "Capture volatile evidence before containment actions that affect system state",
+      "Eradication includes removing persistence mechanisms and patching vulnerabilities",
+      "Lessons learned within 2 weeks, no-blame environment, focus on improvement",
+      "GDPR requires 72-hour breach notification to supervisory authority"
     ],
     "exam_essentials": [
-      "NIST IR phases: Preparation, Detection/Analysis, Containment/Eradication/Recovery, Post-Incident",
-      "IOC = Indicator of Compromise (IPs, hashes, domains)",
-      "Short-term containment = immediate; Long-term = thorough",
-      "Capture memory BEFORE shutdown (volatile evidence)",
-      "Root cause analysis prevents recurrence",
-      "Lessons learned = blameless review (within 1-2 weeks)"
+      "IR phases: Preparation → Detection → Containment → Eradication → Recovery → Lessons Learned",
+      "Event = occurrence; Incident = confirmed violation",
+      "Capture volatile evidence (RAM) before power off",
+      "Patch exploited vulnerability before recovery",
+      "GDPR 72-hour notification requirement",
+      "Lessons learned = no-blame, improvement-focused"
     ],
-    "connection_to_next": "Incident response handles active threats. The next lesson covers digital forensicsâ€”the investigation techniques that determine what happened, how it happened, and what evidence can support legal action."
+    "connection_to_next": "Incident response often requires forensic investigation. The next lesson covers digital forensics—collecting, preserving, and analyzing evidence to understand what happened and support legal proceedings."
   },
 
   "related_content": {

