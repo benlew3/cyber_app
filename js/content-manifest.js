@@ -64,7 +64,6 @@ window.CONTENT_MANIFEST = {
     "D1-SIM-004_Zero_Trust_Migration.json",
     "D1-SIM-005_Gap_Analysis.json",
     // Note: You have two D2-SIM-001 files in your list. I included both unique filenames.
-    "D2-SIM-001_Attribution_Puzzle.json",
     "D2-SIM-001_Phishing_Campaign.json", 
     "D2-SIM-002_Vulnerability_Management.json",
     "D2-SIM-003_Ransomware_Response.json",
