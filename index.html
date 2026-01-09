@@ -7,35 +7,21 @@
     <meta name="theme-color" content="#0a0a0a">
     <title>Security+ Training Platform</title>
     
-    <!-- Inter & JetBrains Mono Fonts for Elegance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     
-    <!-- Elegant Design System CSS -->
     <link rel="stylesheet" href="css/elegant_design_system.css">
     
-    <!-- Tailwind CSS for Career Quiz -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Updated App Styles (merged with elegant system) -->
     <link rel="stylesheet" href="css/style.css">
-    
-    <!-- Editorial Design for Lessons -->
     <link rel="stylesheet" href="css/editorial.css">
-    
-    <!-- NEW: Interactive Memory Hooks Styles -->
     <link rel="stylesheet" href="css/memory-hooks.css">
     
     <style>
-        /* Critical CSS - Immediate dark theme */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        /* Ensure immediate dark theme before CSS loads */
+        /* Critical CSS - Immediate dark theme & Loaders */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #0a0a0a;
             color: #fafafa;
@@ -43,90 +29,35 @@
             min-height: 100vh;
             line-height: 1.6;
         }
+        #loading-screen { display: none !important; }
+        #main-content { display: block; min-height: 100vh; }
+        #content { display: block; opacity: 1; }
         
-        /* Hide loading screen immediately */
-        #loading-screen {
-            display: none !important;
-        }
-        
-        /* Main content container */
-        #main-content {
-            display: block;
-            min-height: 100vh;
-        }
-        
-        /* Error screen styling - updated for elegance */
         .error-screen {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0a0a;
-            color: #fafafa;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0a0a0a; color: #fafafa;
             z-index: 10000;
-            justify-content: center;
-            align-items: center;
+            justify-content: center; align-items: center;
             padding: 20px;
         }
+        .error-content { text-align: center; max-width: 600px; }
+        .error-title { font-size: 2rem; margin-bottom: 20px; color: #ef4444; font-weight: 600; }
+        .error-message { color: #a3a3a3; margin-bottom: 30px; }
         
-        .error-content {
-            text-align: center;
-            max-width: 600px;
-        }
-        
-        .error-title {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #ef4444;
-            font-weight: 600;
-        }
-        
-        .error-message {
-            color: #a3a3a3;
-            margin-bottom: 30px;
-        }
-        
-        /* Ensure content is visible */
-        #content {
-            display: block;
-            opacity: 1;
-        }
-        
-        /* Code block styling for lesson content */
+        /* Code block styling */
         .lesson-content code {
-            background: #27272a;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9em;
+            background: #27272a; padding: 2px 6px; border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.9em;
         }
-        
         .lesson-content pre {
-            background: #1a1a1a;
-            padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin: 10px 0;
+            background: #1a1a1a; padding: 15px; border-radius: 8px;
+            overflow-x: auto; margin: 10px 0;
         }
-        
-        .lesson-content pre code {
-            background: transparent;
-            padding: 0;
-        }
+        .lesson-content pre code { background: transparent; padding: 0; }
     </style>
 </head>
 <body data-theme="dark">
-    <!-- Loading Screen (hidden by default) -->
-    <div id="loading-screen">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <p>Loading Security+ Platform...</p>
-        </div>
-    </div>
-    
-    <!-- Error Screen (hidden by default) -->
     <div id="error-screen" class="error-screen">
         <div class="error-content">
             <h1 class="error-title">⚠️ Loading Error</h1>
@@ -135,10 +66,8 @@
         </div>
     </div>
     
-    <!-- Main Application Container -->
     <div id="main-content">
         <div id="content">
-            <!-- App content will be injected here by JavaScript -->
             <noscript>
                 <div style="padding: 40px; text-align: center;">
                     <h1>JavaScript Required</h1>
@@ -148,185 +77,105 @@
         </div>
     </div>
     
-    <!-- Error handling and loading management -->
     <script>
-        // Set theme immediately
         const savedTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
         
-        // Immediate error handler
         window.addEventListener('error', function(e) {
             console.error('Global error:', e.error);
-            
-            // Don't show error screen for minor issues
             if (e.error && e.error.message && 
                 !e.error.message.includes('ResizeObserver') &&
                 !e.error.message.includes('Non-Error')) {
-                
-                // Show error screen for critical errors
                 const errorScreen = document.getElementById('error-screen');
                 if (errorScreen && !window.APP?.initialized) {
                     errorScreen.style.display = 'flex';
-                    
-                    // Update error message
                     const errorMsg = errorScreen.querySelector('.error-message');
-                    if (errorMsg) {
-                        errorMsg.textContent = `Error: ${e.error.message}`;
-                    }
+                    if (errorMsg) errorMsg.textContent = `Error: ${e.error.message}`;
                 }
             }
         });
         
-        // Loading timeout - if app doesn't load in 8 seconds, show error
         setTimeout(function() {
             if (!window.APP?.initialized) {
-                console.warn('App initialization timeout - showing error screen');
-                const errorScreen = document.getElementById('error-screen');
-                if (errorScreen) {
-                    errorScreen.style.display = 'flex';
-                    const errorMsg = errorScreen.querySelector('.error-message');
-                    if (errorMsg) {
-                        errorMsg.textContent = 'The application is taking too long to load. Please refresh the page.';
-                    }
-                }
+                console.warn('App initialization timeout');
+                // Optional: Show error screen here if strictly needed
             }
         }, 8000);
-        
-        // Hide loading screen immediately
-        document.addEventListener('DOMContentLoaded', function() {
-            const loadingScreen = document.getElementById('loading-screen');
-            if (loadingScreen) {
-                loadingScreen.style.display = 'none';
-                loadingScreen.remove();
-            }
-        });
     </script>
     
-    <!-- ============================================ -->
-    <!-- JAVASCRIPT LOAD ORDER - DO NOT CHANGE ORDER -->
-    <!-- ============================================ -->
-    
-    <!-- 1. UTILITIES (MUST BE FIRST - provides escapeHtml) -->
     <script src="js/utils.js"></script>
     
-    <!-- 2. DATA LOADER (loads external JSON content) -->
+    <script src="js/content-manifest.js"></script>
+    
     <script src="js/data-loader.js"></script>
     
-    <!-- 3. MAIN APPLICATION -->
     <script src="js/app.js"></script>
     
-    <!-- 4. INTERACTIVE SIMULATION SYSTEM -->
     <script src="js/interactive_simulation_core.js"></script>
     <script src="js/interactive_simulation_tools.js"></script>
     <script src="js/interactive_simulation_display.js"></script>
     <script src="js/interactive_simulation_handlers.js"></script>
-    
-    <!-- 5. ENHANCED SIMULATIONS (overrides basic startSimulation) -->
     <script src="js/enhanced-simulations.js"></script>
     
-    <!-- 6. INTERACTIVE PBQ ENGINE -->
     <script src="js/pbq-engine.js"></script>
-    
-    <!-- 7. ADAPTIVE LEARNING MODULE -->
     <script src="js/adaptive-learning.js"></script>
-    
-    <!-- 8. NOTES SYSTEM -->
     <script src="js/notes-system.js"></script>
-    
-    <!-- 8.5. ENHANCED LESSON VIEWER (v33) -->
     <script src="js/enhanced-lesson-viewer.js"></script>
     
-    <!-- ============================================ -->
-    <!-- NEW: INTERACTIVE MEMORY HOOKS SYSTEM -->
-    <!-- ============================================ -->
-    
-    <!-- 8.6. INTERACTIVE MEMORY HOOKS (self-check system) -->
     <script src="js/interactive-memory-hooks.js"></script>
-    
-    <!-- 8.7. WEAK SPOTS REVIEW PAGE -->
     <script src="js/weak-spots-review.js"></script>
-    
-    <!-- 8.8. MEMORY HOOKS INTEGRATION -->
     <script src="js/memory-hooks-integration.js"></script>
-    
-    <!-- 8.9. APP PATCHES FOR MEMORY HOOKS -->
     <script src="js/app-memory-hooks-patch.js"></script>
     
-    <!-- ============================================ -->
-    
-    <!-- 9. ELEGANT UI SYSTEM (Theme Toggle & Enhancements) -->
     <script src="js/elegant_ui_system.js"></script>
     
-    <!-- 10. REACT FOR CAREER QUIZ -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- 11. CAREER QUIZ LOADER - Manually fetch and compile JSX -->
     <script>
-        (function loadCareerQuiz() {
-            console.log('Loading Career Quiz...');
+        (function loadReactComponents() {
+            console.log('⚛️ Loading React Components...');
             
-            fetch('js/career-quiz.jsx')
-                .then(function(response) {
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch career-quiz.jsx: ' + response.status);
-                    }
-                    return response.text();
-                })
-                .then(function(jsxCode) {
-                    console.log('Career Quiz JSX loaded, compiling with Babel...');
-                    
-                    // Compile JSX with Babel
-                    var compiledCode = Babel.transform(jsxCode, {
-                        presets: ['react']
-                    }).code;
-                    
-                    // Execute the compiled code
-                    var script = document.createElement('script');
-                    script.textContent = compiledCode;
-                    document.body.appendChild(script);
-                    
-                    console.log('✅ Career Quiz compiled and loaded');
-                    
-                    // Verify it loaded
-                    setTimeout(function() {
-                        if (window.CybersecurityCareerQuiz) {
-                            console.log('✅ CybersecurityCareerQuiz component is available');
-                        } else {
-                            console.error('❌ CybersecurityCareerQuiz not found after compilation');
-                        }
-                    }, 100);
-                })
-                .catch(function(error) {
-                    console.error('❌ Failed to load Career Quiz:', error);
-                });
+            // Helper to fetch and compile JSX
+            function loadJSX(path, name) {
+                return fetch(path)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`Failed to fetch ${name}`);
+                        return response.text();
+                    })
+                    .then(jsxCode => {
+                        const compiled = Babel.transform(jsxCode, { presets: ['react'] }).code;
+                        const script = document.createElement('script');
+                        script.textContent = compiled;
+                        document.body.appendChild(script);
+                        console.log(`✅ ${name} compiled and loaded`);
+                    })
+                    .catch(err => console.error(`❌ Error loading ${name}:`, err));
+            }
+
+            // Load components sequentially or in parallel
+            Promise.all([
+                loadJSX('js/career-quiz.jsx', 'Career Quiz'),
+                loadJSX('components/InteractiveMemoryHooks.jsx', 'Memory Hooks')
+            ]).then(() => {
+                console.log('🎉 All React Components Loaded');
+            });
         })();
     </script>
     
-    <!-- Fallback if app.js fails to load -->
     <script>
-        // Check if app.js loaded after a short delay
         setTimeout(function() {
             if (!window.APP) {
-                console.error('app.js failed to load');
+                console.error('CRITICAL: App failed to initialize');
                 document.getElementById('content').innerHTML = `
                     <div class="container text-center" style="padding-top: 100px;">
                         <h1 style="color: #ef4444;">⚠️ Application Failed to Load</h1>
-                        <p class="text-muted" style="margin: 20px 0;">
-                            The application JavaScript could not be loaded. 
-                            Please check that all JS files exist and are accessible.
-                        </p>
-                        <p style="color: #71717a; font-size: 0.9rem;">
-                            Required files: utils.js, app.js, interactive_simulation_*.js, enhanced-simulations.js
-                        </p>
-                        <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 20px;">
-                            Retry
-                        </button>
-                    </div>
-                `;
+                        <p class="text-muted">Please check console for details.</p>
+                        <button onclick="location.reload()" class="btn btn-primary">Retry</button>
+                    </div>`;
             }
-        }, 1500);
+        }, 2000);
     </script>
 </body>
 </html>
