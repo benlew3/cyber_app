@@ -2,26 +2,71 @@
   "lesson_id": "D3-LESSON-005",
   "domain": 3,
   "title": "Cloud Security",
-  "objectives_covered": ["3.3"],
+  "objectives_covered": [
+    "3.3"
+  ],
   "estimated_duration": "55-65 minutes",
   "difficulty": "intermediate",
   "version": "2.0-enhanced",
-
   "skill_tree": {
-    "prerequisites": ["D3-LESSON-001", "D3-LESSON-002"],
-    "unlocks": ["D3-LESSON-006", "D5-LESSON-003"],
+    "prerequisites": [
+      {
+        "lesson_id": "D3-LESSON-001",
+        "title": "Security Architecture Concepts",
+        "why_needed": "Provides foundational concepts for this lesson"
+      },
+      {
+        "lesson_id": "D3-LESSON-002",
+        "title": "Infrastructure Security",
+        "why_needed": "Provides foundational concepts for this lesson"
+      }
+    ],
+    "unlocks": [
+      {
+        "lesson_id": "D3-LESSON-006",
+        "title": "Cryptography",
+        "connection": "Builds upon concepts from this lesson"
+      },
+      {
+        "lesson_id": "D5-LESSON-003",
+        "title": "Third-Party Risk Management",
+        "connection": "Builds upon concepts from this lesson"
+      }
+    ],
     "cascade_learning": {
       "builds_on": [
-        {"lesson": "D3-LESSON-001", "concepts": ["Security architecture", "Zero Trust", "Defense in depth"]},
-        {"lesson": "D3-LESSON-002", "concepts": ["Virtualization security", "Container security"]}
+        {
+          "lesson": "D3-LESSON-001",
+          "concepts": [
+            "Security architecture",
+            "Zero Trust",
+            "Defense in depth"
+          ]
+        },
+        {
+          "lesson": "D3-LESSON-002",
+          "concepts": [
+            "Virtualization security",
+            "Container security"
+          ]
+        }
       ],
       "enables": [
-        {"lesson": "D3-LESSON-006", "concepts": ["Cloud encryption and key management"]},
-        {"lesson": "D5-LESSON-003", "concepts": ["Third-party risk for cloud providers"]}
+        {
+          "lesson": "D3-LESSON-006",
+          "concepts": [
+            "Cloud encryption and key management"
+          ]
+        },
+        {
+          "lesson": "D5-LESSON-003",
+          "concepts": [
+            "Third-party risk for cloud providers"
+          ]
+        }
       ]
     }
   },
-
   "role_relevance": {
     "soc_analyst": {
       "importance": "critical",
@@ -31,7 +76,7 @@
         "Analyzing cloud access logs for anomalies",
         "Correlating cloud and on-premise security events"
       ],
-      "real_scenario": "Alert shows S3 bucket became public—investigate when it changed, who changed it, and what data was exposed"
+      "real_scenario": "Alert shows S3 bucket became publicâ€”investigate when it changed, who changed it, and what data was exposed"
     },
     "incident_responder": {
       "importance": "critical",
@@ -41,7 +86,7 @@
         "Collecting cloud forensic evidence",
         "Coordinating with cloud provider during incidents"
       ],
-      "real_scenario": "Compromised IAM credentials used to spin up crypto-mining instances—contain by revoking credentials and terminating instances"
+      "real_scenario": "Compromised IAM credentials used to spin up crypto-mining instancesâ€”contain by revoking credentials and terminating instances"
     },
     "grc_analyst": {
       "importance": "high",
@@ -51,7 +96,7 @@
         "Managing cloud vendor risk assessments",
         "Documenting cloud security controls for audits"
       ],
-      "real_scenario": "SOC 2 audit requires demonstrating cloud data encryption—document KMS configuration and key management procedures"
+      "real_scenario": "SOC 2 audit requires demonstrating cloud data encryptionâ€”document KMS configuration and key management procedures"
     },
     "penetration_tester": {
       "importance": "high",
@@ -61,7 +106,7 @@
         "Finding exposed cloud storage",
         "Exploiting serverless function vulnerabilities"
       ],
-      "real_scenario": "Discovered overly permissive IAM role allows assuming admin role—privilege escalation path to full cloud account compromise"
+      "real_scenario": "Discovered overly permissive IAM role allows assuming admin roleâ€”privilege escalation path to full cloud account compromise"
     },
     "security_engineer": {
       "importance": "critical",
@@ -74,9 +119,8 @@
       "real_scenario": "Implementing landing zone with AWS Organizations, SCPs, and centralized logging for multi-account environment"
     }
   },
-
   "introduction": {
-    "hook": "In 2019, Capital One suffered a massive breach exposing 100 million credit applications—not because AWS was insecure, but because a misconfigured web application firewall allowed an attacker to exploit instance metadata and steal IAM credentials. The cloud was secure; the customer's configuration wasn't. Cloud security isn't about trusting your provider; it's about understanding the shared responsibility model and securing what's yours.",
+    "hook": "In 2019, Capital One suffered a massive breach exposing 100 million credit applicationsâ€”not because AWS was insecure, but because a misconfigured web application firewall allowed an attacker to exploit instance metadata and steal IAM credentials. The cloud was secure; the customer's configuration wasn't. Cloud security isn't about trusting your provider; it's about understanding the shared responsibility model and securing what's yours.",
     "learning_goals": [
       "Distinguish cloud service models (IaaS, PaaS, SaaS) and their security implications",
       "Apply the shared responsibility model to determine security ownership",
@@ -84,20 +128,26 @@
       "Understand cloud-native security services and how to leverage them",
       "Identify and remediate common cloud misconfigurations"
     ],
-    "why_it_matters": "Cloud adoption is accelerating rapidly. Security professionals must understand cloud-specific risks, controls, and responsibilities. Misconfigurations are the leading cause of cloud breaches—not sophisticated attacks.",
+    "why_it_matters": {
+      "career_impact": "Cloud adoption is accelerating rapidly. Security professionals must understand cloud-specific risks, controls, and responsibilities. Misconfigurations are the leading cause of cloud breachesâ€”not sophisticated attacks.",
+      "business_connection": "",
+      "exam_relevance": ""
+    },
     "exam_weight": {
       "percentage": "6-8% of Domain 3",
       "question_count": "5-7 questions",
-      "question_types": ["Shared responsibility scenarios", "Service model comparison", "Cloud security controls"]
+      "question_types": [
+        "Shared responsibility scenarios",
+        "Service model comparison",
+        "Cloud security controls"
+      ]
     }
   },
-
   "sections": [
     {
       "section_id": "D3-L005-S01",
       "title": "Cloud Service Models",
       "content": "Understanding cloud service models determines security responsibility boundaries.\n\n**Infrastructure as a Service (IaaS)**\n\n*What Provider Manages*\n- Physical facilities\n- Physical servers/hardware\n- Hypervisor layer\n- Physical networking\n- Physical storage\n\n*What Customer Manages*\n- Operating systems\n- Applications\n- Data\n- Network configurations\n- Identity and access\n\n*Examples*\n- AWS EC2, S3\n- Azure VMs, Blob Storage\n- Google Compute Engine\n\n**Platform as a Service (PaaS)**\n\n*What Provider Manages*\n- Everything in IaaS plus:\n- Operating systems\n- Runtime environment\n- Middleware\n- Development tools\n\n*What Customer Manages*\n- Applications\n- Data\n- Some configurations\n- Identity and access\n\n*Examples*\n- AWS Elastic Beanstalk\n- Azure App Service\n- Google App Engine\n- Heroku\n\n**Software as a Service (SaaS)**\n\n*What Provider Manages*\n- Everything in PaaS plus:\n- Application software\n- Most configurations\n\n*What Customer Manages*\n- Data (content)\n- User access\n- Some settings/policies\n- Integration configurations\n\n*Examples*\n- Microsoft 365\n- Salesforce\n- Google Workspace\n- Dropbox\n\n**Additional Models**\n\n*Function as a Service (FaaS/Serverless)*\n- Provider manages everything except code\n- Customer writes functions\n- Event-driven execution\n- Examples: AWS Lambda, Azure Functions\n\n*Anything as a Service (XaaS)*\n- Broad term for cloud delivery\n- Security as a Service (SECaaS)\n- Identity as a Service (IDaaS)\n- Desktop as a Service (DaaS)",
-
       "key_points": [
         "IaaS: customer manages OS, apps, data; provider manages infrastructure",
         "PaaS: customer manages apps and data; provider manages through runtime",
@@ -105,7 +155,6 @@
         "More 'as a Service' = less customer responsibility but less control",
         "FaaS/Serverless: customer only manages code and data"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -127,7 +176,7 @@
           },
           {
             "concept": "Shared Responsibility",
-            "analogy": "Like renting an apartment—landlord maintains the building structure, you maintain your furniture and belongings. The line depends on the rental agreement (service model).",
+            "analogy": "Like renting an apartmentâ€”landlord maintains the building structure, you maintain your furniture and belongings. The line depends on the rental agreement (service model).",
             "why_it_works": "Clear division of who secures what"
           }
         ],
@@ -144,43 +193,39 @@
           }
         ]
       },
-
       "real_world_example": {
         "scenario": "Understanding service model responsibility",
         "company": "Meridian Healthcare",
-        "application": "Meridian uses multiple cloud services: IaaS (AWS EC2 for custom applications)—they patch OS, configure firewalls, manage encryption. PaaS (Azure App Service for patient portal)—they manage application code and data, Azure handles OS. SaaS (Salesforce for CRM)—they manage user access and data classification, Salesforce handles everything else. Each model requires different security approaches."
+        "application": "Meridian uses multiple cloud services: IaaS (AWS EC2 for custom applications)â€”they patch OS, configure firewalls, manage encryption. PaaS (Azure App Service for patient portal)â€”they manage application code and data, Azure handles OS. SaaS (Salesforce for CRM)â€”they manage user access and data classification, Salesforce handles everything else. Each model requires different security approaches."
       },
-
       "what_would_happen_if": [
         {
           "situation": "Company assumes AWS patches their EC2 instances (IaaS)",
-          "consequence": "Instances run unpatched. Known vulnerabilities exploited. Breach occurs. Company claims AWS should have patched—but EC2 is IaaS, OS patching is customer responsibility.",
+          "consequence": "Instances run unpatched. Known vulnerabilities exploited. Breach occurs. Company claims AWS should have patchedâ€”but EC2 is IaaS, OS patching is customer responsibility.",
           "lesson": "Know what you're responsible for in each service model. IaaS = you patch OS."
         },
         {
           "situation": "Company doesn't configure user access properly in SaaS application",
-          "consequence": "Overprivileged users access sensitive data. Data breach from insider threat. Provider not at fault—access management is customer responsibility even in SaaS.",
-          "lesson": "Customer always responsible for identity, access, and data—regardless of service model."
+          "consequence": "Overprivileged users access sensitive data. Data breach from insider threat. Provider not at faultâ€”access management is customer responsibility even in SaaS.",
+          "lesson": "Customer always responsible for identity, access, and dataâ€”regardless of service model."
         }
       ],
-
       "knowledge_check": {
         "question": "A company hosts their web application on AWS EC2 instances. A vulnerability in the Linux operating system is exploited, leading to a breach. According to the shared responsibility model, who is responsible for this security failure?",
         "options": [
           "AWS, because they provide the infrastructure",
           "The customer, because OS patching is their responsibility in IaaS",
           "Both equally share the responsibility",
-          "Neither—it's a third-party vulnerability"
+          "Neitherâ€”it's a third-party vulnerability"
         ],
         "correct": 1,
         "explanation": "In IaaS (EC2), the customer is responsible for the guest operating system including patching. AWS manages the underlying infrastructure (hypervisor, physical hardware) but not the customer's OS. This is the shared responsibility model.",
         "wrong_answer_analysis": {
           "0": "AWS provides infrastructure but customer manages OS in IaaS model.",
-          "2": "Responsibility isn't equally shared—there are clear boundaries. OS is customer's.",
+          "2": "Responsibility isn't equally sharedâ€”there are clear boundaries. OS is customer's.",
           "3": "Even third-party vulnerabilities are customer responsibility to patch in IaaS."
         }
       },
-
       "must_remember_for_exam": [
         {
           "point": "IaaS = customer manages OS, apps, data; provider manages hardware/hypervisor",
@@ -195,7 +240,6 @@
           "why_tested": "Fundamental cloud security concept."
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Infrastructure as a Service (IaaS)",
@@ -217,13 +261,39 @@
           "definition": "Security framework defining which security controls the cloud provider manages versus which the customer manages, varying by service model.",
           "exam_note": "Provider = OF the cloud. Customer = IN the cloud. Varies by model."
         }
-      ]
+      ],
+      "exam_tips": [
+        "Know OSI layers and which attacks target each layer",
+        "ARP poisoning is Layer 2; DNS poisoning is Layer 7 (application)"
+      ],
+      "deep_dive": [
+        {
+          "title": "Shared Responsibility Model",
+          "content": "IaaS: Customer secures OS, applications, data, network controls; Provider secures physical, hypervisor, network infrastructure. PaaS: Customer secures applications and data; Provider adds OS and runtime. SaaS: Customer secures data and access; Provider secures everything else. Understanding boundaries is critical for security. Common mistakes: Assuming provider handles security, misconfiguring customer controls."
+        }
+      ],
+      "career_spotlight": {
+        "role": "Cloud Security Engineer",
+        "daily_tasks": [
+          "Implementing cloud security controls",
+          "Configuring IAM policies",
+          "Managing cloud security posture",
+          "Responding to cloud security alerts",
+          "Advising on cloud architecture"
+        ],
+        "tools_used": [
+          "AWS/Azure/GCP security tools",
+          "CSPM tools",
+          "Cloud SIEM",
+          "IaC security"
+        ],
+        "career_path": "Cloud Engineer → Cloud Security → Senior Cloud Security → Cloud Security Architect"
+      }
     },
     {
       "section_id": "D3-L005-S02",
       "title": "Cloud Deployment Models",
       "content": "Deployment models determine who owns and operates cloud infrastructure.\n\n**Public Cloud**\n\n*Characteristics*\n- Owned by cloud provider\n- Shared infrastructure\n- Multi-tenant environment\n- Pay-per-use pricing\n- Internet accessible\n\n*Security Considerations*\n- Logical isolation between tenants\n- Provider handles physical security\n- Customer responsible for access control\n- Data residency concerns\n- Shared responsibility applies\n\n**Private Cloud**\n\n*Characteristics*\n- Dedicated to single organization\n- On-premises or hosted\n- Single-tenant environment\n- More control over infrastructure\n- Higher cost, more customization\n\n*Security Considerations*\n- Full control over security\n- No multi-tenant concerns\n- Customer handles more responsibility\n- May still use cloud provider platform\n\n**Hybrid Cloud**\n\n*Characteristics*\n- Combines public and private\n- Workload placement flexibility\n- Data can move between environments\n- Common enterprise model\n\n*Security Considerations*\n- Consistent policies across environments\n- Secure connectivity between clouds\n- Identity federation requirements\n- Data classification drives placement\n\n**Community Cloud**\n\n*Characteristics*\n- Shared by specific community\n- Common compliance requirements\n- Shared cost and security\n- Industry-specific (healthcare, government)\n\n*Security Considerations*\n- Shared security standards\n- Collaborative governance\n- Common compliance framework\n\n**Multi-Cloud**\n\n*Characteristics*\n- Multiple cloud providers\n- Avoid vendor lock-in\n- Best-of-breed services\n- Complexity increases\n\n*Security Considerations*\n- Consistent security across providers\n- Multiple IAM systems to manage\n- Different security tools per cloud\n- Increased attack surface",
-
       "key_points": [
         "Public cloud: shared infrastructure, multi-tenant, provider manages physical",
         "Private cloud: dedicated infrastructure, single-tenant, more customer control",
@@ -231,7 +301,6 @@
         "Community cloud: shared by organizations with common requirements",
         "Multi-cloud: multiple providers, complexity but avoids lock-in"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -260,17 +329,16 @@
         "common_mistakes": [
           {
             "mistake": "Thinking private cloud is always on-premises",
-            "correction": "Private cloud can be hosted by a provider—it's about dedication (single-tenant), not location. Hosted private cloud is still private cloud.",
+            "correction": "Private cloud can be hosted by a providerâ€”it's about dedication (single-tenant), not location. Hosted private cloud is still private cloud.",
             "exam_trap": "Private cloud = single-tenant, not necessarily on-premises"
           },
           {
             "mistake": "Assuming hybrid cloud is always most secure",
             "correction": "Hybrid adds complexity. Secure connectivity between clouds required. Inconsistent policies create gaps. Each model has trade-offs.",
-            "exam_trap": "More models doesn't mean more secure—complexity introduces risk"
+            "exam_trap": "More models doesn't mean more secureâ€”complexity introduces risk"
           }
         ]
       },
-
       "what_would_happen_if": [
         {
           "situation": "Sensitive data placed in public cloud without proper controls",
@@ -283,7 +351,6 @@
           "lesson": "Hybrid requires identity federation for consistent access control across environments."
         }
       ],
-
       "knowledge_check": {
         "question": "A healthcare organization needs cloud services that meet HIPAA requirements and wants to share compliance costs with similar organizations. Which deployment model is most appropriate?",
         "options": [
@@ -300,7 +367,6 @@
           "3": "Hybrid cloud doesn't specifically address sharing with similar organizations."
         }
       },
-
       "must_remember_for_exam": [
         {
           "point": "Public = shared/multi-tenant; Private = dedicated/single-tenant",
@@ -315,7 +381,6 @@
           "why_tested": "Industry-specific compliance scenarios."
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Public Cloud",
@@ -337,13 +402,45 @@
           "definition": "Cloud infrastructure shared by several organizations with common concerns, such as compliance requirements or mission objectives.",
           "exam_note": "Shared by similar organizations. Common compliance. Cost sharing."
         }
-      ]
+      ],
+      "exam_tips": [
+        "Know the three control categories: Technical, Administrative, Physical",
+        "Understand control functions: Preventive, Detective, Corrective, Deterrent, Compensating"
+      ],
+      "deep_dive": [
+        {
+          "title": "Multi-Cloud Security Challenges",
+          "content": "Challenges: Different security models per provider, inconsistent tooling, visibility gaps, skill requirements, policy management complexity. Solutions: Cloud-agnostic security tools (CSPM, CWPP), unified identity management, consistent policy frameworks, centralized logging, automation. Strategy: Define security baseline, map controls across providers, automate compliance checking."
+        }
+      ],
+      "career_spotlight": {
+        "role": "Multi-Cloud Security Architect",
+        "daily_tasks": [
+          "Designing cross-cloud security",
+          "Harmonizing security controls",
+          "Evaluating cloud-agnostic tools",
+          "Creating cloud security standards",
+          "Advising on cloud strategy"
+        ],
+        "tools_used": [
+          "Multi-cloud CSPM",
+          "Terraform",
+          "Cross-cloud SIEM",
+          "Policy frameworks"
+        ],
+        "career_path": "Cloud Security Engineer → Multi-Cloud Specialist → Multi-Cloud Architect"
+      },
+      "real_world_example": {
+        "title": "Capital One AWS Misconfiguration",
+        "incident": "Misconfigured WAF allowed SSRF to AWS metadata service. Retrieved IAM credentials with excessive permissions. 100 million customer records exposed.",
+        "impact": "$80 million fine. Largest banking breach via cloud. Demonstrated cloud misconfiguration risk.",
+        "lesson": "Cloud misconfigurations are critical risk. Use CSPM to detect issues. Implement least privilege IAM."
+      }
     },
     {
       "section_id": "D3-L005-S03",
       "title": "Cloud Security Controls",
       "content": "Cloud environments require specific security controls adapted to their unique characteristics.\n\n**Identity and Access Management**\n\n*IAM Best Practices*\n- Least privilege for all roles\n- No long-term root/admin credentials\n- MFA for all users, especially admins\n- Regular access reviews\n- Use roles instead of users where possible\n\n*Identity Federation*\n- Integrate with corporate identity\n- Single sign-on (SSO)\n- SAML, OIDC protocols\n- Centralized identity management\n\n*Service Accounts*\n- Non-human identities\n- Used by applications/services\n- Rotate credentials regularly\n- Audit usage\n\n**Network Security**\n\n*Virtual Private Cloud (VPC)*\n- Isolated network environment\n- Customer-defined IP ranges\n- Subnets (public/private)\n- Route tables\n\n*Security Groups / NACLs*\n- Security groups: Stateful, instance-level\n- NACLs: Stateless, subnet-level\n- Default deny recommended\n- Least privilege rules\n\n*Connectivity*\n- VPN for secure connections\n- Direct Connect/ExpressRoute (dedicated)\n- Transit Gateway for hub-spoke\n- PrivateLink for service access\n\n**Data Security**\n\n*Encryption*\n- At rest: Server-side encryption\n- In transit: TLS everywhere\n- Key management: KMS, HSM\n- Customer-managed vs provider-managed keys\n\n*Storage Security*\n- Bucket/blob policies\n- Access control lists\n- Block public access\n- Versioning and logging\n\n**Security Monitoring**\n\n*Cloud-Native Tools*\n- AWS: CloudTrail, GuardDuty, Security Hub\n- Azure: Monitor, Sentinel, Defender\n- GCP: Cloud Audit Logs, Security Command Center\n\n*What to Monitor*\n- API calls (who did what)\n- Configuration changes\n- Network flows\n- Authentication events",
-
       "key_points": [
         "IAM: least privilege, no permanent admin creds, MFA everywhere",
         "VPC provides network isolation; security groups are stateful, NACLs stateless",
@@ -351,7 +448,6 @@
         "Block public access to storage by default; enable logging",
         "Cloud-native monitoring: CloudTrail (AWS), Monitor/Sentinel (Azure)"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -373,7 +469,7 @@
           },
           {
             "concept": "VPC",
-            "analogy": "VPC is like your own private data center floor in a shared building—you control the network layout, who can access what, but you don't manage the building's physical security",
+            "analogy": "VPC is like your own private data center floor in a shared buildingâ€”you control the network layout, who can access what, but you don't manage the building's physical security",
             "why_it_works": "Isolated network you control within provider's infrastructure"
           }
         ],
@@ -390,7 +486,6 @@
           }
         ]
       },
-
       "what_would_happen_if": [
         {
           "situation": "S3 bucket configured with public access and contains customer data",
@@ -403,7 +498,6 @@
           "lesson": "Grant minimum permissions needed. Use specific policies, not AdministratorAccess."
         }
       ],
-
       "knowledge_check": {
         "question": "A security team discovers that an AWS S3 bucket containing sensitive customer data is accessible to anyone on the internet. What is the immediate remediation action?",
         "options": [
@@ -413,14 +507,13 @@
           "Enable CloudTrail logging for the bucket"
         ],
         "correct": 2,
-        "explanation": "The immediate action is to remove public access—stop the exposure. Then configure appropriate policies to allow only authorized access. Encryption and logging are important but don't stop the current exposure. Versioning helps recovery but doesn't stop access.",
+        "explanation": "The immediate action is to remove public accessâ€”stop the exposure. Then configure appropriate policies to allow only authorized access. Encryption and logging are important but don't stop the current exposure. Versioning helps recovery but doesn't stop access.",
         "wrong_answer_analysis": {
-          "0": "Encryption protects data at rest but doesn't stop public access—data is still accessible.",
+          "0": "Encryption protects data at rest but doesn't stop public accessâ€”data is still accessible.",
           "1": "Versioning helps track/recover but doesn't stop current public access.",
           "3": "Logging captures who accessed but doesn't stop the public access."
         }
       },
-
       "must_remember_for_exam": [
         {
           "point": "Security groups = stateful; NACLs = stateless",
@@ -435,7 +528,6 @@
           "why_tested": "Know AWS security services and their purposes."
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Virtual Private Cloud (VPC)",
@@ -457,21 +549,52 @@
           "definition": "A cloud service that creates and manages cryptographic keys used to encrypt data, integrating with other cloud services for data protection.",
           "exam_note": "Creates/manages encryption keys. Integrates with storage. Audit key usage."
         }
-      ]
+      ],
+      "exam_tips": [
+        "Know the three control categories: Technical, Administrative, Physical",
+        "Understand control functions: Preventive, Detective, Corrective, Deterrent, Compensating"
+      ],
+      "deep_dive": [
+        {
+          "title": "Cloud Security Posture Management",
+          "content": "CSPM capabilities: Configuration assessment, compliance monitoring, risk prioritization, remediation guidance, drift detection. Key checks: Public storage buckets, overly permissive IAM, unencrypted data, exposed management ports, logging disabled. Implementation: Continuous scanning, integration with CI/CD, automated remediation for low-risk issues, alerting for critical findings."
+        }
+      ],
+      "career_spotlight": {
+        "role": "Cloud Security Analyst",
+        "daily_tasks": [
+          "Reviewing CSPM findings",
+          "Prioritizing cloud risks",
+          "Coordinating remediation",
+          "Tracking cloud compliance",
+          "Reporting cloud security metrics"
+        ],
+        "tools_used": [
+          "Prisma Cloud",
+          "Wiz",
+          "AWS Security Hub",
+          "Azure Defender"
+        ],
+        "career_path": "Security Analyst → Cloud Security Analyst → Senior Analyst → Cloud Security Lead"
+      },
+      "real_world_example": {
+        "title": "S3 Bucket Exposures",
+        "incident": "Thousands of S3 buckets discovered publicly accessible containing: voter records, military files, healthcare data, financial information. Companies included Verizon, Dow Jones, Accenture.",
+        "impact": "Billions of records exposed. Regulatory fines. Reputation damage. All preventable misconfigurations.",
+        "lesson": "Default configurations are not secure. Continuous monitoring essential. CSPM finds these issues."
+      }
     },
     {
       "section_id": "D3-L005-S04",
       "title": "Cloud Security Challenges",
       "content": "Cloud environments present unique security challenges requiring specific countermeasures.\n\n**Misconfigurations**\n\n*Common Issues*\n- Public storage buckets\n- Overpermissive IAM policies\n- Unencrypted data\n- Missing logging\n- Default security groups\n\n*Prevention*\n- Infrastructure as Code (IaC)\n- Cloud Security Posture Management (CSPM)\n- Automated compliance scanning\n- Secure defaults in templates\n- Regular configuration audits\n\n**Shadow IT**\n\n*Challenge*\n- Unapproved cloud services\n- Departments using personal accounts\n- Data in unknown locations\n- No security oversight\n\n*Solutions*\n- CASB for visibility\n- Approved cloud catalog\n- Easy provisioning process\n- Usage monitoring\n- Education and policy\n\n**Data Sovereignty**\n\n*Concerns*\n- Data residency requirements\n- Cross-border data transfers\n- Regulatory compliance (GDPR)\n- Provider data center locations\n\n*Solutions*\n- Region selection\n- Data localization controls\n- Provider compliance certifications\n- Contractual requirements\n\n**API Security**\n\n*Risks*\n- All cloud is API-driven\n- Exposed API keys\n- Injection attacks\n- Excessive permissions\n- No rate limiting\n\n*Protections*\n- API gateways\n- Authentication required\n- Rate limiting\n- Input validation\n- Key rotation\n\n**Supply Chain and Dependencies**\n\n*Risks*\n- Third-party integrations\n- Marketplace images\n- Container dependencies\n- SaaS interconnections\n\n*Mitigations*\n- Vendor assessment\n- Image scanning\n- Dependency monitoring\n- Least privilege for integrations",
-
       "key_points": [
-        "Misconfigurations are #1 cloud breach cause—CSPM and IaC help prevent",
+        "Misconfigurations are #1 cloud breach causeâ€”CSPM and IaC help prevent",
         "Shadow IT: unapproved cloud usage; CASB provides visibility",
         "Data sovereignty requires understanding where data resides geographically",
-        "All cloud is API-driven—API security is critical",
+        "All cloud is API-drivenâ€”API security is critical",
         "Cloud supply chain includes marketplace images and third-party integrations"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -488,12 +611,12 @@
         "analogies": [
           {
             "concept": "Shadow IT",
-            "analogy": "Like employees bringing their own appliances to work and plugging them in—IT doesn't know they exist, can't manage them, but they're connected to the network",
+            "analogy": "Like employees bringing their own appliances to work and plugging them inâ€”IT doesn't know they exist, can't manage them, but they're connected to the network",
             "why_it_works": "Unapproved, unmanaged, but still connected"
           },
           {
             "concept": "Data Sovereignty",
-            "analogy": "Like embassy rules—data in a country may be subject to that country's laws regardless of who owns it",
+            "analogy": "Like embassy rulesâ€”data in a country may be subject to that country's laws regardless of who owns it",
             "why_it_works": "Data location determines legal jurisdiction"
           }
         ],
@@ -510,7 +633,6 @@
           }
         ]
       },
-
       "what_would_happen_if": [
         {
           "situation": "Developer commits AWS credentials to public GitHub repository",
@@ -523,7 +645,6 @@
           "lesson": "CASB provides visibility. Offer easy approved alternatives. Policy and education."
         }
       ],
-
       "knowledge_check": {
         "question": "A company discovers that multiple departments have been using unapproved cloud storage services to share files, including sensitive customer data. Which solution provides visibility into this shadow IT usage?",
         "options": [
@@ -540,11 +661,10 @@
           "3": "SIEM aggregates logs from known sources, not shadow IT discovery."
         }
       },
-
       "must_remember_for_exam": [
         {
           "point": "Misconfigurations are leading cause of cloud breaches",
-          "why_tested": "Critical concept—not hacking, misconfiguration."
+          "why_tested": "Critical conceptâ€”not hacking, misconfiguration."
         },
         {
           "point": "CASB provides shadow IT visibility and policy enforcement",
@@ -555,7 +675,6 @@
           "why_tested": "Know CSPM's purpose in cloud security."
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Cloud Security Posture Management (CSPM)",
@@ -577,26 +696,107 @@
           "definition": "Managing and provisioning cloud infrastructure through machine-readable configuration files rather than manual processes.",
           "exam_note": "Repeatable deployments. Version controlled. Security templates."
         }
-      ]
+      ],
+      "exam_tips": [
+        "PCI-DSS for payment cards; HIPAA for healthcare; SOX for financial reporting",
+        "SOC 2 Type I tests design; Type II tests operating effectiveness over time"
+      ],
+      "deep_dive": [
+        {
+          "title": "Cloud-Native Security Tools",
+          "content": "AWS: GuardDuty (threat detection), Security Hub (posture), IAM Access Analyzer, Macie (data discovery). Azure: Defender for Cloud, Sentinel (SIEM), Key Vault. GCP: Security Command Center, Chronicle, Cloud Armor. Third-party: Fills gaps across providers, provides unified view, adds specialized capabilities. Strategy: Use native tools for basics, add third-party for advanced needs."
+        }
+      ],
+      "career_spotlight": {
+        "role": "Cloud Security Operations",
+        "daily_tasks": [
+          "Monitoring cloud security alerts",
+          "Investigating cloud incidents",
+          "Managing cloud security tools",
+          "Automating cloud response",
+          "Reporting cloud security status"
+        ],
+        "tools_used": [
+          "Native cloud security tools",
+          "Cloud SIEM",
+          "SOAR platforms",
+          "Automation scripts"
+        ],
+        "career_path": "SOC Analyst → Cloud SOC → Cloud Security Operations → Cloud Security Manager"
+      },
+      "real_world_example": {
+        "title": "Cloud Cryptojacking Campaigns",
+        "incident": "Attackers compromise cloud accounts via stolen credentials or misconfigurations. Deploy cryptocurrency miners consuming massive compute resources. Victims face huge cloud bills.",
+        "impact": "Organizations received six-figure cloud bills. Demonstrated financial impact of cloud compromise.",
+        "lesson": "Monitor cloud spend for anomalies. Implement billing alerts. Secure cloud credentials."
+      }
     }
   ],
-
   "hands_on_activity": {
     "title": "Cloud Security Assessment",
     "objective": "Assess cloud security posture and identify misconfigurations",
     "scenario": "You're reviewing cloud security at Apex Financial. They use AWS for IaaS workloads, Azure for some PaaS, and multiple SaaS applications.",
     "steps": [
       "Step 1: Map service models and identify shared responsibility boundaries",
-      "Step 2: Review IAM policies for least privilege—identify over-permissive roles",
+      "Step 2: Review IAM policies for least privilegeâ€”identify over-permissive roles",
       "Step 3: Check storage (S3/Blob) for public access misconfigurations",
       "Step 4: Verify encryption settings for data at rest and in transit",
       "Step 5: Review network security groups and VPC configurations",
-      "Step 6: Check logging and monitoring—CloudTrail, flow logs enabled?",
+      "Step 6: Check logging and monitoringâ€”CloudTrail, flow logs enabled?",
       "Step 7: Document findings and prioritize remediation"
     ],
-    "expected_outcome": "Cloud security assessment report with misconfiguration findings and remediation priorities."
+    "expected_outcome": "Cloud security assessment report with misconfiguration findings and remediation priorities.",
+    "exercises": [
+      {
+        "cloud_service": "IaaS (EC2/VMs)",
+        "customer_responsibility": [
+          "OS patching",
+          "Application security",
+          "Data encryption",
+          "Access control"
+        ],
+        "provider_responsibility": [
+          "Physical security",
+          "Hypervisor",
+          "Network infrastructure"
+        ],
+        "key_controls": "Security groups, IAM roles, encryption, logging"
+      },
+      {
+        "cloud_service": "PaaS (Lambda/Functions)",
+        "customer_responsibility": [
+          "Code security",
+          "IAM configuration",
+          "Data handling"
+        ],
+        "provider_responsibility": [
+          "Runtime",
+          "Scaling",
+          "Infrastructure"
+        ],
+        "key_controls": "Least privilege IAM, secrets management, input validation"
+      },
+      {
+        "cloud_service": "SaaS (Office 365)",
+        "customer_responsibility": [
+          "User access",
+          "Data classification",
+          "Configuration"
+        ],
+        "provider_responsibility": [
+          "Application security",
+          "Infrastructure",
+          "Availability"
+        ],
+        "key_controls": "Conditional access, DLP, audit logging, MFA"
+      }
+    ],
+    "reflection_questions": [
+      "How does the shared responsibility model change your security testing approach?",
+      "What cloud-specific threats don't exist in on-premises environments?",
+      "How do you maintain visibility across multi-cloud environments?"
+    ]
   },
-
   "what_would_you_do": {
     "scenario": "Development team wants to use a third-party container image from Docker Hub for a customer-facing application.",
     "context": "Application will process customer PII. Image is popular with millions of downloads but from unknown publisher. Team says it saves weeks of development time.",
@@ -620,7 +820,7 @@
         "id": "c",
         "text": "Require official images from verified publishers or building internally",
         "is_best": true,
-        "feedback": "Best practice—use verified publishers or build from scratch. Official images are maintained, scanned, and accountable. Customer data requires trusted components.",
+        "feedback": "Best practiceâ€”use verified publishers or build from scratch. Official images are maintained, scanned, and accountable. Customer data requires trusted components.",
         "consequences": "Known provenance. Maintained images. Accountable publisher."
       },
       {
@@ -633,7 +833,6 @@
     ],
     "key_lesson": "Supply chain security is critical in cloud. Container images from unknown sources are significant risk, especially for applications handling sensitive data. Use verified publishers or build internally."
   },
-
   "summary": {
     "key_takeaways": [
       "IaaS: customer manages OS up; PaaS: customer manages apps/data; SaaS: customer manages data/access",
@@ -651,13 +850,17 @@
       "CASB = shadow IT visibility; CSPM = misconfiguration detection",
       "CloudTrail = API logging; GuardDuty = threat detection"
     ],
-    "connection_to_next": "Cloud security relies heavily on cryptography for data protection. The next lesson dives deep into cryptographic concepts—encryption algorithms, hashing, digital signatures, and PKI that secure data everywhere."
+    "connection_to_next": "Cloud security relies heavily on cryptography for data protection. The next lesson dives deep into cryptographic conceptsâ€”encryption algorithms, hashing, digital signatures, and PKI that secure data everywhere."
   },
-
   "related_content": {
-    "simulations": ["D3-SIM-001"],
-    "remediation": ["D3-REM-001"],
+    "simulations": [
+      "D3-SIM-001"
+    ],
+    "remediation": [
+      "D3-REM-001"
+    ],
     "next_lesson": "D3-LESSON-006",
     "previous_lesson": "D3-LESSON-004"
-  }
+  },
+  "subtitle": "Security in Shared Responsibility Models"
 }
