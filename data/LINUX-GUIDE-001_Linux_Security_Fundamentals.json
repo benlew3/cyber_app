@@ -1,0 +1,2994 @@
+{
+  "guide_id": "LINUX-GUIDE-001",
+  "title": "Linux for Security+ Professionals",
+  "version": "1.0",
+  "description": "Comprehensive Linux guide covering Debian and AlmaLinux for cybersecurity professionals preparing for Security+ SY0-701",
+  
+  "introduction": {
+    "overview": "Linux powers the majority of servers, security tools, and enterprise infrastructure. As a security professional, Linux proficiency is non-negotiable. This guide covers two major distributions: Debian (the foundation for Ubuntu and Kali) and AlmaLinux (enterprise RHEL-compatible). Mastering both prepares you for any environment you'll encounter.",
+    
+    "why_two_distros": {
+      "debian_family": {
+        "description": "Debian-based distributions dominate development, security research, and cloud deployments",
+        "includes": ["Debian", "Ubuntu", "Kali Linux", "Linux Mint", "Pop!_OS"],
+        "package_manager": "APT (apt, apt-get, dpkg)",
+        "common_uses": ["Security testing (Kali)", "Cloud servers (Ubuntu)", "Development environments", "Containers"]
+      },
+      "rhel_family": {
+        "description": "RHEL-based distributions dominate enterprise, government, and regulated industries",
+        "includes": ["AlmaLinux", "Rocky Linux", "RHEL", "CentOS Stream", "Oracle Linux", "Fedora"],
+        "package_manager": "DNF/YUM (dnf, yum, rpm)",
+        "common_uses": ["Enterprise servers", "Government systems", "Financial services", "Healthcare IT"]
+      }
+    },
+    
+    "security_plus_relevance": [
+      "Domain 3.2: Network infrastructure concepts - Linux servers",
+      "Domain 4.1: Security monitoring - Linux logging and SIEM",
+      "Domain 4.4: Security alerting and monitoring - Command-line tools",
+      "Domain 4.5: Modify enterprise capabilities for security - Hardening"
+    ]
+  },
+  
+  "chapters": [
+    {
+      "chapter_id": 1,
+      "title": "Installation & Setup",
+      "sections": [
+        {
+          "section_id": "1.1",
+          "title": "Choosing Your Environment",
+          "content": "For learning, you have several options. Virtual machines provide the safest sandbox for experimentation. Cloud instances offer real-world experience. Dual-boot gives full hardware access but carries risk.",
+          
+          "environment_options": [
+            {
+              "type": "Virtual Machine (Recommended)",
+              "tools": ["VirtualBox (Free)", "VMware Workstation Player (Free)", "Hyper-V (Windows Pro)"],
+              "pros": ["Safe sandbox", "Snapshots for recovery", "Run both distros simultaneously"],
+              "cons": ["Requires RAM (4GB+ per VM)", "Slightly slower performance"],
+              "recommendation": "Best for learning - make mistakes safely"
+            },
+            {
+              "type": "Cloud Instance",
+              "tools": ["AWS Free Tier", "Google Cloud Free", "Azure Free", "Linode", "DigitalOcean"],
+              "pros": ["Real-world experience", "No local resources needed", "Practice remote administration"],
+              "cons": ["Potential costs if exceeding free tier", "Requires internet"],
+              "recommendation": "Great for practicing SSH and remote hardening"
+            },
+            {
+              "type": "WSL2 (Windows Subsystem for Linux)",
+              "tools": ["Windows 10/11 built-in"],
+              "pros": ["Quick setup", "Integrated with Windows", "Low overhead"],
+              "cons": ["Not full Linux experience", "Some tools don't work", "No systemd (older versions)"],
+              "recommendation": "Good for command-line practice, not full administration"
+            },
+            {
+              "type": "Bare Metal / Dual Boot",
+              "tools": ["USB installer", "Rufus/Etcher"],
+              "pros": ["Full performance", "Real hardware experience"],
+              "cons": ["Risk to existing OS", "Can't run both simultaneously"],
+              "recommendation": "For dedicated Linux machines only"
+            }
+          ]
+        },
+        {
+          "section_id": "1.2",
+          "title": "Installing Debian",
+          "content": "Debian is the 'universal operating system' - rock-solid stability with extensive package repositories. We'll install Debian 12 (Bookworm), the current stable release.",
+          
+          "download": {
+            "url": "https://www.debian.org/download",
+            "recommended_image": "debian-12.x.x-amd64-netinst.iso",
+            "size": "~600MB",
+            "note": "netinst downloads packages during installation - requires internet"
+          },
+          
+          "vm_specifications": {
+            "minimum": {
+              "ram": "1 GB",
+              "disk": "10 GB",
+              "cpu": "1 core"
+            },
+            "recommended": {
+              "ram": "2-4 GB",
+              "disk": "20-40 GB",
+              "cpu": "2 cores"
+            },
+            "for_security_tools": {
+              "ram": "4-8 GB",
+              "disk": "40-80 GB",
+              "cpu": "2-4 cores"
+            }
+          },
+          
+          "installation_steps": [
+            {
+              "step": 1,
+              "title": "Boot from ISO",
+              "instructions": "In VirtualBox/VMware, mount the ISO and start the VM. Select 'Graphical Install' for beginners or 'Install' for text-based.",
+              "security_note": "Text install is useful for headless servers you'll manage via SSH"
+            },
+            {
+              "step": 2,
+              "title": "Language & Location",
+              "instructions": "Select your language, location, and keyboard layout. This affects system locale and timezone.",
+              "security_note": "Consistent timezone across systems aids log correlation"
+            },
+            {
+              "step": 3,
+              "title": "Network Configuration",
+              "instructions": "Enter hostname (e.g., 'debian-sec') and domain (can leave blank for home use). DHCP will auto-configure if available.",
+              "security_note": "Hostname appears in logs - use consistent naming convention"
+            },
+            {
+              "step": 4,
+              "title": "Root Password",
+              "instructions": "Set a strong root password OR leave blank to disable root login and use sudo (recommended).",
+              "security_note": "Disabling root and using sudo provides audit trail of privileged commands"
+            },
+            {
+              "step": 5,
+              "title": "Create User Account",
+              "instructions": "Create your non-root user account. This will be added to sudo group if root was disabled.",
+              "security_note": "Never use root for daily tasks - principle of least privilege"
+            },
+            {
+              "step": 6,
+              "title": "Partition Disks",
+              "instructions": "For learning: 'Guided - use entire disk'. For production: consider separate /home, /var, /tmp partitions.",
+              "security_note": "Separate partitions allow mount options like noexec on /tmp",
+              "partition_schemes": {
+                "simple": "Single / partition (fine for VMs)",
+                "security_focused": {
+                  "/": "15-20 GB (root filesystem)",
+                  "/home": "Remaining space (user data)",
+                  "/var": "5-10 GB (logs, databases)",
+                  "/tmp": "2-5 GB (temporary files, mount noexec)",
+                  "swap": "Equal to RAM or 2GB minimum"
+                }
+              }
+            },
+            {
+              "step": 7,
+              "title": "Package Manager Configuration",
+              "instructions": "Select mirror close to you. Enable security updates (critical). Skip popularity-contest for privacy.",
+              "security_note": "Security repository provides timely vulnerability patches"
+            },
+            {
+              "step": 8,
+              "title": "Software Selection",
+              "instructions": "Deselect 'Debian desktop environment' for server. Select 'SSH server' and 'standard system utilities'.",
+              "security_note": "Minimal installation = smaller attack surface",
+              "recommended_selections": {
+                "server": ["SSH server", "standard system utilities"],
+                "desktop_learning": ["Debian desktop environment", "XFCE or LXQt (lightweight)", "SSH server", "standard system utilities"]
+              }
+            },
+            {
+              "step": 9,
+              "title": "GRUB Boot Loader",
+              "instructions": "Install GRUB to the primary drive (usually /dev/sda). This allows the system to boot.",
+              "security_note": "GRUB can be password-protected to prevent boot tampering"
+            },
+            {
+              "step": 10,
+              "title": "Complete Installation",
+              "instructions": "Remove installation media and reboot. Login with your user account.",
+              "security_note": "First task after install: update all packages"
+            }
+          ],
+          
+          "post_install_commands": [
+            {
+              "command": "su - # or use sudo if root disabled",
+              "description": "Switch to root for system configuration"
+            },
+            {
+              "command": "apt update && apt upgrade -y",
+              "description": "Update package lists and upgrade all packages"
+            },
+            {
+              "command": "apt install -y sudo vim curl wget git net-tools",
+              "description": "Install essential tools"
+            },
+            {
+              "command": "usermod -aG sudo yourusername",
+              "description": "Add your user to sudo group (if not already)"
+            },
+            {
+              "command": "systemctl enable ssh && systemctl start ssh",
+              "description": "Ensure SSH starts on boot"
+            }
+          ]
+        },
+        {
+          "section_id": "1.3",
+          "title": "Installing AlmaLinux",
+          "content": "AlmaLinux is a 1:1 binary compatible fork of RHEL, created after CentOS shifted to CentOS Stream. It's the go-to choice for enterprise Linux learning.",
+          
+          "download": {
+            "url": "https://almalinux.org/get-almalinux/",
+            "recommended_image": "AlmaLinux-9.x-x86_64-minimal.iso",
+            "size": "~1.5GB (minimal) or ~8GB (DVD)",
+            "note": "Minimal ISO recommended for servers; DVD includes all packages offline"
+          },
+          
+          "vm_specifications": {
+            "minimum": {
+              "ram": "1.5 GB",
+              "disk": "10 GB",
+              "cpu": "1 core"
+            },
+            "recommended": {
+              "ram": "2-4 GB",
+              "disk": "20-40 GB",
+              "cpu": "2 cores"
+            }
+          },
+          
+          "installation_steps": [
+            {
+              "step": 1,
+              "title": "Boot and Select Install",
+              "instructions": "Boot from ISO, select 'Install AlmaLinux 9' from the menu.",
+              "security_note": "You can verify boot media integrity from this menu"
+            },
+            {
+              "step": 2,
+              "title": "Language Selection",
+              "instructions": "Select installation language. This opens the Installation Summary hub.",
+              "security_note": "All configuration happens from this central hub - review ALL sections"
+            },
+            {
+              "step": 3,
+              "title": "Installation Destination",
+              "instructions": "Select your disk. Choose 'Automatic' partitioning for learning or 'Custom' for control.",
+              "security_note": "Consider enabling disk encryption (LUKS) for sensitive systems",
+              "encryption_option": {
+                "name": "LUKS Encryption",
+                "benefit": "Protects data if physical disk is stolen",
+                "consideration": "Requires passphrase at every boot"
+              }
+            },
+            {
+              "step": 4,
+              "title": "Network & Hostname",
+              "instructions": "Enable your network adapter (often OFF by default!). Set hostname.",
+              "security_note": "Critical: Network is often disabled by default - enable it!",
+              "warning": "Without network enabled, you won't be able to update or install packages"
+            },
+            {
+              "step": 5,
+              "title": "Software Selection",
+              "instructions": "Choose 'Minimal Install' for servers. Add 'Guest Agents' if in VM.",
+              "security_note": "Minimal = fewer packages = smaller attack surface",
+              "base_environments": {
+                "minimal_install": "Recommended for servers - ~400 packages",
+                "server": "Common server packages - ~500 packages",
+                "server_with_gui": "Includes GNOME - ~1200 packages",
+                "workstation": "Full desktop - ~1500 packages"
+              }
+            },
+            {
+              "step": 6,
+              "title": "Time & Date",
+              "instructions": "Set timezone and enable NTP (Network Time Protocol).",
+              "security_note": "Accurate time is CRITICAL for log correlation and certificate validation"
+            },
+            {
+              "step": 7,
+              "title": "Root Password",
+              "instructions": "Set strong root password. Can also disable root SSH here.",
+              "security_note": "Check 'Lock root account' to force sudo usage (recommended)"
+            },
+            {
+              "step": 8,
+              "title": "User Creation",
+              "instructions": "Create user, check 'Make this user administrator' to grant sudo.",
+              "security_note": "Administrative users can use sudo for privileged operations"
+            },
+            {
+              "step": 9,
+              "title": "Security Policy (Optional)",
+              "instructions": "Can apply security profiles like CIS, DISA STIG, or PCI-DSS.",
+              "security_note": "Great for learning compliance requirements - applies hardening automatically",
+              "profiles": {
+                "cis": "Center for Internet Security benchmark",
+                "stig": "DISA Security Technical Implementation Guide",
+                "pci-dss": "Payment Card Industry standard",
+                "hipaa": "Healthcare compliance baseline"
+              }
+            },
+            {
+              "step": 10,
+              "title": "Begin Installation",
+              "instructions": "Click 'Begin Installation' and wait. Reboot when complete.",
+              "security_note": "Review settings before starting - changes are permanent"
+            }
+          ],
+          
+          "post_install_commands": [
+            {
+              "command": "sudo dnf update -y",
+              "description": "Update all packages to latest versions"
+            },
+            {
+              "command": "sudo dnf install -y vim curl wget git net-tools bind-utils",
+              "description": "Install essential tools"
+            },
+            {
+              "command": "sudo systemctl enable --now sshd",
+              "description": "Enable and start SSH daemon"
+            },
+            {
+              "command": "sudo firewall-cmd --list-all",
+              "description": "Verify firewall configuration"
+            },
+            {
+              "command": "sudo dnf install -y epel-release",
+              "description": "Enable EPEL repository for additional packages"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 2,
+      "title": "Essential Commands & Navigation",
+      "sections": [
+        {
+          "section_id": "2.1",
+          "title": "File System Navigation",
+          "content": "The Linux file system follows the Filesystem Hierarchy Standard (FHS). Everything starts at root (/). Understanding this structure is essential for security work - knowing where logs live, where configs hide, and where attackers might lurk.",
+          
+          "filesystem_hierarchy": [
+            {
+              "path": "/",
+              "name": "Root",
+              "description": "The top of the filesystem tree",
+              "security_relevance": "Mount point for root partition"
+            },
+            {
+              "path": "/bin",
+              "name": "Essential Binaries",
+              "description": "Core commands available to all users (ls, cp, cat)",
+              "security_relevance": "Modifications here indicate rootkit"
+            },
+            {
+              "path": "/sbin",
+              "name": "System Binaries",
+              "description": "System administration commands (iptables, fdisk)",
+              "security_relevance": "Root-only commands, modifications suspicious"
+            },
+            {
+              "path": "/etc",
+              "name": "Configuration Files",
+              "description": "System-wide configuration files",
+              "security_relevance": "CRITICAL: Contains passwords, SSH keys, firewall rules",
+              "key_files": ["/etc/passwd", "/etc/shadow", "/etc/ssh/sshd_config", "/etc/sudoers"]
+            },
+            {
+              "path": "/home",
+              "name": "User Home Directories",
+              "description": "Personal files and user configs",
+              "security_relevance": "User-specific configs, SSH keys, command history"
+            },
+            {
+              "path": "/root",
+              "name": "Root's Home",
+              "description": "Home directory for root user",
+              "security_relevance": "Should have restricted access (700)"
+            },
+            {
+              "path": "/var",
+              "name": "Variable Data",
+              "description": "Logs, mail, databases, web content",
+              "security_relevance": "LOGS LIVE HERE - /var/log is your investigation goldmine",
+              "key_subdirs": ["/var/log", "/var/www", "/var/lib"]
+            },
+            {
+              "path": "/tmp",
+              "name": "Temporary Files",
+              "description": "World-writable temporary storage",
+              "security_relevance": "Attackers stage malware here - mount with noexec",
+              "hardening": "Mount options: noexec,nosuid,nodev"
+            },
+            {
+              "path": "/opt",
+              "name": "Optional Software",
+              "description": "Third-party applications",
+              "security_relevance": "Check for unauthorized software installations"
+            },
+            {
+              "path": "/usr",
+              "name": "User Programs",
+              "description": "Secondary hierarchy for user programs",
+              "security_relevance": "Most installed software lives here"
+            },
+            {
+              "path": "/proc",
+              "name": "Process Information",
+              "description": "Virtual filesystem exposing kernel/process info",
+              "security_relevance": "Examine running processes, network connections"
+            },
+            {
+              "path": "/dev",
+              "name": "Device Files",
+              "description": "Device nodes for hardware access",
+              "security_relevance": "Access to raw devices - /dev/sda is raw disk"
+            }
+          ],
+          
+          "navigation_commands": [
+            {
+              "command": "pwd",
+              "description": "Print working directory - where am I?",
+              "example": "pwd\n/home/analyst"
+            },
+            {
+              "command": "cd",
+              "description": "Change directory",
+              "examples": [
+                "cd /var/log     # Go to log directory",
+                "cd ~            # Go to home directory",
+                "cd ..           # Go up one level",
+                "cd -            # Go to previous directory"
+              ]
+            },
+            {
+              "command": "ls",
+              "description": "List directory contents",
+              "examples": [
+                "ls              # Basic listing",
+                "ls -la          # Long format, show hidden files",
+                "ls -lah         # Human-readable sizes",
+                "ls -lt          # Sort by modification time",
+                "ls -laR         # Recursive listing"
+              ],
+              "security_use": "ls -la shows permissions, ownership, hidden files"
+            },
+            {
+              "command": "tree",
+              "description": "Display directory tree structure",
+              "example": "tree -L 2 /etc    # Show /etc 2 levels deep",
+              "install": {
+                "debian": "apt install tree",
+                "almalinux": "dnf install tree"
+              }
+            }
+          ]
+        },
+        {
+          "section_id": "2.2",
+          "title": "File Operations",
+          "content": "Creating, copying, moving, and removing files are fundamental operations. In security work, you'll frequently need to examine files, create backups before changes, and securely delete sensitive data.",
+          
+          "commands": [
+            {
+              "command": "cat",
+              "description": "Display file contents (concatenate)",
+              "examples": [
+                "cat /etc/passwd                    # View file",
+                "cat file1 file2 > combined        # Combine files",
+                "cat -n /var/log/auth.log          # Show with line numbers"
+              ],
+              "security_use": "Quick file inspection, but loads entire file to memory"
+            },
+            {
+              "command": "less",
+              "description": "View files with pagination (better for large files)",
+              "examples": [
+                "less /var/log/syslog",
+                "# Navigate: Space=page down, b=page up, /=search, q=quit"
+              ],
+              "security_use": "Preferred for large log files - doesn't load entire file"
+            },
+            {
+              "command": "head / tail",
+              "description": "View beginning or end of files",
+              "examples": [
+                "head -n 20 /var/log/auth.log      # First 20 lines",
+                "tail -n 50 /var/log/syslog        # Last 50 lines",
+                "tail -f /var/log/auth.log         # Follow new entries (live)"
+              ],
+              "security_use": "tail -f is essential for real-time log monitoring"
+            },
+            {
+              "command": "cp",
+              "description": "Copy files and directories",
+              "examples": [
+                "cp file.txt backup.txt            # Copy file",
+                "cp -r /etc/ssh /backup/           # Copy directory recursively",
+                "cp -p original copy               # Preserve permissions/timestamps"
+              ],
+              "security_use": "Always backup configs before modifying: cp file file.bak"
+            },
+            {
+              "command": "mv",
+              "description": "Move or rename files",
+              "examples": [
+                "mv oldname newname                # Rename",
+                "mv file.txt /tmp/                 # Move to directory"
+              ]
+            },
+            {
+              "command": "rm",
+              "description": "Remove files (DANGEROUS - no recycle bin!)",
+              "examples": [
+                "rm file.txt                       # Remove file",
+                "rm -r directory/                  # Remove directory recursively",
+                "rm -rf /path/                     # Force remove (DANGEROUS)"
+              ],
+              "security_warning": "rm -rf is irreversible. Never run rm -rf / or rm -rf *",
+              "secure_delete": {
+                "command": "shred -vfz -n 3 sensitive_file",
+                "description": "Overwrite file multiple times before deletion"
+              }
+            },
+            {
+              "command": "mkdir / rmdir",
+              "description": "Create and remove directories",
+              "examples": [
+                "mkdir newdir                      # Create directory",
+                "mkdir -p path/to/nested/dir      # Create nested directories",
+                "rmdir emptydir                    # Remove empty directory"
+              ]
+            },
+            {
+              "command": "touch",
+              "description": "Create empty file or update timestamp",
+              "examples": [
+                "touch newfile.txt                 # Create empty file",
+                "touch -d '2023-01-01' file        # Set specific timestamp"
+              ],
+              "security_use": "Attackers may use touch to hide modification times"
+            },
+            {
+              "command": "find",
+              "description": "Search for files (POWERFUL)",
+              "examples": [
+                "find / -name '*.conf'             # Find all .conf files",
+                "find /home -user john             # Files owned by john",
+                "find / -perm -4000                # Find SUID files",
+                "find /tmp -mtime -1               # Modified in last day",
+                "find / -size +100M                # Files over 100MB",
+                "find / -type f -perm -o+w         # World-writable files"
+              ],
+              "security_use": "Essential for hunting: SUID binaries, recent changes, large files"
+            },
+            {
+              "command": "locate",
+              "description": "Fast file search using database",
+              "examples": [
+                "locate passwd                     # Find files named passwd",
+                "sudo updatedb                     # Update the database"
+              ],
+              "install": {
+                "debian": "apt install mlocate",
+                "almalinux": "dnf install mlocate"
+              }
+            }
+          ]
+        },
+        {
+          "section_id": "2.3",
+          "title": "Text Processing",
+          "content": "Security analysts spend significant time processing text - parsing logs, extracting indicators, and searching for patterns. These commands are your daily tools.",
+          
+          "commands": [
+            {
+              "command": "grep",
+              "description": "Search text patterns (Global Regular Expression Print)",
+              "examples": [
+                "grep 'Failed' /var/log/auth.log           # Find failed logins",
+                "grep -i 'error' /var/log/syslog           # Case-insensitive",
+                "grep -r 'password' /etc/                  # Recursive search",
+                "grep -v 'noise' file.log                  # Exclude pattern",
+                "grep -E 'error|warning|critical' log      # Multiple patterns",
+                "grep -c 'pattern' file                    # Count matches",
+                "grep -A 3 -B 3 'pattern' file             # Show context lines",
+                "zgrep 'pattern' /var/log/syslog.2.gz      # Search compressed logs"
+              ],
+              "security_use": "Primary tool for log analysis and IOC hunting"
+            },
+            {
+              "command": "awk",
+              "description": "Pattern scanning and text processing",
+              "examples": [
+                "awk '{print $1}' file                     # Print first column",
+                "awk -F: '{print $1}' /etc/passwd          # Colon-delimited",
+                "awk '/pattern/ {print $0}' file           # Print matching lines",
+                "awk '{sum+=$1} END {print sum}' file      # Sum column values",
+                "cat access.log | awk '{print $1}' | sort | uniq -c | sort -rn  # IP frequency"
+              ],
+              "security_use": "Extract specific fields from logs, aggregate data"
+            },
+            {
+              "command": "sed",
+              "description": "Stream editor for text transformation",
+              "examples": [
+                "sed 's/old/new/g' file                    # Replace text",
+                "sed -n '10,20p' file                      # Print lines 10-20",
+                "sed '/pattern/d' file                     # Delete matching lines",
+                "sed -i 's/old/new/g' file                 # Edit file in-place"
+              ],
+              "security_use": "Sanitize logs, modify configs programmatically"
+            },
+            {
+              "command": "cut",
+              "description": "Extract columns from text",
+              "examples": [
+                "cut -d: -f1 /etc/passwd                   # First field, colon delim",
+                "cut -d' ' -f1,4 access.log                # Fields 1 and 4, space delim",
+                "cut -c1-10 file                           # First 10 characters"
+              ],
+              "security_use": "Quick column extraction from structured logs"
+            },
+            {
+              "command": "sort",
+              "description": "Sort lines of text",
+              "examples": [
+                "sort file.txt                             # Alphabetical sort",
+                "sort -n file.txt                          # Numeric sort",
+                "sort -r file.txt                          # Reverse sort",
+                "sort -t: -k3 -n /etc/passwd               # Sort by UID"
+              ]
+            },
+            {
+              "command": "uniq",
+              "description": "Filter duplicate lines (requires sorted input)",
+              "examples": [
+                "sort file | uniq                          # Remove duplicates",
+                "sort file | uniq -c                       # Count occurrences",
+                "sort file | uniq -d                       # Show only duplicates"
+              ],
+              "security_use": "Aggregate and count - essential for log analysis"
+            },
+            {
+              "command": "wc",
+              "description": "Word, line, character count",
+              "examples": [
+                "wc -l /var/log/auth.log                   # Count lines",
+                "grep 'Failed' auth.log | wc -l            # Count matches"
+              ]
+            }
+          ],
+          
+          "pipeline_examples": {
+            "description": "Commands become powerful when combined with pipes (|)",
+            "examples": [
+              {
+                "command": "cat /var/log/auth.log | grep 'Failed' | awk '{print $11}' | sort | uniq -c | sort -rn | head -10",
+                "description": "Top 10 IPs with failed login attempts"
+              },
+              {
+                "command": "cat access.log | awk '{print $1}' | sort | uniq -c | sort -rn | head -20",
+                "description": "Top 20 IPs by request count"
+              },
+              {
+                "command": "grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}' /var/log/syslog | cut -d' ' -f1 | uniq -c",
+                "description": "Events per day from syslog"
+              },
+              {
+                "command": "find /var/log -name '*.log' -exec grep -l 'error' {} \\;",
+                "description": "Find all log files containing 'error'"
+              }
+            ]
+          }
+        },
+        {
+          "section_id": "2.4",
+          "title": "System Information",
+          "content": "Understanding the system you're working on is crucial for both administration and incident response.",
+          
+          "commands": [
+            {
+              "command": "uname",
+              "description": "System information",
+              "examples": [
+                "uname -a                     # All system info",
+                "uname -r                     # Kernel version",
+                "uname -m                     # Architecture (x86_64)"
+              ]
+            },
+            {
+              "command": "hostnamectl",
+              "description": "System hostname and OS info",
+              "example": "hostnamectl"
+            },
+            {
+              "command": "cat /etc/os-release",
+              "description": "Distribution information",
+              "example": "cat /etc/os-release"
+            },
+            {
+              "command": "uptime",
+              "description": "System uptime and load",
+              "example": "uptime",
+              "security_use": "Unexpected reboots may indicate compromise or attack"
+            },
+            {
+              "command": "free",
+              "description": "Memory usage",
+              "example": "free -h                      # Human-readable"
+            },
+            {
+              "command": "df",
+              "description": "Disk space usage",
+              "examples": [
+                "df -h                        # Human-readable",
+                "df -i                        # Inode usage"
+              ],
+              "security_use": "Full disks can indicate log flooding attack or data exfiltration staging"
+            },
+            {
+              "command": "du",
+              "description": "Directory space usage",
+              "examples": [
+                "du -sh /var/log              # Size of /var/log",
+                "du -sh /* | sort -h          # Size of top-level dirs"
+              ]
+            },
+            {
+              "command": "lsblk",
+              "description": "List block devices (disks)",
+              "example": "lsblk"
+            },
+            {
+              "command": "mount",
+              "description": "Show mounted filesystems",
+              "example": "mount | column -t",
+              "security_use": "Verify security mount options (noexec, nosuid)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 3,
+      "title": "Users, Groups & Permissions",
+      "sections": [
+        {
+          "section_id": "3.1",
+          "title": "Understanding Users and Groups",
+          "content": "Linux is inherently multi-user. Every process runs as a user, every file is owned by a user. Understanding this model is fundamental to Linux security.",
+          
+          "key_files": [
+            {
+              "file": "/etc/passwd",
+              "description": "User account information (readable by all)",
+              "format": "username:x:UID:GID:comment:home:shell",
+              "example": "analyst:x:1001:1001:Security Analyst:/home/analyst:/bin/bash",
+              "security_note": "x means password is in /etc/shadow"
+            },
+            {
+              "file": "/etc/shadow",
+              "description": "Encrypted passwords (root only)",
+              "format": "username:encrypted_password:lastchange:min:max:warn:inactive:expire",
+              "security_note": "If attacker gets this, they can crack passwords offline"
+            },
+            {
+              "file": "/etc/group",
+              "description": "Group definitions",
+              "format": "groupname:x:GID:members"
+            },
+            {
+              "file": "/etc/sudoers",
+              "description": "Sudo privileges configuration",
+              "security_note": "ALWAYS edit with visudo - syntax errors lock you out"
+            }
+          ],
+          
+          "special_users": [
+            {
+              "user": "root",
+              "uid": 0,
+              "description": "Superuser - unrestricted access",
+              "security_note": "Minimize direct root usage; use sudo"
+            },
+            {
+              "user": "nobody",
+              "uid": "65534",
+              "description": "Unprivileged user for services",
+              "security_note": "Services run as nobody to limit damage if compromised"
+            },
+            {
+              "users": "daemon, bin, sys",
+              "description": "System users for services",
+              "security_note": "Should never have login shells"
+            }
+          ],
+          
+          "user_commands": [
+            {
+              "command": "whoami",
+              "description": "Current username"
+            },
+            {
+              "command": "id",
+              "description": "Current user's UID, GID, and groups",
+              "example": "id\nuid=1000(analyst) gid=1000(analyst) groups=1000(analyst),27(sudo)"
+            },
+            {
+              "command": "who",
+              "description": "Users currently logged in"
+            },
+            {
+              "command": "w",
+              "description": "Logged in users and what they're doing"
+            },
+            {
+              "command": "last",
+              "description": "Login history",
+              "security_use": "Review for unauthorized access",
+              "examples": [
+                "last                         # All logins",
+                "last -f /var/log/wtmp        # Login records",
+                "lastb                        # Failed login attempts"
+              ]
+            },
+            {
+              "command": "useradd",
+              "description": "Create new user",
+              "examples": [
+                "useradd -m -s /bin/bash newuser          # With home dir and bash",
+                "useradd -G sudo,adm newuser              # With supplementary groups"
+              ],
+              "debian_alternative": "adduser newuser      # Interactive, friendlier"
+            },
+            {
+              "command": "usermod",
+              "description": "Modify user account",
+              "examples": [
+                "usermod -aG sudo username                # Add to sudo group",
+                "usermod -L username                      # Lock account",
+                "usermod -U username                      # Unlock account",
+                "usermod -s /sbin/nologin username        # Disable shell"
+              ]
+            },
+            {
+              "command": "userdel",
+              "description": "Delete user",
+              "examples": [
+                "userdel username                         # Delete user",
+                "userdel -r username                      # Delete with home dir"
+              ]
+            },
+            {
+              "command": "passwd",
+              "description": "Change password",
+              "examples": [
+                "passwd                                   # Change own password",
+                "passwd username                          # Change another's (root)",
+                "passwd -l username                       # Lock account",
+                "passwd -e username                       # Expire (force change)"
+              ]
+            },
+            {
+              "command": "chage",
+              "description": "Password aging policy",
+              "examples": [
+                "chage -l username                        # View policy",
+                "chage -M 90 username                     # Max 90 days",
+                "chage -E 2024-12-31 username             # Set expiration"
+              ],
+              "security_use": "Enforce password rotation policies"
+            }
+          ],
+          
+          "group_commands": [
+            {
+              "command": "groups",
+              "description": "Show user's groups",
+              "example": "groups analyst"
+            },
+            {
+              "command": "groupadd",
+              "description": "Create group",
+              "example": "groupadd security-team"
+            },
+            {
+              "command": "groupdel",
+              "description": "Delete group",
+              "example": "groupdel oldgroup"
+            },
+            {
+              "command": "gpasswd",
+              "description": "Manage group membership",
+              "examples": [
+                "gpasswd -a user group                    # Add user to group",
+                "gpasswd -d user group                    # Remove user from group"
+              ]
+            }
+          ]
+        },
+        {
+          "section_id": "3.2",
+          "title": "File Permissions Deep Dive",
+          "content": "Linux file permissions control who can read, write, and execute files. Misconfigurations are a leading cause of security breaches.",
+          
+          "permission_model": {
+            "structure": "-rwxrwxrwx",
+            "breakdown": [
+              {
+                "position": "1",
+                "meaning": "File type (- = file, d = directory, l = link)"
+              },
+              {
+                "position": "2-4",
+                "meaning": "Owner permissions (rwx)"
+              },
+              {
+                "position": "5-7",
+                "meaning": "Group permissions (rwx)"
+              },
+              {
+                "position": "8-10",
+                "meaning": "Others permissions (rwx)"
+              }
+            ],
+            "permission_meanings": {
+              "r": {
+                "file": "Read file contents",
+                "directory": "List directory contents"
+              },
+              "w": {
+                "file": "Modify file contents",
+                "directory": "Create/delete files in directory"
+              },
+              "x": {
+                "file": "Execute as program",
+                "directory": "Enter directory (cd into it)"
+              }
+            }
+          },
+          
+          "numeric_permissions": {
+            "description": "Permissions as octal numbers (chmod 755)",
+            "values": {
+              "4": "read (r)",
+              "2": "write (w)",
+              "1": "execute (x)"
+            },
+            "common_modes": [
+              {"mode": "777", "meaning": "rwxrwxrwx - Everyone can do everything (DANGEROUS)"},
+              {"mode": "755", "meaning": "rwxr-xr-x - Owner all, others read+execute (typical for directories)"},
+              {"mode": "644", "meaning": "rw-r--r-- - Owner read/write, others read (typical for files)"},
+              {"mode": "700", "meaning": "rwx------ - Owner only (private)"},
+              {"mode": "600", "meaning": "rw------- - Owner read/write only (sensitive files)"},
+              {"mode": "400", "meaning": "r-------- - Owner read only (very sensitive, like keys)"}
+            ]
+          },
+          
+          "permission_commands": [
+            {
+              "command": "chmod",
+              "description": "Change file permissions",
+              "examples": [
+                "chmod 755 script.sh                      # Numeric mode",
+                "chmod u+x script.sh                      # Add execute for owner",
+                "chmod go-rwx secret.txt                  # Remove all for group/others",
+                "chmod -R 750 /var/www                    # Recursive",
+                "chmod a+r file.txt                       # Add read for all"
+              ],
+              "symbolic_format": "[ugoa][+-=][rwx]",
+              "symbolic_meaning": {
+                "u": "user/owner",
+                "g": "group",
+                "o": "others",
+                "a": "all"
+              }
+            },
+            {
+              "command": "chown",
+              "description": "Change file owner and group",
+              "examples": [
+                "chown analyst file.txt                   # Change owner",
+                "chown analyst:security file.txt         # Change owner and group",
+                "chown -R www-data:www-data /var/www     # Recursive",
+                "chown :webgroup file.txt                # Change group only"
+              ]
+            },
+            {
+              "command": "chgrp",
+              "description": "Change group ownership",
+              "example": "chgrp security-team report.pdf"
+            }
+          ],
+          
+          "special_permissions": [
+            {
+              "name": "SUID (Set User ID)",
+              "numeric": "4xxx (e.g., 4755)",
+              "symbolic": "chmod u+s",
+              "effect": "File executes as the file owner, not the user running it",
+              "example": "/usr/bin/passwd has SUID to write to /etc/shadow",
+              "security_concern": "SUID root binaries are high-value targets for privilege escalation",
+              "audit_command": "find / -perm -4000 -type f 2>/dev/null"
+            },
+            {
+              "name": "SGID (Set Group ID)",
+              "numeric": "2xxx (e.g., 2755)",
+              "symbolic": "chmod g+s",
+              "effect_file": "File executes with group privileges",
+              "effect_directory": "New files inherit directory's group",
+              "security_use": "Useful for shared directories",
+              "audit_command": "find / -perm -2000 -type f 2>/dev/null"
+            },
+            {
+              "name": "Sticky Bit",
+              "numeric": "1xxx (e.g., 1777)",
+              "symbolic": "chmod +t",
+              "effect": "Only file owner can delete files in directory",
+              "example": "/tmp has sticky bit - users can't delete others' files",
+              "shown_as": "drwxrwxrwt (t instead of x)"
+            }
+          ],
+          
+          "dangerous_permissions": [
+            {
+              "pattern": "World-writable files",
+              "risk": "Anyone can modify - potential for unauthorized changes",
+              "find": "find / -type f -perm -0002 2>/dev/null"
+            },
+            {
+              "pattern": "World-writable directories without sticky bit",
+              "risk": "Anyone can delete files",
+              "find": "find / -type d -perm -0002 ! -perm -1000 2>/dev/null"
+            },
+            {
+              "pattern": "Unowned files",
+              "risk": "May indicate deleted user or intruder activity",
+              "find": "find / -nouser -o -nogroup 2>/dev/null"
+            },
+            {
+              "pattern": "SUID/SGID in unusual locations",
+              "risk": "Potential privilege escalation",
+              "find": "find /home /tmp /var -perm /6000 2>/dev/null"
+            }
+          ]
+        },
+        {
+          "section_id": "3.3",
+          "title": "Sudo Configuration",
+          "content": "sudo (substitute user do) allows permitted users to execute commands as root or other users. Proper sudo configuration is critical for security.",
+          
+          "sudo_basics": [
+            {
+              "command": "sudo command",
+              "description": "Run single command as root"
+            },
+            {
+              "command": "sudo -u user command",
+              "description": "Run command as specific user"
+            },
+            {
+              "command": "sudo -i",
+              "description": "Interactive root shell (login shell)"
+            },
+            {
+              "command": "sudo -s",
+              "description": "Root shell (keeps current environment)"
+            },
+            {
+              "command": "sudo -l",
+              "description": "List your sudo privileges"
+            },
+            {
+              "command": "sudo -v",
+              "description": "Extend sudo timeout without running command"
+            }
+          ],
+          
+          "sudoers_file": {
+            "location": "/etc/sudoers",
+            "edit_command": "visudo",
+            "warning": "ALWAYS use visudo - it validates syntax before saving",
+            
+            "format": "user  host = (runas) commands",
+            
+            "examples": [
+              {
+                "line": "root    ALL=(ALL:ALL) ALL",
+                "meaning": "root can run any command as any user on any host"
+              },
+              {
+                "line": "%sudo   ALL=(ALL:ALL) ALL",
+                "meaning": "Members of sudo group can run anything"
+              },
+              {
+                "line": "analyst ALL=(ALL) /usr/bin/tcpdump, /usr/bin/nmap",
+                "meaning": "analyst can run only tcpdump and nmap as root"
+              },
+              {
+                "line": "backup  ALL=(ALL) NOPASSWD: /usr/bin/rsync",
+                "meaning": "backup user can run rsync without password"
+              },
+              {
+                "line": "%security ALL=(ALL) NOPASSWD: ALL",
+                "meaning": "security group has passwordless sudo (use cautiously)"
+              }
+            ],
+            
+            "security_best_practices": [
+              "Use groups instead of individual users",
+              "Limit commands rather than granting ALL",
+              "Avoid NOPASSWD except for automation accounts",
+              "Use full command paths",
+              "Consider using /etc/sudoers.d/ for modular configs"
+            ]
+          },
+          
+          "sudoers_d": {
+            "location": "/etc/sudoers.d/",
+            "purpose": "Drop-in sudo configurations",
+            "example": "echo 'analyst ALL=(ALL) /usr/bin/nmap' | sudo tee /etc/sudoers.d/analyst",
+            "validation": "sudo visudo -c -f /etc/sudoers.d/analyst"
+          },
+          
+          "audit_sudo": {
+            "log_location": {
+              "debian": "/var/log/auth.log",
+              "almalinux": "/var/log/secure"
+            },
+            "grep_commands": [
+              "grep 'sudo' /var/log/auth.log | tail -50",
+              "grep 'sudo.*COMMAND' /var/log/secure"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "chapter_id": 4,
+      "title": "Package Management",
+      "sections": [
+        {
+          "section_id": "4.1",
+          "title": "Debian Package Management (APT)",
+          "content": "APT (Advanced Package Tool) is Debian's package management system. It handles dependencies automatically and manages software from repositories.",
+          
+          "commands": [
+            {
+              "command": "apt update",
+              "description": "Update package lists from repositories",
+              "run_first": "Always run before install/upgrade"
+            },
+            {
+              "command": "apt upgrade",
+              "description": "Upgrade all installed packages",
+              "example": "apt update && apt upgrade -y"
+            },
+            {
+              "command": "apt full-upgrade",
+              "description": "Upgrade with package removal if needed (dist-upgrade)",
+              "use_case": "Major upgrades, kernel updates"
+            },
+            {
+              "command": "apt install",
+              "description": "Install packages",
+              "examples": [
+                "apt install nginx                        # Single package",
+                "apt install vim curl wget git           # Multiple packages",
+                "apt install -y package                  # Auto-yes"
+              ]
+            },
+            {
+              "command": "apt remove",
+              "description": "Remove package (keep configs)",
+              "example": "apt remove nginx"
+            },
+            {
+              "command": "apt purge",
+              "description": "Remove package AND configs",
+              "example": "apt purge nginx"
+            },
+            {
+              "command": "apt autoremove",
+              "description": "Remove unneeded dependencies",
+              "run_after": "After removing packages"
+            },
+            {
+              "command": "apt search",
+              "description": "Search for packages",
+              "example": "apt search security scanner"
+            },
+            {
+              "command": "apt show",
+              "description": "Show package details",
+              "example": "apt show nginx"
+            },
+            {
+              "command": "apt list",
+              "description": "List packages",
+              "examples": [
+                "apt list --installed                    # All installed",
+                "apt list --upgradable                   # Available upgrades"
+              ]
+            },
+            {
+              "command": "dpkg -l",
+              "description": "Low-level package listing",
+              "example": "dpkg -l | grep nginx"
+            },
+            {
+              "command": "dpkg -L package",
+              "description": "List files installed by package",
+              "example": "dpkg -L nginx"
+            },
+            {
+              "command": "dpkg -S file",
+              "description": "Find which package owns a file",
+              "example": "dpkg -S /usr/bin/ssh"
+            }
+          ],
+          
+          "repositories": {
+            "config_file": "/etc/apt/sources.list",
+            "additional": "/etc/apt/sources.list.d/",
+            "security_repo": "deb http://security.debian.org/debian-security bookworm-security main",
+            
+            "adding_repo": [
+              "# Add repository key",
+              "curl -fsSL https://example.com/key.gpg | gpg --dearmor -o /usr/share/keyrings/example.gpg",
+              "# Add repository",
+              "echo 'deb [signed-by=/usr/share/keyrings/example.gpg] https://repo.example.com stable main' > /etc/apt/sources.list.d/example.list",
+              "# Update",
+              "apt update"
+            ]
+          },
+          
+          "security_updates": {
+            "check": "apt list --upgradable 2>/dev/null | grep -i security",
+            "auto_updates": {
+              "install": "apt install unattended-upgrades",
+              "configure": "dpkg-reconfigure unattended-upgrades"
+            }
+          }
+        },
+        {
+          "section_id": "4.2",
+          "title": "AlmaLinux Package Management (DNF)",
+          "content": "DNF (Dandified YUM) is the package manager for RHEL-family distributions. It replaces YUM with better performance and dependency resolution.",
+          
+          "commands": [
+            {
+              "command": "dnf check-update",
+              "description": "Check for available updates"
+            },
+            {
+              "command": "dnf update",
+              "description": "Update all packages",
+              "example": "dnf update -y"
+            },
+            {
+              "command": "dnf install",
+              "description": "Install packages",
+              "examples": [
+                "dnf install nginx",
+                "dnf install -y vim curl wget git"
+              ]
+            },
+            {
+              "command": "dnf remove",
+              "description": "Remove package",
+              "example": "dnf remove nginx"
+            },
+            {
+              "command": "dnf autoremove",
+              "description": "Remove unneeded dependencies"
+            },
+            {
+              "command": "dnf search",
+              "description": "Search for packages",
+              "example": "dnf search security"
+            },
+            {
+              "command": "dnf info",
+              "description": "Show package information",
+              "example": "dnf info nginx"
+            },
+            {
+              "command": "dnf list",
+              "description": "List packages",
+              "examples": [
+                "dnf list installed                      # All installed",
+                "dnf list available                      # Available to install"
+              ]
+            },
+            {
+              "command": "dnf provides",
+              "description": "Find package providing a file",
+              "example": "dnf provides /usr/bin/ssh"
+            },
+            {
+              "command": "dnf history",
+              "description": "Transaction history",
+              "examples": [
+                "dnf history                             # List transactions",
+                "dnf history info 15                     # Details of transaction 15",
+                "dnf history undo 15                     # Undo transaction 15"
+              ],
+              "security_use": "Audit what packages were installed/removed and when"
+            },
+            {
+              "command": "rpm -qa",
+              "description": "Low-level: list all installed packages",
+              "example": "rpm -qa | grep ssh"
+            },
+            {
+              "command": "rpm -ql package",
+              "description": "List files in package",
+              "example": "rpm -ql nginx"
+            },
+            {
+              "command": "rpm -qf file",
+              "description": "Find package owning file",
+              "example": "rpm -qf /usr/bin/ssh"
+            }
+          ],
+          
+          "repositories": {
+            "list": "dnf repolist",
+            "config_dir": "/etc/yum.repos.d/",
+            
+            "epel": {
+              "description": "Extra Packages for Enterprise Linux",
+              "install": "dnf install epel-release",
+              "why": "Many security tools require EPEL"
+            },
+            
+            "adding_repo": [
+              "dnf config-manager --add-repo https://example.com/repo.repo",
+              "# Or manually create /etc/yum.repos.d/example.repo"
+            ]
+          },
+          
+          "security_updates": {
+            "check": "dnf updateinfo list security",
+            "install_security_only": "dnf update --security",
+            "auto_updates": {
+              "install": "dnf install dnf-automatic",
+              "configure": "/etc/dnf/automatic.conf",
+              "enable": "systemctl enable --now dnf-automatic.timer"
+            }
+          },
+          
+          "modules": {
+            "description": "DNF modules allow multiple versions of software",
+            "commands": [
+              "dnf module list                          # List all modules",
+              "dnf module list nginx                    # List nginx versions",
+              "dnf module enable nginx:1.22            # Enable specific stream",
+              "dnf module install nginx:1.22           # Install specific version"
+            ]
+          }
+        },
+        {
+          "section_id": "4.3",
+          "title": "Essential Security Tools Installation",
+          "content": "Install these tools on both distributions to build your security toolkit.",
+          
+          "tool_categories": [
+            {
+              "category": "Network Analysis",
+              "tools": [
+                {
+                  "name": "nmap",
+                  "description": "Network scanner",
+                  "debian": "apt install nmap",
+                  "almalinux": "dnf install nmap"
+                },
+                {
+                  "name": "tcpdump",
+                  "description": "Packet capture",
+                  "debian": "apt install tcpdump",
+                  "almalinux": "dnf install tcpdump"
+                },
+                {
+                  "name": "wireshark",
+                  "description": "GUI packet analyzer",
+                  "debian": "apt install wireshark",
+                  "almalinux": "dnf install wireshark"
+                },
+                {
+                  "name": "netcat",
+                  "description": "Network utility (nc)",
+                  "debian": "apt install netcat-openbsd",
+                  "almalinux": "dnf install nmap-ncat"
+                }
+              ]
+            },
+            {
+              "category": "System Monitoring",
+              "tools": [
+                {
+                  "name": "htop",
+                  "description": "Interactive process viewer",
+                  "debian": "apt install htop",
+                  "almalinux": "dnf install htop"
+                },
+                {
+                  "name": "iotop",
+                  "description": "I/O monitoring",
+                  "debian": "apt install iotop",
+                  "almalinux": "dnf install iotop"
+                },
+                {
+                  "name": "nethogs",
+                  "description": "Per-process bandwidth",
+                  "debian": "apt install nethogs",
+                  "almalinux": "dnf install nethogs"
+                },
+                {
+                  "name": "sysstat",
+                  "description": "System statistics (sar, iostat)",
+                  "debian": "apt install sysstat",
+                  "almalinux": "dnf install sysstat"
+                }
+              ]
+            },
+            {
+              "category": "Security Auditing",
+              "tools": [
+                {
+                  "name": "lynis",
+                  "description": "Security auditing tool",
+                  "debian": "apt install lynis",
+                  "almalinux": "dnf install lynis  # Requires EPEL"
+                },
+                {
+                  "name": "rkhunter",
+                  "description": "Rootkit hunter",
+                  "debian": "apt install rkhunter",
+                  "almalinux": "dnf install rkhunter  # Requires EPEL"
+                },
+                {
+                  "name": "chkrootkit",
+                  "description": "Rootkit checker",
+                  "debian": "apt install chkrootkit",
+                  "almalinux": "# Build from source or use EPEL"
+                },
+                {
+                  "name": "aide",
+                  "description": "File integrity checker",
+                  "debian": "apt install aide",
+                  "almalinux": "dnf install aide"
+                }
+              ]
+            },
+            {
+              "category": "Log Analysis",
+              "tools": [
+                {
+                  "name": "logwatch",
+                  "description": "Log analyzer and reporter",
+                  "debian": "apt install logwatch",
+                  "almalinux": "dnf install logwatch"
+                },
+                {
+                  "name": "fail2ban",
+                  "description": "Intrusion prevention",
+                  "debian": "apt install fail2ban",
+                  "almalinux": "dnf install fail2ban  # Requires EPEL"
+                },
+                {
+                  "name": "multitail",
+                  "description": "View multiple logs simultaneously",
+                  "debian": "apt install multitail",
+                  "almalinux": "dnf install multitail  # Requires EPEL"
+                }
+              ]
+            },
+            {
+              "category": "Forensics & Recovery",
+              "tools": [
+                {
+                  "name": "sleuthkit",
+                  "description": "Filesystem forensics",
+                  "debian": "apt install sleuthkit",
+                  "almalinux": "dnf install sleuthkit"
+                },
+                {
+                  "name": "foremost",
+                  "description": "File recovery",
+                  "debian": "apt install foremost",
+                  "almalinux": "# Build from source"
+                },
+                {
+                  "name": "testdisk",
+                  "description": "Partition recovery",
+                  "debian": "apt install testdisk",
+                  "almalinux": "dnf install testdisk"
+                }
+              ]
+            }
+          ],
+          
+          "install_script": {
+            "debian": "#!/bin/bash\napt update\napt install -y nmap tcpdump wireshark-cli netcat-openbsd \\\n  htop iotop nethogs sysstat \\\n  lynis rkhunter chkrootkit aide \\\n  logwatch fail2ban \\\n  sleuthkit foremost testdisk \\\n  vim curl wget git net-tools dnsutils whois",
+            
+            "almalinux": "#!/bin/bash\ndnf install -y epel-release\ndnf install -y nmap tcpdump wireshark-cli nmap-ncat \\\n  htop iotop nethogs sysstat \\\n  lynis rkhunter aide \\\n  logwatch fail2ban \\\n  sleuthkit testdisk \\\n  vim curl wget git net-tools bind-utils whois"
+          }
+        }
+      ]
+    },
+    {
+      "chapter_id": 5,
+      "title": "Services & Process Management",
+      "sections": [
+        {
+          "section_id": "5.1",
+          "title": "Systemd Service Management",
+          "content": "systemd is the init system and service manager for modern Linux. It manages services, handles dependencies, and provides logging through journald.",
+          
+          "systemctl_commands": [
+            {
+              "command": "systemctl status service",
+              "description": "Check service status",
+              "examples": [
+                "systemctl status sshd",
+                "systemctl status nginx"
+              ]
+            },
+            {
+              "command": "systemctl start service",
+              "description": "Start a service now"
+            },
+            {
+              "command": "systemctl stop service",
+              "description": "Stop a service now"
+            },
+            {
+              "command": "systemctl restart service",
+              "description": "Restart service (stop + start)"
+            },
+            {
+              "command": "systemctl reload service",
+              "description": "Reload config without restart (if supported)"
+            },
+            {
+              "command": "systemctl enable service",
+              "description": "Start service on boot"
+            },
+            {
+              "command": "systemctl disable service",
+              "description": "Don't start on boot"
+            },
+            {
+              "command": "systemctl enable --now service",
+              "description": "Enable AND start immediately"
+            },
+            {
+              "command": "systemctl is-active service",
+              "description": "Check if running"
+            },
+            {
+              "command": "systemctl is-enabled service",
+              "description": "Check if starts on boot"
+            },
+            {
+              "command": "systemctl list-units --type=service",
+              "description": "List all services"
+            },
+            {
+              "command": "systemctl list-units --type=service --state=running",
+              "description": "List running services"
+            },
+            {
+              "command": "systemctl list-unit-files --type=service",
+              "description": "List all service files and states"
+            },
+            {
+              "command": "systemctl mask service",
+              "description": "Completely prevent service from starting",
+              "security_use": "Disable dangerous services permanently"
+            },
+            {
+              "command": "systemctl unmask service",
+              "description": "Remove mask"
+            }
+          ],
+          
+          "journalctl_commands": [
+            {
+              "command": "journalctl",
+              "description": "View all logs"
+            },
+            {
+              "command": "journalctl -u service",
+              "description": "Logs for specific service",
+              "example": "journalctl -u sshd"
+            },
+            {
+              "command": "journalctl -f",
+              "description": "Follow new log entries (like tail -f)"
+            },
+            {
+              "command": "journalctl -p err",
+              "description": "Only error priority and above"
+            },
+            {
+              "command": "journalctl --since '1 hour ago'",
+              "description": "Logs from last hour"
+            },
+            {
+              "command": "journalctl --since '2024-01-01' --until '2024-01-02'",
+              "description": "Logs for date range"
+            },
+            {
+              "command": "journalctl -b",
+              "description": "Logs since last boot"
+            },
+            {
+              "command": "journalctl -b -1",
+              "description": "Logs from previous boot"
+            },
+            {
+              "command": "journalctl --disk-usage",
+              "description": "Check journal size"
+            }
+          ],
+          
+          "security_considerations": [
+            "Review running services regularly - disable unnecessary ones",
+            "Check for services listening on external interfaces",
+            "Verify service file integrity if system compromised",
+            "Use systemctl mask for services that should NEVER run"
+          ]
+        },
+        {
+          "section_id": "5.2",
+          "title": "Process Management",
+          "content": "Understanding processes is crucial for security - detecting malicious processes, understanding resource usage, and investigating incidents.",
+          
+          "commands": [
+            {
+              "command": "ps",
+              "description": "Report process status",
+              "examples": [
+                "ps aux                          # All processes (BSD style)",
+                "ps -ef                          # All processes (Unix style)",
+                "ps aux | grep nginx             # Find specific process",
+                "ps -u username                  # Processes by user",
+                "ps aux --sort=-%mem | head      # Top memory consumers",
+                "ps aux --sort=-%cpu | head      # Top CPU consumers"
+              ],
+              "columns": {
+                "USER": "Process owner",
+                "PID": "Process ID",
+                "CPU": "CPU usage %",
+                "MEM": "Memory usage %",
+                "VSZ": "Virtual memory size",
+                "RSS": "Resident set size (physical memory)",
+                "TTY": "Terminal",
+                "STAT": "Process state",
+                "START": "Start time",
+                "TIME": "CPU time used",
+                "COMMAND": "Command and arguments"
+              },
+              "states": {
+                "R": "Running",
+                "S": "Sleeping (waiting for event)",
+                "D": "Uninterruptible sleep (usually I/O)",
+                "Z": "Zombie (terminated but not reaped)",
+                "T": "Stopped"
+              }
+            },
+            {
+              "command": "top",
+              "description": "Real-time process monitor",
+              "shortcuts": {
+                "P": "Sort by CPU",
+                "M": "Sort by memory",
+                "k": "Kill a process",
+                "q": "Quit",
+                "1": "Show individual CPU cores"
+              }
+            },
+            {
+              "command": "htop",
+              "description": "Enhanced interactive process viewer",
+              "features": "Color-coded, mouse support, tree view, easier process management"
+            },
+            {
+              "command": "pgrep",
+              "description": "Find processes by name",
+              "examples": [
+                "pgrep nginx                     # PIDs of nginx processes",
+                "pgrep -u root                   # Processes owned by root",
+                "pgrep -a nginx                  # Show full command"
+              ]
+            },
+            {
+              "command": "kill",
+              "description": "Send signal to process",
+              "examples": [
+                "kill PID                        # SIGTERM (graceful)",
+                "kill -9 PID                     # SIGKILL (force)",
+                "kill -HUP PID                   # SIGHUP (reload config)"
+              ],
+              "common_signals": {
+                "SIGTERM (15)": "Graceful termination (default)",
+                "SIGKILL (9)": "Force kill (cannot be caught)",
+                "SIGHUP (1)": "Hangup / reload config",
+                "SIGSTOP (19)": "Pause process",
+                "SIGCONT (18)": "Resume paused process"
+              }
+            },
+            {
+              "command": "pkill",
+              "description": "Kill processes by name",
+              "examples": [
+                "pkill nginx                     # Kill all nginx",
+                "pkill -u attacker               # Kill all processes by user"
+              ],
+              "security_use": "Quick response to kill malicious user's processes"
+            },
+            {
+              "command": "killall",
+              "description": "Kill processes by name",
+              "example": "killall nginx"
+            },
+            {
+              "command": "nice / renice",
+              "description": "Set process priority",
+              "examples": [
+                "nice -n 10 command              # Start with lower priority",
+                "renice +5 -p PID                # Lower priority of running process"
+              ]
+            },
+            {
+              "command": "nohup",
+              "description": "Run command immune to hangups",
+              "example": "nohup long-running-script.sh &"
+            },
+            {
+              "command": "lsof",
+              "description": "List open files (including network)",
+              "examples": [
+                "lsof                            # All open files",
+                "lsof -i                         # Network connections",
+                "lsof -i :22                     # Processes using port 22",
+                "lsof -u username                # Files opened by user",
+                "lsof -p PID                     # Files opened by process",
+                "lsof /var/log/syslog            # Processes using file",
+                "lsof +D /tmp                    # All files in /tmp"
+              ],
+              "security_use": "Identify what processes have files open, find deleted but held files"
+            }
+          ],
+          
+          "proc_filesystem": {
+            "description": "/proc is a virtual filesystem exposing kernel and process info",
+            "useful_entries": [
+              {
+                "path": "/proc/PID/",
+                "description": "Directory for each running process"
+              },
+              {
+                "path": "/proc/PID/cmdline",
+                "description": "Command line that started process"
+              },
+              {
+                "path": "/proc/PID/environ",
+                "description": "Environment variables"
+              },
+              {
+                "path": "/proc/PID/fd/",
+                "description": "File descriptors (open files)"
+              },
+              {
+                "path": "/proc/PID/exe",
+                "description": "Link to executable"
+              },
+              {
+                "path": "/proc/PID/cwd",
+                "description": "Current working directory"
+              },
+              {
+                "path": "/proc/PID/maps",
+                "description": "Memory mappings"
+              }
+            ],
+            "security_use": "Investigate suspicious processes, find deleted executables still running"
+          }
+        }
+      ]
+    },
+    {
+      "chapter_id": 6,
+      "title": "Network Configuration & Security",
+      "sections": [
+        {
+          "section_id": "6.1",
+          "title": "Network Configuration Commands",
+          "content": "Understanding network configuration is essential for security - knowing what's listening, what's connected, and how to configure secure networking.",
+          
+          "commands": [
+            {
+              "command": "ip",
+              "description": "Modern network configuration tool (replaces ifconfig)",
+              "examples": [
+                "ip addr                         # Show all interfaces and IPs",
+                "ip addr show eth0               # Show specific interface",
+                "ip link                         # Show link layer info",
+                "ip link set eth0 up             # Bring interface up",
+                "ip link set eth0 down           # Bring interface down",
+                "ip route                        # Show routing table",
+                "ip route add default via 192.168.1.1  # Add default gateway",
+                "ip neigh                        # Show ARP table (neighbors)"
+              ]
+            },
+            {
+              "command": "ifconfig",
+              "description": "Legacy network configuration (still useful)",
+              "examples": [
+                "ifconfig                        # Show interfaces",
+                "ifconfig eth0                   # Show specific interface"
+              ],
+              "install": {
+                "debian": "apt install net-tools",
+                "almalinux": "dnf install net-tools"
+              }
+            },
+            {
+              "command": "ss",
+              "description": "Socket statistics (replaces netstat)",
+              "examples": [
+                "ss -tuln                        # TCP/UDP listening ports",
+                "ss -tunap                       # All connections with processes",
+                "ss -s                           # Summary statistics",
+                "ss -o state established         # Established connections"
+              ],
+              "security_use": "Identify what's listening, detect unauthorized services"
+            },
+            {
+              "command": "netstat",
+              "description": "Legacy network statistics",
+              "examples": [
+                "netstat -tuln                   # Listening ports",
+                "netstat -tunap                  # All with PIDs",
+                "netstat -r                      # Routing table"
+              ]
+            },
+            {
+              "command": "nmcli",
+              "description": "NetworkManager CLI",
+              "examples": [
+                "nmcli device status             # Show devices",
+                "nmcli connection show           # Show connections",
+                "nmcli connection up 'Connection Name'  # Activate connection"
+              ],
+              "note": "Primary tool on AlmaLinux/RHEL with NetworkManager"
+            },
+            {
+              "command": "hostnamectl",
+              "description": "Set system hostname",
+              "example": "hostnamectl set-hostname newname"
+            }
+          ],
+          
+          "config_files": {
+            "debian": {
+              "interfaces": "/etc/network/interfaces",
+              "dns": "/etc/resolv.conf",
+              "hosts": "/etc/hosts",
+              "example_static": "auto eth0\niface eth0 inet static\n  address 192.168.1.100\n  netmask 255.255.255.0\n  gateway 192.168.1.1"
+            },
+            "almalinux": {
+              "interface_scripts": "/etc/sysconfig/network-scripts/",
+              "networkmanager_connections": "/etc/NetworkManager/system-connections/",
+              "dns": "/etc/resolv.conf",
+              "hosts": "/etc/hosts"
+            }
+          }
+        },
+        {
+          "section_id": "6.2",
+          "title": "Firewall Configuration",
+          "content": "Firewalls are the first line of defense. Both Debian and AlmaLinux support iptables, but have different default frontends.",
+          
+          "debian_ufw": {
+            "name": "UFW (Uncomplicated Firewall)",
+            "description": "User-friendly frontend for iptables",
+            "install": "apt install ufw",
+            "commands": [
+              {
+                "command": "ufw status",
+                "description": "Check firewall status"
+              },
+              {
+                "command": "ufw enable",
+                "description": "Enable firewall"
+              },
+              {
+                "command": "ufw disable",
+                "description": "Disable firewall"
+              },
+              {
+                "command": "ufw default deny incoming",
+                "description": "Deny all incoming by default"
+              },
+              {
+                "command": "ufw default allow outgoing",
+                "description": "Allow all outgoing by default"
+              },
+              {
+                "command": "ufw allow ssh",
+                "description": "Allow SSH (port 22)"
+              },
+              {
+                "command": "ufw allow 80/tcp",
+                "description": "Allow HTTP"
+              },
+              {
+                "command": "ufw allow from 192.168.1.0/24",
+                "description": "Allow from subnet"
+              },
+              {
+                "command": "ufw allow from 192.168.1.100 to any port 22",
+                "description": "Allow SSH from specific IP"
+              },
+              {
+                "command": "ufw deny 23",
+                "description": "Deny telnet"
+              },
+              {
+                "command": "ufw delete allow 80/tcp",
+                "description": "Remove rule"
+              },
+              {
+                "command": "ufw status numbered",
+                "description": "Show rules with numbers"
+              },
+              {
+                "command": "ufw delete 3",
+                "description": "Delete rule by number"
+              },
+              {
+                "command": "ufw logging on",
+                "description": "Enable logging"
+              }
+            ],
+            "typical_setup": [
+              "ufw default deny incoming",
+              "ufw default allow outgoing",
+              "ufw allow ssh",
+              "ufw allow 80/tcp",
+              "ufw allow 443/tcp",
+              "ufw enable"
+            ]
+          },
+          
+          "almalinux_firewalld": {
+            "name": "firewalld",
+            "description": "Dynamic firewall manager with zones",
+            "commands": [
+              {
+                "command": "firewall-cmd --state",
+                "description": "Check if running"
+              },
+              {
+                "command": "firewall-cmd --get-active-zones",
+                "description": "Show active zones"
+              },
+              {
+                "command": "firewall-cmd --get-default-zone",
+                "description": "Show default zone"
+              },
+              {
+                "command": "firewall-cmd --list-all",
+                "description": "List all rules for default zone"
+              },
+              {
+                "command": "firewall-cmd --add-service=http",
+                "description": "Allow HTTP (runtime only)"
+              },
+              {
+                "command": "firewall-cmd --add-service=http --permanent",
+                "description": "Allow HTTP (persistent)"
+              },
+              {
+                "command": "firewall-cmd --add-port=8080/tcp --permanent",
+                "description": "Allow specific port"
+              },
+              {
+                "command": "firewall-cmd --remove-service=http --permanent",
+                "description": "Remove service"
+              },
+              {
+                "command": "firewall-cmd --add-source=192.168.1.0/24 --zone=trusted",
+                "description": "Trust a subnet"
+              },
+              {
+                "command": "firewall-cmd --reload",
+                "description": "Apply permanent rules"
+              },
+              {
+                "command": "firewall-cmd --runtime-to-permanent",
+                "description": "Save runtime rules as permanent"
+              }
+            ],
+            "zones": {
+              "drop": "Drop all incoming, allow outgoing",
+              "block": "Reject incoming with message",
+              "public": "For untrusted networks (default)",
+              "external": "For external networks with NAT",
+              "internal": "For internal networks",
+              "dmz": "For DMZ servers",
+              "work": "For work networks",
+              "home": "For home networks",
+              "trusted": "Allow all traffic"
+            },
+            "typical_setup": [
+              "firewall-cmd --add-service=ssh --permanent",
+              "firewall-cmd --add-service=http --permanent",
+              "firewall-cmd --add-service=https --permanent",
+              "firewall-cmd --reload"
+            ]
+          },
+          
+          "iptables_basics": {
+            "description": "Low-level firewall - useful to understand even with frontends",
+            "commands": [
+              "iptables -L -n -v               # List all rules",
+              "iptables -L INPUT -n --line-numbers  # List INPUT chain with numbers",
+              "iptables -A INPUT -p tcp --dport 22 -j ACCEPT  # Allow SSH",
+              "iptables -A INPUT -p tcp --dport 80 -j ACCEPT  # Allow HTTP",
+              "iptables -A INPUT -j DROP       # Drop all other input",
+              "iptables -D INPUT 3             # Delete rule 3",
+              "iptables-save > /etc/iptables.rules  # Save rules",
+              "iptables-restore < /etc/iptables.rules  # Restore rules"
+            ],
+            "chains": {
+              "INPUT": "Incoming packets to this host",
+              "OUTPUT": "Outgoing packets from this host",
+              "FORWARD": "Packets routed through this host"
+            }
+          }
+        },
+        {
+          "section_id": "6.3",
+          "title": "SSH Configuration & Hardening",
+          "content": "SSH is typically the primary remote access method. Proper configuration is critical for security.",
+          
+          "client_usage": [
+            {
+              "command": "ssh user@host",
+              "description": "Basic connection"
+            },
+            {
+              "command": "ssh -p 2222 user@host",
+              "description": "Connect on non-standard port"
+            },
+            {
+              "command": "ssh -i ~/.ssh/mykey user@host",
+              "description": "Use specific key"
+            },
+            {
+              "command": "ssh -L 8080:localhost:80 user@host",
+              "description": "Local port forwarding (tunnel)"
+            },
+            {
+              "command": "ssh -D 9050 user@host",
+              "description": "SOCKS proxy"
+            }
+          ],
+          
+          "key_management": {
+            "generate": {
+              "command": "ssh-keygen -t ed25519 -C 'your_email@example.com'",
+              "description": "Generate Ed25519 key (recommended)",
+              "alternative": "ssh-keygen -t rsa -b 4096 -C 'comment'",
+              "files": {
+                "private": "~/.ssh/id_ed25519 (PROTECT THIS)",
+                "public": "~/.ssh/id_ed25519.pub (share this)"
+              }
+            },
+            "copy_to_server": {
+              "command": "ssh-copy-id user@host",
+              "description": "Copy public key to remote authorized_keys",
+              "manual": "cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys"
+            },
+            "permissions": {
+              "~/.ssh/": "700 (drwx------)",
+              "~/.ssh/authorized_keys": "600 (-rw-------)",
+              "~/.ssh/id_*": "600 (-rw-------)",
+              "~/.ssh/id_*.pub": "644 (-rw-r--r--)"
+            }
+          },
+          
+          "server_hardening": {
+            "config_file": "/etc/ssh/sshd_config",
+            "recommended_settings": [
+              {
+                "setting": "PermitRootLogin no",
+                "description": "Disable direct root login"
+              },
+              {
+                "setting": "PasswordAuthentication no",
+                "description": "Require key-based auth (after setting up keys!)"
+              },
+              {
+                "setting": "PubkeyAuthentication yes",
+                "description": "Enable public key authentication"
+              },
+              {
+                "setting": "PermitEmptyPasswords no",
+                "description": "Deny empty passwords"
+              },
+              {
+                "setting": "X11Forwarding no",
+                "description": "Disable X11 forwarding unless needed"
+              },
+              {
+                "setting": "MaxAuthTries 3",
+                "description": "Limit authentication attempts"
+              },
+              {
+                "setting": "ClientAliveInterval 300",
+                "description": "Timeout idle sessions (5 min)"
+              },
+              {
+                "setting": "ClientAliveCountMax 2",
+                "description": "Disconnect after 2 missed keepalives"
+              },
+              {
+                "setting": "AllowUsers analyst admin",
+                "description": "Whitelist specific users"
+              },
+              {
+                "setting": "AllowGroups sshusers",
+                "description": "Whitelist specific groups"
+              },
+              {
+                "setting": "Protocol 2",
+                "description": "Use only SSH protocol 2"
+              },
+              {
+                "setting": "Port 2222",
+                "description": "Non-standard port (security through obscurity, minor benefit)"
+              }
+            ],
+            "apply_changes": [
+              "sshd -t                         # Test configuration",
+              "systemctl restart sshd          # Apply changes",
+              "# Keep existing session open while testing!"
+            ],
+            "warning": "Always test SSH config before disconnecting. Keep a session open!"
+          },
+          
+          "fail2ban_config": {
+            "description": "Automatically ban IPs with failed login attempts",
+            "install": {
+              "debian": "apt install fail2ban",
+              "almalinux": "dnf install fail2ban  # Requires EPEL"
+            },
+            "config_files": {
+              "main": "/etc/fail2ban/jail.conf",
+              "local": "/etc/fail2ban/jail.local (create this for customization)"
+            },
+            "example_jail_local": "[DEFAULT]\nbantime = 3600\nfindtime = 600\nmaxretry = 3\n\n[sshd]\nenabled = true\nport = ssh\nlogpath = %(sshd_log)s\nmaxretry = 3",
+            "commands": [
+              "fail2ban-client status                    # Show jail status",
+              "fail2ban-client status sshd              # Show sshd jail",
+              "fail2ban-client set sshd unbanip IP      # Unban IP",
+              "fail2ban-client set sshd banip IP        # Manually ban IP"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "chapter_id": 7,
+      "title": "Log Analysis & Monitoring",
+      "sections": [
+        {
+          "section_id": "7.1",
+          "title": "Understanding Linux Logs",
+          "content": "Logs are your window into what's happening on a system. For security, logs are essential for detection, investigation, and compliance.",
+          
+          "log_locations": {
+            "common": "/var/log/",
+            "key_files": [
+              {
+                "file": "/var/log/syslog (Debian) or /var/log/messages (AlmaLinux)",
+                "content": "General system messages",
+                "security_use": "System-wide events, service failures"
+              },
+              {
+                "file": "/var/log/auth.log (Debian) or /var/log/secure (AlmaLinux)",
+                "content": "Authentication events",
+                "security_use": "Login attempts, sudo usage, SSH access - CRITICAL"
+              },
+              {
+                "file": "/var/log/kern.log",
+                "content": "Kernel messages",
+                "security_use": "Hardware issues, kernel security events"
+              },
+              {
+                "file": "/var/log/dmesg",
+                "content": "Boot messages and kernel ring buffer",
+                "security_use": "Hardware detection, boot-time events"
+              },
+              {
+                "file": "/var/log/faillog",
+                "content": "Failed login attempts",
+                "security_use": "Brute force detection"
+              },
+              {
+                "file": "/var/log/lastlog",
+                "content": "Last login times for users",
+                "security_use": "Identify inactive accounts"
+              },
+              {
+                "file": "/var/log/wtmp",
+                "content": "Login records (binary)",
+                "security_use": "Login history (use 'last' to read)"
+              },
+              {
+                "file": "/var/log/btmp",
+                "content": "Failed login records (binary)",
+                "security_use": "Failed login history (use 'lastb' to read)"
+              },
+              {
+                "file": "/var/log/cron",
+                "content": "Cron job logs",
+                "security_use": "Detect unauthorized scheduled tasks"
+              },
+              {
+                "file": "/var/log/audit/audit.log",
+                "content": "Audit daemon logs",
+                "security_use": "Detailed security auditing (if auditd enabled)"
+              }
+            ],
+            "application_logs": [
+              "/var/log/apache2/ or /var/log/httpd/ - Web server",
+              "/var/log/nginx/ - Nginx logs",
+              "/var/log/mysql/ - Database logs",
+              "/var/log/mail.log - Mail server logs"
+            ]
+          },
+          
+          "journald": {
+            "description": "systemd's journal - binary structured logs",
+            "advantages": [
+              "Structured data (can filter by fields)",
+              "Boot isolation",
+              "Automatic rotation",
+              "Faster searches"
+            ],
+            "common_commands": [
+              "journalctl                              # All logs",
+              "journalctl -u sshd                      # Specific service",
+              "journalctl -f                           # Follow (like tail -f)",
+              "journalctl --since '1 hour ago'         # Time-based",
+              "journalctl -p err                       # Priority filter",
+              "journalctl _UID=1000                    # By user ID",
+              "journalctl -o json-pretty               # JSON output",
+              "journalctl --disk-usage                 # Check size",
+              "journalctl --vacuum-time=7d             # Delete logs older than 7 days"
+            ]
+          }
+        },
+        {
+          "section_id": "7.2",
+          "title": "Security Log Analysis",
+          "content": "Practical techniques for analyzing logs to detect security events.",
+          
+          "auth_log_analysis": {
+            "description": "Authentication logs are goldmine for security",
+            "debian_file": "/var/log/auth.log",
+            "almalinux_file": "/var/log/secure",
+            
+            "hunt_queries": [
+              {
+                "name": "Failed SSH logins",
+                "command": "grep 'Failed password' /var/log/auth.log | tail -50"
+              },
+              {
+                "name": "Failed logins by IP",
+                "command": "grep 'Failed password' /var/log/auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -rn | head -20"
+              },
+              {
+                "name": "Successful SSH logins",
+                "command": "grep 'Accepted' /var/log/auth.log | tail -50"
+              },
+              {
+                "name": "Sudo commands",
+                "command": "grep 'sudo:' /var/log/auth.log | grep 'COMMAND'"
+              },
+              {
+                "name": "User creation/modification",
+                "command": "grep -E 'useradd|usermod|userdel' /var/log/auth.log"
+              },
+              {
+                "name": "Password changes",
+                "command": "grep 'password changed' /var/log/auth.log"
+              },
+              {
+                "name": "Invalid users",
+                "command": "grep 'Invalid user' /var/log/auth.log | awk '{print $8}' | sort | uniq -c | sort -rn"
+              }
+            ]
+          },
+          
+          "syslog_analysis": {
+            "description": "System logs for general security events",
+            "hunt_queries": [
+              {
+                "name": "Error messages",
+                "command": "grep -i error /var/log/syslog | tail -100"
+              },
+              {
+                "name": "Critical messages",
+                "command": "grep -iE 'critical|emergency|alert' /var/log/syslog"
+              },
+              {
+                "name": "Service failures",
+                "command": "grep 'failed' /var/log/syslog"
+              },
+              {
+                "name": "Kernel security events",
+                "command": "grep -i 'segfault\\|kernel\\|oom' /var/log/syslog"
+              }
+            ]
+          },
+          
+          "log_correlation": {
+            "description": "Combine multiple log sources for fuller picture",
+            "example_scenario": "Investigating a potential breach",
+            "steps": [
+              {
+                "step": 1,
+                "action": "Check auth logs for access",
+                "command": "grep 'Accepted\\|Failed' /var/log/auth.log | grep 'Jan  9'"
+              },
+              {
+                "step": 2,
+                "action": "Check for privilege escalation",
+                "command": "grep 'sudo' /var/log/auth.log | grep 'Jan  9'"
+              },
+              {
+                "step": 3,
+                "action": "Check for new processes",
+                "command": "journalctl --since '2024-01-09 00:00:00' | grep -i exec"
+              },
+              {
+                "step": 4,
+                "action": "Check network connections",
+                "command": "grep -i 'connection\\|connect' /var/log/syslog | grep 'Jan  9'"
+              },
+              {
+                "step": 5,
+                "action": "Build timeline",
+                "command": "cat /var/log/auth.log /var/log/syslog | sort -k1,3 | grep 'Jan  9'"
+              }
+            ]
+          },
+          
+          "automation_tools": [
+            {
+              "tool": "logwatch",
+              "description": "Daily log analysis report",
+              "usage": "logwatch --detail High --mailto admin@example.com"
+            },
+            {
+              "tool": "logrotate",
+              "description": "Automatic log rotation",
+              "config": "/etc/logrotate.conf, /etc/logrotate.d/"
+            },
+            {
+              "tool": "rsyslog",
+              "description": "Log forwarding and processing",
+              "use_case": "Send logs to central SIEM"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": 8,
+      "title": "Security Hardening",
+      "sections": [
+        {
+          "section_id": "8.1",
+          "title": "Initial Hardening Checklist",
+          "content": "Apply these security measures to any new Linux system.",
+          
+          "checklist": [
+            {
+              "category": "User Security",
+              "items": [
+                {
+                  "item": "Disable root SSH login",
+                  "command": "Edit /etc/ssh/sshd_config: PermitRootLogin no"
+                },
+                {
+                  "item": "Use SSH keys instead of passwords",
+                  "command": "ssh-keygen, ssh-copy-id, then PasswordAuthentication no"
+                },
+                {
+                  "item": "Remove/lock unnecessary users",
+                  "command": "usermod -L username"
+                },
+                {
+                  "item": "Enforce password policy",
+                  "debian": "apt install libpam-pwquality; edit /etc/pam.d/common-password",
+                  "almalinux": "Edit /etc/security/pwquality.conf"
+                },
+                {
+                  "item": "Set password expiration",
+                  "command": "chage -M 90 -W 14 username"
+                },
+                {
+                  "item": "Audit sudo configuration",
+                  "command": "visudo - ensure minimal necessary privileges"
+                }
+              ]
+            },
+            {
+              "category": "Network Security",
+              "items": [
+                {
+                  "item": "Enable firewall",
+                  "debian": "ufw enable",
+                  "almalinux": "systemctl enable --now firewalld"
+                },
+                {
+                  "item": "Deny all incoming by default",
+                  "debian": "ufw default deny incoming",
+                  "almalinux": "Default zone is public (restrictive)"
+                },
+                {
+                  "item": "Only allow necessary ports",
+                  "principle": "Whitelist approach - deny all, allow specific"
+                },
+                {
+                  "item": "Disable unused network services",
+                  "command": "ss -tuln to identify, systemctl disable to remove"
+                },
+                {
+                  "item": "Install fail2ban",
+                  "command": "apt/dnf install fail2ban && systemctl enable --now fail2ban"
+                }
+              ]
+            },
+            {
+              "category": "System Security",
+              "items": [
+                {
+                  "item": "Keep system updated",
+                  "debian": "apt update && apt upgrade",
+                  "almalinux": "dnf update"
+                },
+                {
+                  "item": "Enable automatic security updates",
+                  "debian": "apt install unattended-upgrades",
+                  "almalinux": "dnf install dnf-automatic"
+                },
+                {
+                  "item": "Remove unnecessary packages",
+                  "command": "Review installed packages, remove unneeded"
+                },
+                {
+                  "item": "Secure /tmp",
+                  "command": "Mount with noexec,nosuid,nodev options"
+                },
+                {
+                  "item": "Check for SUID/SGID binaries",
+                  "command": "find / -perm /6000 -type f 2>/dev/null"
+                },
+                {
+                  "item": "Enable auditd",
+                  "command": "apt/dnf install auditd && systemctl enable --now auditd"
+                }
+              ]
+            },
+            {
+              "category": "Integrity & Monitoring",
+              "items": [
+                {
+                  "item": "Install AIDE (file integrity)",
+                  "command": "apt/dnf install aide && aide --init"
+                },
+                {
+                  "item": "Configure log rotation",
+                  "command": "Review /etc/logrotate.conf"
+                },
+                {
+                  "item": "Enable process accounting",
+                  "command": "apt/dnf install acct && systemctl enable --now acct"
+                },
+                {
+                  "item": "Regular security audits",
+                  "command": "lynis audit system"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_id": "8.2",
+          "title": "Security Auditing with Lynis",
+          "content": "Lynis is an open-source security auditing tool that performs comprehensive system checks.",
+          
+          "installation": {
+            "debian": "apt install lynis",
+            "almalinux": "dnf install lynis  # Requires EPEL"
+          },
+          
+          "usage": {
+            "basic_audit": "lynis audit system",
+            "quick_check": "lynis audit system --quick",
+            "specific_tests": "lynis audit system --tests authentication",
+            "report": "lynis audit system --report-file /tmp/lynis-report.txt"
+          },
+          
+          "output_sections": [
+            "System Information",
+            "Boot and Services",
+            "Kernel Configuration",
+            "Memory and Processes",
+            "Users, Groups and Authentication",
+            "Shells",
+            "File Systems",
+            "USB Devices",
+            "Storage",
+            "NFS",
+            "Name Services",
+            "Ports and Packages",
+            "Networking",
+            "Printers and Spools",
+            "Software: E-mail and Messaging",
+            "Software: Firewalls",
+            "Software: Webserver",
+            "SSH Support",
+            "SNMP Support",
+            "Databases",
+            "LDAP Services",
+            "PHP",
+            "Squid Support",
+            "Logging and Files",
+            "Insecure Services",
+            "Banners and Identification",
+            "Scheduled Tasks",
+            "Accounting",
+            "Time and Synchronization",
+            "Cryptography",
+            "Virtualization",
+            "Containers",
+            "Security Frameworks",
+            "Software: File Integrity",
+            "Software: System Tooling",
+            "Software: Malware Scanners",
+            "Home Directories",
+            "Kernel Hardening",
+            "Hardening"
+          ],
+          
+          "interpreting_results": {
+            "hardening_index": "Score 0-100 representing security posture",
+            "warnings": "Issues requiring attention",
+            "suggestions": "Recommended improvements",
+            "focus_areas": [
+              "Red warnings - address immediately",
+              "Suggestions with [impact: HIGH] priority",
+              "Authentication and access control findings"
+            ]
+          }
+        },
+        {
+          "section_id": "8.3",
+          "title": "SELinux (AlmaLinux) and AppArmor (Debian)",
+          "content": "Mandatory Access Control (MAC) provides additional security beyond traditional permissions.",
+          
+          "selinux": {
+            "description": "Security-Enhanced Linux - default on RHEL/AlmaLinux",
+            "modes": {
+              "enforcing": "Policies enforced, violations blocked and logged",
+              "permissive": "Violations logged but not blocked (testing)",
+              "disabled": "SELinux completely off (not recommended)"
+            },
+            "commands": [
+              {
+                "command": "getenforce",
+                "description": "Show current mode"
+              },
+              {
+                "command": "setenforce 0",
+                "description": "Temporarily set permissive"
+              },
+              {
+                "command": "setenforce 1",
+                "description": "Temporarily set enforcing"
+              },
+              {
+                "command": "sestatus",
+                "description": "Detailed status"
+              },
+              {
+                "command": "ls -Z",
+                "description": "Show SELinux context on files"
+              },
+              {
+                "command": "ps auxZ",
+                "description": "Show SELinux context on processes"
+              },
+              {
+                "command": "chcon -t httpd_sys_content_t /var/www/html/",
+                "description": "Change file context"
+              },
+              {
+                "command": "restorecon -Rv /var/www/",
+                "description": "Restore default context"
+              },
+              {
+                "command": "ausearch -m AVC -ts recent",
+                "description": "Search for recent denials"
+              },
+              {
+                "command": "sealert -a /var/log/audit/audit.log",
+                "description": "Analyze SELinux alerts"
+              }
+            ],
+            "config_file": "/etc/selinux/config",
+            "best_practice": "Keep SELinux in enforcing mode - learn to work with it, not disable it"
+          },
+          
+          "apparmor": {
+            "description": "Application Armor - default on Debian/Ubuntu",
+            "modes": {
+              "enforce": "Profile restrictions enforced",
+              "complain": "Violations logged but allowed"
+            },
+            "commands": [
+              {
+                "command": "aa-status",
+                "description": "Show AppArmor status and profiles"
+              },
+              {
+                "command": "aa-enforce /etc/apparmor.d/profile",
+                "description": "Set profile to enforce mode"
+              },
+              {
+                "command": "aa-complain /etc/apparmor.d/profile",
+                "description": "Set profile to complain mode"
+              },
+              {
+                "command": "aa-disable /etc/apparmor.d/profile",
+                "description": "Disable a profile"
+              },
+              {
+                "command": "aa-genprof /path/to/binary",
+                "description": "Generate new profile"
+              },
+              {
+                "command": "aa-logprof",
+                "description": "Update profile based on logs"
+              }
+            ],
+            "profiles_location": "/etc/apparmor.d/",
+            "logs": "/var/log/syslog (grep apparmor)"
+          }
+        }
+      ]
+    },
+    {
+      "chapter_id": 9,
+      "title": "Hands-On Labs",
+      "sections": [
+        {
+          "section_id": "9.1",
+          "title": "Lab 1: Initial Server Hardening",
+          "content": "Practice securing a fresh Linux installation",
+          
+          "objective": "Harden a new Debian or AlmaLinux server following security best practices",
+          "duration": "45-60 minutes",
+          
+          "tasks": [
+            {
+              "task": 1,
+              "title": "System Update",
+              "debian": [
+                "apt update",
+                "apt upgrade -y"
+              ],
+              "almalinux": [
+                "dnf update -y"
+              ],
+              "verify": "Check for 0 packages to upgrade"
+            },
+            {
+              "task": 2,
+              "title": "Create Admin User",
+              "commands": [
+                "useradd -m -s /bin/bash -G sudo,adm secadmin  # Debian",
+                "useradd -m -s /bin/bash secadmin && usermod -aG wheel secadmin  # AlmaLinux",
+                "passwd secadmin"
+              ],
+              "verify": "id secadmin - should show sudo/wheel group"
+            },
+            {
+              "task": 3,
+              "title": "Configure SSH Keys",
+              "commands": [
+                "# On your local machine:",
+                "ssh-keygen -t ed25519",
+                "ssh-copy-id secadmin@server-ip",
+                "# Test: ssh secadmin@server-ip (should not ask for password)"
+              ],
+              "verify": "Can login without password"
+            },
+            {
+              "task": 4,
+              "title": "Harden SSH Configuration",
+              "commands": [
+                "cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak",
+                "# Edit /etc/ssh/sshd_config:",
+                "# PermitRootLogin no",
+                "# PasswordAuthentication no",
+                "# MaxAuthTries 3",
+                "sshd -t  # Test config",
+                "systemctl restart sshd"
+              ],
+              "verify": "ssh root@server should be denied"
+            },
+            {
+              "task": 5,
+              "title": "Configure Firewall",
+              "debian": [
+                "apt install ufw",
+                "ufw default deny incoming",
+                "ufw default allow outgoing",
+                "ufw allow ssh",
+                "ufw enable"
+              ],
+              "almalinux": [
+                "systemctl enable --now firewalld",
+                "firewall-cmd --add-service=ssh --permanent",
+                "firewall-cmd --reload"
+              ],
+              "verify": "ufw status / firewall-cmd --list-all"
+            },
+            {
+              "task": 6,
+              "title": "Install fail2ban",
+              "commands": [
+                "apt install fail2ban  # Debian",
+                "dnf install epel-release && dnf install fail2ban  # AlmaLinux",
+                "systemctl enable --now fail2ban"
+              ],
+              "verify": "fail2ban-client status sshd"
+            },
+            {
+              "task": 7,
+              "title": "Run Security Audit",
+              "commands": [
+                "apt install lynis  # Debian",
+                "dnf install lynis  # AlmaLinux (EPEL)",
+                "lynis audit system"
+              ],
+              "verify": "Note hardening index, review warnings"
+            }
+          ],
+          
+          "success_criteria": [
+            "Cannot login as root via SSH",
+            "Cannot login with password (key only)",
+            "Firewall is active with only SSH allowed",
+            "fail2ban is protecting SSH",
+            "Lynis hardening index > 60"
+          ]
+        },
+        {
+          "section_id": "9.2",
+          "title": "Lab 2: Log Analysis Investigation",
+          "content": "Practice analyzing logs to detect security events",
+          
+          "objective": "Analyze authentication logs to identify suspicious activity",
+          "duration": "30-45 minutes",
+          
+          "scenario": "You've been asked to review the authentication logs for a server that may have been targeted by attackers.",
+          
+          "tasks": [
+            {
+              "task": 1,
+              "title": "Identify Failed Login Attempts",
+              "command": "grep 'Failed password' /var/log/auth.log | wc -l",
+              "question": "How many failed login attempts occurred?"
+            },
+            {
+              "task": 2,
+              "title": "Find Top Attacking IPs",
+              "command": "grep 'Failed password' /var/log/auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -rn | head -10",
+              "question": "Which IP has the most failed attempts?"
+            },
+            {
+              "task": 3,
+              "title": "Identify Targeted Usernames",
+              "command": "grep 'Failed password' /var/log/auth.log | awk '{print $(NF-5)}' | sort | uniq -c | sort -rn | head -10",
+              "question": "What usernames are attackers trying?"
+            },
+            {
+              "task": 4,
+              "title": "Check for Successful Compromise",
+              "command": "grep 'Accepted' /var/log/auth.log | grep -v 'your-known-ip'",
+              "question": "Are there any unexpected successful logins?"
+            },
+            {
+              "task": 5,
+              "title": "Review Sudo Activity",
+              "command": "grep 'sudo:' /var/log/auth.log | grep 'COMMAND'",
+              "question": "What privileged commands were executed?"
+            },
+            {
+              "task": 6,
+              "title": "Build Timeline",
+              "command": "grep -E 'Failed|Accepted|sudo' /var/log/auth.log | tail -100",
+              "question": "Create a timeline of events"
+            }
+          ],
+          
+          "report_template": [
+            "## Security Log Analysis Report",
+            "",
+            "### Summary",
+            "- Total failed login attempts: ___",
+            "- Unique attacking IPs: ___",
+            "- Time period analyzed: ___",
+            "",
+            "### Top Attackers",
+            "| IP Address | Failed Attempts |",
+            "|------------|-----------------|",
+            "",
+            "### Targeted Accounts",
+            "| Username | Attempts |",
+            "|----------|----------|",
+            "",
+            "### Findings",
+            "1. ...",
+            "2. ...",
+            "",
+            "### Recommendations",
+            "1. Block attacking IPs in firewall",
+            "2. Review successful logins for compromise",
+            "3. ..."
+          ]
+        },
+        {
+          "section_id": "9.3",
+          "title": "Lab 3: Network Security Assessment",
+          "content": "Practice identifying network security issues",
+          
+          "objective": "Audit network configuration and identify security concerns",
+          "duration": "30 minutes",
+          
+          "tasks": [
+            {
+              "task": 1,
+              "title": "Identify Listening Services",
+              "command": "ss -tuln",
+              "question": "What services are listening? Are any unexpected?"
+            },
+            {
+              "task": 2,
+              "title": "Check External Exposure",
+              "command": "ss -tuln | grep -v '127.0.0.1\\|::1'",
+              "question": "What's exposed to the network?"
+            },
+            {
+              "task": 3,
+              "title": "Review Firewall Rules",
+              "debian": "ufw status verbose",
+              "almalinux": "firewall-cmd --list-all",
+              "question": "Are the rules appropriately restrictive?"
+            },
+            {
+              "task": 4,
+              "title": "Check for World-Accessible Services",
+              "command": "ss -tuln | grep '0.0.0.0\\|::' | grep -v ':22'",
+              "question": "Which services accept connections from anywhere?"
+            },
+            {
+              "task": 5,
+              "title": "Verify SSH Configuration",
+              "command": "grep -E '^(PermitRootLogin|PasswordAuthentication|Port)' /etc/ssh/sshd_config",
+              "question": "Is SSH securely configured?"
+            },
+            {
+              "task": 6,
+              "title": "Check Active Connections",
+              "command": "ss -tunap | grep ESTABLISHED",
+              "question": "What active connections exist? Any suspicious?"
+            }
+          ],
+          
+          "security_checklist": [
+            "[ ] Only necessary ports are open",
+            "[ ] No services bound to 0.0.0.0 unless intended",
+            "[ ] Firewall is active and restrictive",
+            "[ ] SSH is hardened (no root, no password)",
+            "[ ] No unexpected established connections"
+          ]
+        }
+      ]
+    }
+  ],
+  
+  "quick_reference": {
+    "package_management": {
+      "debian": {
+        "update": "apt update && apt upgrade",
+        "install": "apt install package",
+        "remove": "apt remove package",
+        "search": "apt search keyword",
+        "info": "apt show package"
+      },
+      "almalinux": {
+        "update": "dnf update",
+        "install": "dnf install package",
+        "remove": "dnf remove package",
+        "search": "dnf search keyword",
+        "info": "dnf info package"
+      }
+    },
+    "service_management": {
+      "start": "systemctl start service",
+      "stop": "systemctl stop service",
+      "restart": "systemctl restart service",
+      "enable": "systemctl enable service",
+      "status": "systemctl status service",
+      "logs": "journalctl -u service"
+    },
+    "firewall": {
+      "debian_ufw": {
+        "enable": "ufw enable",
+        "status": "ufw status",
+        "allow": "ufw allow port/service",
+        "deny": "ufw deny port"
+      },
+      "almalinux_firewalld": {
+        "status": "firewall-cmd --state",
+        "list": "firewall-cmd --list-all",
+        "add": "firewall-cmd --add-service=name --permanent",
+        "reload": "firewall-cmd --reload"
+      }
+    },
+    "user_management": {
+      "add_user": "useradd -m username",
+      "set_password": "passwd username",
+      "add_to_sudo": {
+        "debian": "usermod -aG sudo username",
+        "almalinux": "usermod -aG wheel username"
+      },
+      "lock_user": "usermod -L username",
+      "delete_user": "userdel -r username"
+    },
+    "essential_paths": {
+      "logs": "/var/log/",
+      "auth_log": {
+        "debian": "/var/log/auth.log",
+        "almalinux": "/var/log/secure"
+      },
+      "ssh_config": "/etc/ssh/sshd_config",
+      "sudoers": "/etc/sudoers",
+      "passwd": "/etc/passwd",
+      "shadow": "/etc/shadow"
+    }
+  },
+  
+  "exam_tips": [
+    "Know the difference between apt (Debian) and dnf (RHEL) commands",
+    "Understand file permissions (rwx, 755, SUID, SGID, sticky bit)",
+    "Know where security logs are stored on different distros",
+    "Understand systemd service management (systemctl, journalctl)",
+    "Know basic firewall configuration (ufw for Debian, firewalld for RHEL)",
+    "Understand SSH hardening options",
+    "Know the filesystem hierarchy (/etc, /var/log, /tmp security)",
+    "Understand sudo configuration and security",
+    "Know how to find SUID/SGID binaries and why they matter",
+    "Understand mandatory access control (SELinux modes, AppArmor profiles)"
+  ]
+}
