@@ -63,7 +63,7 @@
     /**
      * Show the main Linux Setup page
      */
-    async function showLinuxSetup() {
+    async function showLinuxGuide() {
         console.log('🐧 Loading Linux Guide...');
         
         const content = document.getElementById('content');
@@ -76,7 +76,7 @@
                     <div class="error-message">
                         <h2>⚠️ Error Loading Linux Guide</h2>
                         <p>Could not load the Linux guide data. Please try again.</p>
-                        <button class="btn btn-primary" onclick="showLinuxSetup()">Retry</button>
+                        <button class="btn btn-primary" onclick="showLinuxGuide()">Retry</button>
                     </div>
                 </div>
             `;
@@ -193,7 +193,7 @@
         
         content.innerHTML = `
             <div class="container linux-guide">
-                <button class="back-btn" onclick="showLinuxSetup()">← Back to Linux Guide</button>
+                <button class="back-btn" onclick="showLinuxGuide()">← Back to Linux Guide</button>
                 
                 <div class="chapter-header">
                     <span class="chapter-badge">Chapter ${chapter.chapter_id}</span>
@@ -243,7 +243,7 @@
                             Next: ${escapeHtml(data.chapters[chapterIndex + 1].title)} →
                         </button>
                     ` : `
-                        <button class="btn btn-success" onclick="showLinuxSetup()">
+                        <button class="btn btn-success" onclick="showLinuxGuide()">
                             ✓ Complete Guide
                         </button>
                     `}
@@ -1070,7 +1070,7 @@
         
         content.innerHTML = `
             <div class="container linux-guide">
-                <button class="back-btn" onclick="showLinuxSetup()">← Back to Linux Guide</button>
+                <button class="back-btn" onclick="showLinuxGuide()">← Back to Linux Guide</button>
                 
                 <h1>⚡ Quick Reference</h1>
                 
@@ -1185,16 +1185,17 @@
     // ═══════════════════════════════════════════════════════════════════════════
     
     window.LinuxGuide = {
-        show: showLinuxSetup,
+        show: showLinuxGuide,  // Renamed to avoid confusion
         showChapter,
         showQuickReference,
         setDistro,
         scrollToSection
     };
     
-    // Make showLinuxSetup globally available
-    window.showLinuxSetup = showLinuxSetup;
+    // NOTE: We do NOT override window.showLinuxGuide here!
+    // The original showLinuxGuide() from app.js should remain untouched.
+    // Use window.LinuxGuide.show() for the detailed guide view.
     
-    console.log('✅ Linux Guide module loaded');
+    console.log('✅ Linux Guide module loaded (window.LinuxGuide.show available)');
     
 })();

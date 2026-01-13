@@ -60,7 +60,7 @@
         header.innerHTML = `
             <div class="header-brand">
                 <span>🛡️</span>
-                <span>Security+ v33</span>
+                <span>Security+ v34</span>
             </div>
             <nav class="header-nav">
                 <button class="nav-btn" onclick="showDashboard()">🏠 Dashboard</button>
