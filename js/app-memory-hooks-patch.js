@@ -12,7 +12,26 @@
 (function() {
     'use strict';
     
-    console.log('🔧 Applying Memory Hooks patches to app.js...');
+    console.log('🔧 Memory Hooks patches loading...');
+    
+    // Wait for DOM and app to be ready
+    function waitForApp(callback, maxAttempts = 50) {
+        let attempts = 0;
+        const check = setInterval(() => {
+            attempts++;
+            if (window.APP && document.getElementById('content')) {
+                clearInterval(check);
+                console.log('🔧 App ready, applying Memory Hooks patches...');
+                callback();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(check);
+                console.error('Memory Hooks patches: Timeout waiting for APP');
+            }
+        }, 100);
+    }
+    
+    // Main initialization
+    function applyPatches() {
     
     // ═══════════════════════════════════════════════════════════════════════════
     // Patch 1: Add Weak Spots Review to Navigation Header
@@ -252,10 +271,17 @@
     // Refresh header if it exists
     setTimeout(function() {
         if (document.querySelector('.header-bar')) {
-            window.createHeader();
+            if (typeof window.createHeader === 'function') {
+                window.createHeader();
+            }
         }
     }, 500);
     
     console.log('✅ Memory Hooks patches applied successfully');
+    
+    } // End of applyPatches function
+    
+    // Start when app is ready
+    waitForApp(applyPatches);
     
 })();
