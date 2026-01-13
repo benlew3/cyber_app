@@ -6,3 +6,6 @@ This app is more focused on simulations and quizzes as well as a mock exam. Ther
   <br>
 Feel free to use this as much as you like!
 </h3>
+
+
+<p style="font-size: 6px;"> version 34</p>
