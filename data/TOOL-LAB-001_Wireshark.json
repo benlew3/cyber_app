@@ -1,0 +1,591 @@
+{
+  "lab_id": "TOOL-LAB-001",
+  "tool_name": "Wireshark",
+  "tool_category": "Network Analysis",
+  "version": "1.0",
+  
+  "metadata": {
+    "difficulty": "beginner",
+    "estimated_time": "2-3 hours",
+    "last_updated": "2025-01-13",
+    "author": "Security+ Training System"
+  },
+  
+  "overview": {
+    "tagline": "The World's Most Popular Network Protocol Analyzer",
+    "description": "Wireshark is the gold standard for network traffic analysis. It captures packets in real-time and lets you dive deep into network protocols. Security analysts use it daily to investigate suspicious traffic, troubleshoot network issues, and analyze malware communications.",
+    "official_site": "https://www.wireshark.org/",
+    "download_url": "https://www.wireshark.org/download.html",
+    "license": "Open Source (GPL)",
+    "platforms": ["Windows", "Linux", "macOS"],
+    "why_learn": "If you can't analyze network traffic, you can't do security. Period. Wireshark is essential for incident response, threat hunting, and forensics."
+  },
+  
+  "security_plus_relevance": {
+    "domains": [3, 4],
+    "objectives": ["3.2", "4.1", "4.4", "4.5"],
+    "exam_topics": [
+      "Network infrastructure concepts and protocols",
+      "Security monitoring and analysis",
+      "Packet analysis and network forensics",
+      "Identifying malicious network activity"
+    ],
+    "exam_question_types": [
+      "Identifying protocols from packet captures",
+      "Recognizing attack patterns in traffic",
+      "Understanding TCP/IP fundamentals",
+      "Analyzing encrypted vs unencrypted traffic"
+    ]
+  },
+  
+  "career_relevance": {
+    "soc_analyst": {
+      "relevance": "critical",
+      "percentage_of_job": "30-40%",
+      "usage": "Analyzing alerts, investigating suspicious connections, validating IDS/IPS findings"
+    },
+    "incident_responder": {
+      "relevance": "critical", 
+      "percentage_of_job": "25-35%",
+      "usage": "Investigating breaches, analyzing malware C2, reconstructing attack timelines"
+    },
+    "security_engineer": {
+      "relevance": "high",
+      "percentage_of_job": "15-20%",
+      "usage": "Troubleshooting security tools, validating firewall rules, testing encryption"
+    },
+    "penetration_tester": {
+      "relevance": "high",
+      "percentage_of_job": "20-25%",
+      "usage": "Capturing credentials, analyzing target traffic, validating exploits"
+    },
+    "grc_analyst": {
+      "relevance": "low",
+      "percentage_of_job": "5%",
+      "usage": "Validating encryption compliance, audit evidence collection"
+    }
+  },
+  
+  "prerequisites": {
+    "knowledge": [
+      "Basic understanding of TCP/IP (IP addresses, ports)",
+      "Familiarity with common protocols (HTTP, DNS, TCP, UDP)",
+      "Understanding of client-server communication"
+    ],
+    "tools_needed": [
+      "Wireshark (free download)",
+      "VirtualBox or VMware (for safe capture environment)",
+      "A Linux VM (Kali, Ubuntu, or your Debian/AlmaLinux)"
+    ],
+    "files_provided": [
+      "Sample PCAP files linked in each project"
+    ],
+    "estimated_setup_time": "20-30 minutes"
+  },
+  
+  "quick_start": {
+    "installation_steps": [
+      {
+        "step": 1,
+        "title": "Download Wireshark",
+        "instructions": "Visit wireshark.org/download.html and download the installer for your OS.",
+        "platform_specific": {
+          "windows": "Download the Windows x64 Installer",
+          "linux": "Use package manager: sudo apt install wireshark (Debian) or sudo dnf install wireshark (RHEL)",
+          "macos": "Download the macOS Intel or Arm installer"
+        }
+      },
+      {
+        "step": 2,
+        "title": "Install with Capture Permissions",
+        "instructions": "During installation, allow non-root users to capture packets when prompted.",
+        "platform_specific": {
+          "windows": "Check 'Install Npcap' during installation",
+          "linux": "Add your user to wireshark group: sudo usermod -aG wireshark $USER (then log out/in)",
+          "macos": "Grant capture permissions when prompted"
+        }
+      },
+      {
+        "step": 3,
+        "title": "Launch and Verify",
+        "instructions": "Open Wireshark. You should see your network interfaces listed.",
+        "verification": "If you see interfaces like 'eth0', 'Wi-Fi', or 'Ethernet', you're ready to go!"
+      }
+    ],
+    "first_run": "Double-click any interface to start capturing. You'll see packets appear immediately. Click the red stop button when done.",
+    "verification": "Browse to any website while capturing - you should see HTTP/HTTPS packets appear."
+  },
+  
+  "core_concepts": [
+    {
+      "concept_id": "packets",
+      "title": "Packets & Frames",
+      "explanation": "Network data is broken into small chunks called packets. Wireshark shows each packet with details about all its protocol layers.",
+      "why_it_matters": "Understanding packet structure is fundamental to analyzing what's happening on a network.",
+      "exam_tip": "Know the OSI layers and how they map to packet structure (Ethernet frame → IP packet → TCP segment → Application data)"
+    },
+    {
+      "concept_id": "filters",
+      "title": "Display Filters",
+      "explanation": "Filters let you focus on specific traffic. Without them, you're drowning in noise.",
+      "why_it_matters": "Real captures have thousands of packets. Filters help you find the needle in the haystack.",
+      "exam_tip": "Common filters: 'http', 'dns', 'tcp.port==443', 'ip.addr==192.168.1.1'"
+    },
+    {
+      "concept_id": "streams",
+      "title": "Following Streams",
+      "explanation": "TCP Stream shows the complete conversation between two hosts. HTTP stream shows the request and response together.",
+      "why_it_matters": "Individual packets are fragments - streams show the whole picture.",
+      "exam_tip": "Right-click → Follow → TCP Stream is one of the most powerful features"
+    },
+    {
+      "concept_id": "protocols",
+      "title": "Protocol Dissection",
+      "explanation": "Wireshark decodes hundreds of protocols automatically, showing you field-by-field details.",
+      "why_it_matters": "You don't need to memorize hex - Wireshark translates it for you.",
+      "exam_tip": "Expand protocol layers in the middle pane to see decoded fields"
+    }
+  ],
+  
+  "mini_projects": [
+    {
+      "project_id": "project-1",
+      "title": "Your First Capture: HTTP Traffic Analysis",
+      "difficulty": "beginner",
+      "estimated_time": "30-45 minutes",
+      "description": "Capture live HTTP traffic, apply filters, and extract information from web requests.",
+      "learning_objectives": [
+        "Start and stop packet captures",
+        "Apply display filters",
+        "Navigate the Wireshark interface",
+        "Extract data from HTTP requests"
+      ],
+      "scenario": "You're a SOC analyst investigating a user who may have visited a suspicious website. You need to capture and analyze their web traffic.",
+      
+      "setup": {
+        "files_needed": [],
+        "environment": "Your local machine with Wireshark installed. Use a VM for safer practice.",
+        "notes": "We'll capture LIVE traffic for this exercise. Use a test VM or be aware you'll see your own traffic."
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Start a Capture",
+          "instructions": "1. Open Wireshark\n2. Select your active network interface (usually 'Wi-Fi' or 'Ethernet')\n3. Double-click the interface to start capturing\n4. You should see packets appearing in real-time",
+          "hints": ["If no packets appear, try a different interface", "The interface with traffic will show a sparkline graph"],
+          "expected_result": "Packets flowing in the main window with colored rows",
+          "common_mistakes": ["Selecting wrong interface (loopback won't show external traffic)", "Not having capture permissions"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Generate HTTP Traffic",
+          "instructions": "1. Open a web browser\n2. Visit http://httpforever.com (a site that still uses HTTP)\n3. Click around on the page\n4. Return to Wireshark and click the red STOP button",
+          "hints": ["Most sites use HTTPS now - httpforever.com is one that doesn't", "HTTP traffic is unencrypted and easy to read"],
+          "expected_result": "Your capture now contains HTTP packets mixed with other traffic",
+          "common_mistakes": ["Visiting HTTPS sites (encrypted, can't see content)", "Forgetting to stop the capture"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Apply an HTTP Filter",
+          "instructions": "1. In the filter bar at the top, type: http\n2. Press Enter\n3. Only HTTP packets should now be visible",
+          "hints": ["Filter bar turns green when filter is valid", "Red means syntax error"],
+          "expected_result": "Only blue/green HTTP packets visible, all others hidden",
+          "common_mistakes": ["Typing 'HTTP' (filters are case-sensitive)", "Confusing display filters with capture filters"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Examine an HTTP Request",
+          "instructions": "1. Find a packet that says 'GET' in the Info column\n2. Click on it\n3. In the middle pane, expand 'Hypertext Transfer Protocol'\n4. Look at the Host, User-Agent, and other fields",
+          "hints": ["GET requests fetch web pages", "The User-Agent tells you what browser was used"],
+          "expected_result": "You can see the full HTTP request including headers",
+          "common_mistakes": ["Looking at response instead of request", "Not expanding the protocol tree"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Follow the HTTP Stream",
+          "instructions": "1. Right-click on an HTTP packet\n2. Select Follow → HTTP Stream\n3. A new window shows the complete conversation\n4. Blue = request (client → server), Red = response (server → client)",
+          "hints": ["This shows request AND response together", "You can see HTML content returned"],
+          "expected_result": "A window showing the full HTTP conversation in readable text",
+          "common_mistakes": ["Selecting wrong stream type (use HTTP Stream for HTTP packets)"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What is the User-Agent string in your HTTP request?",
+          "answer": "Varies - should show your browser name and version",
+          "explanation": "User-Agent identifies the client software. Attackers sometimes forge this."
+        },
+        {
+          "question": "What HTTP method was used to request the page?",
+          "answer": "GET",
+          "explanation": "GET retrieves resources. POST sends data. PUT updates. DELETE removes."
+        },
+        {
+          "question": "What was the HTTP response code?",
+          "answer": "200 OK (most likely)",
+          "explanation": "200 = success, 301/302 = redirect, 404 = not found, 500 = server error"
+        }
+      ],
+      
+      "takeaways": [
+        "HTTP traffic is completely visible - anyone on the network can see it",
+        "This is why HTTPS (encrypted) is important for sensitive data",
+        "Filters are essential for finding relevant traffic in large captures"
+      ]
+    },
+    {
+      "project_id": "project-2",
+      "title": "Analyzing a Suspicious PCAP File",
+      "difficulty": "intermediate",
+      "estimated_time": "45-60 minutes",
+      "description": "Analyze a pre-captured PCAP file containing suspicious activity. Find the malware download and extracted credentials.",
+      "learning_objectives": [
+        "Open and analyze PCAP files",
+        "Use advanced display filters",
+        "Identify suspicious network patterns",
+        "Extract files from packet captures"
+      ],
+      "scenario": "An IDS alert fired for a workstation. You've been given a PCAP of the network traffic. Find evidence of compromise.",
+      
+      "setup": {
+        "files_needed": ["suspicious-traffic.pcap"],
+        "file_sources": [
+          {
+            "name": "Malware Traffic Analysis Samples",
+            "url": "https://www.malware-traffic-analysis.net/training-exercises.html",
+            "description": "Real malware PCAP samples (use 2024 exercises)"
+          },
+          {
+            "name": "Wireshark Sample Captures",
+            "url": "https://wiki.wireshark.org/SampleCaptures",
+            "description": "Official Wireshark sample files"
+          }
+        ],
+        "environment": "Open the PCAP in Wireshark (File → Open). No live capture needed."
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Get an Overview with Statistics",
+          "instructions": "1. Open the PCAP file\n2. Go to Statistics → Protocol Hierarchy\n3. Note which protocols are present and their percentages\n4. Go to Statistics → Conversations → TCP tab\n5. Sort by Bytes to find the largest conversations",
+          "hints": ["Large data transfers might indicate exfiltration", "Unusual protocols might indicate tunneling"],
+          "expected_result": "A list of protocols and top talkers in the capture",
+          "common_mistakes": ["Jumping straight to packets without getting overview first"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Find DNS Queries",
+          "instructions": "1. Apply filter: dns\n2. Look for unusual domain names\n3. Note domains that look suspicious (random strings, unusual TLDs)\n4. Right-click a DNS query and select 'Apply as Column' on the query name",
+          "hints": ["Malware often uses randomly generated domain names (DGA)", "Look for .xyz, .top, .tk domains"],
+          "expected_result": "List of domains the host tried to resolve",
+          "common_mistakes": ["Ignoring DNS - it reveals what sites were contacted before connection"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Investigate HTTP Downloads",
+          "instructions": "1. Apply filter: http.request.method == \"GET\"\n2. Look for file downloads (.exe, .dll, .js, .vbs)\n3. Check the host and URI for each request\n4. Go to File → Export Objects → HTTP\n5. Look at the list of downloadable files",
+          "hints": ["Malware often downloads additional payloads via HTTP", "Look for files with suspicious names"],
+          "expected_result": "List of files downloaded over HTTP",
+          "common_mistakes": ["Not using Export Objects feature", "Only looking at packet list"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Look for Unencrypted Credentials",
+          "instructions": "1. Apply filter: http.request.method == \"POST\"\n2. Look for login forms or authentication\n3. Follow the HTTP stream for any POST requests\n4. Look for username/password fields in the data",
+          "hints": ["POST often contains form submissions", "Credentials in HTTP are visible in plain text"],
+          "expected_result": "Any credentials submitted over unencrypted HTTP",
+          "common_mistakes": ["Not following the stream to see POST data"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Identify Command & Control (C2)",
+          "instructions": "1. Apply filter: tcp.flags.syn == 1 && tcp.flags.ack == 0\n2. This shows outbound connection attempts\n3. Look for connections to unusual ports or IPs\n4. Check the frequency - regular intervals suggest C2 beaconing",
+          "hints": ["C2 often beacons at regular intervals (every 60s, 5min, etc.)", "Look for connections to non-standard ports"],
+          "expected_result": "Suspicious outbound connections identified",
+          "common_mistakes": ["Not recognizing beaconing patterns"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What suspicious domain(s) did the host try to contact?",
+          "answer": "Varies by PCAP - look for DGA domains or suspicious TLDs",
+          "explanation": "Malware often uses dynamically generated domains or unusual TLDs"
+        },
+        {
+          "question": "Were any executable files downloaded? What were their names?",
+          "answer": "Varies - check Export Objects → HTTP",
+          "explanation": "Malware droppers download additional payloads"
+        },
+        {
+          "question": "What evidence of C2 communication did you find?",
+          "answer": "Regular beacon intervals, unusual ports, encoded data",
+          "explanation": "C2 maintains attacker access to compromised systems"
+        }
+      ],
+      
+      "takeaways": [
+        "Always start with statistics for an overview before diving into packets",
+        "DNS queries reveal intent before connections are made",
+        "Export Objects saves time when extracting downloaded files",
+        "Regular connection patterns often indicate C2 beaconing"
+      ]
+    },
+    {
+      "project_id": "project-3",
+      "title": "Network Forensics Challenge",
+      "difficulty": "advanced",
+      "estimated_time": "60-90 minutes",
+      "description": "A complete forensics scenario: analyze a breach, build a timeline, and write findings.",
+      "learning_objectives": [
+        "Conduct systematic network forensics investigation",
+        "Build an attack timeline from packet data",
+        "Document findings professionally",
+        "Identify indicators of compromise (IOCs)"
+      ],
+      "scenario": "A company detected unusual outbound traffic. Your task: analyze the PCAP, determine what happened, and provide a report with IOCs.",
+      
+      "setup": {
+        "files_needed": ["challenge.pcap"],
+        "file_sources": [
+          {
+            "name": "SANS Holiday Hack Challenge",
+            "url": "https://www.sans.org/mlp/holiday-hack-challenge-2023/",
+            "description": "Annual challenge with PCAP analysis"
+          },
+          {
+            "name": "CyberDefenders",
+            "url": "https://cyberdefenders.org/blueteam-ctf-challenges/",
+            "description": "Blue team CTF challenges with PCAPs"
+          }
+        ],
+        "environment": "Download a challenge PCAP and work through it independently"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Initial Triage",
+          "instructions": "Answer these questions from the PCAP:\n1. What is the time range of the capture?\n2. How many unique IP addresses are involved?\n3. What protocols are present?\n4. Which host appears to be the victim?",
+          "hints": ["View → Time Display Format → Date and Time", "Statistics → Endpoints"],
+          "expected_result": "Basic facts about the capture documented",
+          "common_mistakes": ["Starting detailed analysis before understanding scope"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Build Attack Timeline",
+          "instructions": "Create a timeline of events:\n1. When did suspicious activity start?\n2. What was the initial compromise vector?\n3. What lateral movement occurred?\n4. What data was exfiltrated?",
+          "hints": ["Sort by time", "Look for the first anomaly", "Track the attacker's progression"],
+          "expected_result": "Chronological timeline of the attack",
+          "common_mistakes": ["Missing early reconnaissance activity"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Extract IOCs",
+          "instructions": "Document all Indicators of Compromise:\n1. Malicious IP addresses\n2. Malicious domains\n3. File hashes (if extractable)\n4. User agents used\n5. Any patterns or signatures",
+          "hints": ["These IOCs can be used to detect similar attacks", "Format: type | value | context"],
+          "expected_result": "IOC list ready for threat intelligence sharing",
+          "common_mistakes": ["Including legitimate IPs/domains as IOCs"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Write Executive Summary",
+          "instructions": "Write a brief (1 paragraph) summary for management:\n1. What happened?\n2. What was the impact?\n3. What should be done?",
+          "hints": ["No technical jargon", "Focus on business impact", "Clear recommendations"],
+          "expected_result": "Professional summary suitable for non-technical audience",
+          "common_mistakes": ["Too technical", "Missing recommendations"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What was the initial access vector?",
+          "answer": "Varies - phishing, exploit, etc.",
+          "explanation": "Understanding how attackers get in helps prevent future incidents"
+        },
+        {
+          "question": "What data was exfiltrated (if any)?",
+          "answer": "Varies - check large outbound transfers",
+          "explanation": "Data exfiltration determines breach severity and notification requirements"
+        },
+        {
+          "question": "What IOCs would you share with other organizations?",
+          "answer": "IPs, domains, file hashes, behavioral patterns",
+          "explanation": "IOC sharing helps the community defend against similar attacks"
+        }
+      ],
+      
+      "takeaways": [
+        "Real investigations require systematic methodology",
+        "Documentation is as important as analysis",
+        "IOCs help protect others from the same threat",
+        "Executive summaries translate technical findings into business impact"
+      ]
+    }
+  ],
+  
+  "external_resources": [
+    {
+      "platform": "TryHackMe",
+      "name": "Wireshark 101",
+      "url": "https://tryhackme.com/room/wireshark",
+      "cost": "Free",
+      "difficulty": "beginner",
+      "estimated_time": "2 hours",
+      "description": "Comprehensive Wireshark introduction with guided exercises"
+    },
+    {
+      "platform": "TryHackMe",
+      "name": "Wireshark: Traffic Analysis",
+      "url": "https://tryhackme.com/room/wiresharktrafficanalysis",
+      "cost": "Free",
+      "difficulty": "intermediate",
+      "estimated_time": "2-3 hours",
+      "description": "Analyze malicious traffic patterns"
+    },
+    {
+      "platform": "Malware Traffic Analysis",
+      "name": "Training Exercises",
+      "url": "https://www.malware-traffic-analysis.net/training-exercises.html",
+      "cost": "Free",
+      "difficulty": "intermediate",
+      "estimated_time": "Varies",
+      "description": "Real malware PCAP samples with answers"
+    },
+    {
+      "platform": "CyberDefenders",
+      "name": "Blue Team Labs",
+      "url": "https://cyberdefenders.org/blueteam-ctf-challenges/",
+      "cost": "Free",
+      "difficulty": "intermediate-advanced",
+      "estimated_time": "Varies",
+      "description": "CTF-style challenges including PCAP analysis"
+    }
+  ],
+  
+  "cheat_sheet": {
+    "sections": [
+      {
+        "title": "Essential Display Filters",
+        "commands": [
+          { "command": "ip.addr == 192.168.1.1", "description": "Traffic to/from specific IP" },
+          { "command": "ip.src == 10.0.0.0/8", "description": "Traffic from subnet" },
+          { "command": "tcp.port == 80", "description": "Traffic on specific port" },
+          { "command": "http", "description": "All HTTP traffic" },
+          { "command": "dns", "description": "All DNS traffic" },
+          { "command": "tcp.flags.syn == 1", "description": "TCP SYN packets (connection starts)" },
+          { "command": "http.request.method == \"POST\"", "description": "HTTP POST requests" },
+          { "command": "frame contains \"password\"", "description": "Packets containing string" },
+          { "command": "!(arp or dns or icmp)", "description": "Exclude common noise" },
+          { "command": "tcp.analysis.retransmission", "description": "Retransmitted packets" }
+        ]
+      },
+      {
+        "title": "Combining Filters",
+        "commands": [
+          { "command": "http && ip.addr == 192.168.1.1", "description": "HTTP from specific host" },
+          { "command": "dns || http", "description": "DNS or HTTP traffic" },
+          { "command": "!broadcast && !multicast", "description": "Exclude broadcast/multicast" },
+          { "command": "(http.request or http.response)", "description": "HTTP requests and responses" }
+        ]
+      },
+      {
+        "title": "Keyboard Shortcuts",
+        "commands": [
+          { "command": "Ctrl+E", "description": "Start/Stop capture" },
+          { "command": "Ctrl+F", "description": "Find packet" },
+          { "command": "Ctrl+G", "description": "Go to packet number" },
+          { "command": "Ctrl+Shift+E", "description": "Export specified packets" },
+          { "command": "Ctrl+Alt+Shift+T", "description": "Follow TCP stream" }
+        ]
+      },
+      {
+        "title": "Statistics Menu Essentials",
+        "commands": [
+          { "command": "Statistics → Protocol Hierarchy", "description": "Protocol breakdown" },
+          { "command": "Statistics → Conversations", "description": "Top talkers" },
+          { "command": "Statistics → Endpoints", "description": "All hosts in capture" },
+          { "command": "Statistics → IO Graph", "description": "Traffic over time" },
+          { "command": "File → Export Objects → HTTP", "description": "Extract downloaded files" }
+        ]
+      }
+    ]
+  },
+  
+  "knowledge_check": [
+    {
+      "question": "Which filter would show only HTTP traffic to 10.0.0.5?",
+      "options": [
+        "http && ip.addr == 10.0.0.5",
+        "HTTP AND 10.0.0.5",
+        "filter http 10.0.0.5",
+        "http | ip.addr == 10.0.0.5"
+      ],
+      "correct": 0,
+      "explanation": "Wireshark uses && for AND, and filters are case-sensitive (http not HTTP)"
+    },
+    {
+      "question": "What does following a TCP stream show you?",
+      "options": [
+        "Only the first packet",
+        "The complete conversation between two hosts",
+        "All TCP packets in the capture",
+        "Network statistics"
+      ],
+      "correct": 1,
+      "explanation": "Following a stream reconstructs the full conversation, showing all data exchanged"
+    },
+    {
+      "question": "Where would you look to find files downloaded via HTTP?",
+      "options": [
+        "Edit → Preferences",
+        "Statistics → Protocol Hierarchy",
+        "File → Export Objects → HTTP",
+        "Analyze → Expert Information"
+      ],
+      "correct": 2,
+      "explanation": "Export Objects extracts files transferred over various protocols"
+    },
+    {
+      "question": "What type of traffic is visible in plaintext with Wireshark?",
+      "options": [
+        "HTTPS",
+        "SSH",
+        "HTTP",
+        "TLS 1.3"
+      ],
+      "correct": 2,
+      "explanation": "HTTP is unencrypted. HTTPS, SSH, and TLS encrypt their payloads"
+    },
+    {
+      "question": "What Wireshark feature helps identify the largest data transfers?",
+      "options": [
+        "Display filters",
+        "Statistics → Conversations (sorted by bytes)",
+        "Colorization rules",
+        "Time display format"
+      ],
+      "correct": 1,
+      "explanation": "Conversations sorted by bytes quickly identifies top talkers and large transfers"
+    }
+  ],
+  
+  "next_steps": {
+    "related_labs": ["TOOL-LAB-002", "TOOL-LAB-003"],
+    "related_lessons": ["D3-LESSON-003", "D4-LESSON-001", "D4-LESSON-003"],
+    "certifications": [
+      "CompTIA CySA+ (heavy Wireshark usage)",
+      "CompTIA Network+",
+      "Wireshark Certified Network Analyst (WCNA)"
+    ],
+    "advanced_topics": [
+      "TLS decryption with pre-master secrets",
+      "VoIP/SIP analysis",
+      "Wireless packet capture",
+      "Command-line tshark for automation"
+    ]
+  }
+}

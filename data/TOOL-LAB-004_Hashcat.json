@@ -1,0 +1,545 @@
+{
+  "lab_id": "TOOL-LAB-004",
+  "tool_name": "Hashcat",
+  "tool_category": "Password / Cryptography",
+  "version": "1.0",
+  
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_time": "2-3 hours",
+    "last_updated": "2025-01-13",
+    "author": "Security+ Training System"
+  },
+  
+  "overview": {
+    "tagline": "World's Fastest Password Recovery Tool",
+    "description": "Hashcat uses GPU acceleration to crack password hashes at incredible speeds. Security professionals use it to audit password strength, recover lost passwords, and understand how attackers crack credentials.",
+    "official_site": "https://hashcat.net/hashcat/",
+    "download_url": "https://hashcat.net/hashcat/",
+    "license": "Open Source (MIT)",
+    "platforms": ["Windows", "Linux", "macOS"],
+    "why_learn": "Understanding password cracking helps you defend against it. You'll learn why password policies matter and how to recommend strong practices."
+  },
+  
+  "security_plus_relevance": {
+    "domains": [1, 2],
+    "objectives": ["1.4", "2.3", "2.4"],
+    "exam_topics": [
+      "Cryptographic concepts (hashing)",
+      "Password attacks (brute force, dictionary, rainbow tables)",
+      "Authentication mechanisms",
+      "Password policies and best practices"
+    ],
+    "exam_question_types": [
+      "Identifying hash types",
+      "Understanding password attack methods",
+      "Recommending password policies",
+      "Cryptographic weaknesses"
+    ]
+  },
+  
+  "career_relevance": {
+    "soc_analyst": {
+      "relevance": "medium",
+      "percentage_of_job": "5-10%",
+      "usage": "Understanding credential theft, validating password policies"
+    },
+    "incident_responder": {
+      "relevance": "high",
+      "percentage_of_job": "10-15%",
+      "usage": "Analyzing stolen credentials, determining breach scope"
+    },
+    "security_engineer": {
+      "relevance": "high",
+      "percentage_of_job": "10-15%",
+      "usage": "Password policy validation, security assessments"
+    },
+    "penetration_tester": {
+      "relevance": "critical",
+      "percentage_of_job": "25-35%",
+      "usage": "Cracking captured hashes, credential testing"
+    },
+    "grc_analyst": {
+      "relevance": "medium",
+      "percentage_of_job": "5%",
+      "usage": "Understanding password risks for policy development"
+    }
+  },
+  
+  "prerequisites": {
+    "knowledge": [
+      "Basic understanding of hashing (one-way functions)",
+      "Familiarity with command line",
+      "Understanding of password storage concepts"
+    ],
+    "tools_needed": [
+      "Hashcat (pre-installed on Kali)",
+      "A GPU (recommended) or CPU (slower but works)",
+      "Wordlists (rockyou.txt included with Kali)"
+    ],
+    "files_provided": [
+      "Sample hash files for practice"
+    ],
+    "estimated_setup_time": "15 minutes",
+    "ethical_warning": "⚠️ Only crack hashes you have permission to test. Unauthorized access is illegal."
+  },
+  
+  "quick_start": {
+    "installation_steps": [
+      {
+        "step": 1,
+        "title": "Check Installation",
+        "instructions": "Run: hashcat --version",
+        "platform_specific": {
+          "linux": "Pre-installed on Kali. Otherwise: sudo apt install hashcat",
+          "windows": "Download from hashcat.net, extract, run from folder",
+          "macos": "brew install hashcat"
+        }
+      },
+      {
+        "step": 2,
+        "title": "Check GPU Support",
+        "instructions": "Run: hashcat -I\n\nThis shows available devices (GPU is much faster than CPU)",
+        "verification": "You should see your GPU listed. CPU works too, just slower."
+      },
+      {
+        "step": 3,
+        "title": "Get Wordlists",
+        "instructions": "On Kali: /usr/share/wordlists/rockyou.txt.gz (gunzip to extract)\n\nOr download SecLists from GitHub",
+        "verification": "You should have rockyou.txt (14 million passwords)"
+      }
+    ],
+    "first_run": "hashcat -m 0 -a 0 hash.txt wordlist.txt (MD5 dictionary attack)",
+    "verification": "If you see 'Status: Cracked' for a test hash, you're ready"
+  },
+  
+  "core_concepts": [
+    {
+      "concept_id": "hash-types",
+      "title": "Hash Types (-m)",
+      "explanation": "Different algorithms create different hash formats. Hashcat uses -m to specify the type (0=MD5, 100=SHA1, 1000=NTLM, etc.).",
+      "why_it_matters": "You must identify the hash type to crack it. Wrong type = no results.",
+      "exam_tip": "Know common hashes: MD5 (32 chars), SHA1 (40 chars), NTLM (Windows), bcrypt (starts with $2)"
+    },
+    {
+      "concept_id": "attack-modes",
+      "title": "Attack Modes (-a)",
+      "explanation": "Dictionary (-a 0), combination (-a 1), brute force (-a 3), rule-based (-a 0 with rules). Each has different use cases.",
+      "why_it_matters": "Choosing the right attack mode dramatically affects success and speed.",
+      "exam_tip": "Dictionary attacks use wordlists. Brute force tries all combinations. Rules mutate words."
+    },
+    {
+      "concept_id": "salting",
+      "title": "Salting",
+      "explanation": "Salts are random data added before hashing to prevent rainbow table attacks. Each user gets a unique salt.",
+      "why_it_matters": "Salted hashes are much harder to crack. This is why bcrypt and modern algorithms use salts.",
+      "exam_tip": "Salts don't make hashes slower to crack individually, but prevent pre-computation attacks"
+    },
+    {
+      "concept_id": "gpu-acceleration",
+      "title": "GPU Acceleration",
+      "explanation": "GPUs can compute billions of hashes per second. A gaming GPU cracks MD5 at 50+ billion hashes/sec.",
+      "why_it_matters": "This is why fast hashes (MD5, SHA1) are insecure for passwords - they're too fast to crack.",
+      "exam_tip": "Use slow hashes (bcrypt, Argon2) for password storage"
+    }
+  ],
+  
+  "mini_projects": [
+    {
+      "project_id": "project-1",
+      "title": "Cracking Your First Hash",
+      "difficulty": "beginner",
+      "estimated_time": "30-45 minutes",
+      "description": "Learn hashcat basics by cracking simple MD5 hashes.",
+      "learning_objectives": [
+        "Identify hash types",
+        "Run dictionary attacks",
+        "Understand hashcat output",
+        "Use basic options"
+      ],
+      "scenario": "You found some hashed passwords during a security assessment. Crack them to demonstrate weak password usage.",
+      
+      "setup": {
+        "files_needed": ["Practice hashes (created below)"],
+        "environment": "Terminal with hashcat and rockyou.txt",
+        "create_test_hashes": "echo -n 'password123' | md5sum → save hash to file"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Create Test Hashes",
+          "instructions": "Create some MD5 hashes to crack:\n\necho -n 'password' | md5sum | cut -d' ' -f1 > hashes.txt\necho -n 'letmein' | md5sum | cut -d' ' -f1 >> hashes.txt\necho -n 'dragon' | md5sum | cut -d' ' -f1 >> hashes.txt",
+          "hints": ["These are common passwords that should crack quickly", "-n removes newline from echo"],
+          "expected_result": "File with 3 MD5 hashes (32 characters each)",
+          "common_mistakes": ["Forgetting -n on echo (adds newline, different hash)"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Identify Hash Type",
+          "instructions": "Look at your hashes. MD5 hashes are:\n- 32 hexadecimal characters\n- Lowercase letters (a-f) and numbers\n\nVerify hash type: hashcat --example-hashes | grep -i md5",
+          "hints": ["hash-identifier tool can also help", "Different formats have patterns"],
+          "expected_result": "Confirmed MD5 hash format",
+          "common_mistakes": ["Confusing MD5 with other 32-char hashes"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Run Dictionary Attack",
+          "instructions": "Run: hashcat -m 0 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt\n\n-m 0 = MD5\n-a 0 = dictionary attack",
+          "hints": ["This may take a minute to load rockyou.txt", "Results show hash:password pairs"],
+          "expected_result": "All 3 hashes cracked in seconds",
+          "common_mistakes": ["Wrong hash mode (-m)", "Forgetting to decompress rockyou.txt.gz"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "View Results",
+          "instructions": "Run: hashcat -m 0 hashes.txt --show\n\nThis displays cracked passwords without re-running attack.",
+          "hints": ["--show retrieves results from potfile", "Potfile stores all cracked hashes"],
+          "expected_result": "hash:password pairs displayed",
+          "common_mistakes": ["Not knowing about --show option"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Check Speed Statistics",
+          "instructions": "During the crack, note the speed (H/s = hashes per second).\n\nOn GPU: expect millions to billions per second\nOn CPU: expect millions per second",
+          "hints": ["This shows why MD5 is too fast for passwords", "Billions/sec = weak passwords crack instantly"],
+          "expected_result": "Understanding of cracking speed",
+          "common_mistakes": ["Not understanding the speed implications"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "How long did it take to crack 'password'?",
+          "answer": "Less than 1 second",
+          "explanation": "Common passwords are in the first entries of wordlists"
+        },
+        {
+          "question": "What was the hash rate (H/s)?",
+          "answer": "Varies - GPU: billions, CPU: millions",
+          "explanation": "This speed makes fast hashes unsuitable for passwords"
+        }
+      ],
+      
+      "takeaways": [
+        "Common passwords crack instantly with dictionary attacks",
+        "MD5 is way too fast for password storage",
+        "Wordlists like rockyou contain real leaked passwords",
+        "Always use slow hashing algorithms (bcrypt, Argon2) for passwords"
+      ]
+    },
+    {
+      "project_id": "project-2",
+      "title": "Advanced Attack Techniques",
+      "difficulty": "intermediate",
+      "estimated_time": "60-90 minutes",
+      "description": "Learn rule-based attacks and mask attacks for more complex passwords.",
+      "learning_objectives": [
+        "Use rule-based attacks",
+        "Create mask/brute force attacks",
+        "Understand attack optimization",
+        "Crack more complex passwords"
+      ],
+      "scenario": "Dictionary attacks failed on some hashes. Try more advanced techniques.",
+      
+      "setup": {
+        "files_needed": ["Harder hashes (created in tasks)"],
+        "environment": "Hashcat with rule files (included with installation)"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Create Complex Test Hashes",
+          "instructions": "Create hashes with common mutations:\n\necho -n 'Password1' | md5sum | cut -d' ' -f1 > complex.txt\necho -n 'Summer2024!' | md5sum | cut -d' ' -f1 >> complex.txt\necho -n 'P@ssw0rd' | md5sum | cut -d' ' -f1 >> complex.txt",
+          "hints": ["These have capitals, numbers, special chars", "Common patterns users think are secure"],
+          "expected_result": "3 hashes of 'complex' passwords",
+          "common_mistakes": ["Creating truly random passwords (won't crack for demo)"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Rule-Based Attack",
+          "instructions": "Run: hashcat -m 0 -a 0 complex.txt /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule\n\n-r applies rules (capitalize, add numbers, leet speak, etc.)",
+          "hints": ["best64 is a good starting ruleset", "Rules transform each wordlist word"],
+          "expected_result": "'Password1' and 'P@ssw0rd' likely cracked",
+          "common_mistakes": ["Wrong path to rules file"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Mask Attack (Brute Force)",
+          "instructions": "Run: hashcat -m 0 -a 3 complex.txt ?u?l?l?l?l?l?d?d?d?d?s\n\n?u=uppercase, ?l=lowercase, ?d=digit, ?s=special\nThis pattern: Capital + 5 lowercase + 4 digits + special",
+          "hints": ["Masks define character positions", "This targets 'Summer2024!' pattern"],
+          "expected_result": "'Summer2024!' cracked if pattern matches",
+          "common_mistakes": ["Wrong mask pattern", "Pattern doesn't match target"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Combination Attack",
+          "instructions": "Run: hashcat -m 0 -a 1 hashes.txt wordlist1.txt wordlist2.txt\n\nThis combines words from two lists (word1+word2).",
+          "hints": ["Good for compound passwords like 'supersecret'", "Create small wordlists for demo"],
+          "expected_result": "Understanding of combination attacks",
+          "common_mistakes": ["Using huge wordlists (too many combinations)"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Analyze Results",
+          "instructions": "Compare what cracked and what didn't.\n- Which techniques worked for which passwords?\n- What made some passwords harder?",
+          "hints": ["Truly random passwords don't crack", "Pattern-based 'complex' passwords often do"],
+          "expected_result": "Understanding of password strength factors",
+          "common_mistakes": ["Thinking complex = secure"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "Why did 'P@ssw0rd' crack with rules but not dictionary?",
+          "answer": "Rules apply common substitutions (a→@, o→0)",
+          "explanation": "Leet speak substitutions are predictable"
+        },
+        {
+          "question": "Is 'Summer2024!' a strong password?",
+          "answer": "No - it follows predictable Season+Year+Symbol pattern",
+          "explanation": "Pattern-based passwords are crackable despite complexity"
+        }
+      ],
+      
+      "takeaways": [
+        "Rules transform words to match common patterns",
+        "'Complex' passwords following patterns are still weak",
+        "Masks target specific password structures",
+        "True strength comes from randomness, not complexity rules"
+      ]
+    },
+    {
+      "project_id": "project-3",
+      "title": "Real-World Hash Cracking Challenge",
+      "difficulty": "advanced",
+      "estimated_time": "60-90 minutes",
+      "description": "Crack a variety of hash types you'd encounter in real assessments.",
+      "learning_objectives": [
+        "Identify multiple hash types",
+        "Crack Windows NTLM hashes",
+        "Understand hash extraction",
+        "Apply appropriate techniques"
+      ],
+      "scenario": "During a penetration test, you've extracted password hashes from various systems. Crack as many as possible.",
+      
+      "setup": {
+        "files_needed": ["Mixed hash samples"],
+        "environment": "Hashcat with GPU recommended",
+        "sample_hashes": "NTLM, SHA256, bcrypt samples provided below"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Identify Hash Types",
+          "instructions": "Given these hashes, identify the type:\n\n1. 32 chars, hex: likely MD5 or NTLM\n2. 64 chars, hex: likely SHA256\n3. Starts with $2a$ or $2b$: bcrypt\n4. Starts with $6$: SHA512crypt\n\nUse: hashcat --example-hashes | grep -A2 'Hash mode'",
+          "hints": ["Length and format indicate type", "Prefixes ($2$, $6$) are strong indicators"],
+          "expected_result": "Correctly identified hash types",
+          "common_mistakes": ["Confusing similar-length hashes"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Crack NTLM Hashes",
+          "instructions": "NTLM (Windows) hash:\n31d6cfe0d16ae931b73c59d7e0c089c0 (empty password)\na87f3a337d73085c45f9416be5787d86 (password)\n\nRun: hashcat -m 1000 -a 0 ntlm.txt rockyou.txt",
+          "hints": ["-m 1000 = NTLM", "NTLM is fast like MD5"],
+          "expected_result": "NTLM hashes cracked",
+          "common_mistakes": ["Using -m 0 (MD5) instead of -m 1000"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Attempt bcrypt Hash",
+          "instructions": "bcrypt hash:\n$2a$10$N9qo8uLOickgx2ZMRZoMye0tE/UqYYq.xO.DuEMH6sR8jAGMXqiKa (password)\n\nRun: hashcat -m 3200 -a 0 bcrypt.txt small_wordlist.txt",
+          "hints": ["-m 3200 = bcrypt", "bcrypt is SLOW - use small wordlist"],
+          "expected_result": "bcrypt takes much longer than MD5/NTLM",
+          "common_mistakes": ["Using full rockyou (will take forever)"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Compare Cracking Speeds",
+          "instructions": "Note the hash rates for each type:\n- NTLM: billions/sec (GPU)\n- bcrypt: thousands/sec\n\nCalculate: How long to crack 8-char password with each?",
+          "hints": ["bcrypt designed to be slow", "This is why algorithm choice matters"],
+          "expected_result": "Understanding of speed differences",
+          "common_mistakes": ["Not appreciating the speed difference magnitude"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Document Findings",
+          "instructions": "Create a mini-report:\n1. Hashes cracked and passwords recovered\n2. Hashes that didn't crack and why\n3. Password policy recommendations",
+          "hints": ["Real assessments require documentation", "Explain implications to non-technical stakeholders"],
+          "expected_result": "Professional cracking report",
+          "common_mistakes": ["Technical report without business context"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "Which hash type was fastest to crack?",
+          "answer": "MD5 or NTLM (billions per second)",
+          "explanation": "Fast hashes = weak password storage"
+        },
+        {
+          "question": "Why is bcrypt recommended for password storage?",
+          "answer": "It's intentionally slow (configurable work factor)",
+          "explanation": "Slow hashing makes cracking impractical at scale"
+        },
+        {
+          "question": "What password policy would you recommend?",
+          "answer": "12+ chars, no common patterns, use passphrase",
+          "explanation": "Length beats complexity; avoid predictable patterns"
+        }
+      ],
+      
+      "takeaways": [
+        "Hash algorithm choice dramatically affects security",
+        "bcrypt/Argon2 are current best practices for passwords",
+        "NTLM (Windows) is very fast to crack - use additional protections",
+        "Document findings with business impact in mind"
+      ]
+    }
+  ],
+  
+  "external_resources": [
+    {
+      "platform": "TryHackMe",
+      "name": "Crack The Hash",
+      "url": "https://tryhackme.com/room/crackthehash",
+      "cost": "Free",
+      "difficulty": "beginner",
+      "estimated_time": "2 hours",
+      "description": "Practice identifying and cracking various hash types"
+    },
+    {
+      "platform": "TryHackMe",
+      "name": "John The Ripper",
+      "url": "https://tryhackme.com/room/johntheripper0",
+      "cost": "Free",
+      "difficulty": "beginner",
+      "estimated_time": "2 hours",
+      "description": "Alternative password cracker with similar concepts"
+    },
+    {
+      "platform": "Hashcat",
+      "name": "Example Hashes",
+      "url": "https://hashcat.net/wiki/doku.php?id=example_hashes",
+      "cost": "Free",
+      "difficulty": "reference",
+      "estimated_time": "Reference",
+      "description": "All supported hash types with examples"
+    }
+  ],
+  
+  "cheat_sheet": {
+    "sections": [
+      {
+        "title": "Common Hash Modes (-m)",
+        "commands": [
+          { "command": "-m 0", "description": "MD5" },
+          { "command": "-m 100", "description": "SHA1" },
+          { "command": "-m 1000", "description": "NTLM (Windows)" },
+          { "command": "-m 1400", "description": "SHA256" },
+          { "command": "-m 1800", "description": "SHA512crypt ($6$)" },
+          { "command": "-m 3200", "description": "bcrypt ($2a$, $2b$)" },
+          { "command": "-m 5600", "description": "NetNTLMv2" },
+          { "command": "-m 13100", "description": "Kerberos TGS-REP" }
+        ]
+      },
+      {
+        "title": "Attack Modes (-a)",
+        "commands": [
+          { "command": "-a 0", "description": "Dictionary (straight)" },
+          { "command": "-a 1", "description": "Combination (word+word)" },
+          { "command": "-a 3", "description": "Brute force (mask)" },
+          { "command": "-a 6", "description": "Hybrid (wordlist+mask)" },
+          { "command": "-a 7", "description": "Hybrid (mask+wordlist)" }
+        ]
+      },
+      {
+        "title": "Mask Characters",
+        "commands": [
+          { "command": "?l", "description": "Lowercase (a-z)" },
+          { "command": "?u", "description": "Uppercase (A-Z)" },
+          { "command": "?d", "description": "Digit (0-9)" },
+          { "command": "?s", "description": "Special (!@#$, etc.)" },
+          { "command": "?a", "description": "All printable" },
+          { "command": "?b", "description": "All bytes (0x00-0xff)" }
+        ]
+      },
+      {
+        "title": "Useful Options",
+        "commands": [
+          { "command": "-r rules.rule", "description": "Apply rule file" },
+          { "command": "--show", "description": "Show cracked passwords" },
+          { "command": "-o output.txt", "description": "Save results to file" },
+          { "command": "--force", "description": "Ignore warnings (use carefully)" },
+          { "command": "-w 3", "description": "Workload profile (1-4)" },
+          { "command": "--increment", "description": "Increment mask length" }
+        ]
+      }
+    ]
+  },
+  
+  "knowledge_check": [
+    {
+      "question": "Why is MD5 unsuitable for password storage?",
+      "options": [
+        "It produces hashes that are too long",
+        "It's too fast, allowing billions of guesses per second",
+        "It requires too much memory",
+        "It's reversible (can decrypt)"
+      ],
+      "correct": 1,
+      "explanation": "MD5's speed (billions/sec on GPU) makes brute force attacks practical"
+    },
+    {
+      "question": "What does 'salting' a password hash accomplish?",
+      "options": [
+        "Makes the hash longer",
+        "Encrypts the password",
+        "Prevents rainbow table attacks",
+        "Speeds up hash computation"
+      ],
+      "correct": 2,
+      "explanation": "Salts ensure each hash is unique, defeating precomputed rainbow tables"
+    },
+    {
+      "question": "Which hash type is recommended for password storage?",
+      "options": [
+        "MD5",
+        "SHA1",
+        "bcrypt",
+        "NTLM"
+      ],
+      "correct": 2,
+      "explanation": "bcrypt is intentionally slow and has configurable work factor"
+    },
+    {
+      "question": "What attack mode uses a wordlist in hashcat?",
+      "options": [
+        "-a 3 (brute force)",
+        "-a 0 (dictionary)",
+        "-a 1 (combination)",
+        "-a 9 (association)"
+      ],
+      "correct": 1,
+      "explanation": "-a 0 is straight/dictionary mode using a wordlist file"
+    }
+  ],
+  
+  "next_steps": {
+    "related_labs": ["TOOL-LAB-001", "TOOL-LAB-002"],
+    "related_lessons": ["D1-LESSON-004", "D2-LESSON-003"],
+    "certifications": [
+      "CompTIA PenTest+",
+      "OSCP",
+      "eJPT"
+    ],
+    "advanced_topics": [
+      "Custom rule creation",
+      "Hash extraction techniques",
+      "Cloud-based cracking",
+      "Kerberoasting and AS-REP roasting"
+    ]
+  }
+}

@@ -1,0 +1,589 @@
+{
+  "lab_id": "TOOL-LAB-002",
+  "tool_name": "Nmap",
+  "tool_category": "Vulnerability Scanning",
+  "version": "1.0",
+  
+  "metadata": {
+    "difficulty": "beginner",
+    "estimated_time": "2-3 hours",
+    "last_updated": "2025-01-13",
+    "author": "Security+ Training System"
+  },
+  
+  "overview": {
+    "tagline": "The Network Mapper - Security Scanner",
+    "description": "Nmap is the industry-standard tool for network discovery and security auditing. It identifies live hosts, open ports, running services, and potential vulnerabilities. Every security professional needs Nmap skills.",
+    "official_site": "https://nmap.org/",
+    "download_url": "https://nmap.org/download.html",
+    "license": "Open Source (GPL)",
+    "platforms": ["Windows", "Linux", "macOS"],
+    "why_learn": "Network reconnaissance is the first step of both attackers and defenders. Understanding what's exposed is fundamental to security."
+  },
+  
+  "security_plus_relevance": {
+    "domains": [2, 3, 4],
+    "objectives": ["2.3", "2.4", "3.2", "4.3"],
+    "exam_topics": [
+      "Vulnerability scanning concepts",
+      "Network reconnaissance techniques",
+      "Service identification and enumeration",
+      "Attack surface analysis"
+    ],
+    "exam_question_types": [
+      "Identifying appropriate scan types for scenarios",
+      "Understanding port states (open, closed, filtered)",
+      "Recognizing scan output and results",
+      "Knowing when scanning is appropriate"
+    ]
+  },
+  
+  "career_relevance": {
+    "soc_analyst": {
+      "relevance": "high",
+      "percentage_of_job": "15-20%",
+      "usage": "Asset discovery, validating alerts, identifying rogue devices"
+    },
+    "incident_responder": {
+      "relevance": "high",
+      "percentage_of_job": "10-15%",
+      "usage": "Identifying compromised systems, lateral movement detection"
+    },
+    "security_engineer": {
+      "relevance": "high",
+      "percentage_of_job": "20-25%",
+      "usage": "Vulnerability assessments, network auditing, compliance scanning"
+    },
+    "penetration_tester": {
+      "relevance": "critical",
+      "percentage_of_job": "40-50%",
+      "usage": "Reconnaissance, enumeration, vulnerability identification"
+    },
+    "grc_analyst": {
+      "relevance": "medium",
+      "percentage_of_job": "5-10%",
+      "usage": "Audit evidence, compliance validation"
+    }
+  },
+  
+  "prerequisites": {
+    "knowledge": [
+      "TCP/IP basics (ports, protocols)",
+      "Understanding of common services (HTTP, SSH, DNS)",
+      "Basic command line familiarity"
+    ],
+    "tools_needed": [
+      "Nmap (pre-installed on Kali, or download)",
+      "A target to scan (use scanme.nmap.org or your own lab)",
+      "VirtualBox/VMware for safe scanning environment"
+    ],
+    "files_provided": [],
+    "estimated_setup_time": "15 minutes",
+    "legal_warning": "⚠️ ONLY scan systems you own or have explicit permission to test. Unauthorized scanning may be illegal."
+  },
+  
+  "quick_start": {
+    "installation_steps": [
+      {
+        "step": 1,
+        "title": "Check if Nmap is Installed",
+        "instructions": "Open a terminal and type: nmap --version",
+        "platform_specific": {
+          "linux": "Kali has it pre-installed. Otherwise: sudo apt install nmap",
+          "windows": "Download installer from nmap.org. Includes Zenmap GUI.",
+          "macos": "brew install nmap (requires Homebrew)"
+        }
+      },
+      {
+        "step": 2,
+        "title": "Verify Installation",
+        "instructions": "Run: nmap --version\nShould show Nmap version 7.x or higher",
+        "verification": "You should see 'Nmap version 7.xx' and a list of available scripts"
+      },
+      {
+        "step": 3,
+        "title": "Test Basic Scan",
+        "instructions": "Run: nmap scanme.nmap.org\nThis is a legal target provided by Nmap for testing",
+        "verification": "You should see open ports like 22 (SSH) and 80 (HTTP)"
+      }
+    ],
+    "first_run": "nmap scanme.nmap.org - This performs a basic scan of the official test target",
+    "verification": "If you see a list of open ports, Nmap is working correctly"
+  },
+  
+  "core_concepts": [
+    {
+      "concept_id": "port-states",
+      "title": "Port States",
+      "explanation": "Nmap reports ports as open (accepting connections), closed (reachable but no service), or filtered (blocked by firewall).",
+      "why_it_matters": "Understanding port states tells you what's accessible and what's being blocked.",
+      "exam_tip": "Open = service running, Closed = no service but host responds, Filtered = firewall blocking"
+    },
+    {
+      "concept_id": "scan-types",
+      "title": "Scan Types",
+      "explanation": "Different scans have different purposes: TCP Connect (-sT), SYN Stealth (-sS), UDP (-sU), version detection (-sV).",
+      "why_it_matters": "Choosing the right scan type balances accuracy, speed, and stealth.",
+      "exam_tip": "SYN scan (-sS) is default and stealthy. Connect scan (-sT) completes handshake. UDP (-sU) is slow but essential."
+    },
+    {
+      "concept_id": "service-detection",
+      "title": "Service/Version Detection",
+      "explanation": "Nmap can probe open ports to determine what service is running and its version (-sV).",
+      "why_it_matters": "Knowing versions helps identify vulnerabilities (outdated software).",
+      "exam_tip": "Service detection helps find CVEs and known vulnerabilities"
+    },
+    {
+      "concept_id": "nse",
+      "title": "Nmap Scripting Engine (NSE)",
+      "explanation": "NSE scripts extend Nmap with vulnerability checks, brute force, and enumeration capabilities.",
+      "why_it_matters": "Scripts turn Nmap from a scanner into a comprehensive assessment tool.",
+      "exam_tip": "--script vuln runs vulnerability scripts. Be careful - some scripts are intrusive!"
+    }
+  ],
+  
+  "mini_projects": [
+    {
+      "project_id": "project-1",
+      "title": "Basic Network Reconnaissance",
+      "difficulty": "beginner",
+      "estimated_time": "30-45 minutes",
+      "description": "Learn fundamental Nmap scanning techniques on a legal target.",
+      "learning_objectives": [
+        "Perform basic port scans",
+        "Understand scan output",
+        "Identify services by port number",
+        "Use common scan options"
+      ],
+      "scenario": "You're a junior security analyst. Your manager asks you to document what services are running on a server.",
+      
+      "setup": {
+        "files_needed": [],
+        "environment": "Terminal with Nmap installed",
+        "legal_targets": [
+          "scanme.nmap.org (official Nmap test server)",
+          "Your own VMs or home lab",
+          "HackTheBox/TryHackMe lab machines"
+        ]
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Basic TCP Scan",
+          "instructions": "Run: nmap scanme.nmap.org\n\nThis performs a default scan of the top 1000 ports.",
+          "hints": ["Default scans the 1000 most common ports", "Results show port, state, and service"],
+          "expected_result": "List of open ports with services (22/ssh, 80/http, etc.)",
+          "common_mistakes": ["Forgetting to run as root/admin for SYN scans"]
+        },
+        {
+          "task_id": "task-2", 
+          "title": "Scan All Ports",
+          "instructions": "Run: nmap -p- scanme.nmap.org\n\nThis scans all 65,535 TCP ports. Takes longer but more thorough.",
+          "hints": ["Use -p- to scan all ports", "This takes several minutes"],
+          "expected_result": "Complete port list including any on non-standard ports",
+          "common_mistakes": ["Impatience - full port scans take time", "Not understanding why default only scans 1000"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Service Version Detection",
+          "instructions": "Run: nmap -sV scanme.nmap.org\n\nThis probes open ports to determine service versions.",
+          "hints": ["-sV enables version detection", "Shows software name and version"],
+          "expected_result": "Version info like 'OpenSSH 8.4' instead of just 'ssh'",
+          "common_mistakes": ["Confusing -sV (version) with -sS (SYN scan)"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Operating System Detection",
+          "instructions": "Run: sudo nmap -O scanme.nmap.org\n\nAttempts to identify the target's operating system.",
+          "hints": ["Requires root/admin privileges", "-O enables OS detection"],
+          "expected_result": "OS guess with confidence percentage",
+          "common_mistakes": ["Running without sudo/admin - OS detection needs raw sockets"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Aggressive Scan",
+          "instructions": "Run: sudo nmap -A scanme.nmap.org\n\nCombines OS detection, version detection, script scanning, and traceroute.",
+          "hints": ["-A is equivalent to -sV -sC -O --traceroute", "Comprehensive but slower and noisier"],
+          "expected_result": "Detailed output including OS, versions, script results, and network path",
+          "common_mistakes": ["Using -A when stealth is needed", "Not understanding what -A includes"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What SSH version is running on scanme.nmap.org?",
+          "answer": "Varies - use -sV to find out",
+          "explanation": "Service versions help identify vulnerabilities"
+        },
+        {
+          "question": "What OS is the target running?",
+          "answer": "Linux (specific version varies)",
+          "explanation": "OS detection helps understand the target environment"
+        },
+        {
+          "question": "How many ports are open on the target?",
+          "answer": "Typically 4-6 on scanme.nmap.org",
+          "explanation": "Minimizing open ports reduces attack surface"
+        }
+      ],
+      
+      "takeaways": [
+        "Default Nmap scans only the top 1000 ports - use -p- for comprehensive scans",
+        "Version detection (-sV) reveals software versions for vulnerability research",
+        "OS detection requires root privileges",
+        "More aggressive scans are noisier and easier to detect"
+      ]
+    },
+    {
+      "project_id": "project-2",
+      "title": "Network Discovery and Host Enumeration",
+      "difficulty": "intermediate",
+      "estimated_time": "45-60 minutes",
+      "description": "Discover hosts on a network and enumerate their services systematically.",
+      "learning_objectives": [
+        "Perform host discovery (ping sweeps)",
+        "Scan multiple targets efficiently",
+        "Use output formats for documentation",
+        "Organize reconnaissance results"
+      ],
+      "scenario": "You're performing a security assessment on a /24 network. First, find live hosts, then enumerate their services.",
+      
+      "setup": {
+        "files_needed": [],
+        "environment": "A network to scan (your home network or lab VMs)",
+        "lab_setup": "Create 2-3 VMs on an isolated virtual network for safe practice"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Host Discovery (Ping Sweep)",
+          "instructions": "Run: nmap -sn 192.168.1.0/24\n\nReplace with your network range. -sn means 'no port scan' - just find live hosts.",
+          "hints": ["-sn skips port scanning for faster discovery", "Use your actual network range"],
+          "expected_result": "List of live hosts on the network",
+          "common_mistakes": ["Wrong network range", "Firewalls blocking ping responses"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Save Results to File",
+          "instructions": "Run: nmap -sn 192.168.1.0/24 -oA discovery\n\nThis saves output in normal, XML, and grepable formats.",
+          "hints": ["-oA saves in all formats", "-oN for normal, -oX for XML, -oG for grepable"],
+          "expected_result": "Three files: discovery.nmap, discovery.xml, discovery.gnmap",
+          "common_mistakes": ["Forgetting to document findings"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Scan Discovered Hosts",
+          "instructions": "Run: nmap -sV -iL targets.txt -oA full_scan\n\nFirst create targets.txt with discovered IPs, one per line.",
+          "hints": ["-iL reads targets from file", "Combine with -sV for version info"],
+          "expected_result": "Detailed scan results for all live hosts",
+          "common_mistakes": ["Scanning entire range instead of just live hosts (wastes time)"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Identify Specific Services",
+          "instructions": "Run: nmap -p 22,80,443,3389 192.168.1.0/24\n\nScan only specific ports across the network.",
+          "hints": ["Useful for finding all web servers, SSH servers, etc.", "-p specifies ports"],
+          "expected_result": "Quick view of specific services across the network",
+          "common_mistakes": ["Missing important ports by being too specific"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Create Network Inventory",
+          "instructions": "Compile your results into a table:\n- IP Address\n- Hostname (if found)\n- OS (if detected)\n- Open Ports\n- Services/Versions",
+          "hints": ["Use the grepable output for easy parsing", "Excel/spreadsheet works well"],
+          "expected_result": "Organized inventory of network assets",
+          "common_mistakes": ["Not documenting findings properly"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "How many live hosts did you discover?",
+          "answer": "Varies by network",
+          "explanation": "Host discovery is the first step in any assessment"
+        },
+        {
+          "question": "Which host has the most open ports?",
+          "answer": "Varies - larger attack surface",
+          "explanation": "More open ports = more potential vulnerabilities"
+        },
+        {
+          "question": "Did you find any unexpected services?",
+          "answer": "Varies",
+          "explanation": "Unknown services warrant investigation"
+        }
+      ],
+      
+      "takeaways": [
+        "Always start with host discovery before detailed scans",
+        "Document everything - use Nmap's output options",
+        "Target specific ports when looking for particular services",
+        "Create organized inventories for reporting"
+      ]
+    },
+    {
+      "project_id": "project-3",
+      "title": "Vulnerability Scanning with NSE",
+      "difficulty": "advanced",
+      "estimated_time": "60-90 minutes",
+      "description": "Use Nmap Scripting Engine (NSE) to identify vulnerabilities and misconfigurations.",
+      "learning_objectives": [
+        "Use NSE vulnerability scripts",
+        "Identify common misconfigurations",
+        "Understand script categories",
+        "Interpret vulnerability results"
+      ],
+      "scenario": "You're conducting a vulnerability assessment. Use NSE scripts to identify security issues beyond just open ports.",
+      
+      "setup": {
+        "files_needed": [],
+        "environment": "A vulnerable target VM (Metasploitable, DVWA, or HackTheBox)",
+        "legal_warning": "⚠️ Only run vulnerability scans against systems you have permission to test!"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "List Available Scripts",
+          "instructions": "Run: ls /usr/share/nmap/scripts/ | head -50\n\nOr: nmap --script-help default",
+          "hints": ["Scripts are organized by category", "Over 600 scripts available"],
+          "expected_result": "List of available NSE scripts",
+          "common_mistakes": ["Not knowing what scripts are available"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Run Default Scripts",
+          "instructions": "Run: nmap -sC target_ip\n\n-sC runs default safe scripts for enumeration.",
+          "hints": ["-sC equivalent to --script=default", "Safe for general use"],
+          "expected_result": "Additional enumeration info beyond basic port scan",
+          "common_mistakes": ["Confusing -sC (scripts) with -sV (version)"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Vulnerability Scan",
+          "instructions": "Run: nmap --script vuln target_ip\n\nThis runs all scripts in the 'vuln' category.",
+          "hints": ["May take several minutes", "Some scripts are intrusive - be careful"],
+          "expected_result": "List of potential vulnerabilities found",
+          "common_mistakes": ["Running on production systems without permission"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Specific Vulnerability Check",
+          "instructions": "Run: nmap --script smb-vuln* target_ip\n\nChecks for SMB vulnerabilities like EternalBlue.",
+          "hints": ["Wildcards work in script names", "Check for specific CVEs"],
+          "expected_result": "SMB vulnerability status",
+          "common_mistakes": ["Not understanding what specific scripts check for"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "HTTP Enumeration",
+          "instructions": "Run: nmap --script http-enum,http-headers,http-methods -p 80,443 target_ip\n\nEnumerate web server details.",
+          "hints": ["Multiple scripts can be comma-separated", "Great for web reconnaissance"],
+          "expected_result": "Web directories, headers, and allowed methods",
+          "common_mistakes": ["Missing ports - always specify HTTP ports"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What vulnerabilities did the vuln scripts find?",
+          "answer": "Varies by target",
+          "explanation": "NSE scripts can identify known CVEs"
+        },
+        {
+          "question": "What interesting information did http-enum reveal?",
+          "answer": "Directories, admin panels, etc.",
+          "explanation": "Web enumeration finds hidden content"
+        },
+        {
+          "question": "What CVE numbers appeared in your scan?",
+          "answer": "Varies",
+          "explanation": "CVE numbers help research specific vulnerabilities"
+        }
+      ],
+      
+      "takeaways": [
+        "NSE transforms Nmap into a vulnerability scanner",
+        "Different script categories serve different purposes",
+        "Always get permission before running vuln scripts",
+        "Combine multiple scripts for comprehensive enumeration"
+      ]
+    }
+  ],
+  
+  "external_resources": [
+    {
+      "platform": "TryHackMe",
+      "name": "Nmap",
+      "url": "https://tryhackme.com/room/furthernmap",
+      "cost": "Free",
+      "difficulty": "beginner",
+      "estimated_time": "2 hours",
+      "description": "Comprehensive Nmap room covering all scan types"
+    },
+    {
+      "platform": "TryHackMe",
+      "name": "Nmap Live Host Discovery",
+      "url": "https://tryhackme.com/room/nmap01",
+      "cost": "Free",
+      "difficulty": "beginner",
+      "estimated_time": "1 hour",
+      "description": "Focus on host discovery techniques"
+    },
+    {
+      "platform": "HackTheBox",
+      "name": "Starting Point",
+      "url": "https://www.hackthebox.com/starting-point",
+      "cost": "Free",
+      "difficulty": "beginner",
+      "estimated_time": "Varies",
+      "description": "Practice Nmap on real vulnerable machines"
+    },
+    {
+      "platform": "Nmap.org",
+      "name": "Official Documentation",
+      "url": "https://nmap.org/book/man.html",
+      "cost": "Free",
+      "difficulty": "all",
+      "estimated_time": "Reference",
+      "description": "Complete Nmap reference manual"
+    }
+  ],
+  
+  "cheat_sheet": {
+    "sections": [
+      {
+        "title": "Basic Scans",
+        "commands": [
+          { "command": "nmap target", "description": "Basic scan (top 1000 ports)" },
+          { "command": "nmap -p- target", "description": "Scan all 65535 ports" },
+          { "command": "nmap -p 22,80,443 target", "description": "Scan specific ports" },
+          { "command": "nmap -p 1-1000 target", "description": "Scan port range" },
+          { "command": "nmap -F target", "description": "Fast scan (top 100 ports)" }
+        ]
+      },
+      {
+        "title": "Scan Types",
+        "commands": [
+          { "command": "nmap -sS target", "description": "SYN stealth scan (default, needs root)" },
+          { "command": "nmap -sT target", "description": "TCP connect scan (no root needed)" },
+          { "command": "nmap -sU target", "description": "UDP scan (slow but important)" },
+          { "command": "nmap -sn target", "description": "Ping scan (host discovery only)" },
+          { "command": "nmap -Pn target", "description": "Skip host discovery (assume online)" }
+        ]
+      },
+      {
+        "title": "Detection",
+        "commands": [
+          { "command": "nmap -sV target", "description": "Service version detection" },
+          { "command": "nmap -O target", "description": "OS detection (needs root)" },
+          { "command": "nmap -A target", "description": "Aggressive (OS + version + scripts + traceroute)" },
+          { "command": "nmap -sC target", "description": "Run default scripts" }
+        ]
+      },
+      {
+        "title": "Output",
+        "commands": [
+          { "command": "nmap -oN scan.txt target", "description": "Normal output to file" },
+          { "command": "nmap -oX scan.xml target", "description": "XML output" },
+          { "command": "nmap -oG scan.gnmap target", "description": "Grepable output" },
+          { "command": "nmap -oA scan target", "description": "All formats" }
+        ]
+      },
+      {
+        "title": "Timing & Performance",
+        "commands": [
+          { "command": "nmap -T0 target", "description": "Paranoid (very slow, IDS evasion)" },
+          { "command": "nmap -T3 target", "description": "Normal (default)" },
+          { "command": "nmap -T4 target", "description": "Aggressive (faster)" },
+          { "command": "nmap -T5 target", "description": "Insane (fastest, may miss ports)" }
+        ]
+      },
+      {
+        "title": "NSE Scripts",
+        "commands": [
+          { "command": "nmap --script vuln target", "description": "Run vulnerability scripts" },
+          { "command": "nmap --script safe target", "description": "Run safe scripts only" },
+          { "command": "nmap --script http-* target", "description": "All HTTP scripts" },
+          { "command": "nmap --script-help script-name", "description": "Get script info" }
+        ]
+      }
+    ]
+  },
+  
+  "knowledge_check": [
+    {
+      "question": "What does a 'filtered' port state indicate?",
+      "options": [
+        "The port is open and accepting connections",
+        "The port is closed but the host responded",
+        "A firewall is blocking probes to that port",
+        "The service crashed during the scan"
+      ],
+      "correct": 2,
+      "explanation": "Filtered means a firewall or filter is preventing Nmap from determining the port state"
+    },
+    {
+      "question": "Which scan type requires root/administrator privileges?",
+      "options": [
+        "TCP Connect scan (-sT)",
+        "SYN scan (-sS)",
+        "Both require root",
+        "Neither requires root"
+      ],
+      "correct": 1,
+      "explanation": "SYN scans need root because they use raw sockets. Connect scans use normal system calls."
+    },
+    {
+      "question": "What does 'nmap -sV' do?",
+      "options": [
+        "Performs a very fast scan",
+        "Enables verbose output",
+        "Detects service versions on open ports",
+        "Scans for vulnerabilities"
+      ],
+      "correct": 2,
+      "explanation": "-sV probes open ports to determine what service and version is running"
+    },
+    {
+      "question": "How do you scan all 65,535 TCP ports?",
+      "options": [
+        "nmap -all target",
+        "nmap -p- target",
+        "nmap -p 0-65535 target",
+        "nmap --all-ports target"
+      ],
+      "correct": 1,
+      "explanation": "-p- is shorthand for scanning all ports (1-65535)"
+    },
+    {
+      "question": "What is the purpose of 'nmap -sn'?",
+      "options": [
+        "Silent/stealth scan",
+        "Skip port scanning (host discovery only)",
+        "Scan network services",
+        "Scan without sudo"
+      ],
+      "correct": 1,
+      "explanation": "-sn performs host discovery without port scanning - useful for finding live hosts quickly"
+    }
+  ],
+  
+  "next_steps": {
+    "related_labs": ["TOOL-LAB-001", "TOOL-LAB-003"],
+    "related_lessons": ["D2-LESSON-007", "D3-LESSON-002", "D4-LESSON-004"],
+    "certifications": [
+      "CompTIA PenTest+",
+      "eJPT (eLearnSecurity Junior Penetration Tester)",
+      "OSCP (Offensive Security Certified Professional)"
+    ],
+    "advanced_topics": [
+      "Firewall/IDS evasion techniques",
+      "Custom NSE script development",
+      "Masscan for large networks",
+      "Integrating Nmap with other tools"
+    ]
+  }
+}

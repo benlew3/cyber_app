@@ -1,0 +1,578 @@
+{
+  "lab_id": "TOOL-LAB-003",
+  "tool_name": "Splunk",
+  "tool_category": "SIEM / Log Analysis",
+  "version": "1.0",
+  
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_time": "3-4 hours",
+    "last_updated": "2025-01-13",
+    "author": "Security+ Training System"
+  },
+  
+  "overview": {
+    "tagline": "The Data Platform for Security and Observability",
+    "description": "Splunk is the industry-leading SIEM (Security Information and Event Management) platform. It ingests logs from any source, enables powerful searches, creates visualizations, and triggers alerts. SOC analysts live in Splunk.",
+    "official_site": "https://www.splunk.com/",
+    "download_url": "https://www.splunk.com/en_us/download/splunk-enterprise.html",
+    "license": "Freemium (Free up to 500MB/day)",
+    "platforms": ["Windows", "Linux", "macOS", "Docker"],
+    "why_learn": "SIEM skills are required for SOC roles. Splunk is the most widely used SIEM, and SPL (Splunk Processing Language) is a marketable skill."
+  },
+  
+  "security_plus_relevance": {
+    "domains": [4],
+    "objectives": ["4.1", "4.4", "4.5"],
+    "exam_topics": [
+      "Security monitoring and alerting",
+      "Log analysis and correlation",
+      "SIEM concepts and capabilities",
+      "Security automation and SOAR"
+    ],
+    "exam_question_types": [
+      "Understanding SIEM functionality",
+      "Log analysis scenarios",
+      "Alert and correlation concepts",
+      "Security monitoring best practices"
+    ]
+  },
+  
+  "career_relevance": {
+    "soc_analyst": {
+      "relevance": "critical",
+      "percentage_of_job": "60-80%",
+      "usage": "Alert triage, threat hunting, investigation, reporting"
+    },
+    "incident_responder": {
+      "relevance": "critical",
+      "percentage_of_job": "40-50%",
+      "usage": "Timeline creation, evidence gathering, IOC searching"
+    },
+    "security_engineer": {
+      "relevance": "high",
+      "percentage_of_job": "20-30%",
+      "usage": "Creating detections, tuning alerts, building dashboards"
+    },
+    "penetration_tester": {
+      "relevance": "medium",
+      "percentage_of_job": "10-15%",
+      "usage": "Understanding what gets logged, testing detection coverage"
+    },
+    "grc_analyst": {
+      "relevance": "medium",
+      "percentage_of_job": "15-20%",
+      "usage": "Compliance reporting, audit evidence, metrics"
+    }
+  },
+  
+  "prerequisites": {
+    "knowledge": [
+      "Basic understanding of logs and log formats",
+      "Familiarity with common security events",
+      "Basic command line skills"
+    ],
+    "tools_needed": [
+      "Splunk Free (500MB/day limit)",
+      "OR TryHackMe/Boss of the SOC for online practice",
+      "Sample log data (provided in exercises)"
+    ],
+    "files_provided": [
+      "Sample log datasets linked in projects"
+    ],
+    "estimated_setup_time": "30-45 minutes"
+  },
+  
+  "quick_start": {
+    "installation_steps": [
+      {
+        "step": 1,
+        "title": "Download Splunk Enterprise",
+        "instructions": "Visit splunk.com/download and create a free account. Download Splunk Enterprise (includes free license).",
+        "platform_specific": {
+          "linux": "Download .deb or .rpm package",
+          "windows": "Download MSI installer",
+          "docker": "docker pull splunk/splunk:latest"
+        }
+      },
+      {
+        "step": 2,
+        "title": "Install Splunk",
+        "instructions": "Run the installer and accept defaults. Set admin password when prompted.",
+        "platform_specific": {
+          "linux": "sudo dpkg -i splunk.deb && sudo /opt/splunk/bin/splunk start --accept-license",
+          "windows": "Run MSI, follow wizard, start service",
+          "docker": "docker run -d -p 8000:8000 -e SPLUNK_START_ARGS='--accept-license' -e SPLUNK_PASSWORD='yourpassword' splunk/splunk:latest"
+        }
+      },
+      {
+        "step": 3,
+        "title": "Access Web Interface",
+        "instructions": "Open browser to http://localhost:8000\nLogin with admin and your password",
+        "verification": "You should see the Splunk home screen with Search & Reporting app"
+      }
+    ],
+    "first_run": "Go to Settings → Add Data → Upload to add your first log file",
+    "verification": "If you can search 'index=*' and see results, you're ready!"
+  },
+  
+  "core_concepts": [
+    {
+      "concept_id": "indexes",
+      "title": "Indexes",
+      "explanation": "Indexes are where Splunk stores data. Think of them as databases or folders for different data types.",
+      "why_it_matters": "Understanding indexes helps you search efficiently and manage data retention.",
+      "exam_tip": "Know that SIEM indexes/stores logs from multiple sources for centralized analysis"
+    },
+    {
+      "concept_id": "spl",
+      "title": "Splunk Processing Language (SPL)",
+      "explanation": "SPL is Splunk's query language. It uses pipes (|) to chain commands, similar to Unix.",
+      "why_it_matters": "SPL is how you search, filter, transform, and visualize data.",
+      "exam_tip": "Understand basic search/filter/aggregate concepts even if you don't memorize SPL syntax"
+    },
+    {
+      "concept_id": "fields",
+      "title": "Fields and Field Extraction",
+      "explanation": "Splunk automatically extracts fields from logs (src_ip, user, action). You can also create custom extractions.",
+      "why_it_matters": "Fields let you search and filter precisely instead of just string matching.",
+      "exam_tip": "Field-based searching is more accurate than keyword searching"
+    },
+    {
+      "concept_id": "alerts",
+      "title": "Alerts and Correlation",
+      "explanation": "Saved searches can trigger alerts when conditions are met. Correlation rules detect attack patterns.",
+      "why_it_matters": "Automated alerting is how SOCs scale - you can't manually watch all logs.",
+      "exam_tip": "Understand alert thresholds, correlation, and the importance of tuning to reduce false positives"
+    }
+  ],
+  
+  "mini_projects": [
+    {
+      "project_id": "project-1",
+      "title": "Introduction to SPL Search",
+      "difficulty": "beginner",
+      "estimated_time": "45-60 minutes",
+      "description": "Learn Splunk basics: searching, filtering, and understanding results.",
+      "learning_objectives": [
+        "Navigate Splunk interface",
+        "Write basic SPL queries",
+        "Use time range selectors",
+        "Understand search results"
+      ],
+      "scenario": "You're a new SOC analyst. Your first task is to learn how to search logs in your company's SIEM.",
+      
+      "setup": {
+        "files_needed": ["Tutorial data (built into Splunk)"],
+        "environment": "Splunk with tutorial data, OR TryHackMe Splunk room",
+        "alternative": "Use TryHackMe's Splunk 101 room if you don't have local Splunk"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Load Tutorial Data",
+          "instructions": "In Splunk:\n1. Go to Settings → Add Data\n2. Click 'Tutorial data'\n3. Follow prompts to add sample data\n\nOr search: index=main (if data already exists)",
+          "hints": ["Tutorial data includes web logs, mail logs, and security events"],
+          "expected_result": "Sample data available for searching",
+          "common_mistakes": ["Skipping this step and having no data to search"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Basic Keyword Search",
+          "instructions": "In the search bar, type: error\n\nClick the magnifying glass or press Enter.\nSet time range to 'All time'.",
+          "hints": ["This finds all events containing 'error'", "Case insensitive by default"],
+          "expected_result": "Events containing the word 'error'",
+          "common_mistakes": ["Too narrow time range showing no results"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Field-Based Search",
+          "instructions": "Search: status=404\n\nThis finds HTTP 404 errors specifically using the status field.",
+          "hints": ["Click a field on the left to see its values", "Field searches are more precise"],
+          "expected_result": "Only events where status equals 404",
+          "common_mistakes": ["Using status:404 instead of status=404"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Combine Search Terms",
+          "instructions": "Search: status=404 AND action=purchase\n\nFind 404 errors on purchase pages.",
+          "hints": ["AND combines requirements", "OR expands results", "NOT excludes"],
+          "expected_result": "Events matching both conditions",
+          "common_mistakes": ["Forgetting AND (spaces imply AND but explicit is clearer)"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Use Pipes for Statistics",
+          "instructions": "Search: * | stats count by status\n\nThis counts events grouped by HTTP status code.",
+          "hints": ["| sends results to the next command", "stats aggregates data"],
+          "expected_result": "Table showing count for each status code",
+          "common_mistakes": ["Forgetting the pipe character"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What HTTP status code appears most frequently?",
+          "answer": "Usually 200 (OK)",
+          "explanation": "Most web requests succeed with 200"
+        },
+        {
+          "question": "How many events have status=500?",
+          "answer": "Varies - use: status=500 | stats count",
+          "explanation": "500 errors indicate server problems"
+        }
+      ],
+      
+      "takeaways": [
+        "SPL searches pipe results from left to right",
+        "Field-based searches are more precise than keyword searches",
+        "Stats command aggregates data for analysis",
+        "Time range selection is critical for search performance"
+      ]
+    },
+    {
+      "project_id": "project-2",
+      "title": "Security Log Analysis",
+      "difficulty": "intermediate",
+      "estimated_time": "60-90 minutes",
+      "description": "Analyze security events to identify suspicious activity patterns.",
+      "learning_objectives": [
+        "Search Windows security logs",
+        "Identify authentication anomalies",
+        "Create simple visualizations",
+        "Build a basic security report"
+      ],
+      "scenario": "A user reports strange activity on their account. Investigate authentication logs to find evidence of compromise.",
+      
+      "setup": {
+        "files_needed": ["Windows security logs or Boss of the SOC dataset"],
+        "file_sources": [
+          {
+            "name": "Boss of the SOC (BOTS)",
+            "url": "https://github.com/splunk/botsv1",
+            "description": "Free security-focused Splunk dataset"
+          },
+          {
+            "name": "TryHackMe Investigating Windows",
+            "url": "https://tryhackme.com/room/introtosiem",
+            "description": "Online lab with Windows logs"
+          }
+        ],
+        "environment": "Splunk with security log data"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Find Failed Logins",
+          "instructions": "Search: EventCode=4625\n\nWindows Event ID 4625 = failed login attempt.",
+          "hints": ["4625 is the Windows code for failed logon", "High counts may indicate brute force"],
+          "expected_result": "List of failed authentication events",
+          "common_mistakes": ["Using wrong event code"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Count Failures by User",
+          "instructions": "Search: EventCode=4625 | stats count by Account_Name | sort -count",
+          "hints": ["Sort -count puts highest first", "Look for accounts with many failures"],
+          "expected_result": "Table of users sorted by failure count",
+          "common_mistakes": ["Not sorting results"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Find Successful Logins After Failures",
+          "instructions": "Search: EventCode=4624 Account_Name=\"suspicious_user\"\n\nReplace suspicious_user with the account from task 2.",
+          "hints": ["4624 = successful logon", "Success after many failures = possible compromise"],
+          "expected_result": "Successful logins for the investigated account",
+          "common_mistakes": ["Wrong field name for username"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Create Timeline Visualization",
+          "instructions": "Search: EventCode=4625 OR EventCode=4624 | timechart count by EventCode",
+          "hints": ["timechart shows events over time", "Look for patterns or spikes"],
+          "expected_result": "Chart showing login attempts over time",
+          "common_mistakes": ["Not including both event codes"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Identify Source IPs",
+          "instructions": "Search: EventCode=4625 | stats count by Source_Network_Address | sort -count",
+          "hints": ["Multiple IPs attacking = distributed attack", "Single IP = targeted"],
+          "expected_result": "Source IPs behind failed logins",
+          "common_mistakes": ["Field names vary - check your data"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "Which account had the most failed login attempts?",
+          "answer": "Varies by dataset",
+          "explanation": "High failure counts indicate brute force attempts"
+        },
+        {
+          "question": "Did the attacker eventually succeed? How do you know?",
+          "answer": "Check for 4624 events after 4625 events for same user",
+          "explanation": "Success after failures = likely compromise"
+        },
+        {
+          "question": "What time did the attack occur?",
+          "answer": "Use timechart to visualize",
+          "explanation": "Timeline helps establish incident scope"
+        }
+      ],
+      
+      "takeaways": [
+        "Windows Event IDs are crucial for security analysis",
+        "Brute force shows as many 4625s followed by 4624",
+        "Timecharts reveal attack patterns and duration",
+        "Source IP analysis helps identify attacker infrastructure"
+      ]
+    },
+    {
+      "project_id": "project-3",
+      "title": "Building Security Dashboards and Alerts",
+      "difficulty": "advanced",
+      "estimated_time": "90-120 minutes",
+      "description": "Create a security monitoring dashboard and configure automated alerts.",
+      "learning_objectives": [
+        "Build Splunk dashboards",
+        "Create saved searches",
+        "Configure alert triggers",
+        "Implement basic detection rules"
+      ],
+      "scenario": "Management wants visibility into security events. Build a dashboard for the SOC and create alerts for critical events.",
+      
+      "setup": {
+        "files_needed": ["Security log data from previous project"],
+        "environment": "Splunk with edit permissions (not possible on some shared instances)"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Create a Dashboard",
+          "instructions": "1. Run a search you want to visualize\n2. Click 'Save As' → Dashboard Panel\n3. Create new dashboard named 'Security Overview'\n4. Add the panel",
+          "hints": ["Dashboards combine multiple visualizations", "Start with your most useful searches"],
+          "expected_result": "New dashboard with one panel",
+          "common_mistakes": ["Not saving the dashboard"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Add Multiple Panels",
+          "instructions": "Add these panels to your dashboard:\n1. Failed logins over time (timechart)\n2. Top failed accounts (stats table)\n3. Top source IPs (pie chart)\n4. Total event count (single value)",
+          "hints": ["Each search becomes a panel", "Choose appropriate visualizations"],
+          "expected_result": "Dashboard with 4 panels",
+          "common_mistakes": ["All panels showing same visualization type"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Create a Saved Search",
+          "instructions": "1. Search: EventCode=4625 | stats count\n2. Save As → Report\n3. Name it 'Failed Login Count'\n4. Set schedule to run every 5 minutes",
+          "hints": ["Saved searches can power alerts", "Schedule determines how often it runs"],
+          "expected_result": "Scheduled report that runs automatically",
+          "common_mistakes": ["Not setting a schedule"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Configure an Alert",
+          "instructions": "1. Search: EventCode=4625 | stats count as failures | where failures > 10\n2. Save As → Alert\n3. Trigger when: Number of results > 0\n4. Action: Send email or log event",
+          "hints": ["Threshold of 10 is example - tune for your environment", "Test with low threshold first"],
+          "expected_result": "Alert that fires when threshold exceeded",
+          "common_mistakes": ["Threshold too low (alert fatigue) or too high (missed attacks)"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Create Brute Force Detection Rule",
+          "instructions": "Create alert:\nEventCode=4625 | bin _time span=5m | stats count by Account_Name, _time | where count > 5",
+          "hints": ["This detects >5 failures in 5 minutes per account", "Adjust thresholds for your environment"],
+          "expected_result": "Alert detecting brute force patterns",
+          "common_mistakes": ["Not considering time windows"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What's an appropriate threshold for failed login alerts?",
+          "answer": "Depends on environment - start with 5-10 per 5 minutes",
+          "explanation": "Too low = noise, too high = missed attacks"
+        },
+        {
+          "question": "Why use time bins in detection rules?",
+          "answer": "To detect patterns within specific windows",
+          "explanation": "100 failures over a month is different than 100 in 5 minutes"
+        }
+      ],
+      
+      "takeaways": [
+        "Dashboards provide at-a-glance security visibility",
+        "Alerts automate detection so analysts focus on response",
+        "Threshold tuning is critical to avoid alert fatigue",
+        "Time-based detection catches burst attacks"
+      ]
+    }
+  ],
+  
+  "external_resources": [
+    {
+      "platform": "TryHackMe",
+      "name": "Splunk 101",
+      "url": "https://tryhackme.com/room/splunk101",
+      "cost": "Free",
+      "difficulty": "beginner",
+      "estimated_time": "2 hours",
+      "description": "Introduction to Splunk basics"
+    },
+    {
+      "platform": "TryHackMe",
+      "name": "Splunk 2",
+      "url": "https://tryhackme.com/room/splunk2gcd5",
+      "cost": "Free",
+      "difficulty": "intermediate",
+      "estimated_time": "3 hours",
+      "description": "Advanced Splunk analysis"
+    },
+    {
+      "platform": "Splunk",
+      "name": "Boss of the SOC (BOTS)",
+      "url": "https://bots.splunk.com/",
+      "cost": "Free",
+      "difficulty": "intermediate-advanced",
+      "estimated_time": "4-8 hours",
+      "description": "Capture-the-flag style Splunk challenges"
+    },
+    {
+      "platform": "Splunk",
+      "name": "Free Training",
+      "url": "https://www.splunk.com/en_us/training/free-courses.html",
+      "cost": "Free",
+      "difficulty": "all",
+      "estimated_time": "Varies",
+      "description": "Official free Splunk courses"
+    }
+  ],
+  
+  "cheat_sheet": {
+    "sections": [
+      {
+        "title": "Basic Search",
+        "commands": [
+          { "command": "index=main", "description": "Search main index" },
+          { "command": "index=* sourcetype=syslog", "description": "All indexes, syslog only" },
+          { "command": "error OR failed", "description": "Either term" },
+          { "command": "error AND NOT test", "description": "Error but not test" },
+          { "command": "status=404", "description": "Field equals value" },
+          { "command": "status!=200", "description": "Field not equal" },
+          { "command": "bytes>1000", "description": "Numeric comparison" }
+        ]
+      },
+      {
+        "title": "Statistics",
+        "commands": [
+          { "command": "| stats count", "description": "Count all events" },
+          { "command": "| stats count by user", "description": "Count per user" },
+          { "command": "| stats sum(bytes) as total", "description": "Sum with rename" },
+          { "command": "| stats avg(duration)", "description": "Average" },
+          { "command": "| stats dc(user)", "description": "Distinct count" },
+          { "command": "| stats earliest(_time) latest(_time)", "description": "Time range" }
+        ]
+      },
+      {
+        "title": "Transforming",
+        "commands": [
+          { "command": "| table user, action, status", "description": "Select fields" },
+          { "command": "| rename user as username", "description": "Rename field" },
+          { "command": "| sort -count", "description": "Sort descending" },
+          { "command": "| head 10", "description": "First 10 results" },
+          { "command": "| dedup user", "description": "Remove duplicates" },
+          { "command": "| where count > 5", "description": "Filter results" }
+        ]
+      },
+      {
+        "title": "Time",
+        "commands": [
+          { "command": "| timechart count", "description": "Count over time" },
+          { "command": "| timechart count by status", "description": "Count by field over time" },
+          { "command": "| bin _time span=1h", "description": "Group by hour" },
+          { "command": "earliest=-24h", "description": "Last 24 hours" },
+          { "command": "earliest=-7d@d latest=@d", "description": "Last 7 days" }
+        ]
+      },
+      {
+        "title": "Windows Security Events",
+        "commands": [
+          { "command": "EventCode=4624", "description": "Successful logon" },
+          { "command": "EventCode=4625", "description": "Failed logon" },
+          { "command": "EventCode=4648", "description": "Explicit credential logon" },
+          { "command": "EventCode=4672", "description": "Admin logon" },
+          { "command": "EventCode=4688", "description": "Process created" },
+          { "command": "EventCode=4698", "description": "Scheduled task created" }
+        ]
+      }
+    ]
+  },
+  
+  "knowledge_check": [
+    {
+      "question": "What is the purpose of a SIEM?",
+      "options": [
+        "Block network attacks",
+        "Centralize and analyze logs from multiple sources",
+        "Scan for vulnerabilities",
+        "Encrypt sensitive data"
+      ],
+      "correct": 1,
+      "explanation": "SIEM aggregates logs, enables searching/analysis, and provides alerting"
+    },
+    {
+      "question": "What does the pipe (|) do in SPL?",
+      "options": [
+        "Separates search terms",
+        "Creates an OR condition",
+        "Sends results to the next command",
+        "Filters out results"
+      ],
+      "correct": 2,
+      "explanation": "Pipes chain commands together, passing output from one to the next"
+    },
+    {
+      "question": "Which Windows Event ID indicates a successful logon?",
+      "options": [
+        "4624",
+        "4625",
+        "4672",
+        "4688"
+      ],
+      "correct": 0,
+      "explanation": "4624 = successful logon, 4625 = failed logon"
+    },
+    {
+      "question": "What SPL command counts events grouped by a field?",
+      "options": [
+        "count by field",
+        "stats count by field",
+        "group field | count",
+        "aggregate count field"
+      ],
+      "correct": 1,
+      "explanation": "stats count by field_name groups and counts events"
+    }
+  ],
+  
+  "next_steps": {
+    "related_labs": ["TOOL-LAB-001", "TOOL-LAB-002"],
+    "related_lessons": ["D4-LESSON-001", "D4-LESSON-002"],
+    "certifications": [
+      "Splunk Core Certified User",
+      "Splunk Core Certified Power User",
+      "CompTIA CySA+"
+    ],
+    "advanced_topics": [
+      "Advanced SPL (subsearches, lookups, macros)",
+      "Splunk Enterprise Security (ES)",
+      "SOAR integration",
+      "Custom app development"
+    ]
+  }
+}

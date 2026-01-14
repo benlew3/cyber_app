@@ -1,0 +1,562 @@
+{
+  "lab_id": "TOOL-LAB-005",
+  "tool_name": "Burp Suite",
+  "tool_category": "Web Security",
+  "version": "1.0",
+  
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_time": "3-4 hours",
+    "last_updated": "2025-01-13",
+    "author": "Security+ Training System"
+  },
+  
+  "overview": {
+    "tagline": "The Leading Web Security Testing Toolkit",
+    "description": "Burp Suite is the industry-standard platform for web application security testing. It intercepts HTTP/HTTPS traffic, allowing you to analyze and modify requests. Security testers use it to find vulnerabilities like SQL injection, XSS, and authentication flaws.",
+    "official_site": "https://portswigger.net/burp",
+    "download_url": "https://portswigger.net/burp/communitydownload",
+    "license": "Freemium (Community Edition is free)",
+    "platforms": ["Windows", "Linux", "macOS"],
+    "why_learn": "Web applications are the #1 attack vector. Understanding how to test them is essential for any security role."
+  },
+  
+  "security_plus_relevance": {
+    "domains": [2, 4],
+    "objectives": ["2.3", "2.4", "4.1"],
+    "exam_topics": [
+      "Web application vulnerabilities (OWASP Top 10)",
+      "SQL injection, XSS, CSRF attacks",
+      "Input validation and sanitization",
+      "Security testing methodologies"
+    ],
+    "exam_question_types": [
+      "Identifying web vulnerabilities from scenarios",
+      "Understanding attack vectors",
+      "Recommending mitigations",
+      "Security testing concepts"
+    ]
+  },
+  
+  "career_relevance": {
+    "soc_analyst": {
+      "relevance": "medium",
+      "percentage_of_job": "10-15%",
+      "usage": "Understanding web attacks in logs, validating WAF alerts"
+    },
+    "incident_responder": {
+      "relevance": "medium",
+      "percentage_of_job": "15-20%",
+      "usage": "Analyzing web-based breaches, understanding attack mechanics"
+    },
+    "security_engineer": {
+      "relevance": "high",
+      "percentage_of_job": "20-30%",
+      "usage": "Testing applications, validating security controls"
+    },
+    "penetration_tester": {
+      "relevance": "critical",
+      "percentage_of_job": "50-70%",
+      "usage": "Primary tool for web application testing"
+    },
+    "grc_analyst": {
+      "relevance": "low",
+      "percentage_of_job": "5%",
+      "usage": "Understanding web risks for policy development"
+    }
+  },
+  
+  "prerequisites": {
+    "knowledge": [
+      "Basic understanding of HTTP (requests, responses, methods)",
+      "Familiarity with web technologies (HTML, cookies, sessions)",
+      "Understanding of client-server architecture"
+    ],
+    "tools_needed": [
+      "Burp Suite Community Edition (free)",
+      "A browser (Firefox recommended for easy proxy config)",
+      "A vulnerable web app to test (DVWA, OWASP WebGoat, or online labs)"
+    ],
+    "files_provided": [],
+    "estimated_setup_time": "30 minutes",
+    "ethical_warning": "⚠️ Only test applications you own or have explicit permission to test."
+  },
+  
+  "quick_start": {
+    "installation_steps": [
+      {
+        "step": 1,
+        "title": "Download Burp Suite",
+        "instructions": "Visit portswigger.net/burp/communitydownload\nDownload Community Edition (free)",
+        "platform_specific": {
+          "linux": "Download .sh installer, run with: bash burpsuite_community.sh",
+          "windows": "Download .exe installer, run setup wizard",
+          "macos": "Download .dmg, drag to Applications"
+        }
+      },
+      {
+        "step": 2,
+        "title": "Configure Browser Proxy",
+        "instructions": "Burp listens on 127.0.0.1:8080 by default.\n\nFirefox: Settings → Network Settings → Manual Proxy → 127.0.0.1:8080\n\nOr use FoxyProxy extension for easy switching.",
+        "verification": "Browse to http://burp - you should see Burp Suite page"
+      },
+      {
+        "step": 3,
+        "title": "Install Burp CA Certificate",
+        "instructions": "For HTTPS interception:\n1. With proxy enabled, go to http://burp\n2. Click 'CA Certificate' to download\n3. Import into browser's certificate store\n\nFirefox: Settings → Privacy → Certificates → Import",
+        "verification": "You should be able to browse HTTPS sites through Burp without errors"
+      }
+    ],
+    "first_run": "Start Burp, start browser with proxy, browse a site - requests appear in Proxy → HTTP history",
+    "verification": "If you see requests in HTTP history, you're set up correctly"
+  },
+  
+  "core_concepts": [
+    {
+      "concept_id": "proxy",
+      "title": "Intercepting Proxy",
+      "explanation": "Burp sits between your browser and the server, allowing you to see and modify all HTTP/HTTPS traffic.",
+      "why_it_matters": "Interception lets you analyze exactly what data is sent and test how the server handles modified input.",
+      "exam_tip": "Proxy tools reveal hidden parameters, cookies, and headers not visible in the browser"
+    },
+    {
+      "concept_id": "repeater",
+      "title": "Repeater",
+      "explanation": "Repeater lets you manually modify and resend requests, observing the response each time.",
+      "why_it_matters": "Testing injection attacks requires sending many modified requests. Repeater makes this efficient.",
+      "exam_tip": "Use Repeater to test input validation by sending unexpected values"
+    },
+    {
+      "concept_id": "intruder",
+      "title": "Intruder",
+      "explanation": "Intruder automates sending many requests with different payloads - useful for fuzzing and brute force.",
+      "why_it_matters": "Automated testing finds vulnerabilities that manual testing might miss.",
+      "exam_tip": "Intruder can test for SQLi, XSS, and brute force with payload lists"
+    },
+    {
+      "concept_id": "scanner",
+      "title": "Scanner (Pro)",
+      "explanation": "Automated vulnerability scanner (Pro version only, but understand the concept).",
+      "why_it_matters": "Automated scanners find common vulnerabilities quickly but require validation.",
+      "exam_tip": "Know that automated scanning complements manual testing but doesn't replace it"
+    }
+  ],
+  
+  "mini_projects": [
+    {
+      "project_id": "project-1",
+      "title": "Intercepting and Analyzing Traffic",
+      "difficulty": "beginner",
+      "estimated_time": "45-60 minutes",
+      "description": "Learn to intercept, analyze, and understand web traffic with Burp Proxy.",
+      "learning_objectives": [
+        "Configure browser proxy settings",
+        "Intercept HTTP/HTTPS requests",
+        "Analyze request/response structure",
+        "Understand cookies and headers"
+      ],
+      "scenario": "You're analyzing a web application to understand its traffic patterns before testing it.",
+      
+      "setup": {
+        "files_needed": [],
+        "environment": "Burp Suite + configured browser",
+        "target": "Any website you're allowed to analyze (your own, practice labs)"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Enable Interception",
+          "instructions": "1. Open Burp Suite\n2. Go to Proxy → Intercept tab\n3. Ensure 'Intercept is on' (toggle if needed)\n4. Open configured browser\n5. Browse to a website",
+          "hints": ["The request will appear in Burp, browser will 'hang' waiting", "Click 'Forward' to send the request"],
+          "expected_result": "Captured HTTP request visible in Intercept tab",
+          "common_mistakes": ["Forgetting to configure browser proxy", "Not having intercept enabled"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Analyze Request Structure",
+          "instructions": "Look at the intercepted request:\n1. Request line (GET /path HTTP/1.1)\n2. Host header\n3. User-Agent\n4. Cookies\n5. Other headers",
+          "hints": ["Each line is a header", "POST requests have body content too"],
+          "expected_result": "Understanding of HTTP request structure",
+          "common_mistakes": ["Not examining all headers"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "View HTTP History",
+          "instructions": "1. Turn off interception (click toggle)\n2. Browse around the site\n3. Go to Proxy → HTTP history\n4. Review all captured requests",
+          "hints": ["History shows all traffic even without interception", "Click requests to see details"],
+          "expected_result": "Complete log of HTTP traffic",
+          "common_mistakes": ["Thinking you need interception on to capture traffic"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Find Sensitive Data",
+          "instructions": "Look through requests for:\n1. Session cookies (often named JSESSIONID, PHPSESSID, etc.)\n2. Authentication tokens\n3. User input in parameters\n4. API calls",
+          "hints": ["Use search/filter in HTTP history", "Sort by different columns"],
+          "expected_result": "Identified sensitive data in requests",
+          "common_mistakes": ["Missing cookies in headers"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Analyze Responses",
+          "instructions": "Select a request and view the Response tab:\n1. Status code (200, 302, 404, etc.)\n2. Response headers\n3. Response body (HTML, JSON, etc.)",
+          "hints": ["Response contains server's reply", "Look for security headers (or lack thereof)"],
+          "expected_result": "Understanding of request/response cycle",
+          "common_mistakes": ["Only looking at requests, ignoring responses"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What session cookie(s) did you find?",
+          "answer": "Varies - common names: JSESSIONID, PHPSESSID, ASP.NET_SessionId",
+          "explanation": "Session cookies maintain authenticated state"
+        },
+        {
+          "question": "What User-Agent did your browser send?",
+          "answer": "Varies - includes browser name and version",
+          "explanation": "User-Agent can be spoofed by attackers"
+        }
+      ],
+      
+      "takeaways": [
+        "All HTTP traffic is visible to intercepting proxies",
+        "Session cookies are critical security tokens",
+        "Understanding traffic patterns is the foundation of web testing",
+        "History lets you analyze without interrupting browsing"
+      ]
+    },
+    {
+      "project_id": "project-2",
+      "title": "Finding SQL Injection",
+      "difficulty": "intermediate",
+      "estimated_time": "60-90 minutes",
+      "description": "Use Burp to find and exploit SQL injection vulnerabilities.",
+      "learning_objectives": [
+        "Identify injection points",
+        "Use Repeater for manual testing",
+        "Recognize SQLi indicators",
+        "Understand SQLi impact"
+      ],
+      "scenario": "You're testing a web application for SQL injection. Use Burp to find and confirm vulnerabilities.",
+      
+      "setup": {
+        "files_needed": [],
+        "environment": "Burp Suite + vulnerable application",
+        "vulnerable_apps": [
+          {
+            "name": "DVWA (Damn Vulnerable Web Application)",
+            "url": "https://github.com/digininja/DVWA",
+            "description": "Install locally or use Docker"
+          },
+          {
+            "name": "PortSwigger Web Security Academy",
+            "url": "https://portswigger.net/web-security/sql-injection",
+            "description": "Free online SQLi labs"
+          },
+          {
+            "name": "TryHackMe SQL Injection",
+            "url": "https://tryhackme.com/room/sqlinjectionlm",
+            "description": "Guided SQLi practice"
+          }
+        ]
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Find User Input Points",
+          "instructions": "Browse the application and identify:\n1. Login forms\n2. Search boxes\n3. URL parameters (?id=1)\n4. Hidden form fields",
+          "hints": ["Any user input could be an injection point", "Check HTTP history for parameters"],
+          "expected_result": "List of potential injection points",
+          "common_mistakes": ["Only testing visible form fields"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Send Request to Repeater",
+          "instructions": "1. Find a request with parameters (like ?id=1)\n2. Right-click → Send to Repeater\n3. Go to Repeater tab",
+          "hints": ["Repeater lets you modify and resend", "Original request preserved in Proxy"],
+          "expected_result": "Request loaded in Repeater",
+          "common_mistakes": ["Modifying in Proxy instead of Repeater"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Test for SQLi with Single Quote",
+          "instructions": "In Repeater:\n1. Add a single quote to a parameter: id=1'\n2. Click Send\n3. Analyze the response for SQL errors",
+          "hints": ["SQL errors indicate vulnerability", "Look for: syntax error, mysql, SQL"],
+          "expected_result": "SQL error message (if vulnerable)",
+          "common_mistakes": ["Not recognizing SQL error messages"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Confirm SQLi with Boolean Test",
+          "instructions": "Test these payloads:\n1. id=1 AND 1=1 (should work normally)\n2. id=1 AND 1=2 (should fail/differ)\n\nDifferent responses confirm SQLi.",
+          "hints": ["1=1 is always true", "1=2 is always false", "Different behavior = SQLi"],
+          "expected_result": "Confirmed SQLi via different responses",
+          "common_mistakes": ["Not comparing both responses"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Extract Data with UNION",
+          "instructions": "If confirmed vulnerable, try UNION attack:\nid=1 UNION SELECT 1,2,3--\n\nAdjust column count until successful.",
+          "hints": ["UNION requires matching column count", "-- comments out rest of query"],
+          "expected_result": "Understanding of data extraction",
+          "common_mistakes": ["Wrong column count"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What SQL error message did you receive?",
+          "answer": "Varies - often includes 'syntax error' or database name",
+          "explanation": "Error messages reveal database type and vulnerability"
+        },
+        {
+          "question": "How did the response differ between AND 1=1 and AND 1=2?",
+          "answer": "1=1 returns normal content, 1=2 returns empty/error",
+          "explanation": "Boolean-based SQLi detected by response differences"
+        }
+      ],
+      
+      "takeaways": [
+        "SQL injection remains a top vulnerability",
+        "Single quote is the simplest SQLi test",
+        "Boolean tests confirm SQLi even without error messages",
+        "Repeater is essential for iterative testing"
+      ]
+    },
+    {
+      "project_id": "project-3",
+      "title": "Automated Testing with Intruder",
+      "difficulty": "advanced",
+      "estimated_time": "60-90 minutes",
+      "description": "Use Burp Intruder for automated parameter fuzzing and brute force testing.",
+      "learning_objectives": [
+        "Configure Intruder attacks",
+        "Use payload lists effectively",
+        "Analyze automated test results",
+        "Identify vulnerabilities from patterns"
+      ],
+      "scenario": "Manual testing is slow. Use automation to test multiple parameters with various payloads.",
+      
+      "setup": {
+        "files_needed": ["Payload lists (XSS, SQLi wordlists)"],
+        "environment": "Burp Suite + vulnerable application",
+        "payload_sources": [
+          {
+            "name": "SecLists",
+            "url": "https://github.com/danielmiessler/SecLists",
+            "description": "Comprehensive security testing wordlists"
+          }
+        ]
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Send Request to Intruder",
+          "instructions": "1. Find a request with testable parameters\n2. Right-click → Send to Intruder\n3. Go to Intruder tab",
+          "hints": ["Intruder automates repeated requests", "Useful for fuzzing and brute force"],
+          "expected_result": "Request loaded in Intruder",
+          "common_mistakes": ["Wrong request selected"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Configure Positions",
+          "instructions": "1. Go to Positions tab\n2. Click 'Clear §' to remove auto-marks\n3. Highlight the value you want to test\n4. Click 'Add §' to mark it",
+          "hints": ["§ symbols mark payload positions", "Test one position at a time initially"],
+          "expected_result": "Parameter marked for testing",
+          "common_mistakes": ["Not clearing default positions", "Marking too many positions"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Load Payloads",
+          "instructions": "1. Go to Payloads tab\n2. Payload type: Simple list\n3. Load a wordlist or add payloads manually\n\nFor SQLi test, add: ' OR 1=1--, ' UNION SELECT--, etc.",
+          "hints": ["Start with small payload list", "SecLists has good fuzzing lists"],
+          "expected_result": "Payload list loaded",
+          "common_mistakes": ["Using huge lists (slow in Community Edition)"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Start Attack",
+          "instructions": "1. Click 'Start Attack'\n2. Watch results populate\n3. Sort by Length or Status to find anomalies",
+          "hints": ["Different response length often indicates interesting result", "Community Edition is rate-limited"],
+          "expected_result": "Attack results with varying responses",
+          "common_mistakes": ["Not analyzing all results"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Identify Vulnerabilities from Results",
+          "instructions": "Look for:\n1. Different status codes (500 = error, might indicate SQLi)\n2. Different response lengths\n3. Different response content\n\nInvestigate anomalies in Repeater.",
+          "hints": ["Anomalies warrant manual investigation", "False positives are common - verify"],
+          "expected_result": "Potential vulnerabilities identified",
+          "common_mistakes": ["Assuming all anomalies are vulnerabilities"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "Which payload(s) produced different responses?",
+          "answer": "Varies - SQLi or XSS payloads may trigger different behavior",
+          "explanation": "Different responses indicate the application processed input unexpectedly"
+        },
+        {
+          "question": "How did you filter/sort results to find anomalies?",
+          "answer": "Sort by Length or Status code",
+          "explanation": "Quick filtering helps identify interesting results in large datasets"
+        }
+      ],
+      
+      "takeaways": [
+        "Automation finds issues manual testing might miss",
+        "Response length/status differences indicate interesting behavior",
+        "Always verify automated findings manually",
+        "Community Edition rate limiting requires patience"
+      ]
+    }
+  ],
+  
+  "external_resources": [
+    {
+      "platform": "PortSwigger",
+      "name": "Web Security Academy",
+      "url": "https://portswigger.net/web-security",
+      "cost": "Free",
+      "difficulty": "all levels",
+      "estimated_time": "100+ hours total",
+      "description": "Comprehensive free web security training from Burp's creators"
+    },
+    {
+      "platform": "TryHackMe",
+      "name": "Burp Suite: The Basics",
+      "url": "https://tryhackme.com/room/burpsuitebasics",
+      "cost": "Free",
+      "difficulty": "beginner",
+      "estimated_time": "2 hours",
+      "description": "Introduction to Burp Suite fundamentals"
+    },
+    {
+      "platform": "TryHackMe",
+      "name": "Burp Suite: Repeater",
+      "url": "https://tryhackme.com/room/burpsuiterepeater",
+      "cost": "Free",
+      "difficulty": "intermediate",
+      "estimated_time": "2 hours",
+      "description": "Deep dive into Repeater functionality"
+    },
+    {
+      "platform": "OWASP",
+      "name": "WebGoat",
+      "url": "https://owasp.org/www-project-webgoat/",
+      "cost": "Free",
+      "difficulty": "beginner-intermediate",
+      "estimated_time": "Varies",
+      "description": "Deliberately vulnerable application for learning"
+    }
+  ],
+  
+  "cheat_sheet": {
+    "sections": [
+      {
+        "title": "Proxy Shortcuts",
+        "commands": [
+          { "command": "Ctrl+I", "description": "Toggle intercept on/off" },
+          { "command": "Ctrl+F", "description": "Forward intercepted request" },
+          { "command": "Ctrl+Shift+D", "description": "Drop intercepted request" }
+        ]
+      },
+      {
+        "title": "Common SQLi Payloads",
+        "commands": [
+          { "command": "'", "description": "Basic test - causes syntax error if vulnerable" },
+          { "command": "' OR '1'='1", "description": "Authentication bypass" },
+          { "command": "' OR 1=1--", "description": "Boolean true with comment" },
+          { "command": "' UNION SELECT NULL--", "description": "UNION test (adjust NULLs)" },
+          { "command": "'; DROP TABLE users--", "description": "Destructive (don't use without permission!)" }
+        ]
+      },
+      {
+        "title": "Common XSS Payloads",
+        "commands": [
+          { "command": "<script>alert(1)</script>", "description": "Basic XSS test" },
+          { "command": "<img src=x onerror=alert(1)>", "description": "Image tag XSS" },
+          { "command": "javascript:alert(1)", "description": "JavaScript URL" },
+          { "command": "'\"><script>alert(1)</script>", "description": "Break out of attributes" }
+        ]
+      },
+      {
+        "title": "Intruder Attack Types",
+        "commands": [
+          { "command": "Sniper", "description": "Single payload position at a time" },
+          { "command": "Battering Ram", "description": "Same payload in all positions" },
+          { "command": "Pitchfork", "description": "Different payload lists, in parallel" },
+          { "command": "Cluster Bomb", "description": "All combinations of all payloads" }
+        ]
+      }
+    ]
+  },
+  
+  "knowledge_check": [
+    {
+      "question": "What is the primary purpose of Burp Suite's Proxy?",
+      "options": [
+        "To block malicious websites",
+        "To intercept and modify HTTP traffic",
+        "To encrypt communications",
+        "To scan for malware"
+      ],
+      "correct": 1,
+      "explanation": "Burp Proxy intercepts traffic between browser and server for analysis and modification"
+    },
+    {
+      "question": "Which Burp tool is best for manually modifying and resending requests?",
+      "options": [
+        "Proxy",
+        "Intruder",
+        "Repeater",
+        "Scanner"
+      ],
+      "correct": 2,
+      "explanation": "Repeater allows manual modification and resending of individual requests"
+    },
+    {
+      "question": "What does a single quote (') test for in input fields?",
+      "options": [
+        "Cross-Site Scripting (XSS)",
+        "SQL Injection",
+        "Buffer Overflow",
+        "CSRF"
+      ],
+      "correct": 1,
+      "explanation": "Single quotes can break SQL syntax, revealing SQL injection vulnerabilities"
+    },
+    {
+      "question": "Why install Burp's CA certificate in your browser?",
+      "options": [
+        "To speed up browsing",
+        "To block malicious sites",
+        "To intercept HTTPS traffic without errors",
+        "To encrypt your traffic"
+      ],
+      "correct": 2,
+      "explanation": "Burp's CA certificate allows it to perform HTTPS interception without certificate warnings"
+    }
+  ],
+  
+  "next_steps": {
+    "related_labs": ["TOOL-LAB-002", "TOOL-LAB-003"],
+    "related_lessons": ["D2-LESSON-006", "D3-LESSON-003"],
+    "certifications": [
+      "CompTIA PenTest+",
+      "OSCP",
+      "eWPT (Web Application Penetration Tester)",
+      "Burp Suite Certified Practitioner"
+    ],
+    "advanced_topics": [
+      "Burp Extensions and BApps",
+      "Advanced Intruder techniques",
+      "API testing",
+      "Burp Collaborator for out-of-band testing"
+    ]
+  }
+}
