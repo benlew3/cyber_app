@@ -1,4 +1,4 @@
-// Security+ Platform v33 - Complete Training Platform
+// Security+ Platform v34 - Complete Training Platform
 // Full functionality with enhanced simulations, light/dark mode, and comprehensive content
 // 41 lessons (with navigation), 26 simulations (260 decision points), 15 remediation, 
 // 250 questions, 30 PBQs, 300+ glossary terms, practice exam
@@ -6,7 +6,7 @@
 // v29 KEY ENHANCEMENT: Each simulation now has 10 comprehensive decision points
 // matching the actual JSON files (1000+ lines each) for professional training
 
-console.log('🚀 Security+ v33 - Complete Training Platform!');
+console.log('🚀 Security+ v34 - Complete Training Platform!');
 
 // ============================================
 // IMMEDIATE LOADING FIX & ERROR PREVENTION
