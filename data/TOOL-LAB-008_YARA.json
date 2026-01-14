@@ -1,0 +1,482 @@
+{
+  "lab_id": "TOOL-LAB-008",
+  "tool_name": "YARA",
+  "tool_category": "Malware Detection",
+  "version": "1.0",
+  
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_time": "2-3 hours",
+    "last_updated": "2025-01-14",
+    "author": "Security+ Training System"
+  },
+  
+  "overview": {
+    "tagline": "The Pattern Matching Swiss Knife for Malware Researchers",
+    "description": "YARA identifies and classifies malware using pattern-matching rules. Rules describe strings, byte sequences, and conditions that identify malware families. Used by antivirus vendors, threat intel platforms, and SOC teams worldwide.",
+    "official_site": "https://virustotal.github.io/yara/",
+    "download_url": "https://github.com/VirusTotal/yara/releases",
+    "license": "Open Source (BSD)",
+    "platforms": ["Windows", "Linux", "macOS"],
+    "why_learn": "Writing detection rules is a core skill for threat hunters. YARA is the universal language for describing malware patterns."
+  },
+  
+  "security_plus_relevance": {
+    "domains": [2, 4],
+    "objectives": ["2.3", "2.4", "4.1", "4.4"],
+    "exam_topics": [
+      "Malware analysis concepts",
+      "Threat detection and hunting",
+      "Indicators of compromise",
+      "Security monitoring"
+    ]
+  },
+  
+  "career_relevance": {
+    "soc_analyst": {
+      "relevance": "high",
+      "percentage_of_job": "15-25%",
+      "usage": "Writing detection rules, threat hunting"
+    },
+    "incident_responder": {
+      "relevance": "high",
+      "percentage_of_job": "20-30%",
+      "usage": "Creating rules to find malware variants"
+    },
+    "security_engineer": {
+      "relevance": "high",
+      "percentage_of_job": "15-20%",
+      "usage": "Building detection into security tools"
+    },
+    "penetration_tester": {
+      "relevance": "medium",
+      "percentage_of_job": "10%",
+      "usage": "Understanding detection triggers"
+    },
+    "grc_analyst": {
+      "relevance": "low",
+      "percentage_of_job": "2%",
+      "usage": "Understanding detection capabilities"
+    }
+  },
+  
+  "prerequisites": {
+    "knowledge": [
+      "Basic malware concepts",
+      "Hex/binary data familiarity",
+      "Basic programming concepts"
+    ],
+    "tools_needed": [
+      "YARA command line tool",
+      "Text editor",
+      "Sample files for testing"
+    ],
+    "estimated_setup_time": "15 minutes"
+  },
+  
+  "quick_start": {
+    "installation_steps": [
+      {
+        "step": 1,
+        "title": "Install YARA",
+        "instructions": "Linux: sudo apt install yara\nMac: brew install yara\nWindows: Download from GitHub releases",
+        "platform_specific": {
+          "linux": "sudo apt install yara",
+          "windows": "Download from GitHub releases",
+          "macos": "brew install yara"
+        }
+      },
+      {
+        "step": 2,
+        "title": "Verify Installation",
+        "instructions": "Run: yara --version",
+        "verification": "Version number displayed"
+      }
+    ],
+    "first_run": "yara rule.yar target_file",
+    "verification": "Matches show rule name and filename"
+  },
+  
+  "core_concepts": [
+    {
+      "concept_id": "rules",
+      "title": "Rule Structure",
+      "explanation": "Rules have: meta (info), strings (patterns), conditions (match logic).",
+      "why_it_matters": "Understanding structure enables effective rule writing.",
+      "exam_tip": "YARA uses pattern matching to identify malware"
+    },
+    {
+      "concept_id": "strings",
+      "title": "String Types",
+      "explanation": "Text strings, hex strings (byte patterns), and regex patterns.",
+      "why_it_matters": "Different malware needs different string types.",
+      "exam_tip": "Hex strings catch obfuscated content"
+    },
+    {
+      "concept_id": "conditions",
+      "title": "Conditions",
+      "explanation": "Logic determining matches: any of, all of, count thresholds.",
+      "why_it_matters": "Good conditions reduce false positives.",
+      "exam_tip": "Combine indicators for higher confidence"
+    }
+  ],
+  
+  "mini_projects": [
+    {
+      "project_id": "project-1",
+      "title": "Writing Your First YARA Rules",
+      "difficulty": "beginner",
+      "estimated_time": "30-45 minutes",
+      "description": "Learn YARA basics by writing rules that detect files based on strings and patterns.",
+      "learning_objectives": [
+        "Write basic YARA rules",
+        "Use text and hex strings",
+        "Test rules against files",
+        "Understand rule structure"
+      ],
+      "scenario": "Create detection rules for suspicious files found during an investigation.",
+      
+      "setup": {
+        "files_needed": ["Sample text files for testing"],
+        "environment": "Terminal with YARA installed"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Create Basic Rule",
+          "instructions": "Create file basic.yar:\n\nrule Suspicious_Script {\n    meta:\n        description = \"Detects suspicious script keywords\"\n        author = \"Your Name\"\n    strings:\n        $cmd1 = \"powershell -enc\"\n        $cmd2 = \"cmd.exe /c\"\n        $cmd3 = \"WScript.Shell\"\n    condition:\n        any of them\n}",
+          "hints": ["meta = information", "strings = patterns", "condition = match logic"],
+          "expected_result": "Rule file created",
+          "common_mistakes": ["Missing quotes around strings"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Test Your Rule",
+          "instructions": "Create test file containing 'powershell -enc test'\n\nRun: yara basic.yar test.txt\n\nAdd -s flag to see matching strings",
+          "hints": ["-s shows matching strings", "No output = no match"],
+          "expected_result": "Rule name shown when file matches",
+          "common_mistakes": ["Wrong file path"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Add Case-Insensitive Matching",
+          "instructions": "Modify rule:\n\n$cmd1 = \"powershell\" nocase\n\nTest with POWERSHELL, PowerShell, etc.",
+          "hints": ["nocase ignores case", "Catches all variations"],
+          "expected_result": "Matches regardless of case",
+          "common_mistakes": ["Forgetting nocase modifier"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Create Hex String Rule",
+          "instructions": "Create rule:\n\nrule PE_File {\n    strings:\n        $mz = { 4D 5A }  // MZ header\n    condition:\n        $mz at 0\n}",
+          "hints": ["Hex in curly braces", "4D 5A = MZ", "at 0 = file start"],
+          "expected_result": "Detects EXE files by header",
+          "common_mistakes": ["Wrong hex format"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Combine Conditions",
+          "instructions": "Create rule requiring multiple matches:\n\nrule Multi_Match {\n    strings:\n        $s1 = \"password\" nocase\n        $s2 = \"admin\" nocase\n        $s3 = \"login\" nocase\n    condition:\n        2 of them\n}",
+          "hints": ["2 of them = any 2 strings", "Reduces false positives"],
+          "expected_result": "Matches only when 2+ strings present",
+          "common_mistakes": ["Using wrong syntax"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What's the difference between 'any of them' and 'all of them'?",
+          "answer": "any = at least one, all = every string must match",
+          "explanation": "'all' is stricter, reducing false positives but may miss variants"
+        }
+      ],
+      
+      "takeaways": [
+        "YARA rules have meta, strings, and condition sections",
+        "Modifiers like nocase improve coverage",
+        "Hex strings detect binary patterns",
+        "Conditions control match specificity"
+      ]
+    },
+    {
+      "project_id": "project-2",
+      "title": "Detecting Malware Families",
+      "difficulty": "intermediate",
+      "estimated_time": "60-90 minutes",
+      "description": "Write YARA rules targeting specific malware families using unique strings and patterns.",
+      "learning_objectives": [
+        "Analyze malware for unique strings",
+        "Write family-specific rules",
+        "Reduce false positives",
+        "Test rule effectiveness"
+      ],
+      "scenario": "Threat intel provided IOCs. Create rules to detect the malware across your environment.",
+      
+      "setup": {
+        "files_needed": ["Malware samples or strings list"],
+        "environment": "Isolated analysis VM"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Extract Unique Strings",
+          "instructions": "Use: strings -n 8 sample.exe > strings.txt\n\nLook for:\n- Mutex names\n- Registry keys\n- URLs/IPs\n- Error messages\n- PDB paths",
+          "hints": ["Ignore common Windows strings", "PDB paths are highly specific"],
+          "expected_result": "List of unique identifiers",
+          "common_mistakes": ["Using common strings"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Write Family Rule",
+          "instructions": "Create rule with unique strings:\n\nrule MalwareX {\n    meta:\n        family = \"MalwareX\"\n        hash = \"abc123...\"\n    strings:\n        $mutex = \"Global\\\\MalwareX_Mtx\"\n        $pdb = \"malware_project.pdb\"\n        $url = \"http://evil.com/gate.php\"\n    condition:\n        uint16(0) == 0x5A4D and 2 of them\n}",
+          "hints": ["uint16(0) == 0x5A4D checks PE header", "Combine multiple indicators"],
+          "expected_result": "Family-specific detection rule",
+          "common_mistakes": ["Rule too generic"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Add Wildcards",
+          "instructions": "Use wildcards for variants:\n\n$url = /http:\\/\\/[a-z]+\\.evil\\.com/\n\n$config = { 68 74 74 70 ?? ?? 2F 2F }",
+          "hints": ["?? = any byte", "Regex for text patterns"],
+          "expected_result": "Rule catches variants",
+          "common_mistakes": ["Overly broad wildcards"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Test Against Samples",
+          "instructions": "Test rule against:\n1. Known malware samples\n2. Clean files (false positive check)\n3. Variant samples",
+          "hints": ["False positives are worse than false negatives in production"],
+          "expected_result": "Rule accuracy validated",
+          "common_mistakes": ["Not testing for false positives"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Document Rule",
+          "instructions": "Add comprehensive metadata:\n\nmeta:\n    description = \"...\"\n    author = \"...\"\n    date = \"2025-01-14\"\n    reference = \"https://...\"\n    tlp = \"white\"\n    hash1 = \"...\"",
+          "hints": ["Metadata helps future analysts", "Include references"],
+          "expected_result": "Well-documented rule",
+          "common_mistakes": ["Skipping documentation"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "Why check for PE header (0x5A4D) in condition?",
+          "answer": "Limits rule to Windows executables, reducing false positives",
+          "explanation": "Combining file type checks with strings improves accuracy"
+        }
+      ],
+      
+      "takeaways": [
+        "Unique strings make specific detection rules",
+        "Combine multiple indicators for accuracy",
+        "Test rules against clean files",
+        "Document rules for future reference"
+      ]
+    },
+    {
+      "project_id": "project-3",
+      "title": "Building a Detection Rule Library",
+      "difficulty": "advanced",
+      "estimated_time": "60-90 minutes",
+      "description": "Create a comprehensive YARA rule library for your organization covering multiple threat types.",
+      "learning_objectives": [
+        "Organize rules into categories",
+        "Handle rule performance",
+        "Integrate with security tools",
+        "Maintain rule quality"
+      ],
+      "scenario": "Build a YARA rule repository that can be deployed across EDR, SIEM, and scanning tools.",
+      
+      "setup": {
+        "files_needed": ["Existing YARA rules", "Threat intel"],
+        "environment": "Full development environment"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Organize Rule Categories",
+          "instructions": "Create folder structure:\n\nrules/\n├── malware/\n│   ├── ransomware.yar\n│   ├── trojans.yar\n│   └── rats.yar\n├── webshells/\n├── exploits/\n└── suspicious/",
+          "hints": ["Organize by threat type", "Separate high-confidence from hunting rules"],
+          "expected_result": "Organized rule library",
+          "common_mistakes": ["Flat file structure"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Create Index File",
+          "instructions": "Create index.yar:\n\ninclude \"malware/ransomware.yar\"\ninclude \"malware/trojans.yar\"\ninclude \"webshells/*.yar\"\n\nRun with: yara index.yar target/",
+          "hints": ["Include consolidates rules", "Wildcard includes all files"],
+          "expected_result": "Single entry point for all rules",
+          "common_mistakes": ["Missing includes"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Optimize Performance",
+          "instructions": "Profile slow rules:\n\nyara --print-stats rules.yar target/\n\nOptimize by:\n1. Adding fast strings first in condition\n2. Using specific hex over broad regex\n3. Limiting file size checks",
+          "hints": ["Fast strings evaluated first", "Filesize checks speed up scanning"],
+          "expected_result": "Optimized rule performance",
+          "common_mistakes": ["Ignoring performance"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Add Quality Checks",
+          "instructions": "Create validation script:\n\n1. Syntax check all rules\n2. Test against clean samples\n3. Verify metadata completeness\n4. Check for duplicate rule names",
+          "hints": ["Automate quality checks", "CI/CD integration"],
+          "expected_result": "Quality assurance process",
+          "common_mistakes": ["No validation process"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Document and Share",
+          "instructions": "Create README:\n1. Rule categories explained\n2. How to use rules\n3. Contributing guidelines\n4. Performance expectations\n5. Integration guides",
+          "hints": ["Good docs enable team adoption", "Include examples"],
+          "expected_result": "Complete documentation",
+          "common_mistakes": ["Undocumented rules"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "How do you balance detection coverage vs. false positive rate?",
+          "answer": "Use multiple indicators, test thoroughly, tune thresholds",
+          "explanation": "Production rules need careful tuning"
+        }
+      ],
+      
+      "takeaways": [
+        "Organized libraries scale better",
+        "Performance matters in production",
+        "Quality checks prevent bad deployments",
+        "Documentation enables team success"
+      ]
+    }
+  ],
+  
+  "external_resources": [
+    {
+      "platform": "YARA",
+      "name": "Official Documentation",
+      "url": "https://yara.readthedocs.io/",
+      "cost": "Free",
+      "difficulty": "all",
+      "estimated_time": "Reference",
+      "description": "Complete YARA documentation"
+    },
+    {
+      "platform": "TryHackMe",
+      "name": "YARA Room",
+      "url": "https://tryhackme.com/room/yara",
+      "cost": "Free",
+      "difficulty": "beginner",
+      "estimated_time": "2 hours",
+      "description": "Hands-on YARA practice"
+    },
+    {
+      "platform": "GitHub",
+      "name": "Awesome YARA",
+      "url": "https://github.com/InQuest/awesome-yara",
+      "cost": "Free",
+      "difficulty": "all",
+      "estimated_time": "Reference",
+      "description": "Curated YARA resources and rules"
+    }
+  ],
+  
+  "cheat_sheet": {
+    "sections": [
+      {
+        "title": "Basic Syntax",
+        "commands": [
+          { "command": "rule RuleName { ... }", "description": "Rule structure" },
+          { "command": "strings: $s = \"text\"", "description": "Define text string" },
+          { "command": "strings: $h = { 4D 5A }", "description": "Define hex string" },
+          { "command": "condition: any of them", "description": "Match any string" },
+          { "command": "condition: all of them", "description": "Match all strings" }
+        ]
+      },
+      {
+        "title": "String Modifiers",
+        "commands": [
+          { "command": "nocase", "description": "Case-insensitive" },
+          { "command": "wide", "description": "UTF-16 encoding" },
+          { "command": "ascii", "description": "ASCII only" },
+          { "command": "fullword", "description": "Match whole words" },
+          { "command": "xor", "description": "XOR variations" }
+        ]
+      },
+      {
+        "title": "Condition Logic",
+        "commands": [
+          { "command": "2 of ($s*)", "description": "2 of strings starting with $s" },
+          { "command": "#s > 5", "description": "String appears 5+ times" },
+          { "command": "filesize < 1MB", "description": "File size check" },
+          { "command": "uint16(0) == 0x5A4D", "description": "PE header check" },
+          { "command": "@s[1] < 100", "description": "First occurrence offset" }
+        ]
+      },
+      {
+        "title": "Command Line",
+        "commands": [
+          { "command": "yara rule.yar file", "description": "Scan file" },
+          { "command": "yara -r rule.yar dir/", "description": "Recursive scan" },
+          { "command": "yara -s rule.yar file", "description": "Show matching strings" },
+          { "command": "yara -c rule.yar file", "description": "Count matches only" }
+        ]
+      }
+    ]
+  },
+  
+  "knowledge_check": [
+    {
+      "question": "What does 'nocase' modifier do in YARA?",
+      "options": [
+        "Makes the rule slower",
+        "Makes string matching case-insensitive",
+        "Removes the string from output",
+        "Encrypts the string"
+      ],
+      "correct": 1,
+      "explanation": "nocase matches regardless of uppercase/lowercase"
+    },
+    {
+      "question": "What does condition '2 of them' mean?",
+      "options": [
+        "Exactly 2 strings must match",
+        "At least 2 strings must match",
+        "Only strings 1 and 2 checked",
+        "Maximum 2 matches allowed"
+      ],
+      "correct": 1,
+      "explanation": "'2 of them' requires at least 2 of the defined strings to be present"
+    },
+    {
+      "question": "Why include 'uint16(0) == 0x5A4D' in rules for malware?",
+      "options": [
+        "It makes rules faster",
+        "It limits matching to PE executables",
+        "It's required by YARA",
+        "It checks file size"
+      ],
+      "correct": 1,
+      "explanation": "0x5A4D (MZ) is the PE header magic number, limiting matches to Windows executables"
+    }
+  ],
+  
+  "next_steps": {
+    "related_labs": ["TOOL-LAB-006", "TOOL-LAB-003"],
+    "related_lessons": ["D2-LESSON-004", "D4-LESSON-001"],
+    "certifications": [
+      "GIAC Reverse Engineering Malware (GREM)",
+      "GIAC Certified Forensic Analyst (GCFA)"
+    ],
+    "advanced_topics": [
+      "PE module for import analysis",
+      "Custom YARA modules",
+      "Integration with Cuckoo sandbox",
+      "YARA-X (next generation)"
+    ]
+  }
+}

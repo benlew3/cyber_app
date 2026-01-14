@@ -1,0 +1,507 @@
+{
+  "lab_id": "TOOL-LAB-011",
+  "tool_name": "OpenVAS",
+  "tool_category": "Vulnerability Management",
+  "version": "1.0",
+  
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_time": "3-4 hours",
+    "last_updated": "2025-01-14",
+    "author": "Security+ Training System"
+  },
+  
+  "overview": {
+    "tagline": "Open Source Vulnerability Assessment Scanner",
+    "description": "OpenVAS (Greenbone Vulnerability Manager) is a full-featured vulnerability scanner with 50,000+ Network Vulnerability Tests. It's the open-source alternative to commercial scanners like Nessus and Qualys. Essential for vulnerability management programs.",
+    "official_site": "https://www.greenbone.net/en/",
+    "download_url": "https://greenbone.github.io/docs/latest/",
+    "license": "Open Source (GPL)",
+    "platforms": ["Linux", "Docker"],
+    "why_learn": "Vulnerability management is foundational to security programs. Understanding how scanners work helps you interpret results and prioritize remediation."
+  },
+  
+  "security_plus_relevance": {
+    "domains": [2, 4, 5],
+    "objectives": ["2.3", "2.4", "4.3", "5.2"],
+    "exam_topics": [
+      "Vulnerability scanning concepts",
+      "Vulnerability assessment vs. penetration testing",
+      "Risk prioritization",
+      "Compliance requirements"
+    ]
+  },
+  
+  "career_relevance": {
+    "soc_analyst": {
+      "relevance": "medium",
+      "percentage_of_job": "10-15%",
+      "usage": "Understanding vulnerability data for prioritization"
+    },
+    "incident_responder": {
+      "relevance": "medium",
+      "percentage_of_job": "10%",
+      "usage": "Identifying vulnerable systems during incidents"
+    },
+    "security_engineer": {
+      "relevance": "high",
+      "percentage_of_job": "25-30%",
+      "usage": "Running scans, analyzing results, tracking remediation"
+    },
+    "penetration_tester": {
+      "relevance": "high",
+      "percentage_of_job": "20-25%",
+      "usage": "Initial reconnaissance and vulnerability identification"
+    },
+    "grc_analyst": {
+      "relevance": "critical",
+      "percentage_of_job": "30-40%",
+      "usage": "Compliance reporting, risk assessment, audit evidence"
+    }
+  },
+  
+  "prerequisites": {
+    "knowledge": [
+      "Basic networking concepts",
+      "Understanding of CVE system",
+      "Familiarity with common vulnerabilities",
+      "Basic Linux administration"
+    ],
+    "tools_needed": [
+      "Linux system or Docker",
+      "Target systems to scan (own/authorized)",
+      "Network access to targets"
+    ],
+    "estimated_setup_time": "45-60 minutes",
+    "legal_warning": "⚠️ Only scan systems you own or have explicit written authorization to test."
+  },
+  
+  "quick_start": {
+    "installation_steps": [
+      {
+        "step": 1,
+        "title": "Install via Docker (Recommended)",
+        "instructions": "docker run -d -p 9392:9392 greenbone/openvas\n\nOr use Kali Linux where it may be pre-installed",
+        "platform_specific": {
+          "docker": "docker run -d -p 9392:9392 greenbone/openvas",
+          "kali": "sudo apt install gvm && sudo gvm-setup"
+        }
+      },
+      {
+        "step": 2,
+        "title": "Wait for Feed Update",
+        "instructions": "First run downloads vulnerability feeds (50,000+ tests).\nThis can take 30-60 minutes.\n\nCheck logs: docker logs [container_id]",
+        "verification": "Feeds synchronized message in logs"
+      },
+      {
+        "step": 3,
+        "title": "Access Web Interface",
+        "instructions": "Browse to https://localhost:9392\nDefault credentials vary by installation method\n\nKali: check gvm-setup output for password",
+        "verification": "Login screen appears"
+      }
+    ],
+    "first_run": "Create target → Create task → Run scan → View results",
+    "verification": "Scan completes with vulnerability findings"
+  },
+  
+  "core_concepts": [
+    {
+      "concept_id": "nvts",
+      "title": "Network Vulnerability Tests (NVTs)",
+      "explanation": "OpenVAS uses NVTs - scripts that check for specific vulnerabilities. Updated regularly via feeds.",
+      "why_it_matters": "Current NVTs = current vulnerability detection capability.",
+      "exam_tip": "Vulnerability scanners rely on updated signature databases"
+    },
+    {
+      "concept_id": "cvss",
+      "title": "CVSS Scoring",
+      "explanation": "Common Vulnerability Scoring System rates vulnerability severity 0-10. OpenVAS uses CVSS for prioritization.",
+      "why_it_matters": "CVSS helps prioritize which vulnerabilities to fix first.",
+      "exam_tip": "Know CVSS: Critical (9-10), High (7-8.9), Medium (4-6.9), Low (0.1-3.9)"
+    },
+    {
+      "concept_id": "authenticated",
+      "title": "Authenticated vs. Unauthenticated Scans",
+      "explanation": "Authenticated scans use credentials to check internal configuration. Find more vulnerabilities than unauthenticated.",
+      "why_it_matters": "Authenticated scans are more accurate and comprehensive.",
+      "exam_tip": "Credentialed scans find more vulnerabilities but require access"
+    },
+    {
+      "concept_id": "false-positives",
+      "title": "False Positives",
+      "explanation": "Scanners sometimes report vulnerabilities that don't exist. Validation is essential.",
+      "why_it_matters": "False positives waste remediation effort.",
+      "exam_tip": "Always validate critical findings before reporting"
+    }
+  ],
+  
+  "mini_projects": [
+    {
+      "project_id": "project-1",
+      "title": "Running Your First Vulnerability Scan",
+      "difficulty": "beginner",
+      "estimated_time": "60-90 minutes",
+      "description": "Set up OpenVAS, configure a target, run a scan, and interpret basic results.",
+      "learning_objectives": [
+        "Deploy OpenVAS scanner",
+        "Configure scan targets",
+        "Run basic vulnerability scan",
+        "Interpret scan results"
+      ],
+      "scenario": "You're starting a vulnerability management program. Run initial scans.",
+      
+      "setup": {
+        "files_needed": [],
+        "environment": "OpenVAS installed, target system available",
+        "legal_note": "Only scan your own systems or authorized targets"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Configure Target",
+          "instructions": "1. Login to OpenVAS web interface\n2. Configuration → Targets → New Target\n3. Name: 'Lab Target'\n4. Hosts: Enter IP or hostname\n5. Save",
+          "hints": ["Can use IP ranges", "Ensure network connectivity"],
+          "expected_result": "Target created",
+          "common_mistakes": ["Wrong IP address"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Create Scan Task",
+          "instructions": "1. Scans → Tasks → New Task\n2. Name: 'Initial Scan'\n3. Scan Targets: Select your target\n4. Scan Config: Full and fast\n5. Create",
+          "hints": ["Full and fast is good default", "Discovery scans are lighter"],
+          "expected_result": "Task created",
+          "common_mistakes": ["No target selected"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Run Scan",
+          "instructions": "1. Find task in list\n2. Click Start (play button)\n3. Monitor progress (may take 15-60 min)\n4. Wait for completion",
+          "hints": ["Progress shown in percentage", "Can view partial results"],
+          "expected_result": "Scan completes",
+          "common_mistakes": ["Stopping scan early"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Review Results",
+          "instructions": "1. Click on completed task\n2. View results summary\n3. Click into individual findings\n4. Note severity, CVE, and solution",
+          "hints": ["Start with Critical/High", "CVE links to details"],
+          "expected_result": "Understanding of vulnerabilities found",
+          "common_mistakes": ["Only looking at counts"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Generate Report",
+          "instructions": "1. Select completed task\n2. Export → Choose format (PDF/CSV)\n3. Download report\n4. Review report structure",
+          "hints": ["PDF for executives", "CSV for tracking"],
+          "expected_result": "Vulnerability report generated",
+          "common_mistakes": ["Wrong report format"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What does CVSS 9.8 mean?",
+          "answer": "Critical severity - should be fixed immediately",
+          "explanation": "CVSS 9-10 indicates critical risk requiring urgent attention"
+        }
+      ],
+      
+      "takeaways": [
+        "Vulnerability scanning identifies known security issues",
+        "CVSS scores help prioritize remediation",
+        "Scan configuration affects coverage and time",
+        "Reports enable tracking and communication"
+      ]
+    },
+    {
+      "project_id": "project-2",
+      "title": "Authenticated Scanning",
+      "difficulty": "intermediate",
+      "estimated_time": "60-90 minutes",
+      "description": "Configure and run authenticated scans for more comprehensive vulnerability detection.",
+      "learning_objectives": [
+        "Configure scan credentials",
+        "Compare authenticated vs. unauthenticated results",
+        "Understand credential security",
+        "Interpret comprehensive results"
+      ],
+      "scenario": "Management wants comprehensive vulnerability visibility. Configure authenticated scanning.",
+      
+      "setup": {
+        "files_needed": [],
+        "environment": "OpenVAS with credentials for target"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Create Credentials",
+          "instructions": "1. Configuration → Credentials → New Credential\n2. Name: 'Linux SSH'\n3. Type: Username + Password (or SSH key)\n4. Enter credentials\n5. Save",
+          "hints": ["Use dedicated scan account", "Limit permissions appropriately"],
+          "expected_result": "Credential object created",
+          "common_mistakes": ["Using admin account"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Create Authenticated Target",
+          "instructions": "1. Configuration → Targets → New Target\n2. Add credentials to target\n3. Select SSH credential for port 22\n4. SMB credential for Windows\n5. Save",
+          "hints": ["Match credential type to target OS", "Port 22 for SSH, 445 for SMB"],
+          "expected_result": "Target with credentials",
+          "common_mistakes": ["Wrong credential assignment"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Run Authenticated Scan",
+          "instructions": "1. Create new task with authenticated target\n2. Run scan\n3. Monitor credential success in logs\n4. Wait for completion",
+          "hints": ["Logs show credential success/failure", "Auth scans take longer"],
+          "expected_result": "Authenticated scan complete",
+          "common_mistakes": ["Credentials rejected"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Compare Results",
+          "instructions": "Compare authenticated vs. unauthenticated:\n1. Number of findings\n2. Types of findings\n3. Severity distribution\n4. Missing patches detected",
+          "hints": ["Auth scans find local vulnerabilities", "Missing patches only found with auth"],
+          "expected_result": "Understanding of coverage difference",
+          "common_mistakes": ["Not comparing both"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Document Credential Security",
+          "instructions": "Create security procedure:\n1. Credential storage\n2. Access control\n3. Password rotation\n4. Audit logging",
+          "hints": ["Scanner credentials are sensitive", "Compromise = network access"],
+          "expected_result": "Credential management procedure",
+          "common_mistakes": ["Ignoring credential security"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "Why do authenticated scans find more vulnerabilities?",
+          "answer": "They can check internal configuration, patches, and local services",
+          "explanation": "Credentials allow scanner to see what's running internally"
+        }
+      ],
+      
+      "takeaways": [
+        "Authenticated scans are more comprehensive",
+        "Credential security is critical",
+        "Local vulnerabilities require authentication",
+        "Compare coverage to understand gaps"
+      ]
+    },
+    {
+      "project_id": "project-3",
+      "title": "Building a Vulnerability Management Program",
+      "difficulty": "advanced",
+      "estimated_time": "90-120 minutes",
+      "description": "Design and implement a complete vulnerability management process with scanning, reporting, and tracking.",
+      "learning_objectives": [
+        "Design scan schedules",
+        "Create management reporting",
+        "Track remediation",
+        "Meet compliance requirements"
+      ],
+      "scenario": "Build a mature vulnerability management program for your organization.",
+      
+      "setup": {
+        "files_needed": [],
+        "environment": "OpenVAS with multiple targets"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Design Scan Schedule",
+          "instructions": "Create scanning schedule:\n1. Critical systems - weekly\n2. Standard systems - monthly\n3. Low-risk systems - quarterly\n4. Configure scheduled tasks in OpenVAS",
+          "hints": ["Balance coverage vs. impact", "Schedule off-hours"],
+          "expected_result": "Documented scan schedule",
+          "common_mistakes": ["Scanning during business hours"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Create Asset Groups",
+          "instructions": "Organize targets:\n1. Create target groups by function\n2. Servers, workstations, network devices\n3. PCI scope vs. non-PCI\n4. Apply appropriate scan configs",
+          "hints": ["Grouping enables reporting", "Different configs for different assets"],
+          "expected_result": "Organized asset groups",
+          "common_mistakes": ["Flat target list"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Build Executive Dashboard",
+          "instructions": "Create reporting metrics:\n1. Total vulnerabilities by severity\n2. Trend over time\n3. Mean time to remediation\n4. Systems scanned vs. total",
+          "hints": ["Executives want trends", "Compare to previous period"],
+          "expected_result": "Executive-ready dashboard",
+          "common_mistakes": ["Too technical"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Create Remediation Workflow",
+          "instructions": "Define process:\n1. Scan results reviewed\n2. Tickets created for findings\n3. SLAs based on severity\n4. Verification scans\n5. Closure",
+          "hints": ["SLAs: Critical=7 days, High=30 days", "Track in ticketing system"],
+          "expected_result": "Documented remediation workflow",
+          "common_mistakes": ["No SLAs defined"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Document for Compliance",
+          "instructions": "Create compliance artifacts:\n1. Scanning procedures\n2. Evidence of regular scans\n3. Remediation tracking\n4. Exception process",
+          "hints": ["PCI requires quarterly scans", "Keep evidence for audits"],
+          "expected_result": "Compliance documentation",
+          "common_mistakes": ["No evidence retention"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "How do you handle vulnerabilities that can't be fixed immediately?",
+          "answer": "Risk acceptance process with compensating controls and documentation",
+          "explanation": "Formal exception process with business owner approval"
+        }
+      ],
+      
+      "takeaways": [
+        "Mature programs have regular schedules",
+        "Asset organization enables reporting",
+        "SLAs drive accountability",
+        "Documentation supports compliance"
+      ]
+    }
+  ],
+  
+  "external_resources": [
+    {
+      "platform": "Greenbone",
+      "name": "Official Documentation",
+      "url": "https://greenbone.github.io/docs/",
+      "cost": "Free",
+      "difficulty": "all",
+      "estimated_time": "Reference",
+      "description": "Complete OpenVAS/GVM documentation"
+    },
+    {
+      "platform": "TryHackMe",
+      "name": "Vulnerability Scanning",
+      "url": "https://tryhackme.com/room/psychobreak",
+      "cost": "Free",
+      "difficulty": "intermediate",
+      "estimated_time": "2-3 hours",
+      "description": "Vulnerability scanning practice"
+    },
+    {
+      "platform": "NIST",
+      "name": "National Vulnerability Database",
+      "url": "https://nvd.nist.gov/",
+      "cost": "Free",
+      "difficulty": "all",
+      "estimated_time": "Reference",
+      "description": "CVE and CVSS reference"
+    }
+  ],
+  
+  "cheat_sheet": {
+    "sections": [
+      {
+        "title": "CVSS Severity Ranges",
+        "commands": [
+          { "command": "9.0 - 10.0", "description": "Critical" },
+          { "command": "7.0 - 8.9", "description": "High" },
+          { "command": "4.0 - 6.9", "description": "Medium" },
+          { "command": "0.1 - 3.9", "description": "Low" },
+          { "command": "0.0", "description": "None/Informational" }
+        ]
+      },
+      {
+        "title": "Scan Configurations",
+        "commands": [
+          { "command": "Full and fast", "description": "Comprehensive, optimized (recommended)" },
+          { "command": "Full and fast ultimate", "description": "Most thorough, slower" },
+          { "command": "Full and deep", "description": "Very thorough, very slow" },
+          { "command": "Discovery", "description": "Find hosts only" },
+          { "command": "Host Discovery", "description": "Identify live systems" }
+        ]
+      },
+      {
+        "title": "Common Remediation SLAs",
+        "commands": [
+          { "command": "Critical (9-10)", "description": "7 days" },
+          { "command": "High (7-8.9)", "description": "30 days" },
+          { "command": "Medium (4-6.9)", "description": "90 days" },
+          { "command": "Low (0.1-3.9)", "description": "180 days or risk accept" }
+        ]
+      },
+      {
+        "title": "CLI Commands (gvm-cli)",
+        "commands": [
+          { "command": "gvm-cli socket --xml '<get_tasks/>'", "description": "List tasks" },
+          { "command": "gvm-cli socket --xml '<get_targets/>'", "description": "List targets" },
+          { "command": "gvm-cli socket --xml '<get_results/>'", "description": "Get results" }
+        ]
+      }
+    ]
+  },
+  
+  "knowledge_check": [
+    {
+      "question": "What is the benefit of authenticated vulnerability scanning?",
+      "options": [
+        "Faster scan times",
+        "Finding local vulnerabilities and missing patches",
+        "Lower false positives only",
+        "No benefit over unauthenticated"
+      ],
+      "correct": 1,
+      "explanation": "Authenticated scans can check local configuration, patches, and services not visible externally"
+    },
+    {
+      "question": "What does a CVSS score of 7.5 indicate?",
+      "options": [
+        "Low severity",
+        "Medium severity",
+        "High severity",
+        "Critical severity"
+      ],
+      "correct": 2,
+      "explanation": "CVSS 7.0-8.9 is High severity requiring prompt attention"
+    },
+    {
+      "question": "Why validate vulnerability scan findings?",
+      "options": [
+        "Scanners never make mistakes",
+        "To reduce false positives before remediation",
+        "Validation is optional",
+        "Only for compliance"
+      ],
+      "correct": 1,
+      "explanation": "False positives waste remediation effort; validation confirms real vulnerabilities"
+    },
+    {
+      "question": "How often should critical systems be scanned?",
+      "options": [
+        "Once per year",
+        "Quarterly",
+        "Monthly to weekly",
+        "Only after incidents"
+      ],
+      "correct": 2,
+      "explanation": "Critical systems should be scanned frequently (weekly/monthly) to catch new vulnerabilities"
+    }
+  ],
+  
+  "next_steps": {
+    "related_labs": ["TOOL-LAB-002"],
+    "related_lessons": ["D2-LESSON-007", "D5-LESSON-002"],
+    "certifications": [
+      "CompTIA CySA+",
+      "Qualys Certified Specialist",
+      "Tenable Certified Security Engineer"
+    ],
+    "advanced_topics": [
+      "API integration",
+      "Custom NVT development",
+      "Compliance reporting (PCI, HIPAA)",
+      "Risk-based prioritization"
+    ]
+  }
+}

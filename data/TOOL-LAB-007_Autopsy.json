@@ -1,0 +1,566 @@
+{
+  "lab_id": "TOOL-LAB-007",
+  "tool_name": "Autopsy",
+  "tool_category": "Disk Forensics",
+  "version": "1.0",
+  
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_time": "3-4 hours",
+    "last_updated": "2025-01-14",
+    "author": "Security+ Training System"
+  },
+  
+  "overview": {
+    "tagline": "The Premier Open Source Digital Forensics Platform",
+    "description": "Autopsy is a powerful, free digital forensics platform used by law enforcement, military, and corporate investigators worldwide. It analyzes disk images to recover deleted files, build timelines, extract artifacts, and find evidence of user activity.",
+    "official_site": "https://www.autopsy.com/",
+    "download_url": "https://www.autopsy.com/download/",
+    "license": "Open Source (Apache 2.0)",
+    "platforms": ["Windows", "Linux", "macOS"],
+    "why_learn": "Disk forensics is foundational for incident response. When investigating breaches, insider threats, or policy violations, you need to analyze what happened on affected systems."
+  },
+  
+  "security_plus_relevance": {
+    "domains": [4],
+    "objectives": ["4.1", "4.4", "4.8", "4.9"],
+    "exam_topics": [
+      "Digital forensics procedures",
+      "Evidence acquisition and handling",
+      "Chain of custody",
+      "File system analysis"
+    ],
+    "exam_question_types": [
+      "Forensic imaging concepts",
+      "Evidence integrity (hashing)",
+      "Timeline analysis",
+      "Artifact recovery"
+    ]
+  },
+  
+  "career_relevance": {
+    "soc_analyst": {
+      "relevance": "medium",
+      "percentage_of_job": "10-15%",
+      "usage": "Analyzing disk images from compromised workstations"
+    },
+    "incident_responder": {
+      "relevance": "critical",
+      "percentage_of_job": "30-40%",
+      "usage": "Primary tool for disk-based investigations"
+    },
+    "security_engineer": {
+      "relevance": "medium",
+      "percentage_of_job": "5-10%",
+      "usage": "Understanding what artifacts exist for detection engineering"
+    },
+    "penetration_tester": {
+      "relevance": "low",
+      "percentage_of_job": "5%",
+      "usage": "Understanding what evidence pen tests leave behind"
+    },
+    "grc_analyst": {
+      "relevance": "medium",
+      "percentage_of_job": "10-15%",
+      "usage": "eDiscovery, policy violation investigations, compliance"
+    }
+  },
+  
+  "prerequisites": {
+    "knowledge": [
+      "Basic understanding of file systems (NTFS, FAT32, ext4)",
+      "Familiarity with Windows artifacts (registry, event logs)",
+      "Understanding of hashing for integrity verification"
+    ],
+    "tools_needed": [
+      "Autopsy 4.x (Windows version recommended)",
+      "Disk image samples for analysis",
+      "Sufficient disk space (images can be large)"
+    ],
+    "files_provided": [
+      "Sample disk images from practice sites"
+    ],
+    "estimated_setup_time": "30-45 minutes"
+  },
+  
+  "quick_start": {
+    "installation_steps": [
+      {
+        "step": 1,
+        "title": "Download Autopsy",
+        "instructions": "Visit autopsy.com/download and download the Windows 64-bit installer (recommended).\n\nLinux/Mac users can build from source.",
+        "platform_specific": {
+          "windows": "Download MSI installer, run setup wizard",
+          "linux": "git clone https://github.com/sleuthkit/autopsy && follow build instructions",
+          "macos": "Build from source or use Docker"
+        }
+      },
+      {
+        "step": 2,
+        "title": "Install and Configure",
+        "instructions": "Run installer, accept defaults.\nFirst launch may take time to initialize.",
+        "verification": "Autopsy welcome screen should appear"
+      },
+      {
+        "step": 3,
+        "title": "Get Sample Images",
+        "instructions": "Download practice images from:\n- Digital Corpora: https://digitalcorpora.org/\n- CFReDS: https://cfreds.nist.gov/\n- CyberDefenders challenges",
+        "verification": "Have an E01, dd, or raw image file ready"
+      }
+    ],
+    "first_run": "Create new case → Add data source → Select disk image → Run ingest modules",
+    "verification": "When you see the file browser with recovered data, you're ready"
+  },
+  
+  "core_concepts": [
+    {
+      "concept_id": "imaging",
+      "title": "Forensic Imaging",
+      "explanation": "Forensic images are bit-for-bit copies of storage media. Unlike regular copies, they capture deleted files, slack space, and unallocated space.",
+      "why_it_matters": "Working from images preserves the original evidence and allows recovery of deleted data.",
+      "exam_tip": "Know image formats: E01 (EnCase), dd/raw, AFF. Always verify with hash."
+    },
+    {
+      "concept_id": "chain-of-custody",
+      "title": "Chain of Custody",
+      "explanation": "Documentation tracking who handled evidence, when, and what they did. Essential for legal proceedings.",
+      "why_it_matters": "Broken chain of custody can make evidence inadmissible in court.",
+      "exam_tip": "Document everything: acquisition time, handler, storage location, access logs"
+    },
+    {
+      "concept_id": "artifacts",
+      "title": "Windows Artifacts",
+      "explanation": "Windows stores rich forensic data: Registry (user activity), Event Logs (system events), Prefetch (executed programs), Browser history, and more.",
+      "why_it_matters": "Artifacts tell the story of what happened on a system.",
+      "exam_tip": "Key artifacts: NTUSER.DAT, SAM, SYSTEM, Event Logs, Prefetch, $MFT"
+    },
+    {
+      "concept_id": "timeline",
+      "title": "Timeline Analysis",
+      "explanation": "Creating chronological view of all file system activity: creation, modification, access times.",
+      "why_it_matters": "Timelines reveal the sequence of events during an incident.",
+      "exam_tip": "MACB times: Modified, Accessed, Changed ($MFT), Born (created)"
+    }
+  ],
+  
+  "mini_projects": [
+    {
+      "project_id": "project-1",
+      "title": "Your First Forensic Investigation",
+      "difficulty": "beginner",
+      "estimated_time": "45-60 minutes",
+      "description": "Learn Autopsy basics by analyzing a disk image, navigating the interface, and finding basic artifacts.",
+      "learning_objectives": [
+        "Create a forensic case in Autopsy",
+        "Add and process a disk image",
+        "Navigate the file system view",
+        "Find deleted files"
+      ],
+      "scenario": "An employee's laptop needs to be analyzed as part of a policy violation investigation. Perform initial analysis.",
+      
+      "setup": {
+        "files_needed": ["Sample disk image"],
+        "file_sources": [
+          {
+            "name": "Digital Corpora - M57 Jean",
+            "url": "https://digitalcorpora.org/corpora/scenarios/m57-jean/",
+            "description": "Well-documented practice scenario"
+          },
+          {
+            "name": "CFReDS Hacking Case",
+            "url": "https://cfreds.nist.gov/",
+            "description": "NIST practice images"
+          }
+        ],
+        "environment": "Autopsy installed, disk image downloaded"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Create New Case",
+          "instructions": "1. Launch Autopsy\n2. Click 'New Case'\n3. Enter case name and number\n4. Set case folder location\n5. Click Next → Finish",
+          "hints": ["Use descriptive case names", "Case folders contain all analysis data", "One case per investigation"],
+          "expected_result": "New case created, ready for data source",
+          "common_mistakes": ["Not organizing cases properly"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Add Data Source",
+          "instructions": "1. Click 'Add Data Source'\n2. Select 'Disk Image or VM File'\n3. Browse to your image file\n4. Select ingest modules (start with defaults)\n5. Click Next → wait for processing",
+          "hints": ["Ingest can take 30+ minutes", "Enable Recent Activity module", "Enable Keyword Search"],
+          "expected_result": "Image loaded, ingest modules running",
+          "common_mistakes": ["Skipping ingest modules (miss important analysis)"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Navigate File System",
+          "instructions": "In the left panel:\n1. Expand Data Sources → your image\n2. Browse through volumes/partitions\n3. Navigate to Users folders\n4. Look at Documents, Downloads, Desktop",
+          "hints": ["Deleted files appear with X marks", "Right-click to extract files", "Check all user profiles"],
+          "expected_result": "Understanding of file system structure",
+          "common_mistakes": ["Only checking one user profile"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Find Deleted Files",
+          "instructions": "1. In left panel, click 'Deleted Files'\n2. Browse through deleted items\n3. Check Recycle Bin contents\n4. Note file types and locations",
+          "hints": ["Deleted doesn't mean gone", "$Recycle.Bin contains original paths", "Look for recently deleted items"],
+          "expected_result": "List of deleted files that may be relevant",
+          "common_mistakes": ["Assuming deleted files are unrecoverable"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Review Ingest Results",
+          "instructions": "Check Results tree:\n1. Extracted Content → Interesting Items\n2. Web History\n3. Recent Documents\n4. EXIF Metadata",
+          "hints": ["Ingest modules auto-extract common artifacts", "Review each category", "Note timestamps"],
+          "expected_result": "Overview of automatically extracted artifacts",
+          "common_mistakes": ["Not waiting for ingest to complete"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "How many deleted files were recovered?",
+          "answer": "Varies by image - check Deleted Files node",
+          "explanation": "Deleted file recovery is a primary forensic capability"
+        },
+        {
+          "question": "What web browsers were installed?",
+          "answer": "Check Program Files and browser history artifacts",
+          "explanation": "Browser history reveals user activity"
+        }
+      ],
+      
+      "takeaways": [
+        "Autopsy's ingest modules automate artifact extraction",
+        "Deleted files can often be recovered",
+        "File system navigation reveals user activity",
+        "Always document your findings as you go"
+      ]
+    },
+    {
+      "project_id": "project-2",
+      "title": "Investigating User Activity",
+      "difficulty": "intermediate",
+      "estimated_time": "60-90 minutes",
+      "description": "Deep dive into user activity artifacts: browser history, USB devices, documents accessed, and programs executed.",
+      "learning_objectives": [
+        "Analyze web browser artifacts",
+        "Identify connected USB devices",
+        "Find recently accessed documents",
+        "Determine program execution"
+      ],
+      "scenario": "HR suspects an employee of exfiltrating company data. Analyze their workstation to determine what files were accessed and if any USB devices were connected.",
+      
+      "setup": {
+        "files_needed": ["Disk image with user activity"],
+        "environment": "Autopsy with completed ingest"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Analyze Web History",
+          "instructions": "Navigate to Results → Extracted Content → Web History\n\nLook for:\n1. Sites visited (and when)\n2. Downloads\n3. Search queries\n4. Cloud storage access (Drive, Dropbox)",
+          "hints": ["Check all browsers", "Look for file sharing sites", "Note timestamps around suspected activity"],
+          "expected_result": "Timeline of web activity",
+          "common_mistakes": ["Only checking one browser"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Find USB Device History",
+          "instructions": "Look in Results → Extracted Content → USB Device Attached\n\nAlso manually check:\n- SYSTEM registry hive → USB history\n- setupapi.log for device installation",
+          "hints": ["USB history persists even after removal", "Note device serial numbers", "Check first/last connection times"],
+          "expected_result": "List of USB devices that were connected",
+          "common_mistakes": ["Missing devices in registry if ingest module didn't run"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Check Recent Documents",
+          "instructions": "Look in:\n1. Results → Recent Documents\n2. User profile → Recent folder\n3. NTUSER.DAT → RecentDocs key\n4. LNK files in Recent folder",
+          "hints": ["LNK files show original file paths", "Even deleted files leave LNK artifacts", "Office documents track recent access"],
+          "expected_result": "List of recently accessed documents",
+          "common_mistakes": ["Not checking LNK files for path information"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Identify Executed Programs",
+          "instructions": "Check for evidence of execution:\n1. Prefetch files (C:\\Windows\\Prefetch)\n2. UserAssist registry key\n3. ShimCache\n4. AmCache",
+          "hints": ["Prefetch shows execution count and timestamps", "UserAssist shows GUI programs run", "Look for data exfil tools"],
+          "expected_result": "List of programs that were executed",
+          "common_mistakes": ["Not correlating execution with timeline"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Build Activity Timeline",
+          "instructions": "Create timeline:\n1. Tools → Timeline\n2. Set date range around suspected activity\n3. Filter by file types or keywords\n4. Export relevant entries",
+          "hints": ["Focus on dates of suspected activity", "Correlate USB connection with file access", "Look for patterns"],
+          "expected_result": "Timeline showing sequence of events",
+          "common_mistakes": ["Timeline too broad (overwhelming)"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "Were any USB storage devices connected? When?",
+          "answer": "Check USB artifacts for serial numbers and timestamps",
+          "explanation": "USB history is crucial for data exfiltration investigations"
+        },
+        {
+          "question": "What files were accessed around the time USB was connected?",
+          "answer": "Correlate file access times with USB connection",
+          "explanation": "Timeline correlation reveals intent"
+        }
+      ],
+      
+      "takeaways": [
+        "Windows maintains extensive records of user activity",
+        "USB device history persists after device removal",
+        "Timeline analysis reveals sequences of events",
+        "Multiple artifact types should be correlated"
+      ]
+    },
+    {
+      "project_id": "project-3",
+      "title": "Malware Incident Investigation",
+      "difficulty": "advanced",
+      "estimated_time": "90-120 minutes",
+      "description": "Investigate a malware infection: find initial access, identify malware artifacts, determine persistence, and extract IOCs.",
+      "learning_objectives": [
+        "Identify malware delivery mechanism",
+        "Find persistence mechanisms",
+        "Extract indicators of compromise",
+        "Write incident investigation report"
+      ],
+      "scenario": "EDR detected malware on a workstation. The system was imaged. Determine how it was infected, what the malware did, and extract IOCs for the rest of the network.",
+      
+      "setup": {
+        "files_needed": ["Disk image from malware-infected system"],
+        "file_sources": [
+          {
+            "name": "CyberDefenders - Boss of the SOC",
+            "url": "https://cyberdefenders.org/",
+            "description": "Incident investigation challenges"
+          }
+        ],
+        "environment": "Autopsy with all ingest modules"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Find Initial Access Vector",
+          "instructions": "Look for:\n1. Email attachments (Outlook files)\n2. Downloads folder for suspicious files\n3. Browser history for drive-by downloads\n4. Recently opened Office documents",
+          "hints": ["Check for macro-enabled documents", "Look at email timestamps", "Find patient zero file"],
+          "expected_result": "Identified how malware entered the system",
+          "common_mistakes": ["Not checking email artifacts"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Analyze Malware Artifacts",
+          "instructions": "Find the malware:\n1. Check Prefetch for suspicious executables\n2. Look in Temp folders\n3. Search for recently created executables\n4. Extract suspicious files for analysis",
+          "hints": ["Malware often lands in Temp", "Check AppData folders", "Look for obfuscated filenames"],
+          "expected_result": "Malware executable(s) identified and extracted",
+          "common_mistakes": ["Not extracting files for hash analysis"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Identify Persistence",
+          "instructions": "Check common persistence locations:\n1. Run/RunOnce registry keys\n2. Scheduled Tasks\n3. Services\n4. Startup folders\n5. WMI subscriptions",
+          "hints": ["Registry viewer shows timestamps", "Compare to baseline if available", "Note all persistence mechanisms"],
+          "expected_result": "All persistence mechanisms documented",
+          "common_mistakes": ["Missing less common persistence methods"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Extract IOCs",
+          "instructions": "Gather all indicators:\n1. File hashes (MD5, SHA1, SHA256)\n2. File paths\n3. Registry keys modified\n4. Network indicators (if available)\n5. Scheduled task names",
+          "hints": ["Use multiple hash types", "Document exact paths", "Check for C2 domains in strings"],
+          "expected_result": "Complete IOC list",
+          "common_mistakes": ["Incomplete hashing", "Missing file paths"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Write Investigation Report",
+          "instructions": "Create comprehensive report:\n1. Executive Summary\n2. Initial Access analysis\n3. Malware capabilities\n4. Persistence mechanisms\n5. Timeline of infection\n6. Complete IOC list\n7. Remediation recommendations",
+          "hints": ["Support claims with evidence", "Include screenshots", "Make IOCs actionable"],
+          "expected_result": "Professional investigation report",
+          "common_mistakes": ["Missing remediation steps"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "How did the malware initially get on the system?",
+          "answer": "Varies - common: email attachment, drive-by download",
+          "explanation": "Understanding initial access helps prevent future infections"
+        },
+        {
+          "question": "What persistence mechanisms did the malware use?",
+          "answer": "Check registry run keys, scheduled tasks, services",
+          "explanation": "All persistence must be removed during remediation"
+        },
+        {
+          "question": "What IOCs should be deployed to detect this elsewhere?",
+          "answer": "Hashes, file paths, registry keys, network indicators",
+          "explanation": "IOC deployment protects rest of environment"
+        }
+      ],
+      
+      "takeaways": [
+        "Initial access vector identification prevents future incidents",
+        "Persistence analysis ensures complete remediation",
+        "IOC extraction enables proactive defense",
+        "Comprehensive reporting communicates risk to stakeholders"
+      ]
+    }
+  ],
+  
+  "external_resources": [
+    {
+      "platform": "Autopsy",
+      "name": "Official Training",
+      "url": "https://www.autopsy.com/support/training/",
+      "cost": "Free",
+      "difficulty": "beginner",
+      "estimated_time": "4-8 hours",
+      "description": "Official Autopsy training course"
+    },
+    {
+      "platform": "Digital Corpora",
+      "name": "Practice Images",
+      "url": "https://digitalcorpora.org/",
+      "cost": "Free",
+      "difficulty": "all",
+      "estimated_time": "Varies",
+      "description": "Research-quality forensic images"
+    },
+    {
+      "platform": "CFReDS",
+      "name": "NIST Practice Images",
+      "url": "https://cfreds.nist.gov/",
+      "cost": "Free",
+      "difficulty": "intermediate",
+      "estimated_time": "Varies",
+      "description": "NIST computer forensic reference data sets"
+    },
+    {
+      "platform": "SANS",
+      "name": "FOR500 Course",
+      "url": "https://www.sans.org/cyber-security-courses/windows-forensic-analysis/",
+      "cost": "Paid",
+      "difficulty": "advanced",
+      "estimated_time": "6 days",
+      "description": "Professional Windows forensics training"
+    }
+  ],
+  
+  "cheat_sheet": {
+    "sections": [
+      {
+        "title": "Key Windows Artifacts",
+        "commands": [
+          { "command": "NTUSER.DAT", "description": "User registry hive - activity, settings" },
+          { "command": "SAM", "description": "User accounts and password hashes" },
+          { "command": "SYSTEM", "description": "System config, USB history, services" },
+          { "command": "SOFTWARE", "description": "Installed programs, settings" },
+          { "command": "Prefetch (*.pf)", "description": "Program execution evidence" },
+          { "command": "$MFT", "description": "Master File Table - all file metadata" },
+          { "command": "$UsnJrnl", "description": "Change journal - file modifications" }
+        ]
+      },
+      {
+        "title": "User Activity Artifacts",
+        "commands": [
+          { "command": "Recent folder / LNK files", "description": "Recently accessed files" },
+          { "command": "UserAssist registry", "description": "GUI programs executed" },
+          { "command": "Shellbags", "description": "Folders browsed" },
+          { "command": "Jump Lists", "description": "Recent files per application" },
+          { "command": "Browser history", "description": "Web activity" }
+        ]
+      },
+      {
+        "title": "Persistence Locations",
+        "commands": [
+          { "command": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "description": "System startup programs" },
+          { "command": "HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "description": "User startup programs" },
+          { "command": "Task Scheduler", "description": "Scheduled tasks" },
+          { "command": "Services", "description": "Windows services" },
+          { "command": "Startup folders", "description": "Shell startup items" }
+        ]
+      },
+      {
+        "title": "Autopsy Keyboard Shortcuts",
+        "commands": [
+          { "command": "Ctrl+F", "description": "Find/search" },
+          { "command": "Ctrl+Shift+K", "description": "Keyword search" },
+          { "command": "Right-click → Extract", "description": "Extract file from image" },
+          { "command": "Right-click → View in Timeline", "description": "Show in timeline" }
+        ]
+      }
+    ]
+  },
+  
+  "knowledge_check": [
+    {
+      "question": "Why is forensic imaging used instead of regular file copying?",
+      "options": [
+        "Forensic images are smaller",
+        "Regular copying can't access the file system",
+        "Forensic imaging captures deleted files and unallocated space",
+        "Forensic images are encrypted"
+      ],
+      "correct": 2,
+      "explanation": "Forensic images are bit-for-bit copies that include deleted files, slack space, and unallocated areas"
+    },
+    {
+      "question": "What Windows artifact shows programs that were executed?",
+      "options": [
+        "SAM hive",
+        "Prefetch files",
+        "pagefile.sys",
+        "hiberfil.sys"
+      ],
+      "correct": 1,
+      "explanation": "Prefetch files are created when programs run, showing execution count and timestamps"
+    },
+    {
+      "question": "Why is chain of custody important in forensics?",
+      "options": [
+        "It speeds up analysis",
+        "It's required by Autopsy",
+        "It ensures evidence integrity and admissibility",
+        "It encrypts the evidence"
+      ],
+      "correct": 2,
+      "explanation": "Chain of custody documents who handled evidence and ensures it wasn't tampered with"
+    },
+    {
+      "question": "Where would you find evidence of USB devices that were connected?",
+      "options": [
+        "Only in Event Logs",
+        "SYSTEM registry hive and setupapi logs",
+        "Only in user's Documents folder",
+        "Prefetch files"
+      ],
+      "correct": 1,
+      "explanation": "USB history is stored in the SYSTEM registry and setupapi device installation logs"
+    }
+  ],
+  
+  "next_steps": {
+    "related_labs": ["TOOL-LAB-006", "TOOL-LAB-001"],
+    "related_lessons": ["D4-LESSON-003"],
+    "certifications": [
+      "EnCE (EnCase Certified Examiner)",
+      "GCFE (GIAC Certified Forensic Examiner)",
+      "ACE (AccessData Certified Examiner)"
+    ],
+    "advanced_topics": [
+      "Mobile device forensics",
+      "Cloud forensics",
+      "Enterprise forensics at scale",
+      "Anti-forensics detection"
+    ]
+  }
+}

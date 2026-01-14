@@ -1,0 +1,596 @@
+{
+  "lab_id": "TOOL-LAB-006",
+  "tool_name": "Volatility",
+  "tool_category": "Memory Forensics",
+  "version": "1.0",
+  
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_time": "3-4 hours",
+    "last_updated": "2025-01-14",
+    "author": "Security+ Training System"
+  },
+  
+  "overview": {
+    "tagline": "The Memory Forensics Framework",
+    "description": "Volatility is the gold standard for memory forensics. It extracts digital artifacts from RAM dumps - running processes, network connections, loaded DLLs, registry hives, and malware hiding in memory. When attackers use fileless malware or live off the land, memory analysis is often the only way to find them.",
+    "official_site": "https://www.volatilityfoundation.org/",
+    "download_url": "https://github.com/volatilityfoundation/volatility3",
+    "license": "Open Source (GPL)",
+    "platforms": ["Windows", "Linux", "macOS"],
+    "why_learn": "Modern attacks hide in memory. Disk forensics misses fileless malware, injected code, and in-memory-only artifacts. Memory forensics is essential for incident response."
+  },
+  
+  "security_plus_relevance": {
+    "domains": [4],
+    "objectives": ["4.1", "4.4", "4.8", "4.9"],
+    "exam_topics": [
+      "Digital forensics concepts",
+      "Memory analysis and volatile data",
+      "Incident response procedures",
+      "Evidence collection and handling"
+    ],
+    "exam_question_types": [
+      "Order of volatility in evidence collection",
+      "Types of forensic artifacts",
+      "Incident response procedures",
+      "Malware analysis concepts"
+    ]
+  },
+  
+  "career_relevance": {
+    "soc_analyst": {
+      "relevance": "high",
+      "percentage_of_job": "15-20%",
+      "usage": "Analyzing memory dumps from suspected compromised systems"
+    },
+    "incident_responder": {
+      "relevance": "critical",
+      "percentage_of_job": "30-40%",
+      "usage": "Primary tool for memory forensics during investigations"
+    },
+    "security_engineer": {
+      "relevance": "medium",
+      "percentage_of_job": "5-10%",
+      "usage": "Understanding attack techniques for better defenses"
+    },
+    "penetration_tester": {
+      "relevance": "medium",
+      "percentage_of_job": "10-15%",
+      "usage": "Understanding what artifacts attacks leave in memory"
+    },
+    "grc_analyst": {
+      "relevance": "low",
+      "percentage_of_job": "2-5%",
+      "usage": "Understanding forensic capabilities for policy development"
+    }
+  },
+  
+  "prerequisites": {
+    "knowledge": [
+      "Basic understanding of operating system internals",
+      "Familiarity with processes, DLLs, and memory concepts",
+      "Command line proficiency",
+      "Basic malware concepts"
+    ],
+    "tools_needed": [
+      "Volatility 3 (Python-based, newer) or Volatility 2",
+      "Python 3.x installed",
+      "Memory dump samples (provided in exercises)"
+    ],
+    "files_provided": [
+      "Sample memory dumps from practice sites"
+    ],
+    "estimated_setup_time": "30 minutes"
+  },
+  
+  "quick_start": {
+    "installation_steps": [
+      {
+        "step": 1,
+        "title": "Install Volatility 3",
+        "instructions": "pip3 install volatility3\n\nOr clone from GitHub:\ngit clone https://github.com/volatilityfoundation/volatility3.git",
+        "platform_specific": {
+          "linux": "Pre-installed on SIFT Workstation and some Kali builds",
+          "windows": "pip install volatility3 (requires Python 3)",
+          "macos": "pip3 install volatility3"
+        }
+      },
+      {
+        "step": 2,
+        "title": "Verify Installation",
+        "instructions": "vol -h\n\nOr if using source:\npython3 vol.py -h",
+        "verification": "You should see Volatility help with available plugins"
+      },
+      {
+        "step": 3,
+        "title": "Get Sample Memory Dumps",
+        "instructions": "Download practice memory dumps from:\n- MemLabs: https://github.com/stuxnet999/MemLabs\n- Volatility samples: https://github.com/volatilityfoundation/volatility/wiki/Memory-Samples",
+        "verification": "You should have a .raw, .vmem, or .mem file to analyze"
+      }
+    ],
+    "first_run": "vol -f memory.raw windows.info",
+    "verification": "If you see OS information from the memory dump, you're ready"
+  },
+  
+  "core_concepts": [
+    {
+      "concept_id": "volatility",
+      "title": "Order of Volatility",
+      "explanation": "Evidence disappears at different rates. RAM is most volatile (lost on power off), then pagefile, then disk. Collect in order of volatility.",
+      "why_it_matters": "Memory contains evidence that doesn't exist anywhere else. Once power is lost, it's gone forever.",
+      "exam_tip": "Know the order: Registers → Cache → RAM → Disk → Backups → Archives"
+    },
+    {
+      "concept_id": "profiles",
+      "title": "Memory Profiles/Symbols",
+      "explanation": "Volatility needs to know the OS version to parse memory structures correctly. Vol3 auto-detects; Vol2 requires specifying a profile.",
+      "why_it_matters": "Wrong profile = wrong results. Memory structures differ between OS versions.",
+      "exam_tip": "Memory analysis tools require understanding of target OS internals"
+    },
+    {
+      "concept_id": "plugins",
+      "title": "Plugins",
+      "explanation": "Volatility uses plugins for different analysis tasks: pslist (processes), netscan (connections), malfind (injected code), etc.",
+      "why_it_matters": "Different plugins extract different artifacts. Know which to use for your investigation.",
+      "exam_tip": "Memory forensics can reveal running processes, network connections, and malware"
+    },
+    {
+      "concept_id": "artifacts",
+      "title": "Memory Artifacts",
+      "explanation": "RAM contains: running processes, loaded DLLs, network connections, open files, registry hives, decrypted data, command history, and more.",
+      "why_it_matters": "These artifacts may not exist on disk - fileless malware lives only in memory.",
+      "exam_tip": "Memory analysis finds evidence disk forensics cannot"
+    }
+  ],
+  
+  "mini_projects": [
+    {
+      "project_id": "project-1",
+      "title": "Your First Memory Analysis",
+      "difficulty": "beginner",
+      "estimated_time": "45-60 minutes",
+      "description": "Learn Volatility basics by analyzing a memory dump to identify the operating system, running processes, and network connections.",
+      "learning_objectives": [
+        "Install and run Volatility",
+        "Identify OS from memory dump",
+        "List running processes",
+        "Find network connections"
+      ],
+      "scenario": "A potentially compromised workstation has been imaged. Perform initial memory triage to understand what was running.",
+      
+      "setup": {
+        "files_needed": ["Memory dump sample"],
+        "file_sources": [
+          {
+            "name": "MemLabs Lab 1",
+            "url": "https://github.com/stuxnet999/MemLabs",
+            "description": "Beginner-friendly CTF memory samples"
+          },
+          {
+            "name": "Volatility Sample Images",
+            "url": "https://github.com/volatilityfoundation/volatility/wiki/Memory-Samples",
+            "description": "Official sample memory dumps"
+          }
+        ],
+        "environment": "Terminal with Volatility 3 installed"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Identify the Operating System",
+          "instructions": "Run: vol -f memory.raw windows.info\n\nThis identifies the Windows version from the memory dump.",
+          "hints": ["Vol3 auto-detects OS", "Look for NT version and build number", "This helps determine what other plugins to use"],
+          "expected_result": "Windows version, build, and system information displayed",
+          "common_mistakes": ["Using Vol2 syntax with Vol3", "Incorrect file path"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "List Running Processes",
+          "instructions": "Run: vol -f memory.raw windows.pslist\n\nThis shows all processes that were running when memory was captured.",
+          "hints": ["Note the PID (Process ID) and PPID (Parent PID)", "Look for unusual process names", "Check parent-child relationships"],
+          "expected_result": "Table of processes with PID, PPID, name, and creation time",
+          "common_mistakes": ["Not noting suspicious processes for further investigation"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Check Process Tree",
+          "instructions": "Run: vol -f memory.raw windows.pstree\n\nThis shows parent-child relationships between processes.",
+          "hints": ["cmd.exe spawned by Word = suspicious", "Look for unusual parent processes", "Browsers shouldn't spawn cmd.exe"],
+          "expected_result": "Hierarchical view of process relationships",
+          "common_mistakes": ["Ignoring process hierarchy (key for detecting attacks)"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Find Network Connections",
+          "instructions": "Run: vol -f memory.raw windows.netscan\n\nThis shows network connections and listening ports.",
+          "hints": ["Look for connections to unusual IPs", "Note listening ports", "Check which processes have connections"],
+          "expected_result": "List of network connections with associated processes",
+          "common_mistakes": ["Not correlating connections to processes"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Document Findings",
+          "instructions": "Create a summary:\n1. What OS was this?\n2. What processes look suspicious?\n3. Any unusual network activity?\n4. What should be investigated further?",
+          "hints": ["Document everything for your report", "Note PIDs for deep-dive analysis"],
+          "expected_result": "Initial triage summary with next investigation steps",
+          "common_mistakes": ["Not documenting findings systematically"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What Windows version was the system running?",
+          "answer": "Varies by sample - check windows.info output",
+          "explanation": "OS version affects which vulnerabilities and techniques are relevant"
+        },
+        {
+          "question": "Did any processes have unusual parent-child relationships?",
+          "answer": "Varies - look for Office apps spawning cmd/powershell",
+          "explanation": "Malicious macros and exploits often show as unusual process trees"
+        }
+      ],
+      
+      "takeaways": [
+        "Memory dumps contain a snapshot of everything running at capture time",
+        "Process trees reveal attack chains (parent spawned child)",
+        "Network connections show communication channels",
+        "Initial triage identifies what needs deeper investigation"
+      ]
+    },
+    {
+      "project_id": "project-2",
+      "title": "Hunting Malware in Memory",
+      "difficulty": "intermediate",
+      "estimated_time": "60-90 minutes",
+      "description": "Use advanced Volatility plugins to find malware artifacts: injected code, hidden processes, and suspicious memory regions.",
+      "learning_objectives": [
+        "Detect code injection",
+        "Find hidden processes",
+        "Extract suspicious executables",
+        "Identify malware indicators"
+      ],
+      "scenario": "The SOC received an alert about suspicious activity. Memory was captured. Find evidence of compromise.",
+      
+      "setup": {
+        "files_needed": ["Memory dump with malware"],
+        "file_sources": [
+          {
+            "name": "MemLabs Challenges",
+            "url": "https://github.com/stuxnet999/MemLabs",
+            "description": "CTF challenges with hidden artifacts"
+          },
+          {
+            "name": "CyberDefenders Memory Challenges",
+            "url": "https://cyberdefenders.org/blueteam-ctf-challenges/",
+            "description": "Blue team challenges with memory analysis"
+          }
+        ],
+        "environment": "Volatility 3 with memory sample"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Detect Injected Code",
+          "instructions": "Run: vol -f memory.raw windows.malfind\n\nThis finds memory regions with suspicious characteristics (RWX, not backed by file).",
+          "hints": ["MZ header in memory region = injected PE", "RWX permissions are suspicious", "Legitimate processes shouldn't have injected code"],
+          "expected_result": "List of suspicious memory regions with hex dumps",
+          "common_mistakes": ["Ignoring results without MZ header (shellcode doesn't have PE header)"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Find Hidden Processes",
+          "instructions": "Compare: vol -f memory.raw windows.pslist\nWith: vol -f memory.raw windows.psscan\n\npsscan finds processes not in the active list (hidden/terminated).",
+          "hints": ["Rootkits hide processes from pslist", "psscan searches memory for process structures", "Compare both outputs"],
+          "expected_result": "Processes in psscan but not pslist = potentially hidden",
+          "common_mistakes": ["Not comparing both outputs"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Examine Loaded DLLs",
+          "instructions": "Run: vol -f memory.raw windows.dlllist --pid [suspicious_PID]\n\nCheck DLLs loaded by suspicious processes.",
+          "hints": ["Look for DLLs in unusual paths", "Temp folders are suspicious", "Missing file path = injected"],
+          "expected_result": "List of DLLs with their paths",
+          "common_mistakes": ["Not checking DLL paths carefully"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Extract Suspicious Executable",
+          "instructions": "Run: vol -f memory.raw windows.dumpfiles --pid [PID]\n\nOr: vol -f memory.raw windows.procdump --pid [PID]\n\nThis extracts the executable for further analysis.",
+          "hints": ["Submit hash to VirusTotal", "Use strings command on extracted file", "Save for malware analysis"],
+          "expected_result": "Extracted executable file(s)",
+          "common_mistakes": ["Executing extracted malware (don't!)"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Check Command Line Arguments",
+          "instructions": "Run: vol -f memory.raw windows.cmdline\n\nThis shows command lines used to start processes.",
+          "hints": ["Encoded PowerShell = very suspicious", "Look for obfuscation", "Note any C2 URLs or IPs"],
+          "expected_result": "Command lines revealing attacker activity",
+          "common_mistakes": ["Not decoding base64 PowerShell commands"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What evidence of code injection did you find?",
+          "answer": "Varies - malfind results show injected regions",
+          "explanation": "Injected code is a primary indicator of compromise"
+        },
+        {
+          "question": "Were any processes hidden from normal listing?",
+          "answer": "Compare pslist vs psscan output",
+          "explanation": "Rootkits hide processes to avoid detection"
+        },
+        {
+          "question": "What was the command line of suspicious processes?",
+          "answer": "Varies - often shows encoded commands or C2 addresses",
+          "explanation": "Command lines reveal attacker intent and IOCs"
+        }
+      ],
+      
+      "takeaways": [
+        "malfind detects injected code by looking for suspicious memory regions",
+        "Comparing pslist and psscan reveals hidden processes",
+        "Command lines often contain IOCs and reveal attack techniques",
+        "Always extract suspicious files for further analysis"
+      ]
+    },
+    {
+      "project_id": "project-3",
+      "title": "Complete Memory Forensics Investigation",
+      "difficulty": "advanced",
+      "estimated_time": "90-120 minutes",
+      "description": "Conduct a full memory forensics investigation: identify the attack, build a timeline, extract IOCs, and write a report.",
+      "learning_objectives": [
+        "Conduct systematic memory investigation",
+        "Build attack timeline",
+        "Extract and document IOCs",
+        "Write professional forensics report"
+      ],
+      "scenario": "A breach has been confirmed. You have a memory dump from the patient zero machine. Determine what happened and provide actionable intelligence.",
+      
+      "setup": {
+        "files_needed": ["Memory dump from compromised system"],
+        "file_sources": [
+          {
+            "name": "SANS Memory Forensics Challenges",
+            "url": "https://www.sans.org/",
+            "description": "Professional-grade samples"
+          },
+          {
+            "name": "CyberDefenders",
+            "url": "https://cyberdefenders.org/",
+            "description": "Real-world scenario challenges"
+          }
+        ],
+        "environment": "Full forensics workstation"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Initial Triage",
+          "instructions": "Gather baseline information:\n1. vol windows.info - System details\n2. vol windows.pslist - Processes\n3. vol windows.netscan - Network\n4. vol windows.cmdline - Commands",
+          "hints": ["Document everything", "Note timestamps", "Identify anomalies"],
+          "expected_result": "Complete baseline understanding of the system state",
+          "common_mistakes": ["Rushing past triage"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Deep Dive Analysis",
+          "instructions": "Investigate suspicious findings:\n1. vol windows.malfind - Code injection\n2. vol windows.handles - File/registry handles\n3. vol windows.filescan - File objects\n4. vol windows.registry.printkey - Registry keys",
+          "hints": ["Follow the evidence", "Check handles of suspicious processes", "Registry reveals persistence"],
+          "expected_result": "Detailed understanding of malicious activity",
+          "common_mistakes": ["Not following all leads"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Extract Evidence",
+          "instructions": "Extract artifacts:\n1. vol windows.dumpfiles - Extract files\n2. vol windows.procdump - Dump processes\n3. vol windows.memmap - Memory regions\n\nHash everything: sha256sum *",
+          "hints": ["Maintain chain of custody", "Hash all extracted files", "Document extraction"],
+          "expected_result": "Extracted malware samples and artifacts",
+          "common_mistakes": ["Not hashing extracted files"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Build Timeline",
+          "instructions": "Create attack timeline:\n1. When did compromise occur?\n2. What was initial access?\n3. What did attacker do?\n4. What persistence was established?",
+          "hints": ["Use process creation times", "Correlate network connections", "Registry timestamps help"],
+          "expected_result": "Chronological attack timeline",
+          "common_mistakes": ["Not considering timestamps"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Write Investigation Report",
+          "instructions": "Create professional report:\n1. Executive Summary\n2. Scope & Methodology\n3. Findings (with evidence)\n4. Timeline\n5. IOCs (IPs, domains, hashes)\n6. Recommendations",
+          "hints": ["Be factual and precise", "Support claims with evidence", "Make recommendations actionable"],
+          "expected_result": "Professional forensics report",
+          "common_mistakes": ["Opinion without evidence", "Missing IOCs"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What was the initial access vector?",
+          "answer": "Varies - look at earliest suspicious process and its parent",
+          "explanation": "Understanding initial access helps prevent future incidents"
+        },
+        {
+          "question": "What persistence mechanisms were used?",
+          "answer": "Check registry run keys, scheduled tasks, services",
+          "explanation": "Persistence must be removed during remediation"
+        },
+        {
+          "question": "What IOCs can be shared with other teams?",
+          "answer": "IPs, domains, file hashes, registry keys, process names",
+          "explanation": "IOC sharing helps protect other organizations"
+        }
+      ],
+      
+      "takeaways": [
+        "Systematic methodology ensures thorough investigation",
+        "Timeline reconstruction tells the story of the attack",
+        "IOC extraction enables proactive defense",
+        "Professional reports communicate findings effectively"
+      ]
+    }
+  ],
+  
+  "external_resources": [
+    {
+      "platform": "TryHackMe",
+      "name": "Volatility",
+      "url": "https://tryhackme.com/room/volatility",
+      "cost": "Free",
+      "difficulty": "intermediate",
+      "estimated_time": "2-3 hours",
+      "description": "Hands-on Volatility room with guided exercises"
+    },
+    {
+      "platform": "CyberDefenders",
+      "name": "Memory Analysis Challenges",
+      "url": "https://cyberdefenders.org/blueteam-ctf-challenges/",
+      "cost": "Free",
+      "difficulty": "intermediate-advanced",
+      "estimated_time": "Varies",
+      "description": "Real-world memory forensics challenges"
+    },
+    {
+      "platform": "MemLabs",
+      "name": "Memory Forensics Labs",
+      "url": "https://github.com/stuxnet999/MemLabs",
+      "cost": "Free",
+      "difficulty": "beginner-advanced",
+      "estimated_time": "Varies",
+      "description": "CTF-style memory analysis challenges"
+    },
+    {
+      "platform": "13Cubed",
+      "name": "Volatility YouTube Series",
+      "url": "https://www.youtube.com/c/13Cubed",
+      "cost": "Free",
+      "difficulty": "all",
+      "estimated_time": "Varies",
+      "description": "Excellent video tutorials on memory forensics"
+    }
+  ],
+  
+  "cheat_sheet": {
+    "sections": [
+      {
+        "title": "System Information",
+        "commands": [
+          { "command": "vol -f mem.raw windows.info", "description": "OS version and details" },
+          { "command": "vol -f mem.raw windows.envars", "description": "Environment variables" }
+        ]
+      },
+      {
+        "title": "Process Analysis",
+        "commands": [
+          { "command": "vol -f mem.raw windows.pslist", "description": "Running processes" },
+          { "command": "vol -f mem.raw windows.pstree", "description": "Process tree" },
+          { "command": "vol -f mem.raw windows.psscan", "description": "Scan for hidden processes" },
+          { "command": "vol -f mem.raw windows.cmdline", "description": "Command line arguments" },
+          { "command": "vol -f mem.raw windows.dlllist --pid X", "description": "DLLs loaded by process" }
+        ]
+      },
+      {
+        "title": "Network Analysis",
+        "commands": [
+          { "command": "vol -f mem.raw windows.netscan", "description": "Network connections" },
+          { "command": "vol -f mem.raw windows.netstat", "description": "Active connections" }
+        ]
+      },
+      {
+        "title": "Malware Detection",
+        "commands": [
+          { "command": "vol -f mem.raw windows.malfind", "description": "Find injected code" },
+          { "command": "vol -f mem.raw windows.hollowprocesses", "description": "Detect process hollowing" },
+          { "command": "vol -f mem.raw windows.ldrmodules", "description": "Hidden DLLs" }
+        ]
+      },
+      {
+        "title": "File & Registry",
+        "commands": [
+          { "command": "vol -f mem.raw windows.filescan", "description": "Scan for file objects" },
+          { "command": "vol -f mem.raw windows.handles --pid X", "description": "Open handles" },
+          { "command": "vol -f mem.raw windows.registry.printkey", "description": "Registry keys" },
+          { "command": "vol -f mem.raw windows.dumpfiles --pid X", "description": "Extract files" }
+        ]
+      },
+      {
+        "title": "Extraction",
+        "commands": [
+          { "command": "vol -f mem.raw windows.procdump --pid X", "description": "Dump process executable" },
+          { "command": "vol -f mem.raw windows.memmap --pid X --dump", "description": "Dump process memory" }
+        ]
+      }
+    ]
+  },
+  
+  "knowledge_check": [
+    {
+      "question": "Why is memory forensics important for detecting modern attacks?",
+      "options": [
+        "Memory is easier to analyze than disk",
+        "Fileless malware and injected code only exist in memory",
+        "Disk forensics is no longer useful",
+        "Memory never changes"
+      ],
+      "correct": 1,
+      "explanation": "Many modern attacks use fileless techniques that leave no disk artifacts - memory is the only place to find them"
+    },
+    {
+      "question": "What does the malfind plugin detect?",
+      "options": [
+        "Deleted files",
+        "Memory regions with suspicious characteristics like injected code",
+        "Network connections",
+        "User passwords"
+      ],
+      "correct": 1,
+      "explanation": "malfind looks for memory regions with executable permissions that aren't backed by files - indicators of code injection"
+    },
+    {
+      "question": "Why compare pslist and psscan output?",
+      "options": [
+        "They use different time formats",
+        "To find processes hidden by rootkits",
+        "psscan is faster",
+        "pslist doesn't show all columns"
+      ],
+      "correct": 1,
+      "explanation": "pslist walks the active process list (which rootkits can manipulate), while psscan searches memory for process structures"
+    },
+    {
+      "question": "What is the order of volatility for digital evidence?",
+      "options": [
+        "Disk → RAM → Network → Backups",
+        "RAM → Disk → Backups → Network",
+        "Registers → RAM → Disk → Backups",
+        "Network → RAM → Disk → Registers"
+      ],
+      "correct": 2,
+      "explanation": "Collect most volatile first: Registers/Cache → RAM → Disk → Remote logs → Backups"
+    }
+  ],
+  
+  "next_steps": {
+    "related_labs": ["TOOL-LAB-001", "TOOL-LAB-007"],
+    "related_lessons": ["D4-LESSON-003"],
+    "certifications": [
+      "GIAC Certified Forensic Analyst (GCFA)",
+      "GIAC Certified Forensic Examiner (GCFE)",
+      "EnCE (EnCase Certified Examiner)"
+    ],
+    "advanced_topics": [
+      "Custom Volatility plugin development",
+      "Linux memory forensics",
+      "macOS memory analysis",
+      "Cloud memory forensics"
+    ]
+  }
+}

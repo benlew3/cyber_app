@@ -1,0 +1,507 @@
+{
+  "lab_id": "TOOL-LAB-013",
+  "tool_name": "Sigma",
+  "tool_category": "Detection Rules",
+  "version": "1.0",
+  
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_time": "2-3 hours",
+    "last_updated": "2025-01-14",
+    "author": "Security+ Training System"
+  },
+  
+  "overview": {
+    "tagline": "Generic Signature Format for SIEM Systems",
+    "description": "Sigma is a generic and open signature format for SIEM systems. Write rules once, convert to any SIEM: Splunk, Elastic, Microsoft Sentinel, QRadar, and more. Sigma is the YARA of log analysis - a universal detection language.",
+    "official_site": "https://github.com/SigmaHQ/sigma",
+    "download_url": "https://github.com/SigmaHQ/sigma",
+    "license": "Open Source (LGPL)",
+    "platforms": ["Any (YAML rules)"],
+    "why_learn": "Writing portable detection rules is essential for detection engineering. Sigma enables sharing rules across different SIEM platforms."
+  },
+  
+  "security_plus_relevance": {
+    "domains": [4],
+    "objectives": ["4.1", "4.4", "4.5"],
+    "exam_topics": [
+      "Security monitoring",
+      "Detection methods",
+      "Log analysis",
+      "SIEM concepts"
+    ]
+  },
+  
+  "career_relevance": {
+    "soc_analyst": {
+      "relevance": "critical",
+      "percentage_of_job": "25-35%",
+      "usage": "Writing and tuning detection rules"
+    },
+    "incident_responder": {
+      "relevance": "high",
+      "percentage_of_job": "15-20%",
+      "usage": "Creating detections from incident findings"
+    },
+    "security_engineer": {
+      "relevance": "critical",
+      "percentage_of_job": "30-40%",
+      "usage": "Detection engineering, rule deployment"
+    },
+    "penetration_tester": {
+      "relevance": "medium",
+      "percentage_of_job": "10%",
+      "usage": "Understanding detection coverage"
+    },
+    "grc_analyst": {
+      "relevance": "low",
+      "percentage_of_job": "5%",
+      "usage": "Understanding detection capabilities"
+    }
+  },
+  
+  "prerequisites": {
+    "knowledge": [
+      "Understanding of log sources (Windows, Linux, network)",
+      "Basic YAML syntax",
+      "Familiarity with SIEM concepts",
+      "MITRE ATT&CK basics"
+    ],
+    "tools_needed": [
+      "Text editor (VS Code recommended)",
+      "sigma-cli or sigmac",
+      "Python 3.x",
+      "Target SIEM for testing"
+    ],
+    "estimated_setup_time": "15-20 minutes"
+  },
+  
+  "quick_start": {
+    "installation_steps": [
+      {
+        "step": 1,
+        "title": "Install sigma-cli",
+        "instructions": "pip install sigma-cli\n\nOr use Docker:\ndocker run -v $(pwd):/rules sigmaproject/sigma-cli",
+        "verification": "sigma --help shows options"
+      },
+      {
+        "step": 2,
+        "title": "Clone Sigma Repository",
+        "instructions": "git clone https://github.com/SigmaHQ/sigma.git\n\nThis gives you 2500+ community rules",
+        "verification": "rules/ folder contains YAML files"
+      },
+      {
+        "step": 3,
+        "title": "Test Conversion",
+        "instructions": "sigma convert -t splunk rules/windows/process_creation/proc_creation_win_susp_whoami.yml",
+        "verification": "Splunk SPL query output"
+      }
+    ],
+    "first_run": "Write rule → Convert to SIEM format → Test in SIEM",
+    "verification": "Rule triggers on expected events"
+  },
+  
+  "core_concepts": [
+    {
+      "concept_id": "structure",
+      "title": "Rule Structure",
+      "explanation": "Sigma rules are YAML files with: title, status, description, logsource, detection, and optional fields like tags and falsepositives.",
+      "why_it_matters": "Standard structure enables sharing and conversion.",
+      "exam_tip": "Sigma rules are SIEM-agnostic detection signatures"
+    },
+    {
+      "concept_id": "logsource",
+      "title": "Log Sources",
+      "explanation": "Defines what logs the rule applies to: category (process_creation), product (windows), service (sysmon).",
+      "why_it_matters": "Correct logsource ensures rule runs on right data.",
+      "exam_tip": "Detection rules must specify their data sources"
+    },
+    {
+      "concept_id": "detection",
+      "title": "Detection Logic",
+      "explanation": "Selection criteria and conditions. Use field|modifier: value syntax. Modifiers like contains, startswith, endswith.",
+      "why_it_matters": "Detection logic defines what triggers the rule.",
+      "exam_tip": "Logic operators (AND, OR) combine detection conditions"
+    },
+    {
+      "concept_id": "conversion",
+      "title": "Backend Conversion",
+      "explanation": "sigma-cli converts rules to SIEM-specific syntax: Splunk SPL, Elastic KQL, Microsoft Sentinel, etc.",
+      "why_it_matters": "Write once, deploy anywhere.",
+      "exam_tip": "Generic rules can be converted to specific SIEM queries"
+    }
+  ],
+  
+  "mini_projects": [
+    {
+      "project_id": "project-1",
+      "title": "Writing Your First Sigma Rules",
+      "difficulty": "beginner",
+      "estimated_time": "45-60 minutes",
+      "description": "Learn Sigma basics by writing rules that detect common attack techniques.",
+      "learning_objectives": [
+        "Understand Sigma rule structure",
+        "Write basic detection rules",
+        "Convert rules to SIEM format",
+        "Test rule effectiveness"
+      ],
+      "scenario": "Your SOC needs portable detection rules. Start building your rule library.",
+      
+      "setup": {
+        "files_needed": ["sigma-cli installed"],
+        "environment": "Terminal, text editor"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Create Basic Rule",
+          "instructions": "Create file whoami_detection.yml:\n\ntitle: Whoami Execution\nstatus: test\ndescription: Detects execution of whoami command\nauthor: Your Name\ndate: 2025/01/14\nlogsource:\n    category: process_creation\n    product: windows\ndetection:\n    selection:\n        Image|endswith: '\\\\whoami.exe'\n    condition: selection\nlevel: low\ntags:\n    - attack.discovery\n    - attack.t1033",
+          "hints": ["YAML indentation matters", "Use proper backslash escaping"],
+          "expected_result": "Valid Sigma rule file",
+          "common_mistakes": ["YAML indentation errors"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Add Detection Context",
+          "instructions": "Enhance the rule:\n\nfalsepositives:\n    - Legitimate admin activity\n    - Scripts that check user context\nreferences:\n    - https://attack.mitre.org/techniques/T1033/",
+          "hints": ["False positives help tuning", "References add credibility"],
+          "expected_result": "Complete rule with context",
+          "common_mistakes": ["Missing false positives"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Convert to Splunk",
+          "instructions": "Run: sigma convert -t splunk whoami_detection.yml\n\nOutput should be SPL query you can paste into Splunk.",
+          "hints": ["Different targets for different SIEMs", "-t elastic for Elasticsearch"],
+          "expected_result": "Valid SPL query",
+          "common_mistakes": ["Wrong target specified"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Write Multi-Condition Rule",
+          "instructions": "Create rule with OR logic:\n\ndetection:\n    selection_cmd:\n        CommandLine|contains:\n            - 'whoami'\n            - 'hostname'\n            - 'ipconfig'\n    condition: selection_cmd",
+          "hints": ["Lists are OR conditions", "Multiple selections can be AND'd"],
+          "expected_result": "Rule with multiple conditions",
+          "common_mistakes": ["Wrong condition logic"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Test in SIEM",
+          "instructions": "1. Convert rule to your SIEM format\n2. Paste query in SIEM\n3. Generate test event (run whoami)\n4. Verify detection",
+          "hints": ["Test with safe commands", "Check time range"],
+          "expected_result": "Rule detects test event",
+          "common_mistakes": ["Wrong time range"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "Why is the logsource section important?",
+          "answer": "It tells converters what data source the rule applies to",
+          "explanation": "Correct logsource ensures proper field mapping"
+        }
+      ],
+      
+      "takeaways": [
+        "Sigma provides portable detection rules",
+        "YAML structure is consistent across rules",
+        "Conversion enables multi-SIEM deployment",
+        "Testing validates detection effectiveness"
+      ]
+    },
+    {
+      "project_id": "project-2",
+      "title": "ATT&CK-Based Detection Rules",
+      "difficulty": "intermediate",
+      "estimated_time": "60-90 minutes",
+      "description": "Write detection rules mapped to MITRE ATT&CK techniques for systematic coverage.",
+      "learning_objectives": [
+        "Map rules to ATT&CK techniques",
+        "Write rules for common TTPs",
+        "Use advanced field modifiers",
+        "Build detection coverage"
+      ],
+      "scenario": "Map your detections to ATT&CK for systematic threat coverage.",
+      
+      "setup": {
+        "files_needed": ["sigma-cli", "ATT&CK reference"],
+        "environment": "Text editor, SIEM for testing"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Detect Encoded PowerShell (T1059.001)",
+          "instructions": "Create rule:\n\ntitle: Encoded PowerShell Command\nstatus: test\nlogsource:\n    category: process_creation\n    product: windows\ndetection:\n    selection:\n        Image|endswith: '\\\\powershell.exe'\n        CommandLine|contains:\n            - '-enc'\n            - '-e '\n            - 'encodedcommand'\n    condition: selection\nlevel: high\ntags:\n    - attack.execution\n    - attack.t1059.001",
+          "hints": ["Multiple patterns catch variants", "High level for encoded commands"],
+          "expected_result": "PowerShell detection rule",
+          "common_mistakes": ["Missing encoding variants"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Detect Suspicious Parent-Child (T1055)",
+          "instructions": "Detect Office spawning shell:\n\ndetection:\n    selection_parent:\n        ParentImage|endswith:\n            - '\\\\winword.exe'\n            - '\\\\excel.exe'\n            - '\\\\powerpnt.exe'\n    selection_child:\n        Image|endswith:\n            - '\\\\cmd.exe'\n            - '\\\\powershell.exe'\n    condition: selection_parent and selection_child",
+          "hints": ["AND combines selections", "Parent-child is powerful detection"],
+          "expected_result": "Parent-child detection rule",
+          "common_mistakes": ["Using OR instead of AND"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Detect LOLBAS Usage (T1218)",
+          "instructions": "Detect certutil download:\n\ndetection:\n    selection:\n        Image|endswith: '\\\\certutil.exe'\n        CommandLine|contains:\n            - 'urlcache'\n            - 'verifyctl'\n            - '-decode'\n    condition: selection\nlevel: high\ntags:\n    - attack.defense_evasion\n    - attack.t1218",
+          "hints": ["LOLBAS are legitimate tools abused", "Check lolbas-project.github.io"],
+          "expected_result": "LOLBAS detection rule",
+          "common_mistakes": ["Missing LOLBAS variants"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Add Filter for False Positives",
+          "instructions": "Add filter section:\n\ndetection:\n    selection:\n        Image|endswith: '\\\\whoami.exe'\n    filter:\n        User: 'SYSTEM'\n        ParentImage|endswith: '\\\\services.exe'\n    condition: selection and not filter",
+          "hints": ["Filters exclude known-good", "Reduces false positives"],
+          "expected_result": "Rule with false positive filter",
+          "common_mistakes": ["Filter too broad"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Build Coverage Map",
+          "instructions": "Document your rules:\n1. List all ATT&CK techniques covered\n2. Identify coverage gaps\n3. Prioritize next rules to write\n4. Track in spreadsheet",
+          "hints": ["Start with high-impact techniques", "ATT&CK Navigator helps visualize"],
+          "expected_result": "Detection coverage documentation",
+          "common_mistakes": ["No tracking system"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "Why map rules to ATT&CK?",
+          "answer": "Enables systematic coverage and gap identification",
+          "explanation": "ATT&CK mapping shows what you can and can't detect"
+        }
+      ],
+      
+      "takeaways": [
+        "ATT&CK mapping enables systematic detection",
+        "Advanced modifiers catch variants",
+        "Filters reduce false positives",
+        "Coverage tracking identifies gaps"
+      ]
+    },
+    {
+      "project_id": "project-3",
+      "title": "Building a Detection Rule Pipeline",
+      "difficulty": "advanced",
+      "estimated_time": "60-90 minutes",
+      "description": "Create an automated pipeline for rule development, testing, and deployment.",
+      "learning_objectives": [
+        "Automate rule conversion",
+        "Build testing workflows",
+        "Deploy rules across SIEMs",
+        "Maintain rule library"
+      ],
+      "scenario": "Scale your detection engineering with automation.",
+      
+      "setup": {
+        "files_needed": ["sigma-cli", "Git"],
+        "environment": "Development environment"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Create Rule Repository",
+          "instructions": "Set up Git repo:\n\nmkdir detection-rules && cd detection-rules\ngit init\nmkdir -p rules/{windows,linux,network}\nmkdir -p output/{splunk,elastic,sentinel}",
+          "hints": ["Organize by log source", "Git enables version control"],
+          "expected_result": "Structured rule repository",
+          "common_mistakes": ["Flat structure"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Batch Conversion Script",
+          "instructions": "Create convert.sh:\n\n#!/bin/bash\nfor file in rules/**/*.yml; do\n    sigma convert -t splunk \"$file\" >> output/splunk/all_rules.spl\n    sigma convert -t elastic \"$file\" >> output/elastic/all_rules.ndjson\ndone",
+          "hints": ["Automate all conversions", "One script for consistency"],
+          "expected_result": "Working conversion script",
+          "common_mistakes": ["Not handling errors"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Add Validation",
+          "instructions": "Validate rules before conversion:\n\nsigma validate rules/\n\nFix any errors reported.\nAdd to CI/CD pipeline.",
+          "hints": ["Validation catches syntax errors", "Fail fast on bad rules"],
+          "expected_result": "Validation in workflow",
+          "common_mistakes": ["Skipping validation"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Automated Testing",
+          "instructions": "Create test process:\n1. Deploy rule to test SIEM\n2. Generate test event (Atomic Red Team)\n3. Verify alert fires\n4. Document coverage",
+          "hints": ["Atomic Red Team provides safe tests", "Automate where possible"],
+          "expected_result": "Tested detection coverage",
+          "common_mistakes": ["No testing process"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Documentation and Tracking",
+          "instructions": "Create rule metadata:\n1. Rule inventory spreadsheet\n2. ATT&CK coverage matrix\n3. Deployment status tracking\n4. Tuning history",
+          "hints": ["Documentation enables scaling", "Track false positive rates"],
+          "expected_result": "Complete detection documentation",
+          "common_mistakes": ["No documentation"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "Why automate rule deployment?",
+          "answer": "Consistency, speed, and reduced human error",
+          "explanation": "Automation scales detection engineering"
+        }
+      ],
+      
+      "takeaways": [
+        "Automation scales detection engineering",
+        "Version control enables collaboration",
+        "Testing validates detection effectiveness",
+        "Documentation enables maintenance"
+      ]
+    }
+  ],
+  
+  "external_resources": [
+    {
+      "platform": "SigmaHQ",
+      "name": "Sigma Rules Repository",
+      "url": "https://github.com/SigmaHQ/sigma",
+      "cost": "Free",
+      "difficulty": "all",
+      "estimated_time": "Reference",
+      "description": "2500+ community Sigma rules"
+    },
+    {
+      "platform": "SigmaHQ",
+      "name": "Sigma Documentation",
+      "url": "https://sigmahq.io/",
+      "cost": "Free",
+      "difficulty": "all",
+      "estimated_time": "Reference",
+      "description": "Official Sigma documentation"
+    },
+    {
+      "platform": "Atomic Red Team",
+      "name": "Testing Framework",
+      "url": "https://github.com/redcanaryco/atomic-red-team",
+      "cost": "Free",
+      "difficulty": "intermediate",
+      "estimated_time": "Reference",
+      "description": "Tests mapped to ATT&CK for validation"
+    }
+  ],
+  
+  "cheat_sheet": {
+    "sections": [
+      {
+        "title": "Rule Structure",
+        "commands": [
+          { "command": "title:", "description": "Rule name" },
+          { "command": "status:", "description": "test, experimental, stable" },
+          { "command": "logsource:", "description": "Log source definition" },
+          { "command": "detection:", "description": "Detection logic" },
+          { "command": "level:", "description": "low, medium, high, critical" },
+          { "command": "tags:", "description": "ATT&CK tags" }
+        ]
+      },
+      {
+        "title": "Field Modifiers",
+        "commands": [
+          { "command": "|contains", "description": "Substring match" },
+          { "command": "|startswith", "description": "Prefix match" },
+          { "command": "|endswith", "description": "Suffix match" },
+          { "command": "|re", "description": "Regular expression" },
+          { "command": "|cidr", "description": "CIDR notation match" },
+          { "command": "|all", "description": "All values must match" }
+        ]
+      },
+      {
+        "title": "Condition Logic",
+        "commands": [
+          { "command": "selection", "description": "Reference named selection" },
+          { "command": "selection1 and selection2", "description": "Both must match" },
+          { "command": "selection1 or selection2", "description": "Either can match" },
+          { "command": "not filter", "description": "Exclude matches" },
+          { "command": "1 of selection*", "description": "Any selection matches" },
+          { "command": "all of selection*", "description": "All selections match" }
+        ]
+      },
+      {
+        "title": "CLI Commands",
+        "commands": [
+          { "command": "sigma convert -t splunk rule.yml", "description": "Convert to Splunk" },
+          { "command": "sigma convert -t elastic rule.yml", "description": "Convert to Elastic" },
+          { "command": "sigma validate rule.yml", "description": "Validate syntax" },
+          { "command": "sigma list backends", "description": "List conversion targets" }
+        ]
+      }
+    ]
+  },
+  
+  "knowledge_check": [
+    {
+      "question": "What is the main benefit of Sigma rules?",
+      "options": [
+        "They only work with Splunk",
+        "They are portable across different SIEM platforms",
+        "They replace antivirus",
+        "They are faster than native queries"
+      ],
+      "correct": 1,
+      "explanation": "Sigma rules can be converted to many SIEM formats - write once, deploy anywhere"
+    },
+    {
+      "question": "What does the 'logsource' section define?",
+      "options": [
+        "The output format",
+        "The log data the rule applies to",
+        "The alert destination",
+        "The author information"
+      ],
+      "correct": 1,
+      "explanation": "Logsource tells converters what type of log data the rule is designed for"
+    },
+    {
+      "question": "What modifier would you use to match a substring?",
+      "options": [
+        "|equals",
+        "|contains",
+        "|matches",
+        "|like"
+      ],
+      "correct": 1,
+      "explanation": "The |contains modifier matches if the field value contains the specified string"
+    },
+    {
+      "question": "How do you exclude false positives in Sigma?",
+      "options": [
+        "Delete the rule",
+        "Use a filter section with 'not filter' in condition",
+        "Disable the SIEM",
+        "Ignore the alerts"
+      ],
+      "correct": 1,
+      "explanation": "Filter sections define exclusions, used with 'not filter' in the condition"
+    }
+  ],
+  
+  "next_steps": {
+    "related_labs": ["TOOL-LAB-003", "TOOL-LAB-010"],
+    "related_lessons": ["D4-LESSON-001"],
+    "certifications": [
+      "CompTIA CySA+",
+      "GIAC Security Essentials (GSEC)"
+    ],
+    "advanced_topics": [
+      "Custom backends development",
+      "Sigma correlation rules",
+      "Detection-as-code pipelines",
+      "Threat hunting with Sigma"
+    ]
+  }
+}

@@ -1,0 +1,486 @@
+{
+  "lab_id": "TOOL-LAB-010",
+  "tool_name": "Sysmon",
+  "tool_category": "Windows Logging",
+  "version": "1.0",
+  
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_time": "2-3 hours",
+    "last_updated": "2025-01-14",
+    "author": "Security+ Training System"
+  },
+  
+  "overview": {
+    "tagline": "System Monitor - Windows Logging on Steroids",
+    "description": "Sysmon is a free Windows system service that logs detailed information about process creation, network connections, file changes, and more. It fills gaps in native Windows logging that attackers exploit. Essential for any detection engineering or threat hunting program.",
+    "official_site": "https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon",
+    "download_url": "https://docs.microsoft.com/en-us/sysinternals/downloads/sysmon",
+    "license": "Free (Microsoft Sysinternals)",
+    "platforms": ["Windows"],
+    "why_learn": "You can't detect what you can't see. Sysmon provides visibility that native Windows logging lacks. Most advanced threats are caught by Sysmon logs."
+  },
+  
+  "security_plus_relevance": {
+    "domains": [4],
+    "objectives": ["4.1", "4.4", "4.5"],
+    "exam_topics": [
+      "Security monitoring and logging",
+      "Detection and response",
+      "Endpoint visibility",
+      "Log analysis"
+    ]
+  },
+  
+  "career_relevance": {
+    "soc_analyst": {
+      "relevance": "critical",
+      "percentage_of_job": "30-40%",
+      "usage": "Primary log source for endpoint detection"
+    },
+    "incident_responder": {
+      "relevance": "critical",
+      "percentage_of_job": "30-40%",
+      "usage": "Investigating endpoint compromise"
+    },
+    "security_engineer": {
+      "relevance": "critical",
+      "percentage_of_job": "25-35%",
+      "usage": "Deploying and tuning Sysmon, writing detections"
+    },
+    "penetration_tester": {
+      "relevance": "high",
+      "percentage_of_job": "15-20%",
+      "usage": "Understanding what gets logged"
+    },
+    "grc_analyst": {
+      "relevance": "medium",
+      "percentage_of_job": "10%",
+      "usage": "Ensuring logging compliance"
+    }
+  },
+  
+  "prerequisites": {
+    "knowledge": [
+      "Windows administration basics",
+      "Understanding of processes and services",
+      "Basic XML for configuration",
+      "Familiarity with Event Viewer"
+    ],
+    "tools_needed": [
+      "Windows 10/11 or Server (VM recommended)",
+      "Sysmon (free download)",
+      "XML editor",
+      "Event Viewer or SIEM"
+    ],
+    "estimated_setup_time": "30 minutes"
+  },
+  
+  "quick_start": {
+    "installation_steps": [
+      {
+        "step": 1,
+        "title": "Download Sysmon",
+        "instructions": "Download from Microsoft Sysinternals:\nhttps://docs.microsoft.com/en-us/sysinternals/downloads/sysmon\n\nExtract to C:\\Tools\\Sysmon\\",
+        "verification": "Sysmon64.exe present in folder"
+      },
+      {
+        "step": 2,
+        "title": "Get Config File",
+        "instructions": "Download SwiftOnSecurity config:\nhttps://github.com/SwiftOnSecurity/sysmon-config\n\nThis is a community-maintained config with good defaults",
+        "verification": "sysmonconfig-export.xml downloaded"
+      },
+      {
+        "step": 3,
+        "title": "Install Sysmon",
+        "instructions": "Admin PowerShell:\n\ncd C:\\Tools\\Sysmon\n.\\Sysmon64.exe -accepteula -i sysmonconfig-export.xml",
+        "verification": "Sysmon service running (services.msc)"
+      }
+    ],
+    "first_run": "Check Event Viewer → Applications and Services Logs → Microsoft → Windows → Sysmon",
+    "verification": "Events appearing in Sysmon log"
+  },
+  
+  "core_concepts": [
+    {
+      "concept_id": "event-types",
+      "title": "Sysmon Event Types",
+      "explanation": "Sysmon logs specific event types: Process Create (1), Network Connect (3), File Create (11), Registry (12-14), etc. Each type provides unique visibility.",
+      "why_it_matters": "Different events detect different attack techniques.",
+      "exam_tip": "Know key event types: 1 (process), 3 (network), 11 (file)"
+    },
+    {
+      "concept_id": "configuration",
+      "title": "Configuration Files",
+      "explanation": "XML configs control what Sysmon logs. Good configs reduce noise while capturing important events.",
+      "why_it_matters": "Bad config = too much noise or missing events.",
+      "exam_tip": "Community configs like SwiftOnSecurity are good starting points"
+    },
+    {
+      "concept_id": "hashes",
+      "title": "Process Hashes",
+      "explanation": "Sysmon logs file hashes (MD5, SHA256, IMPHASH) for executed files, enabling threat intel correlation.",
+      "why_it_matters": "Hash matching identifies known-bad files instantly.",
+      "exam_tip": "Hashes enable IOC matching without file access"
+    },
+    {
+      "concept_id": "command-lines",
+      "title": "Command Line Logging",
+      "explanation": "Sysmon captures full command lines, revealing attacker techniques and encoded payloads.",
+      "why_it_matters": "Command lines show attacker intent.",
+      "exam_tip": "Many detections trigger on suspicious command line patterns"
+    }
+  ],
+  
+  "mini_projects": [
+    {
+      "project_id": "project-1",
+      "title": "Deploying Sysmon for Detection",
+      "difficulty": "beginner",
+      "estimated_time": "45-60 minutes",
+      "description": "Install Sysmon with a security-focused configuration and verify logging.",
+      "learning_objectives": [
+        "Install Sysmon properly",
+        "Apply community configuration",
+        "Verify events in Event Viewer",
+        "Understand key event types"
+      ],
+      "scenario": "You're deploying endpoint visibility for a new security program.",
+      
+      "setup": {
+        "files_needed": ["Sysmon64.exe", "config XML"],
+        "environment": "Windows VM (recommended for testing)"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Download and Prepare",
+          "instructions": "1. Download Sysmon from Microsoft\n2. Download SwiftOnSecurity config\n3. Extract to C:\\Tools\\Sysmon\\\n4. Place config in same folder",
+          "hints": ["Use official sources only", "Verify file hashes"],
+          "expected_result": "Files ready in folder",
+          "common_mistakes": ["Old Sysmon version"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Install with Config",
+          "instructions": "Admin PowerShell:\n\ncd C:\\Tools\\Sysmon\n.\\Sysmon64.exe -accepteula -i sysmonconfig-export.xml\n\nVerify: Get-Service Sysmon64",
+          "hints": ["-accepteula required first time", "Service should be Running"],
+          "expected_result": "Sysmon service installed and running",
+          "common_mistakes": ["Not running as admin"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Generate Test Events",
+          "instructions": "Create activity to log:\n1. Open PowerShell (Event 1)\n2. Run: ping 8.8.8.8 (Event 3)\n3. Create file: echo test > test.txt (Event 11)\n4. Open notepad (Event 1)",
+          "hints": ["Each action creates events", "Events have slight delay"],
+          "expected_result": "Activity performed",
+          "common_mistakes": ["Not waiting for events"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "View Events",
+          "instructions": "Open Event Viewer:\n1. Applications and Services Logs\n2. Microsoft → Windows → Sysmon → Operational\n3. Find your test events\n4. Examine event details",
+          "hints": ["Event ID 1 = Process Create", "Look at CommandLine field"],
+          "expected_result": "Test events visible with details",
+          "common_mistakes": ["Wrong log location"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Understand Key Fields",
+          "instructions": "For a Process Create event, note:\n1. UtcTime\n2. ProcessId\n3. Image (executable path)\n4. CommandLine\n5. ParentImage\n6. Hashes",
+          "hints": ["These fields enable detection", "ParentImage reveals process trees"],
+          "expected_result": "Understanding of event structure",
+          "common_mistakes": ["Ignoring parent info"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "What does the ParentImage field tell you?",
+          "answer": "Which process launched this process",
+          "explanation": "Parent-child relationships reveal attack chains (Word spawning cmd.exe = suspicious)"
+        }
+      ],
+      
+      "takeaways": [
+        "Sysmon fills critical visibility gaps",
+        "Good config reduces noise",
+        "Command lines reveal attacker actions",
+        "Process trees show attack chains"
+      ]
+    },
+    {
+      "project_id": "project-2",
+      "title": "Writing Sysmon Detection Rules",
+      "difficulty": "intermediate",
+      "estimated_time": "60-90 minutes",
+      "description": "Create detection rules using Sysmon events to catch common attack techniques.",
+      "learning_objectives": [
+        "Identify malicious patterns in logs",
+        "Write SIEM queries for Sysmon",
+        "Detect common attack techniques",
+        "Reduce false positives"
+      ],
+      "scenario": "Build detections for your SIEM using Sysmon data.",
+      
+      "setup": {
+        "files_needed": [],
+        "environment": "Sysmon installed, SIEM or log analysis tool"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Detect Suspicious Parent-Child",
+          "instructions": "Create rule for:\nParentImage contains 'WINWORD.EXE'\nAND Image contains 'cmd.exe' OR 'powershell.exe'\n\nThis catches macro-based attacks.",
+          "hints": ["Office apps spawning shells = bad", "Adjust for your environment"],
+          "expected_result": "Detection rule for Office spawning shell",
+          "common_mistakes": ["Too broad (false positives)"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Detect Encoded PowerShell",
+          "instructions": "Create rule for:\nImage contains 'powershell'\nAND CommandLine contains '-enc' OR '-e ' OR 'encodedcommand'\n\nAttackers encode commands to evade detection.",
+          "hints": ["Base64 encoding hides intent", "Legitimate uses exist - tune carefully"],
+          "expected_result": "Encoded PowerShell detection",
+          "common_mistakes": ["Missing encoding variations"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Detect LOLBAS Usage",
+          "instructions": "Create rules for Living Off the Land:\n1. certutil.exe -urlcache (download)\n2. mshta.exe http:// (execution)\n3. regsvr32.exe /s /n /u (bypass)",
+          "hints": ["LOLBAS = legitimate tools abused", "Check https://lolbas-project.github.io/"],
+          "expected_result": "LOLBAS detection rules",
+          "common_mistakes": ["Not knowing LOLBAS techniques"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Detect Suspicious Network",
+          "instructions": "Event ID 3 (Network Connect) rule:\nImage NOT IN (browser list, approved apps)\nAND DestinationPort IN (80, 443, 8080)\n\nCatches unexpected outbound connections.",
+          "hints": ["Whitelist known apps", "Focus on unusual sources"],
+          "expected_result": "Suspicious network detection",
+          "common_mistakes": ["Too many false positives"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Test Detections Safely",
+          "instructions": "Test rules with safe simulations:\n1. AtomicRedTeam tests\n2. Manual recreation of patterns\n3. Verify alerts fire\n4. Check for false positives",
+          "hints": ["Never test with real malware in prod", "AtomicRedTeam provides safe tests"],
+          "expected_result": "Validated detection rules",
+          "common_mistakes": ["Testing with real malware"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "Why do attackers use encoded PowerShell?",
+          "answer": "To evade signature-based detection and hide intent",
+          "explanation": "Base64 encoding obscures malicious commands"
+        }
+      ],
+      
+      "takeaways": [
+        "Parent-child relationships detect many attacks",
+        "Command line patterns reveal techniques",
+        "LOLBAS abuse requires specific detections",
+        "Test rules before production"
+      ]
+    },
+    {
+      "project_id": "project-3",
+      "title": "Threat Hunting with Sysmon",
+      "difficulty": "advanced",
+      "estimated_time": "60-90 minutes",
+      "description": "Proactively hunt for threats using Sysmon data and MITRE ATT&CK framework.",
+      "learning_objectives": [
+        "Apply ATT&CK techniques to hunting",
+        "Query Sysmon data effectively",
+        "Identify compromise indicators",
+        "Document hunting findings"
+      ],
+      "scenario": "Intelligence suggests targeted attacks. Hunt for evidence.",
+      
+      "setup": {
+        "files_needed": ["MITRE ATT&CK reference"],
+        "environment": "SIEM with Sysmon data"
+      },
+      
+      "tasks": [
+        {
+          "task_id": "task-1",
+          "title": "Map Techniques to Events",
+          "instructions": "For each ATT&CK technique, identify Sysmon events:\n- T1059 (Command Interpreter) → Event 1\n- T1071 (Application Layer Protocol) → Event 3\n- T1547 (Boot/Logon Autostart) → Event 12/13",
+          "hints": ["ATT&CK maps to Sysmon events", "Some techniques need multiple events"],
+          "expected_result": "Technique to event mapping",
+          "common_mistakes": ["Missing event types"]
+        },
+        {
+          "task_id": "task-2",
+          "title": "Hunt for Persistence",
+          "instructions": "Query for persistence:\n1. Registry Run keys (Event 12/13)\n2. Scheduled tasks (Event 1 with schtasks)\n3. Services (Event 1 with sc.exe)\n\nLook for unexpected entries.",
+          "hints": ["Compare to baseline", "New persistence = compromise indicator"],
+          "expected_result": "Persistence analysis complete",
+          "common_mistakes": ["No baseline for comparison"]
+        },
+        {
+          "task_id": "task-3",
+          "title": "Hunt for Lateral Movement",
+          "instructions": "Search for:\n1. PsExec usage (Event 1, 17/18)\n2. WMI remote (Event 1 with wmic /node)\n3. Remote PowerShell (Event 3 to port 5985/5986)",
+          "hints": ["Lateral movement often admin-to-admin", "Time correlation helps"],
+          "expected_result": "Lateral movement analysis",
+          "common_mistakes": ["Ignoring legitimate admin activity"]
+        },
+        {
+          "task_id": "task-4",
+          "title": "Investigate Anomalies",
+          "instructions": "For any suspicious findings:\n1. Pivot to related events\n2. Build timeline\n3. Identify affected systems\n4. Determine scope",
+          "hints": ["Follow the breadcrumbs", "Timeline is critical"],
+          "expected_result": "Complete investigation of anomalies",
+          "common_mistakes": ["Not pivoting to related events"]
+        },
+        {
+          "task_id": "task-5",
+          "title": "Document Hunt",
+          "instructions": "Create hunt report:\n1. Hypothesis\n2. Data sources queried\n3. Techniques searched\n4. Findings (or confirmation of no findings)\n5. Recommendations",
+          "hints": ["Document even negative results", "Hunting improves detection"],
+          "expected_result": "Professional hunt report",
+          "common_mistakes": ["No documentation"]
+        }
+      ],
+      
+      "challenge_questions": [
+        {
+          "question": "Why hunt even with good detections?",
+          "answer": "Detections miss novel attacks; hunting finds unknown threats",
+          "explanation": "Hunting is proactive; detection is reactive"
+        }
+      ],
+      
+      "takeaways": [
+        "ATT&CK framework guides systematic hunting",
+        "Sysmon provides rich data for hunting",
+        "Persistence and lateral movement are key",
+        "Documentation enables improvement"
+      ]
+    }
+  ],
+  
+  "external_resources": [
+    {
+      "platform": "SwiftOnSecurity",
+      "name": "Sysmon Config",
+      "url": "https://github.com/SwiftOnSecurity/sysmon-config",
+      "cost": "Free",
+      "difficulty": "beginner",
+      "estimated_time": "Reference",
+      "description": "Community-maintained Sysmon configuration"
+    },
+    {
+      "platform": "TrustedSec",
+      "name": "Sysmon Hunting Guide",
+      "url": "https://www.trustedsec.com/",
+      "cost": "Free",
+      "difficulty": "intermediate",
+      "estimated_time": "Reference",
+      "description": "Detection and hunting with Sysmon"
+    },
+    {
+      "platform": "MITRE",
+      "name": "ATT&CK Framework",
+      "url": "https://attack.mitre.org/",
+      "cost": "Free",
+      "difficulty": "all",
+      "estimated_time": "Reference",
+      "description": "Adversary techniques knowledge base"
+    }
+  ],
+  
+  "cheat_sheet": {
+    "sections": [
+      {
+        "title": "Key Event IDs",
+        "commands": [
+          { "command": "Event 1", "description": "Process Create" },
+          { "command": "Event 3", "description": "Network Connection" },
+          { "command": "Event 7", "description": "Image Loaded (DLL)" },
+          { "command": "Event 8", "description": "CreateRemoteThread" },
+          { "command": "Event 10", "description": "Process Access" },
+          { "command": "Event 11", "description": "File Create" },
+          { "command": "Event 12", "description": "Registry Add/Delete" },
+          { "command": "Event 13", "description": "Registry Set Value" },
+          { "command": "Event 22", "description": "DNS Query" }
+        ]
+      },
+      {
+        "title": "Installation Commands",
+        "commands": [
+          { "command": "Sysmon64.exe -accepteula -i config.xml", "description": "Install with config" },
+          { "command": "Sysmon64.exe -c config.xml", "description": "Update config" },
+          { "command": "Sysmon64.exe -u", "description": "Uninstall" },
+          { "command": "Sysmon64.exe -s", "description": "Show config schema" }
+        ]
+      },
+      {
+        "title": "Suspicious Patterns",
+        "commands": [
+          { "command": "cmd.exe spawned by Office", "description": "Macro execution" },
+          { "command": "powershell -enc", "description": "Encoded commands" },
+          { "command": "certutil -urlcache", "description": "File download" },
+          { "command": "wmic /node:", "description": "Remote execution" }
+        ]
+      }
+    ]
+  },
+  
+  "knowledge_check": [
+    {
+      "question": "What does Sysmon Event ID 1 capture?",
+      "options": [
+        "Network connections",
+        "Process creation with command line",
+        "File creation",
+        "Registry changes"
+      ],
+      "correct": 1,
+      "explanation": "Event ID 1 logs process creation including full command lines and parent process info"
+    },
+    {
+      "question": "Why is parent process information important?",
+      "options": [
+        "It shows CPU usage",
+        "It reveals attack chains and suspicious spawning",
+        "It's required for performance",
+        "It identifies file hashes"
+      ],
+      "correct": 1,
+      "explanation": "Parent-child relationships reveal attack chains like Word spawning cmd.exe"
+    },
+    {
+      "question": "What does Sysmon provide that native Windows logging doesn't?",
+      "options": [
+        "File deletion tracking",
+        "Command line arguments and process hashes",
+        "User login events",
+        "Disk space monitoring"
+      ],
+      "correct": 1,
+      "explanation": "Sysmon captures detailed command lines and hashes that native logging misses"
+    }
+  ],
+  
+  "next_steps": {
+    "related_labs": ["TOOL-LAB-003", "TOOL-LAB-009"],
+    "related_lessons": ["D4-LESSON-001"],
+    "certifications": [
+      "CompTIA CySA+",
+      "GIAC Certified Enterprise Defender (GCED)"
+    ],
+    "advanced_topics": [
+      "Custom Sysmon configuration",
+      "Sigma rules for Sysmon",
+      "Detection engineering",
+      "EDR integration"
+    ]
+  }
+}
