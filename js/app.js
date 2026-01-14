@@ -1761,7 +1761,7 @@ function injectStyles() {
     if (existingStyles) existingStyles.remove();
     
     const style = document.createElement('style');
-    style.setAttribute('data-app-styles', 'v33');
+    style.setAttribute('data-app-styles', 'v34');
     style.textContent = `
         /* Reset and Base */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -3818,7 +3818,7 @@ function createHeader() {
     header.innerHTML = `
         <div class="header-brand">
             <span>🛡️</span>
-            <span>Security+ v33</span>
+            <span>Security+ v34</span>
         </div>
         <nav class="header-nav">
             <button class="nav-btn" onclick="showDashboard()">🏠 Dashboard</button>
@@ -3946,7 +3946,7 @@ function showDashboard() {
     
     content.innerHTML = `
         <div class="container">
-            <h1 class="page-title">🛡️ Security+ Training Platform v33</h1>
+            <h1 class="page-title">🛡️ Security+ Training Platform v34</h1>
             <p class="page-subtitle">CompTIA Security+ SY0-701 - Complete Training System</p>
             
             <h2 style="margin-top: 20px;">Select Your Learning Path:</h2>
@@ -6470,7 +6470,7 @@ function markLessonComplete(lessonId) {
 
 function saveProgress() {
     try {
-        localStorage.setItem('securityPlusProgress_v33', JSON.stringify(APP.progress));
+        localStorage.setItem('securityPlusProgress_v34', JSON.stringify(APP.progress));
         console.log('Progress saved');
     } catch (e) {
         console.error('Failed to save progress:', e);
@@ -6479,15 +6479,15 @@ function saveProgress() {
 
 function loadProgress() {
     try {
-        // Try loading v33 first, then fall back to v32 for migration
-        let saved = localStorage.getItem('securityPlusProgress_v33');
+        // Try loading v34 first, then fall back to v32 for migration
+        let saved = localStorage.getItem('securityPlusProgress_v34');
         
-        // Migrate from v32 if v33 doesn't exist
+        // Migrate from v32 if v34 doesn't exist
         if (!saved) {
             saved = localStorage.getItem('securityPlusProgress_v32');
             if (saved) {
-                console.log('Migrating progress from v32 to v33');
-                localStorage.setItem('securityPlusProgress_v33', saved);
+                console.log('Migrating progress from v32 to v34');
+                localStorage.setItem('securityPlusProgress_v34', saved);
             }
         }
         
@@ -6495,8 +6495,8 @@ function loadProgress() {
         if (!saved) {
             saved = localStorage.getItem('securityPlusProgress_v29');
             if (saved) {
-                console.log('Migrating progress from v29 to v33');
-                localStorage.setItem('securityPlusProgress_v33', saved);
+                console.log('Migrating progress from v29 to v34');
+                localStorage.setItem('securityPlusProgress_v34', saved);
             }
         }
         
@@ -6521,7 +6521,7 @@ function loadProgress() {
 function exportAllData() {
     const exportData = {
         exportDate: new Date().toISOString(),
-        version: 'v33',
+        version: 'v34',
         progress: APP.progress,
         notes: window.NotesSystem ? window.NotesSystem.getAllNotes() : []
     };
@@ -6913,7 +6913,7 @@ Object.keys(globalFunctions).forEach(key => {
 // STARTUP SEQUENCE
 // ============================================
 
-console.log('Starting Security+ Platform v33...');
+console.log('Starting Security+ Platform v34...');
 
 // Start immediately if DOM is ready
 if (document.readyState === 'loading') {
@@ -6955,7 +6955,7 @@ function testDataFolderSetup() {
 }
 
 // Final confirmation
-console.log('✅ Security+ v33 loaded successfully');
+console.log('✅ Security+ v34 loaded successfully');
 console.log('📊 260 decision points across 26 simulations');
 console.log('🎯 All v30 features preserved + enhanced simulations');
 console.log('💯 Ready for professional Security+ training!');
