@@ -1,7 +1,12 @@
 // ================================================
-// ENHANCED LESSON VIEWER - Security+ Platform v33
-// Features: Flowcharts, Career Relevance, Skill Trees,
-// Collapsible Sections, Micro-Quizzes, Progress Tracking
+// ENHANCED LESSON VIEWER - Security+ Platform v34
+// ================================================
+// Supports NEW lesson format (D3/D4/D5 style)
+// Features:
+// - All deep-dive sections as collapsible accordions
+// - Clear dropdown indicators (chevrons)
+// - Natural reading flow
+// - Tool lab availability indicators
 // ================================================
 
 (function() {
@@ -54,6 +59,19 @@
         }
     };
 
+    // Tool labs mapping - which lessons have associated tool labs
+    const TOOL_LABS = {
+        'D3-LESSON-003': { tool: 'Wireshark', labId: 'wireshark-101' },
+        'D3-LESSON-004': { tool: 'Aircrack-ng', labId: 'wireless-security' },
+        'D4-LESSON-001': { tool: 'Splunk', labId: 'splunk-101' },
+        'D4-LESSON-002': { tool: 'Volatility', labId: 'memory-forensics' },
+        'D4-LESSON-003': { tool: 'Autopsy', labId: 'disk-forensics' },
+        'D4-LESSON-004': { tool: 'Nessus/OpenVAS', labId: 'vuln-scanning' },
+        'D2-LESSON-005': { tool: 'Nmap', labId: 'nmap-101' },
+        'D2-LESSON-006': { tool: 'Burp Suite', labId: 'burp-101' },
+        'D2-LESSON-012': { tool: 'Metasploit', labId: 'metasploit-101' }
+    };
+
     // ================================================
     // MAIN RENDER FUNCTION
     // ================================================
@@ -91,6 +109,9 @@
         const domainLessons = ALL_LESSONS.filter(l => l.domain === lesson.domain);
         const currentIndex = domainLessons.findIndex(l => l.id === lessonId);
 
+        // Check for available tool lab
+        const toolLab = TOOL_LABS[lessonId];
+
         // Build the enhanced lesson view
         content.innerHTML = `
             <div class="enhanced-lesson-container">
@@ -125,6 +146,9 @@
 
                 <!-- Main Content Area -->
                 <main class="lesson-main">
+                    <!-- Tool Lab Banner (if available) -->
+                    ${toolLab ? renderToolLabBanner(toolLab, lessonId) : ''}
+                    
                     <!-- Lesson Header -->
                     <header class="lesson-header">
                         <div class="lesson-breadcrumb">
@@ -137,13 +161,15 @@
                             ${lesson.objectives_covered ? `
                                 <span class="meta-item">📍 Objectives: ${lesson.objectives_covered.join(', ')}</span>
                             ` : ''}
+                            ${lesson.estimated_duration ? `
+                                <span class="meta-item">⏱ ${escapeHtml(lesson.estimated_duration)}</span>
+                            ` : ''}
                             ${lesson.difficulty ? `
                                 <span class="meta-item difficulty-${lesson.difficulty}">
-                                    ${lesson.difficulty.toUpperCase()}
+                                    ${lesson.difficulty.charAt(0).toUpperCase() + lesson.difficulty.slice(1)}
                                 </span>
                             ` : ''}
                             ${isCompleted ? '<span class="meta-item completed">✅ Completed</span>' : ''}
-                            ${window.NotesSystem ? window.NotesSystem.renderNoteButton('lesson', lessonId, lesson.title) : ''}
                         </div>
                         
                         <!-- Career Relevance Bar -->
@@ -161,8 +187,14 @@
                         ${renderAllSections(lesson)}
                     </div>
                     
+                    <!-- Hands-On Activity (if exists) -->
+                    ${renderHandsOnActivity(lesson)}
+                    
                     <!-- Summary Section -->
                     ${renderSummary(lesson)}
+                    
+                    <!-- Tool Lab CTA (if available) -->
+                    ${toolLab ? renderToolLabCTA(toolLab, lessonId) : ''}
                     
                     <!-- Quiz & Simulation Unlock Section -->
                     ${renderUnlockSection(lesson, lessonId)}
@@ -203,6 +235,43 @@
     }
 
     // ================================================
+    // TOOL LAB COMPONENTS
+    // ================================================
+
+    function renderToolLabBanner(toolLab, lessonId) {
+        return `
+            <div class="tool-lab-banner">
+                <div class="tool-lab-icon">🔧</div>
+                <div class="tool-lab-info">
+                    <strong>Hands-On Lab Available!</strong>
+                    <span>Practice with ${escapeHtml(toolLab.tool)} after this lesson</span>
+                </div>
+                <button class="tool-lab-btn" onclick="window.ToolLabs?.startLab('${toolLab.labId}')">
+                    Go to Lab →
+                </button>
+            </div>
+        `;
+    }
+
+    function renderToolLabCTA(toolLab, lessonId) {
+        return `
+            <section class="tool-lab-cta-section">
+                <div class="tool-lab-cta">
+                    <div class="cta-icon">🛠️</div>
+                    <div class="cta-content">
+                        <h3>Ready to Practice?</h3>
+                        <p>Apply what you've learned with a hands-on <strong>${escapeHtml(toolLab.tool)}</strong> lab.</p>
+                        <p class="cta-benefit">Build real skills that employers value.</p>
+                    </div>
+                    <button class="cta-btn" onclick="window.ToolLabs?.startLab('${toolLab.labId}')">
+                        🚀 Start ${escapeHtml(toolLab.tool)} Lab
+                    </button>
+                </div>
+            </section>
+        `;
+    }
+
+    // ================================================
     // TABLE OF CONTENTS
     // ================================================
 
@@ -215,7 +284,7 @@
             <li class="toc-item" data-section="intro">
                 <a href="#section-intro" onclick="scrollToSection('intro'); return false;">
                     <span class="toc-icon">📖</span>
-                    <span class="toc-text">Introduction</span>
+                    Introduction
                 </a>
             </li>
         `;
@@ -226,7 +295,7 @@
                 <li class="toc-item" data-section="skill-tree">
                     <a href="#section-skill-tree" onclick="scrollToSection('skill-tree'); return false;">
                         <span class="toc-icon">🌳</span>
-                        <span class="toc-text">Learning Path</span>
+                        Learning Path
                     </a>
                 </li>
             `;
@@ -235,12 +304,14 @@
         // Main sections
         sections.forEach((section, index) => {
             const sectionId = section.section_id || `section-${index}`;
+            const isCompleted = LessonState.completedSections.has(sectionId);
+            
             html += `
-                <li class="toc-item" data-section="${sectionId}">
+                <li class="toc-item ${isCompleted ? 'completed' : ''}" data-section="${sectionId}">
                     <a href="#${sectionId}" onclick="scrollToSection('${sectionId}'); return false;">
                         <span class="toc-number">${index + 1}</span>
-                        <span class="toc-text">${escapeHtml(section.title)}</span>
-                        <span class="toc-status" id="toc-status-${sectionId}"></span>
+                        ${escapeHtml(section.title)}
+                        ${isCompleted ? '<span class="toc-check">✓</span>' : ''}
                     </a>
                 </li>
             `;
@@ -250,19 +321,8 @@
         html += `
             <li class="toc-item" data-section="summary">
                 <a href="#section-summary" onclick="scrollToSection('summary'); return false;">
-                    <span class="toc-icon">📝</span>
-                    <span class="toc-text">Summary</span>
-                </a>
-            </li>
-        `;
-        
-        // Quiz & Practice
-        html += `
-            <li class="toc-item toc-locked" data-section="practice" id="toc-practice">
-                <a href="#section-practice" onclick="scrollToSection('practice'); return false;">
-                    <span class="toc-icon">🎯</span>
-                    <span class="toc-text">Quiz & Practice</span>
-                    <span class="toc-lock">🔒</span>
+                    <span class="toc-icon">📋</span>
+                    Summary
                 </a>
             </li>
         `;
@@ -282,22 +342,25 @@
         
         return `
             <div class="career-relevance-bar">
-                <span class="relevance-label">Who uses this:</span>
+                <span class="relevance-label">Career Relevance:</span>
                 <div class="relevance-badges">
                     ${roles.map(([roleKey, roleData]) => {
                         const role = CAREER_ROLES[roleKey];
                         if (!role) return '';
                         
-                        const relevanceClass = roleData.relevance === 'critical' ? 'critical' : 
-                                              roleData.relevance === 'high' ? 'high' : 'medium';
+                        // NEW format uses "importance", fallback to "relevance"
+                        const level = roleData.importance || roleData.relevance || 'medium';
+                        const levelClass = level === 'critical' ? 'critical' : 
+                                          level === 'high' ? 'high' : 
+                                          level === 'low' ? 'low' : 'medium';
                         
                         return `
-                            <button class="career-badge ${relevanceClass}" 
+                            <button class="career-badge ${levelClass}" 
                                     onclick="showCareerDetail('${roleKey}')"
-                                    title="${role.name}: ${roleData.relevance} relevance - ${roleData.percentage_of_job || ''}">
+                                    title="Click for ${role.name} details">
                                 <span class="badge-icon">${role.icon}</span>
                                 <span class="badge-name">${role.shortName}</span>
-                                ${roleData.relevance === 'critical' ? '<span class="badge-star">★</span>' : ''}
+                                ${level === 'critical' ? '<span class="badge-star">★</span>' : ''}
                             </button>
                         `;
                     }).join('')}
@@ -317,7 +380,7 @@
             <section class="lesson-section intro-section" id="section-intro">
                 ${intro.hook ? `
                     <div class="intro-hook">
-                        <p>${formatContent(intro.hook)}</p>
+                        ${formatContent(intro.hook)}
                     </div>
                 ` : ''}
                 
@@ -332,44 +395,87 @@
                     </div>
                 ` : ''}
                 
-                ${intro.why_it_matters ? `
-                    <div class="why-matters-box collapsible" data-expanded="false">
-                        <button class="collapsible-header why-matters-header" onclick="toggleCollapsible(this)">
-                            <div class="header-left">
-                                <h3>💡 Why This Matters</h3>
-                                <span class="expand-hint">Click to expand</span>
-                            </div>
-                            <span class="collapse-icon">▶</span>
-                        </button>
-                        <div class="collapsible-content">
-                            ${typeof intro.why_it_matters === 'string' ? `
-                                <div class="matter-item">
-                                    <p>${escapeHtml(intro.why_it_matters)}</p>
-                                </div>
-                            ` : `
-                                ${intro.why_it_matters.career_impact ? `
-                                    <div class="matter-item">
-                                        <strong>Career Impact:</strong>
-                                        <p>${escapeHtml(intro.why_it_matters.career_impact)}</p>
-                                    </div>
-                                ` : ''}
-                                ${intro.why_it_matters.real_world_connection ? `
-                                    <div class="matter-item">
-                                        <strong>Real-World Connection:</strong>
-                                        <p>${escapeHtml(intro.why_it_matters.real_world_connection)}</p>
-                                    </div>
-                                ` : ''}
-                                ${intro.why_it_matters.exam_relevance ? `
-                                    <div class="matter-item">
-                                        <strong>Exam Relevance:</strong>
-                                        <p>${escapeHtml(intro.why_it_matters.exam_relevance)}</p>
-                                    </div>
-                                ` : ''}
-                            `}
+                ${intro.why_it_matters ? renderWhyItMatters(intro.why_it_matters) : ''}
+                
+                ${intro.exam_weight ? renderExamWeight(intro.exam_weight) : ''}
+            </section>
+        `;
+    }
+
+    function renderWhyItMatters(whyItMatters) {
+        // Handle string format (simple) vs object format (detailed)
+        if (typeof whyItMatters === 'string') {
+            return `
+                <div class="accordion-section" data-expanded="false">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span class="accordion-icon">▶</span>
+                        <h3>💡 Why This Matters</h3>
+                        <span class="accordion-hint">Click to expand</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p>${escapeHtml(whyItMatters)}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        return `
+            <div class="accordion-section" data-expanded="false">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-icon">▶</span>
+                    <h3>💡 Why This Matters</h3>
+                    <span class="accordion-hint">Click to expand</span>
+                </button>
+                <div class="accordion-content">
+                    ${whyItMatters.career_impact ? `
+                        <div class="matter-item">
+                            <strong>🎯 Career Impact:</strong>
+                            <p>${escapeHtml(whyItMatters.career_impact)}</p>
+                        </div>
+                    ` : ''}
+                    ${whyItMatters.business_connection ? `
+                        <div class="matter-item">
+                            <strong>💼 Business Connection:</strong>
+                            <p>${escapeHtml(whyItMatters.business_connection)}</p>
+                        </div>
+                    ` : ''}
+                    ${whyItMatters.exam_relevance ? `
+                        <div class="matter-item">
+                            <strong>📝 Exam Relevance:</strong>
+                            <p>${escapeHtml(whyItMatters.exam_relevance)}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderExamWeight(examWeight) {
+        return `
+            <div class="exam-weight-box">
+                <h4>📊 Exam Weight</h4>
+                <div class="exam-weight-details">
+                    ${examWeight.percentage ? `<span class="weight-item"><strong>Weight:</strong> ${escapeHtml(examWeight.percentage)}</span>` : ''}
+                    ${examWeight.question_count ? `<span class="weight-item"><strong>Est. Questions:</strong> ${escapeHtml(examWeight.question_count)}</span>` : ''}
+                    ${examWeight.estimated_questions ? `<span class="weight-item"><strong>Est. Questions:</strong> ${escapeHtml(examWeight.estimated_questions)}</span>` : ''}
+                </div>
+                ${examWeight.question_types ? `
+                    <div class="question-types">
+                        <strong>Question Types:</strong>
+                        <div class="type-tags">
+                            ${examWeight.question_types.map(t => `<span class="type-tag">${escapeHtml(t)}</span>`).join('')}
                         </div>
                     </div>
                 ` : ''}
-            </section>
+                ${examWeight.high_yield_topics ? `
+                    <div class="high-yield-topics">
+                        <strong>🔥 High-Yield Topics:</strong>
+                        <div class="yield-tags">
+                            ${examWeight.high_yield_topics.map(t => `<span class="yield-tag">${escapeHtml(t)}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
         `;
     }
 
@@ -378,167 +484,184 @@
     // ================================================
 
     function renderSkillTreeMini(lesson) {
-        if (!lesson.skill_tree) return '';
+        const st = lesson.skill_tree;
+        if (!st) return '';
         
-        const unlocks = lesson.skill_tree.unlocks || [];
-        if (unlocks.length === 0) return '';
-        
-        // Helper to get unlock info
-        const getUnlockInfo = (u) => {
-            if (typeof u === 'string') {
-                const lessonData = window.ALL_LESSONS ? window.ALL_LESSONS.find(l => l.id === u) : null;
-                return { id: u, title: lessonData ? lessonData.title : u };
-            } else if (typeof u === 'object' && u !== null) {
-                return { id: u.lesson_id || u.id || '', title: u.title || u.lesson_id || '' };
-            }
-            return { id: '', title: '' };
-        };
-        
-        const validUnlocks = unlocks
-            .filter(u => {
-                if (typeof u === 'string') return u.trim() !== '';
-                if (typeof u === 'object' && u !== null) return u.lesson_id || u.id || u.title;
-                return false;
-            })
-            .map(u => getUnlockInfo(u));
-        
-        if (validUnlocks.length === 0) return '';
+        const prereqs = st.prerequisites || [];
+        const unlocks = st.unlocks || [];
         
         return `
             <div class="skill-tree-mini">
-                <div class="mini-title">This Unlocks</div>
-                ${validUnlocks.slice(0, 2).map(info => `
-                    <div class="mini-unlock" onclick="showEnhancedLesson('${info.id}')">
-                        <span class="mini-icon">→</span>
-                        <span class="mini-text">${escapeHtml(info.title)}</span>
+                <h4>📚 Learning Path</h4>
+                ${prereqs.length > 0 ? `
+                    <div class="mini-prereqs">
+                        <span class="mini-label">Requires:</span>
+                        ${prereqs.slice(0, 2).map(p => {
+                            const title = typeof p === 'string' ? p : p.title || p.lesson_id || p;
+                            return `<span class="mini-node prereq">${escapeHtml(title)}</span>`;
+                        }).join('')}
                     </div>
-                `).join('')}
-                ${validUnlocks.length > 2 ? `<div class="mini-more">+${validUnlocks.length - 2} more</div>` : ''}
+                ` : ''}
+                <div class="mini-current">
+                    <span class="mini-node current">📍 Current</span>
+                </div>
+                ${unlocks.length > 0 ? `
+                    <div class="mini-unlocks">
+                        <span class="mini-label">Unlocks:</span>
+                        ${unlocks.slice(0, 2).map(u => {
+                            const title = typeof u === 'string' ? u : u.title || u.lesson_id || u;
+                            return `<span class="mini-node unlock">${escapeHtml(title)}</span>`;
+                        }).join('')}
+                    </div>
+                ` : ''}
             </div>
         `;
     }
 
     function renderSkillTreeFull(lesson) {
-        if (!lesson.skill_tree) return '';
-        
         const st = lesson.skill_tree;
-        
-        // Helper to get prerequisite/unlock display info
-        const getNodeInfo = (node) => {
-            if (typeof node === 'string') {
-                // Look up the title from ALL_LESSONS if available
-                const lessonData = window.ALL_LESSONS ? window.ALL_LESSONS.find(l => l.id === node) : null;
-                return { 
-                    id: node, 
-                    title: lessonData ? lessonData.title : node,
-                    connection: ''
-                };
-            } else if (typeof node === 'object' && node !== null) {
-                return { 
-                    id: node.lesson_id || node.id || '', 
-                    title: node.title || node.lesson_id || node.id || '',
-                    connection: node.connection || node.why_needed || ''
-                };
-            }
-            return { id: '', title: '', connection: '' };
-        };
-        
-        // Filter and process prerequisites
-        const validPrereqs = (st.prerequisites || [])
-            .filter(p => {
-                if (typeof p === 'string') return p.trim() !== '';
-                if (typeof p === 'object' && p !== null) return p.lesson_id || p.id || p.title;
-                return false;
-            })
-            .map(p => getNodeInfo(p));
-        
-        // Filter and process unlocks
-        const validUnlocks = (st.unlocks || [])
-            .filter(u => {
-                if (typeof u === 'string') return u.trim() !== '';
-                if (typeof u === 'object' && u !== null) return u.lesson_id || u.id || u.title;
-                return false;
-            })
-            .map(u => getNodeInfo(u));
+        if (!st) return '';
         
         return `
-            <section class="lesson-section skill-tree-section" id="section-skill-tree">
-                <div class="collapsible" data-expanded="true">
-                    <button class="collapsible-header" onclick="toggleCollapsible(this)">
-                        <h2>🌳 Learning Path & Connections</h2>
-                        <span class="collapse-icon">▼</span>
+            <section class="lesson-section" id="section-skill-tree">
+                <div class="accordion-section" data-expanded="false">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span class="accordion-icon">▶</span>
+                        <h3>🌳 Learning Path & Connections</h3>
+                        <span class="accordion-hint">Click to expand</span>
                     </button>
-                    <div class="collapsible-content">
-                        <div class="skill-tree-visual">
-                            <!-- Prerequisites - Only show if there are valid ones -->
-                            ${validPrereqs.length > 0 ? `
-                                <div class="tree-column prereqs">
-                                    <h4>Prerequisites</h4>
-                                    ${validPrereqs.map(info => `
-                                        <div class="tree-node prereq" onclick="showEnhancedLesson('${info.id}')" 
-                                             title="${escapeHtml(info.connection)}">
-                                            ${escapeHtml(info.title)}
-                                        </div>
-                                    `).join('')}
-                                </div>
-                                <div class="tree-arrow">→</div>
-                            ` : ''}
-                            
-                            <!-- Current Lesson -->
-                            <div class="tree-column current">
-                                <h4>Current Lesson</h4>
-                                <div class="tree-node current-node">
-                                    <strong>${escapeHtml(lesson.title)}</strong>
-                                    ${st.position ? `<span class="node-tier">${st.position.tier}</span>` : ''}
-                                </div>
-                            </div>
-                            
-                            <!-- Unlocks - Only show if there are valid ones -->
-                            ${validUnlocks.length > 0 ? `
-                                <div class="tree-arrow">→</div>
-                                <div class="tree-column unlocks">
-                                    <h4>Unlocks</h4>
-                                    ${validUnlocks.map(info => `
-                                        <div class="tree-node unlock" onclick="showEnhancedLesson('${info.id}')" 
-                                             title="${escapeHtml(info.connection)}">
-                                            <span class="node-title">${escapeHtml(info.title)}</span>
-                                            ${info.connection ? `<span class="node-hint">${escapeHtml(info.connection)}</span>` : ''}
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-                        </div>
-                        
-                        <!-- Cross-Domain Connections -->
-                        ${st.related_concepts && st.related_concepts.length > 0 ? `
-                            <div class="cross-domain-section">
-                                <h4>🔗 Cross-Domain Connections</h4>
-                                <div class="cross-domain-grid">
-                                    ${st.related_concepts.map(rc => `
-                                        <div class="cross-domain-card" onclick="showEnhancedLesson('${rc.lesson}')">
-                                            <span class="cd-topic">${escapeHtml(rc.topic)}</span>
-                                            <span class="cd-relationship">${escapeHtml(rc.relationship)}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-                        
-                        <!-- Builds Toward -->
-                        ${st.builds_toward && st.builds_toward.length > 0 ? `
-                            <div class="builds-toward-section">
-                                <h4>🎓 Builds Toward</h4>
-                                <div class="builds-toward-list">
-                                    ${st.builds_toward.map(b => `
-                                        <span class="build-badge">${escapeHtml(b)}</span>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
+                    <div class="accordion-content">
+                        ${renderSkillTreeContent(st, lesson)}
                     </div>
                 </div>
             </section>
         `;
+    }
+
+    function renderSkillTreeContent(st, lesson) {
+        // Get prerequisites with resolved info
+        const prereqs = (st.prerequisites || []).map(p => {
+            if (typeof p === 'string') {
+                const found = ALL_LESSONS.find(l => l.id === p);
+                return { id: p, title: found?.title || p };
+            }
+            return { id: p.lesson_id || p.id || '', title: p.title || p.lesson_id || '', why: p.why_needed || '' };
+        });
+        
+        // Get unlocks with resolved info
+        const unlocks = (st.unlocks || []).map(u => {
+            if (typeof u === 'string') {
+                const found = ALL_LESSONS.find(l => l.id === u);
+                return { id: u, title: found?.title || u };
+            }
+            return { id: u.lesson_id || u.id || '', title: u.title || u.lesson_id || '', connection: u.connection || '' };
+        });
+
+        let html = '<div class="skill-tree-full">';
+        
+        // Visual tree
+        html += '<div class="skill-tree-visual">';
+        
+        // Prerequisites column
+        if (prereqs.length > 0) {
+            html += `
+                <div class="tree-column prereqs">
+                    <h4>Prerequisites</h4>
+                    ${prereqs.map(p => `
+                        <div class="tree-node prereq" onclick="showEnhancedLesson('${p.id}')" title="${escapeHtml(p.why || '')}">
+                            <span class="node-title">${escapeHtml(p.title)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="tree-arrow">→</div>
+            `;
+        }
+        
+        // Current lesson
+        html += `
+            <div class="tree-column current">
+                <div class="tree-node current">
+                    <span class="node-badge">Current</span>
+                    <span class="node-title">${escapeHtml(lesson.title)}</span>
+                </div>
+            </div>
+        `;
+        
+        // Unlocks column
+        if (unlocks.length > 0) {
+            html += `
+                <div class="tree-arrow">→</div>
+                <div class="tree-column unlocks">
+                    <h4>Unlocks</h4>
+                    ${unlocks.map(u => `
+                        <div class="tree-node unlock" onclick="showEnhancedLesson('${u.id}')" title="${escapeHtml(u.connection || '')}">
+                            <span class="node-title">${escapeHtml(u.title)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        html += '</div>'; // end skill-tree-visual
+        
+        // Cascade learning info
+        if (st.cascade_learning) {
+            html += renderCascadeLearning(st.cascade_learning);
+        }
+        
+        // Builds toward (certifications, etc.)
+        if (st.builds_toward && st.builds_toward.length > 0) {
+            html += `
+                <div class="builds-toward-section">
+                    <h4>🎓 Builds Toward</h4>
+                    <div class="builds-toward-list">
+                        ${st.builds_toward.map(b => `<span class="build-badge">${escapeHtml(b)}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += '</div>'; // end skill-tree-full
+        
+        return html;
+    }
+
+    function renderCascadeLearning(cl) {
+        let html = '<div class="cascade-learning">';
+        
+        if (cl.this_lesson_establishes && cl.this_lesson_establishes.length > 0) {
+            html += `
+                <div class="cascade-block">
+                    <strong>📌 This Lesson Establishes:</strong>
+                    <ul>${cl.this_lesson_establishes.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>
+                </div>
+            `;
+        }
+        
+        if (cl.builds_on) {
+            html += '<div class="cascade-block"><strong>🔗 Builds On:</strong><ul>';
+            if (Array.isArray(cl.builds_on)) {
+                cl.builds_on.forEach(b => {
+                    html += `<li><strong>${escapeHtml(b.lesson || '')}</strong>: ${escapeHtml(b.concepts?.join(', ') || '')}</li>`;
+                });
+            } else if (typeof cl.builds_on === 'object') {
+                Object.entries(cl.builds_on).forEach(([k, v]) => {
+                    html += `<li><strong>${escapeHtml(k)}</strong>: ${escapeHtml(v)}</li>`;
+                });
+            }
+            html += '</ul></div>';
+        }
+        
+        if (cl.enables) {
+            html += '<div class="cascade-block"><strong>➡️ Enables:</strong><ul>';
+            cl.enables.forEach(e => {
+                html += `<li><strong>${escapeHtml(e.lesson || '')}</strong>: ${escapeHtml(e.concepts?.join(', ') || '')}</li>`;
+            });
+            html += '</ul></div>';
+        }
+        
+        html += '</div>';
+        return html;
     }
 
     // ================================================
@@ -562,24 +685,34 @@
                             <span class="section-number">${index + 1}</span>
                             ${escapeHtml(section.title)}
                         </h2>
+                        ${section.estimated_time ? `<span class="section-time">⏱ ${escapeHtml(section.estimated_time)}</span>` : ''}
                     </div>
                     
-                    ${renderSectionContent(section, sectionId, index)}
+                    <!-- Main Content (always visible) -->
+                    ${renderSectionContent(section)}
                     
-                    ${renderDeepDive(section)}
+                    <!-- Key Points (always visible) -->
+                    ${renderKeyPoints(section)}
                     
-                    ${renderCareerSpotlight(section)}
+                    <!-- Deep Dive Accordions (collapsed by default) -->
+                    <div class="deep-dive-accordions">
+                        ${renderMemoryHooksAccordion(section)}
+                        ${renderRealWorldExampleAccordion(section)}
+                        ${renderWhatWouldHappenIfAccordion(section)}
+                        ${renderGlossaryTermsAccordion(section)}
+                    </div>
                     
-                    ${renderMemoryHooks(section)}
+                    <!-- Knowledge Check (interactive) -->
+                    ${renderKnowledgeCheck(section, sectionId)}
                     
-                    ${renderMicroQuizzes(section, sectionId, index)}
+                    <!-- Must Remember for Exam -->
+                    ${renderMustRemember(section)}
                     
-                    ${renderSectionKeyPoints(section)}
-                    
-                    <div class="section-complete-bar" id="complete-bar-${sectionId}">
+                    <!-- Section Complete Button -->
+                    <div class="section-complete-bar">
                         <button class="mark-complete-btn ${isCompleted ? 'completed' : ''}" 
                                 onclick="markSectionComplete('${sectionId}', ${index})">
-                            ${isCompleted ? '✅ Section Completed' : 'Mark Section Complete'}
+                            ${isCompleted ? '✅ Section Completed' : '☐ Mark Section Complete'}
                         </button>
                     </div>
                 </section>
@@ -591,118 +724,138 @@
     // SECTION CONTENT
     // ================================================
 
-    function renderSectionContent(section, sectionId, index) {
-        const content = section.content || {};
+    function renderSectionContent(section) {
+        // Handle string content (D5 style)
+        if (typeof section.content === 'string') {
+            return `<div class="section-content">${formatMarkdown(section.content)}</div>`;
+        }
         
-        let html = '';
+        const content = section.content || {};
+        let html = '<div class="section-content">';
         
         // Overview
         if (content.overview) {
             html += `<div class="content-overview">${formatContent(content.overview)}</div>`;
         }
         
-        // Core Concepts with Flowchart potential
-        if (content.core_concepts) {
-            html += renderCoreConcepts(content.core_concepts, sectionId);
+        // Core Concepts
+        if (content.core_concepts && content.core_concepts.length > 0) {
+            html += renderCoreConcepts(content.core_concepts);
         }
         
-        // Classification Framework (for controls lesson)
-        if (content.classification_framework) {
-            html += renderFlowchart(content.classification_framework);
-        }
-        
-        // Exam Traps
-        if (content.exam_traps) {
-            html += renderExamTraps(content.exam_traps);
-        }
-        
+        html += '</div>';
         return html;
     }
 
-    function renderCoreConcepts(concepts, sectionId) {
+    function renderCoreConcepts(concepts) {
         return `
             <div class="core-concepts">
-                ${concepts.map((concept, cIndex) => {
-                    // Check if concept has any content beyond just the name
-                    const hasContent = checkConceptHasContent(concept);
-                    
-                    if (!hasContent) {
-                        // Just render as a simple label, not collapsible
-                        return `
-                            <div class="concept-card concept-simple">
-                                <div class="concept-header-simple">
-                                    <h3>${escapeHtml(concept.concept || concept.name || 'Concept')}</h3>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    return `
-                        <div class="concept-card collapsible" data-expanded="${cIndex === 0 ? 'true' : 'false'}">
-                            <button class="collapsible-header concept-header" onclick="toggleCollapsible(this)">
-                                <h3>${escapeHtml(concept.concept || concept.name || 'Concept')}</h3>
-                                <span class="collapse-icon">${cIndex === 0 ? '▼' : '▶'}</span>
-                            </button>
-                            <div class="collapsible-content concept-content">
-                                ${renderConceptContent(concept)}
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
+                ${concepts.map((concept, index) => renderConcept(concept, index)).join('')}
             </div>
         `;
     }
-    
-    function checkConceptHasContent(concept) {
-        // Check if concept has any meaningful content
-        const skipKeys = ['concept', 'name', 'id', 'section_id'];
-        for (const key of Object.keys(concept)) {
-            if (skipKeys.includes(key)) continue;
-            const val = concept[key];
-            if (val !== null && val !== undefined && val !== '') {
-                if (typeof val === 'string' && val.trim() !== '') return true;
-                if (typeof val === 'object') return true;
-            }
-        }
-        return false;
-    }
-    
-    function renderConceptContent(concept) {
-        let html = '';
-        const skipKeys = ['concept', 'name', 'id', 'section_id'];
+
+    function renderConcept(concept, index) {
+        const name = concept.concept || concept.name || `Concept ${index + 1}`;
+        const hasDetails = hasConceptDetails(concept);
         
-        // First, handle known structured fields
+        if (!hasDetails) {
+            return `
+                <div class="concept-card simple">
+                    <h4>${escapeHtml(name)}</h4>
+                </div>
+            `;
+        }
+        
+        return `
+            <div class="concept-card accordion-section" data-expanded="false">
+                <button class="accordion-header concept-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-icon">▶</span>
+                    <h4>${escapeHtml(name)}</h4>
+                    <span class="accordion-hint">Click to expand</span>
+                </button>
+                <div class="accordion-content concept-details">
+                    ${renderConceptDetails(concept)}
+                </div>
+            </div>
+        `;
+    }
+
+    function hasConceptDetails(concept) {
+        const skipKeys = ['concept', 'name'];
+        return Object.keys(concept).some(key => !skipKeys.includes(key) && concept[key]);
+    }
+
+    function renderConceptDetails(concept) {
+        let html = '';
+        
         if (concept.definition) {
             html += `<p class="concept-definition">${escapeHtml(concept.definition)}</p>`;
         }
         
         if (concept.how_it_works) {
+            const howItWorks = typeof concept.how_it_works === 'string' 
+                ? concept.how_it_works 
+                : concept.how_it_works.mechanism || '';
             html += `
                 <div class="how-it-works">
-                    <h4>How It Works</h4>
-                    <p>${escapeHtml(concept.how_it_works.mechanism || concept.how_it_works)}</p>
-                    ${concept.how_it_works.example_flow ? `
-                        <div class="example-flow">
-                            <strong>Example Flow:</strong>
-                            <div class="flow-diagram">
-                                ${renderFlowDiagram(concept.how_it_works.example_flow)}
-                            </div>
-                        </div>
-                    ` : ''}
+                    <strong>How It Works:</strong>
+                    <p>${escapeHtml(howItWorks)}</p>
                 </div>
             `;
         }
         
-        if (concept.examples && Array.isArray(concept.examples) && concept.examples.length > 0) {
+        if (concept.examples && concept.examples.length > 0) {
             html += `
-                <div class="examples-grid">
-                    <h4>Examples</h4>
-                    <div class="examples-list">
-                        ${concept.examples.map(ex => `
-                            <div class="example-item">
-                                <strong>${escapeHtml(ex.control || ex.name || ex.example || '')}</strong>
-                                <p>${escapeHtml(ex.function || ex.description || '')}</p>
-                                ${ex.implementation ? `<span class="impl-note">${escapeHtml(ex.implementation)}</span>` : ''}
+                <div class="concept-examples">
+                    <strong>Examples:</strong>
+                    <ul>
+                        ${concept.examples.map(ex => {
+                            if (typeof ex === 'string') return `<li>${escapeHtml(ex)}</li>`;
+                            return `<li><strong>${escapeHtml(ex.name || ex.control || '')}</strong>: ${escapeHtml(ex.description || ex.function || '')}</li>`;
+                        }).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        // Handle other dynamic fields
+        const handled = ['concept', 'name', 'definition', 'how_it_works', 'examples'];
+        Object.entries(concept).forEach(([key, value]) => {
+            if (handled.includes(key) || !value) return;
+            html += renderDynamicField(key, value);
+        });
+        
+        return html || '<p>No additional details.</p>';
+    }
+
+    function renderDynamicField(key, value) {
+        const label = formatKeyName(key);
+        
+        if (typeof value === 'string') {
+            return `<div class="dynamic-field"><strong>${label}:</strong> ${escapeHtml(value)}</div>`;
+        }
+        
+        if (Array.isArray(value)) {
+            if (value.length === 0) return '';
+            if (typeof value[0] === 'string') {
+                return `
+                    <div class="dynamic-field">
+                        <strong>${label}:</strong>
+                        <ul>${value.map(v => `<li>${escapeHtml(v)}</li>`).join('')}</ul>
+                    </div>
+                `;
+            }
+            // Array of objects - render as mini cards
+            return `
+                <div class="dynamic-field">
+                    <strong>${label}:</strong>
+                    <div class="mini-cards">
+                        ${value.map(item => `
+                            <div class="mini-card">
+                                ${Object.entries(item).map(([k, v]) => `
+                                    <div><em>${formatKeyName(k)}:</em> ${escapeHtml(v || '')}</div>
+                                `).join('')}
                             </div>
                         `).join('')}
                     </div>
@@ -710,189 +863,185 @@
             `;
         }
         
-        if (concept.what_would_happen_if) {
-            html += `
-                <div class="what-if-box">
-                    <h4>⚠️ What Would Happen If...</h4>
-                    <p class="what-if-scenario">${escapeHtml(concept.what_would_happen_if.scenario || '')}</p>
-                    <p class="what-if-consequence">${escapeHtml(concept.what_would_happen_if.consequence || '')}</p>
-                    ${concept.what_would_happen_if.real_example ? `
-                        <div class="real-example">
-                            <strong>Real Example:</strong> ${escapeHtml(concept.what_would_happen_if.real_example)}
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-        }
-        
-        // Now handle any other fields dynamically
-        const handledKeys = ['concept', 'name', 'id', 'section_id', 'definition', 'how_it_works', 'examples', 'what_would_happen_if'];
-        
-        for (const [key, value] of Object.entries(concept)) {
-            if (handledKeys.includes(key)) continue;
-            if (value === null || value === undefined || value === '') continue;
-            
-            const formattedKey = formatKeyName(key);
-            
-            if (typeof value === 'string') {
-                html += `
-                    <div class="concept-field">
-                        <strong>${formattedKey}:</strong>
-                        <span>${escapeHtml(value)}</span>
-                    </div>
-                `;
-            } else if (Array.isArray(value)) {
-                html += renderArrayField(formattedKey, value);
-            } else if (typeof value === 'object') {
-                html += renderObjectField(formattedKey, value);
-            }
-        }
-        
-        return html || '<p class="no-content">No additional details available.</p>';
-    }
-    
-    function formatKeyName(key) {
-        // Convert snake_case or camelCase to Title Case
-        return key
-            .replace(/_/g, ' ')
-            .replace(/([A-Z])/g, ' $1')
-            .replace(/^./, str => str.toUpperCase())
-            .trim();
-    }
-    
-    function renderArrayField(label, arr) {
-        if (!arr || arr.length === 0) return '';
-        
-        // Check if array contains objects or primitives
-        const firstItem = arr[0];
-        
-        if (typeof firstItem === 'string') {
+        if (typeof value === 'object') {
             return `
-                <div class="concept-field array-field">
+                <div class="dynamic-field">
                     <strong>${label}:</strong>
-                    <ul class="simple-list">
-                        ${arr.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
-                    </ul>
+                    <div class="nested-object">
+                        ${Object.entries(value).map(([k, v]) => `
+                            <div><em>${formatKeyName(k)}:</em> ${escapeHtml(v || '')}</div>
+                        `).join('')}
+                    </div>
                 </div>
             `;
-        } else if (typeof firstItem === 'object') {
-            // Render as a table or list of cards
-            const keys = Object.keys(firstItem);
-            
-            if (keys.length <= 4) {
-                // Render as table
-                return `
-                    <div class="concept-field table-field">
-                        <strong>${label}:</strong>
-                        <table class="concept-table">
-                            <thead>
-                                <tr>${keys.map(k => `<th>${formatKeyName(k)}</th>`).join('')}</tr>
-                            </thead>
-                            <tbody>
-                                ${arr.map(item => `
-                                    <tr>${keys.map(k => `<td>${escapeHtml(item[k] || '')}</td>`).join('')}</tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            } else {
-                // Render as cards
-                return `
-                    <div class="concept-field cards-field">
-                        <strong>${label}:</strong>
-                        <div class="mini-cards">
-                            ${arr.map(item => `
-                                <div class="mini-card">
-                                    ${Object.entries(item).map(([k, v]) => `
-                                        <div class="mini-card-row">
-                                            <span class="mini-label">${formatKeyName(k)}:</span>
-                                            <span class="mini-value">${escapeHtml(v || '')}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
         }
         
         return '';
     }
-    
-    function renderObjectField(label, obj) {
-        if (!obj || Object.keys(obj).length === 0) return '';
+
+    function formatKeyName(key) {
+        return key
+            .replace(/_/g, ' ')
+            .replace(/([A-Z])/g, ' $1')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ')
+            .trim();
+    }
+
+    // ================================================
+    // KEY POINTS (Always Visible)
+    // ================================================
+
+    function renderKeyPoints(section) {
+        if (!section.key_points || section.key_points.length === 0) return '';
         
         return `
-            <div class="concept-field object-field">
-                <strong>${label}:</strong>
-                <div class="object-content">
-                    ${Object.entries(obj).map(([k, v]) => {
-                        if (typeof v === 'object' && v !== null) {
-                            if (Array.isArray(v)) {
-                                return renderArrayField(formatKeyName(k), v);
-                            }
-                            return `
-                                <div class="nested-object">
-                                    <span class="nested-label">${formatKeyName(k)}:</span>
-                                    <div class="nested-values">
-                                        ${Object.entries(v).map(([nk, nv]) => `
-                                            <span class="nested-item"><em>${formatKeyName(nk)}:</em> ${escapeHtml(nv || '')}</span>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            `;
-                        }
-                        return `
-                            <div class="object-row">
-                                <span class="obj-label">${formatKeyName(k)}:</span>
-                                <span class="obj-value">${escapeHtml(v || '')}</span>
-                            </div>
-                        `;
-                    }).join('')}
+            <div class="key-points-box">
+                <h4>📌 Key Points</h4>
+                <ul>
+                    ${section.key_points.map(kp => `<li>${escapeHtml(kp)}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+
+    // ================================================
+    // MEMORY HOOKS ACCORDION (NEW FORMAT)
+    // ================================================
+
+    function renderMemoryHooksAccordion(section) {
+        if (!section.memory_hooks) return '';
+        
+        const mh = section.memory_hooks;
+        
+        // Check if we have any content
+        const hasMnemonics = (mh.mnemonics && mh.mnemonics.length > 0) || mh.mnemonic;
+        const hasAnalogies = (mh.analogies && mh.analogies.length > 0) || mh.analogy;
+        const hasCommonMistakes = mh.common_mistakes && mh.common_mistakes.length > 0;
+        
+        if (!hasMnemonics && !hasAnalogies && !hasCommonMistakes) return '';
+        
+        // Count items for hint
+        let itemCount = 0;
+        if (hasMnemonics) itemCount += (mh.mnemonics?.length || 1);
+        if (hasAnalogies) itemCount += (mh.analogies?.length || 1);
+        if (hasCommonMistakes) itemCount += mh.common_mistakes.length;
+        
+        return `
+            <div class="accordion-section deep-dive" data-expanded="false">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-icon">▶</span>
+                    <h4>🧠 Memory Hooks</h4>
+                    <span class="accordion-badge">${itemCount} items</span>
+                    <span class="accordion-hint">Study aids & exam tips</span>
+                </button>
+                <div class="accordion-content">
+                    ${renderMnemonicsContent(mh)}
+                    ${renderAnalogiesContent(mh)}
+                    ${renderCommonMistakesContent(mh)}
                 </div>
             </div>
         `;
     }
 
-    function renderFlowDiagram(flowText) {
-        // Convert arrow-separated text into visual flow
-        const steps = flowText.split('→').map(s => s.trim());
-        
-        return `
-            <div class="visual-flow">
-                ${steps.map((step, i) => `
-                    <div class="flow-step">
-                        <div class="step-content">${escapeHtml(step)}</div>
+    function renderMnemonicsContent(mh) {
+        // NEW FORMAT: mnemonics is array of {name, expansion, usage}
+        if (mh.mnemonics && Array.isArray(mh.mnemonics) && mh.mnemonics.length > 0) {
+            return `
+                <div class="memory-section mnemonics">
+                    <h5>📝 Mnemonics</h5>
+                    <div class="mnemonic-cards">
+                        ${mh.mnemonics.map(m => `
+                            <div class="mnemonic-card">
+                                <div class="mnemonic-name">${escapeHtml(m.name)}</div>
+                                <div class="mnemonic-expansion">${escapeHtml(m.expansion)}</div>
+                                ${m.usage ? `<div class="mnemonic-usage">💡 ${escapeHtml(m.usage)}</div>` : ''}
+                            </div>
+                        `).join('')}
                     </div>
-                    ${i < steps.length - 1 ? '<div class="flow-arrow">→</div>' : ''}
-                `).join('')}
-            </div>
-        `;
+                </div>
+            `;
+        }
+        
+        // OLD FORMAT fallback: mnemonic is a string
+        if (mh.mnemonic) {
+            return `
+                <div class="memory-section mnemonics">
+                    <h5>📝 Mnemonic</h5>
+                    <div class="mnemonic-card">
+                        <div class="mnemonic-text">${escapeHtml(mh.mnemonic)}</div>
+                        ${mh.alternative_mnemonic ? `<div class="mnemonic-alt">Or: ${escapeHtml(mh.alternative_mnemonic)}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        
+        return '';
     }
 
-    function renderFlowchart(framework) {
-        if (!framework || !framework.decision_tree) return '';
+    function renderAnalogiesContent(mh) {
+        // NEW FORMAT: analogies is array of {concept, analogy, why_it_works}
+        if (mh.analogies && Array.isArray(mh.analogies) && mh.analogies.length > 0) {
+            return `
+                <div class="memory-section analogies">
+                    <h5>🔗 Analogies</h5>
+                    <div class="analogy-cards">
+                        ${mh.analogies.map(a => `
+                            <div class="analogy-card">
+                                <div class="analogy-concept">${escapeHtml(a.concept)}</div>
+                                <div class="analogy-comparison">
+                                    <span class="analogy-equals">≈</span>
+                                    <span class="analogy-text">${escapeHtml(a.analogy)}</span>
+                                </div>
+                                ${a.why_it_works ? `
+                                    <div class="analogy-why">
+                                        <strong>Why it works:</strong> ${escapeHtml(a.why_it_works)}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // OLD FORMAT fallback
+        if (mh.analogy && typeof mh.analogy === 'object') {
+            return `
+                <div class="memory-section analogies">
+                    <h5>🔗 Analogy: ${escapeHtml(mh.analogy.concept || '')}</h5>
+                    ${mh.analogy.explanation ? `<p>${escapeHtml(mh.analogy.explanation)}</p>` : ''}
+                </div>
+            `;
+        }
+        
+        return '';
+    }
+
+    function renderCommonMistakesContent(mh) {
+        if (!mh.common_mistakes || mh.common_mistakes.length === 0) return '';
         
         return `
-            <div class="flowchart-container">
-                <h4>📊 Decision Flowchart</h4>
-                <div class="flowchart">
-                    ${framework.decision_tree.map((step, i) => `
-                        <div class="flowchart-step">
-                            <div class="step-number">${step.step || i + 1}</div>
-                            <div class="step-question">${escapeHtml(step.question || '')}</div>
-                            <div class="step-branches">
-                                <div class="branch yes">
-                                    <span class="branch-label">Yes →</span>
-                                    <span class="branch-result">${escapeHtml(step.if_yes || '')}</span>
-                                </div>
-                                <div class="branch no">
-                                    <span class="branch-label">No →</span>
-                                    <span class="branch-result">${escapeHtml(step.if_no || '')}</span>
-                                </div>
+            <div class="memory-section common-mistakes">
+                <h5>⚠️ Common Mistakes</h5>
+                <div class="mistake-cards">
+                    ${mh.common_mistakes.map(cm => `
+                        <div class="mistake-card">
+                            <div class="mistake-wrong">
+                                <span class="mistake-x">✗</span>
+                                <span>${escapeHtml(cm.mistake)}</span>
                             </div>
+                            <div class="mistake-right">
+                                <span class="mistake-check">✓</span>
+                                <span>${escapeHtml(cm.correction || cm.correct_approach || cm.why_wrong || '')}</span>
+                            </div>
+                            ${cm.exam_trap ? `
+                                <div class="exam-trap-note">
+                                    <span class="trap-icon">📝</span>
+                                    <span>Exam trap: ${escapeHtml(cm.exam_trap)}</span>
+                                </div>
+                            ` : ''}
                         </div>
                     `).join('')}
                 </div>
@@ -901,318 +1050,219 @@
     }
 
     // ================================================
-    // DEEP DIVE SECTION
+    // REAL WORLD EXAMPLE ACCORDION
     // ================================================
 
-    function renderDeepDive(section) {
-        if (!section.deep_dive) return '';
+    function renderRealWorldExampleAccordion(section) {
+        if (!section.real_world_example) return '';
         
-        const dd = section.deep_dive;
+        const rwe = section.real_world_example;
         
         return `
-            <div class="deep-dive-section collapsible" data-expanded="false">
-                <button class="collapsible-header deep-dive-header" onclick="toggleCollapsible(this)">
-                    <h4>🔬 ${escapeHtml(dd.title || 'Technical Deep Dive')}</h4>
-                    <span class="collapse-icon">▶</span>
+            <div class="accordion-section deep-dive" data-expanded="false">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-icon">▶</span>
+                    <h4>🏢 Real-World Example${rwe.company ? `: ${escapeHtml(rwe.company)}` : ''}</h4>
+                    <span class="accordion-hint">See it in action</span>
                 </button>
-                <div class="collapsible-content deep-dive-content">
-                    ${dd.content ? renderDeepDiveContent(dd.content) : ''}
-                </div>
-            </div>
-        `;
-    }
-
-    function renderDeepDiveContent(content) {
-        let html = '';
-        
-        // Classification methodology
-        if (content.classification_methodology) {
-            const cm = content.classification_methodology;
-            html += `
-                <div class="methodology-section">
-                    <h5>${escapeHtml(cm.description || '')}</h5>
-                    ${cm.steps ? `
-                        <div class="methodology-steps">
-                            ${cm.steps.map(step => `
-                                <div class="method-step">
-                                    <span class="step-num">Step ${step.step}</span>
-                                    <p class="step-question">${escapeHtml(step.question)}</p>
-                                    <div class="step-outcomes">
-                                        <span class="outcome yes">If Yes: ${escapeHtml(step.if_yes)}</span>
-                                        <span class="outcome no">If No: ${escapeHtml(step.if_no)}</span>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-        }
-        
-        // Control mapping matrix
-        if (content.control_mapping_matrix) {
-            const matrix = content.control_mapping_matrix;
-            html += `
-                <div class="matrix-section">
-                    <h5>${escapeHtml(matrix.description || 'Control Mapping')}</h5>
-                    <table class="mapping-table">
-                        <thead>
-                            <tr>
-                                <th>Control</th>
-                                <th>Category</th>
-                                <th>Rationale</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${matrix.matrix.map(row => `
-                                <tr>
-                                    <td>${escapeHtml(row.control)}</td>
-                                    <td><span class="category-badge">${escapeHtml(row.category)}</span></td>
-                                    <td>${escapeHtml(row.rationale)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
-        
-        return html;
-    }
-
-    // ================================================
-    // CAREER SPOTLIGHT
-    // ================================================
-
-    function renderCareerSpotlight(section) {
-        if (!section.career_spotlight) return '';
-        
-        const cs = section.career_spotlight;
-        const role = CAREER_ROLES[cs.role] || { icon: '👤', name: cs.role, color: '#6366f1' };
-        
-        return `
-            <div class="career-spotlight collapsible" data-expanded="false">
-                <button class="collapsible-header spotlight-header" onclick="toggleCollapsible(this)" 
-                        style="border-left-color: ${role.color}">
-                    <h4>${role.icon} Career Spotlight: ${escapeHtml(cs.title || role.name)}</h4>
-                    <span class="collapse-icon">▶</span>
-                </button>
-                <div class="collapsible-content spotlight-content">
-                    ${cs.scenario ? `
-                        <div class="scenario-walkthrough">
-                            <div class="scenario-header">
-                                <span class="scenario-time">${escapeHtml(cs.scenario.time || '')}</span>
-                                <span class="scenario-role">${role.name}</span>
+                <div class="accordion-content">
+                    <div class="real-world-content">
+                        ${rwe.scenario ? `
+                            <div class="rwe-scenario">
+                                <strong>📋 Scenario:</strong>
+                                <p>${escapeHtml(rwe.scenario)}</p>
                             </div>
-                            <p class="scenario-situation">${escapeHtml(cs.scenario.situation || '')}</p>
-                            
-                            ${cs.scenario.your_actions ? `
-                                <div class="action-steps">
-                                    <h5>Your Actions:</h5>
-                                    ${cs.scenario.your_actions.map(action => `
-                                        <div class="action-step">
-                                            <span class="action-num">Step ${action.step}</span>
-                                            <strong>${escapeHtml(action.action)}</strong>
-                                            <p>${escapeHtml(action.details)}</p>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-                            
-                            ${cs.scenario.outcome ? `
-                                <div class="scenario-outcome">
-                                    <strong>Outcome:</strong> ${escapeHtml(cs.scenario.outcome)}
-                                </div>
-                            ` : ''}
-                        </div>
-                    ` : ''}
-                    
-                    ${cs.skills_demonstrated ? `
-                        <div class="skills-demonstrated">
-                            <strong>Skills Demonstrated:</strong>
-                            <div class="skills-tags">
-                                ${cs.skills_demonstrated.map(s => `<span class="skill-tag">${escapeHtml(s)}</span>`).join('')}
+                        ` : ''}
+                        ${rwe.application ? `
+                            <div class="rwe-application">
+                                <strong>⚡ Application:</strong>
+                                <p>${escapeHtml(rwe.application)}</p>
                             </div>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-    }
-
-    // ================================================
-    // MEMORY HOOKS
-    // ================================================
-
-    function renderMemoryHooks(section) {
-        if (!section.memory_hooks) return '';
-        
-        const mh = section.memory_hooks;
-        
-        return `
-            <div class="memory-hooks collapsible" data-expanded="false">
-                <button class="collapsible-header memory-header" onclick="toggleCollapsible(this)">
-                    <h4>🧠 Memory Hooks</h4>
-                    <span class="collapse-icon">▶</span>
-                </button>
-                <div class="collapsible-content memory-content">
-                    ${mh.mnemonic ? `
-                        <div class="mnemonic-box">
-                            <strong>Mnemonic:</strong>
-                            <span class="mnemonic">${escapeHtml(mh.mnemonic)}</span>
-                            ${mh.alternative_mnemonic ? `
-                                <br><span class="alt-mnemonic">${escapeHtml(mh.alternative_mnemonic)}</span>
-                            ` : ''}
-                        </div>
-                    ` : ''}
-                    
-                    ${mh.analogy ? `
-                        <div class="analogy-box">
-                            <strong>Analogy: ${escapeHtml(mh.analogy.concept || '')}</strong>
-                            ${mh.analogy.mapping ? `
-                                <div class="analogy-mapping">
-                                    ${mh.analogy.mapping.map(m => `
-                                        <div class="analogy-item">
-                                            <span class="analogy-category">${escapeHtml(m.category)}</span>
-                                            <span class="analogy-equals">=</span>
-                                            <span class="analogy-equivalent">${escapeHtml(m.restaurant_equivalent || m.equivalent || '')}</span>
-                                            <p class="analogy-explanation">${escapeHtml(m.explanation || '')}</p>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            ` : ''}
-                        </div>
-                    ` : ''}
-                    
-                    ${mh.common_mistakes ? `
-                        <div class="common-mistakes">
-                            <strong>⚠️ Common Mistakes:</strong>
-                            ${mh.common_mistakes.map(cm => `
-                                <div class="mistake-item">
-                                    <p class="mistake">${escapeHtml(cm.mistake)}</p>
-                                    <p class="why-wrong"><strong>Why wrong:</strong> ${escapeHtml(cm.why_wrong)}</p>
-                                    <p class="correct-approach"><strong>Correct:</strong> ${escapeHtml(cm.correct_approach)}</p>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-    }
-
-    // ================================================
-    // MICRO QUIZZES
-    // ================================================
-
-    function renderMicroQuizzes(section, sectionId, sectionIndex) {
-        const microChecks = section.micro_checks || [];
-        if (microChecks.length === 0) return '';
-        
-        return `
-            <div class="micro-quiz-section" id="micro-quiz-${sectionId}">
-                <h4>🎯 Quick Check</h4>
-                ${microChecks.map((check, qIndex) => {
-                    const quizId = `${sectionId}-q${qIndex}`;
-                    const isCompleted = LessonState.completedMicroQuizzes.has(quizId);
-                    
-                    return `
-                        <div class="micro-quiz ${isCompleted ? 'completed' : ''}" id="quiz-${quizId}">
-                            <p class="quiz-question">${escapeHtml(check.question)}</p>
-                            
-                            ${check.type === 'fill_in_blank' ? `
-                                <div class="fill-blank-input">
-                                    <input type="text" id="input-${quizId}" placeholder="Your answer..." 
-                                           ${isCompleted ? 'disabled' : ''}>
-                                    <button onclick="checkMicroQuiz('${quizId}', '${escapeHtml(check.answer)}', 'fill_in_blank')"
-                                            ${isCompleted ? 'disabled' : ''}>
-                                        Check
-                                    </button>
-                                </div>
-                            ` : check.type === 'quick_recall' || check.type === 'classification' ? `
-                                <div class="reveal-answer">
-                                    <button onclick="revealAnswer('${quizId}')" id="reveal-btn-${quizId}"
-                                            ${isCompleted ? 'style="display:none"' : ''}>
-                                        Reveal Answer
-                                    </button>
-                                    <div class="answer-reveal" id="answer-${quizId}" 
-                                         style="${isCompleted ? '' : 'display:none'}">
-                                        <strong>Answer:</strong> ${escapeHtml(check.answer)}
-                                        <button onclick="markMicroQuizComplete('${quizId}')" 
-                                                class="got-it-btn" ${isCompleted ? 'style="display:none"' : ''}>
-                                            ✓ Got It
-                                        </button>
-                                    </div>
-                                </div>
-                            ` : ''}
-                            
-                            ${check.hint ? `
-                                <p class="quiz-hint" id="hint-${quizId}" style="display:none">
-                                    💡 Hint: ${escapeHtml(check.hint)}
-                                </p>
-                                <button class="hint-btn" onclick="document.getElementById('hint-${quizId}').style.display='block'; this.style.display='none'">
-                                    Show Hint
-                                </button>
-                            ` : ''}
-                            
-                            <div class="quiz-feedback" id="feedback-${quizId}"></div>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        `;
-    }
-
-    // ================================================
-    // SECTION KEY POINTS
-    // ================================================
-
-    function renderSectionKeyPoints(section) {
-        const keyPoints = section.key_points || [];
-        const mustRemember = section.must_remember_for_exam || [];
-        
-        if (keyPoints.length === 0 && mustRemember.length === 0) return '';
-        
-        return `
-            <div class="section-key-points">
-                ${keyPoints.length > 0 ? `
-                    <div class="key-points-box">
-                        <h4>📌 Key Points</h4>
-                        <ul>
-                            ${keyPoints.map(kp => `<li>${escapeHtml(kp)}</li>`).join('')}
-                        </ul>
+                        ` : ''}
+                        ${rwe.outcome ? `
+                            <div class="rwe-outcome">
+                                <strong>✅ Outcome:</strong>
+                                <p>${escapeHtml(rwe.outcome)}</p>
+                            </div>
+                        ` : ''}
                     </div>
-                ` : ''}
-                
-                ${mustRemember.length > 0 ? `
-                    <div class="exam-must-remember">
-                        <h4>⭐ Must Remember for Exam</h4>
-                        ${mustRemember.map(mr => `
-                            <div class="must-remember-item">
-                                <p class="fact">${escapeHtml(mr.fact)}</p>
-                                <p class="why-tested">Why tested: ${escapeHtml(mr.why_tested)}</p>
+                </div>
+            </div>
+        `;
+    }
+
+    // ================================================
+    // WHAT WOULD HAPPEN IF ACCORDION
+    // ================================================
+
+    function renderWhatWouldHappenIfAccordion(section) {
+        let scenarios = [];
+        
+        // Handle array format (NEW) or single object
+        if (Array.isArray(section.what_would_happen_if)) {
+            scenarios = section.what_would_happen_if;
+        } else if (section.what_would_happen_if && typeof section.what_would_happen_if === 'object') {
+            scenarios = [section.what_would_happen_if];
+        }
+        
+        if (scenarios.length === 0) return '';
+        
+        return `
+            <div class="accordion-section deep-dive" data-expanded="false">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-icon">▶</span>
+                    <h4>⚠️ What Would Happen If...</h4>
+                    <span class="accordion-badge">${scenarios.length} scenario${scenarios.length > 1 ? 's' : ''}</span>
+                    <span class="accordion-hint">Understand consequences</span>
+                </button>
+                <div class="accordion-content">
+                    <div class="wwhi-scenarios">
+                        ${scenarios.map(s => `
+                            <div class="wwhi-card">
+                                <div class="wwhi-situation">
+                                    <strong>Situation:</strong>
+                                    <p>${escapeHtml(s.situation || s.scenario || '')}</p>
+                                </div>
+                                <div class="wwhi-consequence">
+                                    <strong>Consequence:</strong>
+                                    <p>${escapeHtml(s.consequence || '')}</p>
+                                </div>
+                                ${s.lesson ? `
+                                    <div class="wwhi-lesson">
+                                        <strong>💡 Lesson:</strong>
+                                        <p>${escapeHtml(s.lesson)}</p>
+                                    </div>
+                                ` : ''}
                             </div>
                         `).join('')}
                     </div>
-                ` : ''}
+                </div>
             </div>
         `;
     }
 
-    function renderExamTraps(traps) {
-        if (!traps || traps.length === 0) return '';
+    // ================================================
+    // GLOSSARY TERMS ACCORDION
+    // ================================================
+
+    function renderGlossaryTermsAccordion(section) {
+        if (!section.glossary_terms || section.glossary_terms.length === 0) return '';
         
         return `
-            <div class="exam-traps">
-                <h4>⚠️ Exam Traps to Avoid</h4>
-                ${traps.map(trap => `
-                    <div class="trap-item">
-                        <p class="trap-trap">${escapeHtml(trap.trap)}</p>
-                        <p class="trap-reality"><strong>Reality:</strong> ${escapeHtml(trap.reality)}</p>
-                        <p class="trap-tip"><strong>Exam Tip:</strong> ${escapeHtml(trap.exam_tip)}</p>
+            <div class="accordion-section deep-dive" data-expanded="false">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <span class="accordion-icon">▶</span>
+                    <h4>📖 Key Terms</h4>
+                    <span class="accordion-badge">${section.glossary_terms.length} terms</span>
+                    <span class="accordion-hint">Definitions</span>
+                </button>
+                <div class="accordion-content">
+                    <div class="glossary-grid">
+                        ${section.glossary_terms.map(term => `
+                            <div class="glossary-card">
+                                <div class="glossary-term">${escapeHtml(term.term)}</div>
+                                <div class="glossary-definition">${escapeHtml(term.definition)}</div>
+                                ${term.exam_note ? `
+                                    <div class="glossary-exam-note">
+                                        <span class="exam-icon">📝</span>
+                                        ${escapeHtml(term.exam_note)}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
                     </div>
-                `).join('')}
+                </div>
             </div>
+        `;
+    }
+
+    // ================================================
+    // KNOWLEDGE CHECK
+    // ================================================
+
+    function renderKnowledgeCheck(section, sectionId) {
+        if (!section.knowledge_check) return '';
+        
+        const kc = section.knowledge_check;
+        const checkId = `kc-${sectionId}`;
+        
+        return `
+            <div class="knowledge-check-box" id="${checkId}">
+                <h4>🎯 Knowledge Check</h4>
+                <div class="kc-question">${escapeHtml(kc.question)}</div>
+                <div class="kc-options" id="options-${checkId}">
+                    ${kc.options.map((opt, i) => `
+                        <button class="kc-option" 
+                                onclick="handleKnowledgeCheck('${checkId}', ${i}, ${kc.correct}, this)"
+                                data-index="${i}">
+                            <span class="option-letter">${String.fromCharCode(65 + i)}</span>
+                            <span class="option-text">${escapeHtml(opt)}</span>
+                        </button>
+                    `).join('')}
+                </div>
+                <div class="kc-feedback" id="feedback-${checkId}" style="display: none;"></div>
+            </div>
+        `;
+    }
+
+    // ================================================
+    // MUST REMEMBER FOR EXAM
+    // ================================================
+
+    function renderMustRemember(section) {
+        if (!section.must_remember_for_exam || section.must_remember_for_exam.length === 0) return '';
+        
+        return `
+            <div class="must-remember-box">
+                <h4>⭐ Must Remember for Exam</h4>
+                <div class="must-remember-items">
+                    ${section.must_remember_for_exam.map(mr => `
+                        <div class="must-remember-item">
+                            <div class="mr-fact">${escapeHtml(mr.fact || mr.point || mr)}</div>
+                            ${mr.why_tested ? `<div class="mr-why">Why tested: ${escapeHtml(mr.why_tested)}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // ================================================
+    // HANDS-ON ACTIVITY
+    // ================================================
+
+    function renderHandsOnActivity(lesson) {
+        if (!lesson.hands_on_activity) return '';
+        
+        const activity = lesson.hands_on_activity;
+        
+        return `
+            <section class="lesson-section hands-on-section">
+                <div class="accordion-section" data-expanded="false">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span class="accordion-icon">▶</span>
+                        <h3>🛠️ Hands-On Activity${activity.title ? `: ${escapeHtml(activity.title)}` : ''}</h3>
+                        <span class="accordion-hint">Practice exercise</span>
+                    </button>
+                    <div class="accordion-content">
+                        ${activity.scenario ? `<p class="activity-scenario">${escapeHtml(activity.scenario)}</p>` : ''}
+                        ${activity.steps ? `
+                            <div class="activity-steps">
+                                <h5>Steps:</h5>
+                                <ol>
+                                    ${activity.steps.map(step => `<li>${escapeHtml(step)}</li>`).join('')}
+                                </ol>
+                            </div>
+                        ` : ''}
+                        ${activity.expected_outcome ? `
+                            <div class="activity-outcome">
+                                <strong>Expected Outcome:</strong>
+                                <p>${escapeHtml(activity.expected_outcome)}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </section>
         `;
     }
 
@@ -1223,49 +1273,54 @@
     function renderSummary(lesson) {
         const summary = lesson.summary || {};
         
+        const takeaways = summary.key_takeaways || [];
+        const examEssentials = summary.exam_essentials || [];
+        const commonTraps = summary.common_exam_traps || [];
+        const nextConnection = summary.connection_to_next || '';
+        
+        if (takeaways.length === 0 && examEssentials.length === 0) return '';
+        
         return `
             <section class="lesson-section summary-section" id="section-summary">
-                <h2>📝 Summary</h2>
+                <h2>📋 Summary</h2>
                 
-                ${summary.key_takeaways ? `
+                ${takeaways.length > 0 ? `
                     <div class="takeaways-box">
-                        <h4>Key Takeaways</h4>
+                        <h3>Key Takeaways</h3>
                         <ul>
-                            ${summary.key_takeaways.map(kt => `<li>${escapeHtml(kt)}</li>`).join('')}
+                            ${takeaways.map(t => `<li>${escapeHtml(t)}</li>`).join('')}
                         </ul>
                     </div>
                 ` : ''}
                 
-                ${summary.exam_essentials ? `
+                ${examEssentials.length > 0 ? `
                     <div class="exam-essentials-box">
-                        <h4>🎯 Exam Essentials</h4>
+                        <h3>⭐ Exam Essentials</h3>
                         <ul>
-                            ${summary.exam_essentials.map(ee => `<li>${escapeHtml(ee)}</li>`).join('')}
+                            ${examEssentials.map(e => `<li>${escapeHtml(e)}</li>`).join('')}
                         </ul>
                     </div>
                 ` : ''}
                 
-                ${summary.career_connections ? `
-                    <div class="career-connections">
-                        <h4>💼 Career Connections</h4>
-                        <div class="career-grid">
-                            ${Object.entries(summary.career_connections).map(([role, connection]) => {
-                                const roleInfo = CAREER_ROLES[role] || { icon: '👤', name: role };
-                                return `
-                                    <div class="career-connection-card">
-                                        <span class="cc-role">${roleInfo.icon} ${roleInfo.name}</span>
-                                        <p class="cc-text">${escapeHtml(connection)}</p>
-                                    </div>
-                                `;
-                            }).join('')}
+                ${commonTraps.length > 0 ? `
+                    <div class="accordion-section" data-expanded="false">
+                        <button class="accordion-header" onclick="toggleAccordion(this)">
+                            <span class="accordion-icon">▶</span>
+                            <h4>⚠️ Common Exam Traps</h4>
+                            <span class="accordion-badge">${commonTraps.length} traps</span>
+                        </button>
+                        <div class="accordion-content">
+                            <ul class="traps-list">
+                                ${commonTraps.map(t => `<li>${escapeHtml(t)}</li>`).join('')}
+                            </ul>
                         </div>
                     </div>
                 ` : ''}
                 
-                ${summary.connection_to_next ? `
+                ${nextConnection ? `
                     <div class="next-connection">
-                        <h4>➡️ What's Next</h4>
-                        <p>${escapeHtml(summary.connection_to_next)}</p>
+                        <h4>🔗 What's Next</h4>
+                        <p>${escapeHtml(nextConnection)}</p>
                     </div>
                 ` : ''}
             </section>
@@ -1273,64 +1328,27 @@
     }
 
     // ================================================
-    // UNLOCK SECTION (Quiz & Simulations)
+    // UNLOCK SECTION
     // ================================================
 
     function renderUnlockSection(lesson, lessonId) {
-        const sections = lesson.sections || [];
-        const totalSections = sections.length;
-        const relatedContent = lesson.related_content || {};
+        const related = lesson.related_content || {};
+        const hasSimulation = related.simulations && related.simulations.length > 0;
         
         return `
-            <section class="lesson-section unlock-section" id="section-practice">
-                <div class="unlock-gate" id="unlock-gate">
-                    <div class="lock-icon">🔒</div>
-                    <h3>Complete All Sections to Unlock</h3>
-                    <p>Finish reading and complete the micro-quizzes in each section to access practice materials.</p>
-                    <div class="unlock-progress">
-                        <div class="unlock-bar">
-                            <div class="unlock-fill" id="unlock-fill" style="width: 0%"></div>
-                        </div>
-                        <span class="unlock-text" id="unlock-text">0 / ${totalSections} sections</span>
-                    </div>
-                </div>
+            <section class="lesson-section unlock-section">
+                <h3>🎮 Ready to Practice?</h3>
+                <p>Test your understanding with interactive activities.</p>
                 
-                <div class="unlocked-content" id="unlocked-content" style="display: none;">
-                    <h3>🎉 Practice Materials Unlocked!</h3>
-                    <div class="practice-options">
-                        ${relatedContent.simulations && relatedContent.simulations.length > 0 ? `
-                            <div class="practice-card simulation-card" onclick="startSimulation('${relatedContent.simulations[0]}')">
-                                <span class="practice-icon">🎮</span>
-                                <h4>Interactive Simulation</h4>
-                                <p>Apply what you've learned in a realistic scenario</p>
-                                <span class="practice-id">${relatedContent.simulations[0]}</span>
-                            </div>
-                        ` : ''}
-                        
-                        <div class="practice-card quiz-card" onclick="startDomainQuiz(${lesson.domain})">
-                            <span class="practice-icon">📝</span>
-                            <h4>Domain Quiz</h4>
-                            <p>Test your knowledge with exam-style questions</p>
-                            <span class="practice-id">Domain ${lesson.domain}</span>
-                        </div>
-                        
-                        ${relatedContent.remediation && relatedContent.remediation.length > 0 ? `
-                            <div class="practice-card remediation-card" onclick="startRemediation('${relatedContent.remediation[0]}')">
-                                <span class="practice-icon">🔧</span>
-                                <h4>Extra Practice</h4>
-                                <p>Targeted exercises for this topic</p>
-                                <span class="practice-id">${relatedContent.remediation[0]}</span>
-                            </div>
-                        ` : ''}
-                    </div>
+                <div class="unlock-buttons">
+                    <button class="unlock-btn quiz-btn" onclick="startQuiz(${lesson.domain})">
+                        📝 Take Domain ${lesson.domain} Quiz
+                    </button>
                     
-                    ${relatedContent.next_lesson ? `
-                        <div class="next-lesson-prompt">
-                            <p>Ready to continue?</p>
-                            <button class="btn btn-primary" onclick="showEnhancedLesson('${relatedContent.next_lesson}')">
-                                Next Lesson →
-                            </button>
-                        </div>
+                    ${hasSimulation ? `
+                        <button class="unlock-btn sim-btn" onclick="startSimulation('${related.simulations[0]}')">
+                            🎯 Start Simulation
+                        </button>
                     ` : ''}
                 </div>
             </section>
@@ -1338,45 +1356,146 @@
     }
 
     // ================================================
-    // INTERACTION HANDLERS
+    // NAVIGATION HELPERS
     // ================================================
 
-    function initializeLessonInteractions(lesson) {
-        // Track scroll for TOC highlighting
-        window.addEventListener('scroll', debounce(handleScroll, 100));
+    function getPreviousLesson(currentId) {
+        const currentLesson = ALL_LESSONS.find(l => l.id === currentId);
+        if (!currentLesson) return null;
         
-        // Check unlock status
-        checkUnlockStatus();
+        const domainLessons = ALL_LESSONS.filter(l => l.domain === currentLesson.domain);
+        const currentIndex = domainLessons.findIndex(l => l.id === currentId);
+        
+        return currentIndex > 0 ? domainLessons[currentIndex - 1] : null;
     }
 
-    window.scrollToSection = function(sectionId) {
-        const element = document.getElementById(`section-${sectionId}`) || document.getElementById(sectionId);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    function getNextLesson(currentId) {
+        const currentLesson = ALL_LESSONS.find(l => l.id === currentId);
+        if (!currentLesson) return null;
+        
+        const domainLessons = ALL_LESSONS.filter(l => l.domain === currentLesson.domain);
+        const currentIndex = domainLessons.findIndex(l => l.id === currentId);
+        
+        return currentIndex < domainLessons.length - 1 ? domainLessons[currentIndex + 1] : null;
+    }
+
+    // ================================================
+    // ACCORDION TOGGLE
+    // ================================================
+
+    window.toggleAccordion = function(button) {
+        const accordion = button.closest('.accordion-section');
+        const content = accordion.querySelector('.accordion-content');
+        const icon = button.querySelector('.accordion-icon');
+        const isExpanded = accordion.dataset.expanded === 'true';
+        
+        // Toggle state
+        accordion.dataset.expanded = !isExpanded;
+        
+        // Update icon
+        icon.textContent = isExpanded ? '▶' : '▼';
+        
+        // Animate content
+        if (isExpanded) {
+            content.style.maxHeight = '0';
+            content.style.paddingTop = '0';
+            content.style.paddingBottom = '0';
+        } else {
+            content.style.maxHeight = content.scrollHeight + 40 + 'px';
+            content.style.paddingTop = '15px';
+            content.style.paddingBottom = '15px';
         }
     };
 
-    window.toggleCollapsible = function(header) {
-        const collapsible = header.closest('.collapsible');
-        const isExpanded = collapsible.dataset.expanded === 'true';
+    // ================================================
+    // KNOWLEDGE CHECK HANDLER
+    // ================================================
+
+    window.handleKnowledgeCheck = function(checkId, selected, correct, button) {
+        const section = findSectionByCheckId(checkId);
+        const kc = section?.knowledge_check;
         
-        collapsible.dataset.expanded = !isExpanded;
-        const icon = header.querySelector('.collapse-icon');
-        if (icon) {
-            icon.textContent = isExpanded ? '▶' : '▼';
+        const container = document.getElementById(`options-${checkId}`);
+        const feedback = document.getElementById(`feedback-${checkId}`);
+        const options = container.querySelectorAll('.kc-option');
+        
+        // Disable all options and mark correct/incorrect
+        options.forEach((opt, i) => {
+            opt.disabled = true;
+            opt.classList.add('disabled');
+            if (i === correct) {
+                opt.classList.add('correct');
+            } else if (i === selected && selected !== correct) {
+                opt.classList.add('incorrect');
+            }
+        });
+        
+        // Build feedback HTML
+        let feedbackHtml = '';
+        
+        if (selected === correct) {
+            feedbackHtml = `
+                <div class="feedback-correct">
+                    <strong>✓ Correct!</strong>
+                    <p>${escapeHtml(kc?.explanation || '')}</p>
+                </div>
+            `;
+        } else {
+            feedbackHtml = `
+                <div class="feedback-incorrect">
+                    <strong>✗ Incorrect</strong>
+                    <p>${escapeHtml(kc?.explanation || '')}</p>
+                </div>
+            `;
+            
+            // Show wrong answer analysis if available
+            if (kc?.wrong_answer_analysis) {
+                const waa = kc.wrong_answer_analysis;
+                let reason = '';
+                
+                // Handle object format (keyed by index) or array format
+                if (Array.isArray(waa)) {
+                    const wrongItem = waa.find(w => w.option === selected);
+                    reason = wrongItem?.why_wrong || wrongItem?.why_tempting || '';
+                } else if (typeof waa === 'object') {
+                    reason = waa[selected] || waa[String(selected)] || '';
+                }
+                
+                if (reason) {
+                    feedbackHtml += `
+                        <div class="wrong-analysis">
+                            <strong>Why "${escapeHtml(kc.options[selected])}" is wrong:</strong>
+                            <p>${escapeHtml(reason)}</p>
+                        </div>
+                    `;
+                }
+            }
         }
         
-        const content = collapsible.querySelector('.collapsible-content');
-        if (content) {
-            content.style.display = isExpanded ? 'none' : 'block';
-        }
+        feedback.innerHTML = feedbackHtml;
+        feedback.style.display = 'block';
     };
+
+    function findSectionByCheckId(checkId) {
+        const sectionId = checkId.replace('kc-', '');
+        const lesson = LessonState.currentLesson;
+        return lesson?.sections?.find(s => s.section_id === sectionId);
+    }
+
+    // ================================================
+    // SECTION COMPLETION
+    // ================================================
 
     window.markSectionComplete = function(sectionId, index) {
-        LessonState.completedSections.add(sectionId);
+        const lessonId = LessonState.currentLesson?.lesson_id || LessonState.currentLesson?.id;
+        
+        if (LessonState.completedSections.has(sectionId)) {
+            LessonState.completedSections.delete(sectionId);
+        } else {
+            LessonState.completedSections.add(sectionId);
+        }
         
         // Save to localStorage
-        const lessonId = LessonState.currentLesson.lesson_id || LessonState.currentLesson.id;
         localStorage.setItem(
             `lesson_sections_${lessonId}`,
             JSON.stringify([...LessonState.completedSections])
@@ -1384,211 +1503,177 @@
         
         // Update UI
         const section = document.getElementById(sectionId);
-        if (section) section.classList.add('completed');
-        
         const btn = section?.querySelector('.mark-complete-btn');
+        const tocItem = document.querySelector(`.toc-item[data-section="${sectionId}"]`);
+        
+        const isNowCompleted = LessonState.completedSections.has(sectionId);
+        
+        if (section) section.classList.toggle('completed', isNowCompleted);
         if (btn) {
-            btn.classList.add('completed');
-            btn.textContent = '✅ Section Completed';
+            btn.classList.toggle('completed', isNowCompleted);
+            btn.textContent = isNowCompleted ? '✅ Section Completed' : '☐ Mark Section Complete';
         }
-        
-        const tocStatus = document.getElementById(`toc-status-${sectionId}`);
-        if (tocStatus) tocStatus.textContent = '✓';
+        if (tocItem) tocItem.classList.toggle('completed', isNowCompleted);
         
         updateProgress();
-        checkUnlockStatus();
     };
 
-    window.checkMicroQuiz = function(quizId, correctAnswer, type) {
-        const input = document.getElementById(`input-${quizId}`);
-        const feedback = document.getElementById(`feedback-${quizId}`);
-        
-        if (!input || !feedback) return;
-        
-        const userAnswer = input.value.trim().toLowerCase();
-        const correct = correctAnswer.toLowerCase();
-        
-        // Check if answer contains key terms
-        const isCorrect = correct.split(/[,;()]/).some(term => 
-            userAnswer.includes(term.trim().toLowerCase())
-        );
-        
-        if (isCorrect) {
-            feedback.innerHTML = '<span class="correct">✅ Correct!</span>';
-            feedback.className = 'quiz-feedback correct';
-            markMicroQuizComplete(quizId);
-            input.disabled = true;
-        } else {
-            feedback.innerHTML = `<span class="incorrect">❌ Not quite. The answer is: ${escapeHtml(correctAnswer)}</span>`;
-            feedback.className = 'quiz-feedback incorrect';
+    // ================================================
+    // SCROLL TO SECTION
+    // ================================================
+
+    window.scrollToSection = function(sectionId) {
+        const section = document.getElementById(sectionId) || document.getElementById(`section-${sectionId}`);
+        if (section) {
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     };
 
-    window.revealAnswer = function(quizId) {
-        const answerDiv = document.getElementById(`answer-${quizId}`);
-        const revealBtn = document.getElementById(`reveal-btn-${quizId}`);
-        
-        if (answerDiv) answerDiv.style.display = 'block';
-        if (revealBtn) revealBtn.style.display = 'none';
-    };
-
-    window.markMicroQuizComplete = function(quizId) {
-        LessonState.completedMicroQuizzes.add(quizId);
-        
-        const lessonId = LessonState.currentLesson.lesson_id || LessonState.currentLesson.id;
-        localStorage.setItem(
-            `lesson_quizzes_${lessonId}`,
-            JSON.stringify([...LessonState.completedMicroQuizzes])
-        );
-        
-        const quizDiv = document.getElementById(`quiz-${quizId}`);
-        if (quizDiv) quizDiv.classList.add('completed');
-        
-        // Hide got it button
-        const gotItBtn = quizDiv?.querySelector('.got-it-btn');
-        if (gotItBtn) gotItBtn.style.display = 'none';
-        
-        updateProgress();
-        checkUnlockStatus();
-    };
+    // ================================================
+    // CAREER DETAIL MODAL
+    // ================================================
 
     window.showCareerDetail = function(roleKey) {
         const lesson = LessonState.currentLesson;
-        if (!lesson.role_relevance || !lesson.role_relevance[roleKey]) return;
-        
-        const roleData = lesson.role_relevance[roleKey];
+        const roleData = lesson?.role_relevance?.[roleKey];
         const role = CAREER_ROLES[roleKey];
         
-        // Create modal with role details
+        if (!roleData || !role) return;
+        
+        // Create modal
         const modal = document.createElement('div');
         modal.className = 'career-modal-overlay';
         modal.innerHTML = `
             <div class="career-modal">
                 <button class="modal-close" onclick="this.closest('.career-modal-overlay').remove()">×</button>
-                <h2>${role.icon} ${role.name}</h2>
-                <div class="modal-relevance">
-                    <span class="relevance-level ${roleData.relevance}">${roleData.relevance.toUpperCase()}</span>
-                    <span class="job-percentage">${roleData.percentage_of_job || ''} of daily work</span>
+                <div class="modal-header" style="border-left: 4px solid ${role.color}">
+                    <span class="modal-icon">${role.icon}</span>
+                    <h3>${role.name}</h3>
                 </div>
-                <p class="daily-usage">${roleData.daily_usage || ''}</p>
-                
-                ${roleData.specific_tasks ? `
-                    <div class="modal-tasks">
-                        <h4>Specific Tasks</h4>
-                        <ul>${roleData.specific_tasks.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>
+                <div class="modal-content">
+                    <div class="modal-stat">
+                        <strong>Importance:</strong> 
+                        <span class="importance-badge ${roleData.importance || roleData.relevance}">${roleData.importance || roleData.relevance}</span>
                     </div>
-                ` : ''}
-                
-                ${roleData.tools_youll_use ? `
-                    <div class="modal-tools">
-                        <h4>Tools You'll Use</h4>
-                        <div class="tools-list">
-                            ${roleData.tools_youll_use.map(t => `<span class="tool-tag">${escapeHtml(t)}</span>`).join('')}
+                    
+                    ${roleData.daily_tasks ? `
+                        <div class="modal-section">
+                            <strong>Daily Tasks:</strong>
+                            <ul>${roleData.daily_tasks.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>
                         </div>
-                    </div>
-                ` : ''}
+                    ` : ''}
+                    
+                    ${roleData.real_scenario ? `
+                        <div class="modal-section">
+                            <strong>Real Scenario:</strong>
+                            <p class="real-scenario-text">${escapeHtml(roleData.real_scenario)}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${roleData.tools_youll_use ? `
+                        <div class="modal-section">
+                            <strong>Tools You'll Use:</strong>
+                            <div class="tools-tags">
+                                ${roleData.tools_youll_use.map(t => `<span class="tool-tag">${escapeHtml(t)}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
             </div>
         `;
         
         document.body.appendChild(modal);
-        modal.onclick = (e) => {
+        
+        // Close on overlay click
+        modal.addEventListener('click', (e) => {
             if (e.target === modal) modal.remove();
+        });
+        
+        // Close on Escape
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', escHandler);
+            }
         };
+        document.addEventListener('keydown', escHandler);
     };
 
+    // ================================================
+    // PROGRESS TRACKING
+    // ================================================
+
+    function initializeLessonInteractions(lesson) {
+        // Intersection observer for TOC highlighting
+        const sections = document.querySelectorAll('.main-section');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    highlightTocItem(entry.target.id);
+                }
+            });
+        }, { threshold: 0.3 });
+        
+        sections.forEach(section => observer.observe(section));
+    }
+
+    function highlightTocItem(sectionId) {
+        document.querySelectorAll('.toc-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.section === sectionId);
+        });
+    }
+
     function updateProgress() {
-        const lesson = LessonState.currentLesson;
-        if (!lesson) return;
-        
-        const sections = lesson.sections || [];
-        const totalSections = sections.length;
+        const totalSections = LessonState.currentLesson?.sections?.length || 1;
         const completedCount = LessonState.completedSections.size;
-        const percentage = totalSections > 0 ? Math.round((completedCount / totalSections) * 100) : 0;
+        const percentage = Math.round((completedCount / totalSections) * 100);
         
-        // Update progress circle
-        const progressFill = document.querySelector('.progress-fill');
+        const progressCircle = document.querySelector('.progress-fill');
         const progressText = document.querySelector('.progress-text');
         
-        if (progressFill) {
-            progressFill.setAttribute('stroke-dasharray', `${percentage}, 100`);
+        if (progressCircle) {
+            progressCircle.style.strokeDasharray = `${percentage}, 100`;
         }
         if (progressText) {
             progressText.textContent = `${percentage}%`;
         }
-        
-        // Update unlock progress
-        const unlockFill = document.getElementById('unlock-fill');
-        const unlockText = document.getElementById('unlock-text');
-        
-        if (unlockFill) unlockFill.style.width = `${percentage}%`;
-        if (unlockText) unlockText.textContent = `${completedCount} / ${totalSections} sections`;
     }
 
-    function checkUnlockStatus() {
-        const lesson = LessonState.currentLesson;
-        if (!lesson) return;
-        
-        const sections = lesson.sections || [];
-        const allCompleted = sections.every((s, i) => {
-            const sectionId = s.section_id || `section-${i}`;
-            return LessonState.completedSections.has(sectionId);
-        });
-        
-        const gate = document.getElementById('unlock-gate');
-        const content = document.getElementById('unlocked-content');
-        const tocPractice = document.getElementById('toc-practice');
-        
-        if (allCompleted || sections.length === 0) {
-            if (gate) gate.style.display = 'none';
-            if (content) content.style.display = 'block';
-            if (tocPractice) {
-                tocPractice.classList.remove('toc-locked');
-                const lock = tocPractice.querySelector('.toc-lock');
-                if (lock) lock.style.display = 'none';
-            }
-            
-            // Mark lesson as completed in progress
-            const lessonId = lesson.lesson_id || lesson.id;
-            if (!APP.progress.completedLessons.includes(lessonId)) {
-                APP.progress.completedLessons.push(lessonId);
-                if (typeof saveProgress === 'function') saveProgress();
-            }
-        }
+    // ================================================
+    // HELPER FUNCTIONS
+    // ================================================
+
+    function formatContent(text) {
+        if (!text) return '';
+        let formatted = escapeHtml(text);
+        formatted = formatted.replace(/\n\n/g, '</p><p>');
+        formatted = formatted.replace(/\n/g, '<br>');
+        return `<p>${formatted}</p>`;
     }
 
-    function handleScroll() {
-        // Highlight current section in TOC
-        const sections = document.querySelectorAll('.lesson-section');
-        let current = '';
+    function formatMarkdown(text) {
+        if (!text) return '';
         
-        sections.forEach(section => {
-            const rect = section.getBoundingClientRect();
-            if (rect.top <= 150) {
-                current = section.id;
-            }
-        });
+        let html = escapeHtml(text);
         
-        // Update TOC highlighting
-        document.querySelectorAll('.toc-item').forEach(item => {
-            const sectionId = item.dataset.section;
-            if (current.includes(sectionId) || current === sectionId) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
-        });
+        // Bold
+        html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        // Italic
+        html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        // Line breaks
+        html = html.replace(/\n\n/g, '</p><p>');
+        html = html.replace(/\n/g, '<br>');
+        
+        return `<p>${html}</p>`;
     }
 
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
+    function escapeHtml(text) {
+        if (!text) return '';
+        if (typeof text !== 'string') return String(text);
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     // ================================================
@@ -1596,68 +1681,780 @@
     // ================================================
 
     function injectEnhancedLessonStyles() {
-        if (document.getElementById('enhanced-lesson-styles')) return;
+        if (document.getElementById('enhanced-lesson-styles-v34')) return;
         
         const styles = document.createElement('style');
-        styles.id = 'enhanced-lesson-styles';
+        styles.id = 'enhanced-lesson-styles-v34';
         styles.textContent = `
-            /* Enhanced Lesson Container */
-            .enhanced-lesson-container {
-                display: grid;
-                grid-template-columns: 260px 1fr;
-                gap: 0;
-                min-height: 100vh;
-                max-width: 1600px;
-                margin: 0 auto;
-            }
+            /* ================================================
+               ENHANCED LESSON VIEWER STYLES v34
+               All accordions collapsed by default with clear indicators
+               ================================================ */
             
-            /* Sidebar */
-            .lesson-sidebar {
-                position: sticky;
-                top: 70px;
-                height: calc(100vh - 70px);
+            /* Accordion System */
+            .accordion-section {
+                margin: 15px 0;
+                border: 1px solid #27272a;
+                border-radius: 8px;
+                overflow: hidden;
                 background: #18181b;
-                border-right: 1px solid #27272a;
-                padding: 20px;
-                overflow-y: auto;
-                display: flex;
-                flex-direction: column;
             }
             
-            .sidebar-header {
+            .accordion-section.deep-dive {
+                border-left: 3px solid #6366f1;
+            }
+            
+            .accordion-header {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 15px 20px;
+                background: #1f1f23;
+                border: none;
+                cursor: pointer;
+                text-align: left;
+                color: #fafafa;
+                transition: background 0.2s ease;
+            }
+            
+            .accordion-header:hover {
+                background: #27272a;
+            }
+            
+            .accordion-icon {
+                font-size: 12px;
+                color: #6366f1;
+                transition: transform 0.2s ease;
+                flex-shrink: 0;
+            }
+            
+            .accordion-header h3,
+            .accordion-header h4 {
+                margin: 0;
+                font-size: 1rem;
+                font-weight: 600;
+                flex-grow: 1;
+            }
+            
+            .accordion-hint {
+                font-size: 0.8rem;
+                color: #71717a;
+                font-weight: normal;
+            }
+            
+            .accordion-badge {
+                background: #27272a;
+                color: #a1a1aa;
+                padding: 2px 8px;
+                border-radius: 10px;
+                font-size: 0.75rem;
+                font-weight: 500;
+            }
+            
+            .accordion-content {
+                max-height: 0;
+                overflow: hidden;
+                padding: 0 20px;
+                transition: max-height 0.3s ease, padding 0.3s ease;
+                background: #18181b;
+            }
+            
+            .accordion-section[data-expanded="true"] .accordion-content {
+                max-height: 2000px;
+                padding: 15px 20px;
+            }
+            
+            .accordion-section[data-expanded="true"] .accordion-icon {
+                transform: rotate(90deg);
+            }
+            
+            /* Tool Lab Banner */
+            .tool-lab-banner {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                padding: 12px 20px;
+                background: linear-gradient(135deg, #1e3a5f, #1e1e3f);
+                border: 1px solid #3b82f6;
+                border-radius: 8px;
                 margin-bottom: 20px;
             }
             
-            .back-btn-small {
-                background: transparent;
-                border: 1px solid #3f3f46;
-                color: #a1a1aa;
-                padding: 8px 12px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 0.85rem;
-                width: 100%;
-                text-align: left;
+            .tool-lab-icon {
+                font-size: 24px;
             }
             
-            .back-btn-small:hover {
-                border-color: #6366f1;
+            .tool-lab-info {
+                flex-grow: 1;
+            }
+            
+            .tool-lab-info strong {
+                display: block;
+                color: #60a5fa;
+            }
+            
+            .tool-lab-info span {
+                font-size: 0.9rem;
+                color: #94a3b8;
+            }
+            
+            .tool-lab-btn {
+                padding: 8px 16px;
+                background: #3b82f6;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: 500;
+                transition: background 0.2s;
+            }
+            
+            .tool-lab-btn:hover {
+                background: #2563eb;
+            }
+            
+            /* Tool Lab CTA Section */
+            .tool-lab-cta {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                padding: 25px;
+                background: linear-gradient(135deg, #1e3a5f, #1e1e3f);
+                border: 2px solid #3b82f6;
+                border-radius: 12px;
+                margin: 30px 0;
+            }
+            
+            .cta-icon {
+                font-size: 48px;
+            }
+            
+            .cta-content {
+                flex-grow: 1;
+            }
+            
+            .cta-content h3 {
+                margin: 0 0 5px 0;
+                color: #60a5fa;
+            }
+            
+            .cta-content p {
+                margin: 0;
+                color: #cbd5e1;
+            }
+            
+            .cta-benefit {
+                font-size: 0.9rem;
+                color: #94a3b8 !important;
+                margin-top: 5px !important;
+            }
+            
+            .cta-btn {
+                padding: 12px 24px;
+                background: #3b82f6;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 1rem;
+                transition: all 0.2s;
+            }
+            
+            .cta-btn:hover {
+                background: #2563eb;
+                transform: translateY(-2px);
+            }
+            
+            /* Memory Hooks Sections */
+            .memory-section {
+                margin-bottom: 20px;
+            }
+            
+            .memory-section h5 {
+                margin: 0 0 12px 0;
+                color: #a1a1aa;
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            
+            .mnemonic-cards,
+            .analogy-cards,
+            .mistake-cards {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .mnemonic-card,
+            .analogy-card,
+            .mistake-card {
+                padding: 15px;
+                background: #27272a;
+                border-radius: 8px;
+                border-left: 3px solid #6366f1;
+            }
+            
+            .mnemonic-name {
+                font-weight: 600;
                 color: #fafafa;
+                font-size: 1.1rem;
+                margin-bottom: 5px;
+            }
+            
+            .mnemonic-expansion {
+                color: #a1a1aa;
+                margin-bottom: 8px;
+            }
+            
+            .mnemonic-usage {
+                font-size: 0.85rem;
+                color: #6366f1;
+            }
+            
+            .analogy-concept {
+                font-weight: 600;
+                color: #fafafa;
+                margin-bottom: 8px;
+            }
+            
+            .analogy-comparison {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px;
+                background: #1f1f23;
+                border-radius: 6px;
+                margin-bottom: 10px;
+            }
+            
+            .analogy-equals {
+                color: #6366f1;
+                font-size: 1.5rem;
+            }
+            
+            .analogy-text {
+                color: #e4e4e7;
+            }
+            
+            .analogy-why {
+                font-size: 0.9rem;
+                color: #a1a1aa;
+            }
+            
+            .mistake-wrong {
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                margin-bottom: 10px;
+                color: #fca5a5;
+            }
+            
+            .mistake-x {
+                color: #ef4444;
+                font-weight: bold;
+            }
+            
+            .mistake-right {
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                color: #86efac;
+            }
+            
+            .mistake-check {
+                color: #10b981;
+                font-weight: bold;
+            }
+            
+            .exam-trap-note {
+                margin-top: 10px;
+                padding: 8px 12px;
+                background: #1f1f23;
+                border-radius: 6px;
+                font-size: 0.85rem;
+                color: #f59e0b;
+            }
+            
+            /* Real World Example */
+            .real-world-content {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .rwe-scenario,
+            .rwe-application,
+            .rwe-outcome {
+                padding: 12px;
+                background: #27272a;
+                border-radius: 6px;
+            }
+            
+            .rwe-scenario strong,
+            .rwe-application strong,
+            .rwe-outcome strong {
+                color: #a1a1aa;
+                font-size: 0.85rem;
+            }
+            
+            .rwe-outcome {
+                border-left: 3px solid #10b981;
+            }
+            
+            /* What Would Happen If */
+            .wwhi-scenarios {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .wwhi-card {
+                padding: 15px;
+                background: #27272a;
+                border-radius: 8px;
+                border-left: 3px solid #f59e0b;
+            }
+            
+            .wwhi-situation,
+            .wwhi-consequence,
+            .wwhi-lesson {
+                margin-bottom: 10px;
+            }
+            
+            .wwhi-consequence {
+                color: #fca5a5;
+            }
+            
+            .wwhi-lesson {
+                color: #86efac;
+                margin-bottom: 0;
+            }
+            
+            /* Glossary */
+            .glossary-grid {
+                display: grid;
+                gap: 15px;
+            }
+            
+            .glossary-card {
+                padding: 15px;
+                background: #27272a;
+                border-radius: 8px;
+            }
+            
+            .glossary-term {
+                font-weight: 600;
+                color: #6366f1;
+                margin-bottom: 5px;
+            }
+            
+            .glossary-definition {
+                color: #e4e4e7;
+                margin-bottom: 8px;
+            }
+            
+            .glossary-exam-note {
+                font-size: 0.85rem;
+                color: #f59e0b;
+                padding-top: 8px;
+                border-top: 1px solid #3f3f46;
+            }
+            
+            /* Knowledge Check */
+            .knowledge-check-box {
+                margin: 20px 0;
+                padding: 20px;
+                background: #1f1f23;
+                border-radius: 10px;
+                border: 1px solid #27272a;
+            }
+            
+            .knowledge-check-box h4 {
+                margin: 0 0 15px 0;
+                color: #fafafa;
+            }
+            
+            .kc-question {
+                font-size: 1.05rem;
+                color: #e4e4e7;
+                margin-bottom: 15px;
+                line-height: 1.5;
+            }
+            
+            .kc-options {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .kc-option {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 15px;
+                background: #27272a;
+                border: 1px solid #3f3f46;
+                border-radius: 8px;
+                cursor: pointer;
+                text-align: left;
+                color: #e4e4e7;
+                transition: all 0.2s;
+            }
+            
+            .kc-option:hover:not(.disabled) {
+                background: #3f3f46;
+                border-color: #6366f1;
+            }
+            
+            .kc-option.correct {
+                background: rgba(16, 185, 129, 0.2);
+                border-color: #10b981;
+            }
+            
+            .kc-option.incorrect {
+                background: rgba(239, 68, 68, 0.2);
+                border-color: #ef4444;
+            }
+            
+            .kc-option.disabled {
+                cursor: default;
+                opacity: 0.7;
+            }
+            
+            .option-letter {
+                width: 28px;
+                height: 28px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #3f3f46;
+                border-radius: 50%;
+                font-weight: 600;
+                font-size: 0.9rem;
+                flex-shrink: 0;
+            }
+            
+            .kc-feedback {
+                margin-top: 15px;
+                padding: 15px;
+                border-radius: 8px;
+            }
+            
+            .feedback-correct {
+                background: rgba(16, 185, 129, 0.1);
+                border-left: 3px solid #10b981;
+                padding: 15px;
+                border-radius: 6px;
+            }
+            
+            .feedback-correct strong {
+                color: #10b981;
+            }
+            
+            .feedback-incorrect {
+                background: rgba(239, 68, 68, 0.1);
+                border-left: 3px solid #ef4444;
+                padding: 15px;
+                border-radius: 6px;
+                margin-bottom: 10px;
+            }
+            
+            .feedback-incorrect strong {
+                color: #ef4444;
+            }
+            
+            .wrong-analysis {
+                background: #27272a;
+                padding: 12px;
+                border-radius: 6px;
+                margin-top: 10px;
+            }
+            
+            .wrong-analysis strong {
+                color: #f59e0b;
+            }
+            
+            /* Must Remember */
+            .must-remember-box {
+                margin: 20px 0;
+                padding: 20px;
+                background: linear-gradient(135deg, #1e1e3f, #1e3a5f);
+                border: 1px solid #6366f1;
+                border-radius: 10px;
+            }
+            
+            .must-remember-box h4 {
+                margin: 0 0 15px 0;
+                color: #fcd34d;
+            }
+            
+            .must-remember-item {
+                padding: 12px;
+                background: rgba(0, 0, 0, 0.2);
+                border-radius: 6px;
+                margin-bottom: 10px;
+            }
+            
+            .must-remember-item:last-child {
+                margin-bottom: 0;
+            }
+            
+            .mr-fact {
+                color: #fafafa;
+                font-weight: 500;
+                margin-bottom: 5px;
+            }
+            
+            .mr-why {
+                font-size: 0.85rem;
+                color: #94a3b8;
+            }
+            
+            /* Key Points Box */
+            .key-points-box {
+                margin: 20px 0;
+                padding: 20px;
+                background: #1f1f23;
+                border-radius: 10px;
+                border-left: 4px solid #6366f1;
+            }
+            
+            .key-points-box h4 {
+                margin: 0 0 12px 0;
+                color: #fafafa;
+            }
+            
+            .key-points-box ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+            
+            .key-points-box li {
+                color: #e4e4e7;
+                margin-bottom: 8px;
+            }
+            
+            /* Career Badge Styles */
+            .career-relevance-bar {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin-top: 15px;
+                flex-wrap: wrap;
+            }
+            
+            .relevance-label {
+                color: #71717a;
+                font-size: 0.9rem;
+            }
+            
+            .relevance-badges {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+            
+            .career-badge {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 12px;
+                background: #27272a;
+                border: 1px solid #3f3f46;
+                border-radius: 20px;
+                cursor: pointer;
+                color: #e4e4e7;
+                font-size: 0.85rem;
+                transition: all 0.2s;
+            }
+            
+            .career-badge:hover {
+                background: #3f3f46;
+                transform: translateY(-1px);
+            }
+            
+            .career-badge.critical {
+                border-color: #ef4444;
+                background: rgba(239, 68, 68, 0.1);
+            }
+            
+            .career-badge.high {
+                border-color: #f59e0b;
+                background: rgba(245, 158, 11, 0.1);
+            }
+            
+            .badge-star {
+                color: #fcd34d;
+            }
+            
+            /* Career Modal */
+            .career-modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                padding: 20px;
+            }
+            
+            .career-modal {
+                background: #18181b;
+                border-radius: 12px;
+                max-width: 500px;
+                width: 100%;
+                max-height: 80vh;
+                overflow-y: auto;
+                position: relative;
+            }
+            
+            .modal-close {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: none;
+                border: none;
+                color: #71717a;
+                font-size: 24px;
+                cursor: pointer;
+            }
+            
+            .modal-close:hover {
+                color: #fafafa;
+            }
+            
+            .modal-header {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                padding: 20px;
+                background: #1f1f23;
+            }
+            
+            .modal-icon {
+                font-size: 32px;
+            }
+            
+            .modal-header h3 {
+                margin: 0;
+                color: #fafafa;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+            
+            .modal-stat {
+                margin-bottom: 15px;
+            }
+            
+            .importance-badge {
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 0.85rem;
+                font-weight: 500;
+                text-transform: capitalize;
+            }
+            
+            .importance-badge.critical {
+                background: rgba(239, 68, 68, 0.2);
+                color: #fca5a5;
+            }
+            
+            .importance-badge.high {
+                background: rgba(245, 158, 11, 0.2);
+                color: #fcd34d;
+            }
+            
+            .importance-badge.medium {
+                background: rgba(99, 102, 241, 0.2);
+                color: #a5b4fc;
+            }
+            
+            .modal-section {
+                margin-bottom: 20px;
+            }
+            
+            .modal-section strong {
+                display: block;
+                color: #a1a1aa;
+                margin-bottom: 8px;
+                font-size: 0.85rem;
+                text-transform: uppercase;
+            }
+            
+            .modal-section ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+            
+            .modal-section li {
+                color: #e4e4e7;
+                margin-bottom: 5px;
+            }
+            
+            .real-scenario-text {
+                padding: 12px;
+                background: #27272a;
+                border-radius: 6px;
+                color: #e4e4e7;
+                font-style: italic;
+            }
+            
+            .tools-tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .tool-tag {
+                padding: 4px 10px;
+                background: #27272a;
+                border-radius: 4px;
+                font-size: 0.85rem;
+                color: #a5b4fc;
+            }
+            
+            /* Layout */
+            .enhanced-lesson-container {
+                display: grid;
+                grid-template-columns: 260px 1fr;
+                min-height: 100vh;
+            }
+            
+            .lesson-sidebar {
+                position: sticky;
+                top: 0;
+                height: 100vh;
+                overflow-y: auto;
+                background: #0f0f10;
+                border-right: 1px solid #27272a;
+                padding: 20px;
+            }
+            
+            .lesson-main {
+                padding: 30px 40px;
+                max-width: 900px;
             }
             
             /* Progress Circle */
             .sidebar-progress {
                 text-align: center;
-                padding: 20px 0;
-                border-bottom: 1px solid #27272a;
-                margin-bottom: 20px;
+                margin: 20px 0;
             }
             
             .progress-circle {
                 width: 80px;
                 height: 80px;
-                margin: 0 auto 10px;
-                position: relative;
+                margin: 0 auto;
             }
             
             .progress-circle svg {
@@ -1675,35 +2472,29 @@
                 stroke: #6366f1;
                 stroke-width: 3;
                 stroke-linecap: round;
-                transition: stroke-dasharray 0.5s;
+                transition: stroke-dasharray 0.3s;
             }
             
             .progress-text {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: 1.2rem;
-                font-weight: bold;
+                position: relative;
+                top: -55px;
+                font-weight: 600;
                 color: #fafafa;
             }
             
             .progress-label {
+                display: block;
                 color: #71717a;
                 font-size: 0.85rem;
             }
             
             /* TOC */
-            .sidebar-nav {
-                flex: 1;
-            }
-            
             .toc-title {
-                font-size: 0.75rem;
-                text-transform: uppercase;
                 color: #71717a;
-                margin-bottom: 10px;
-                letter-spacing: 0.05em;
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 15px;
             }
             
             .toc-list {
@@ -1712,242 +2503,116 @@
                 margin: 0;
             }
             
-            .toc-item {
-                margin-bottom: 4px;
-            }
-            
             .toc-item a {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 8px 10px;
-                border-radius: 6px;
+                padding: 10px 12px;
                 color: #a1a1aa;
                 text-decoration: none;
+                border-radius: 6px;
                 font-size: 0.9rem;
                 transition: all 0.2s;
             }
             
             .toc-item a:hover {
-                background: #27272a;
+                background: #1f1f23;
                 color: #fafafa;
             }
             
             .toc-item.active a {
                 background: rgba(99, 102, 241, 0.1);
                 color: #6366f1;
-                border-left: 2px solid #6366f1;
             }
             
-            .toc-item.toc-locked a {
-                opacity: 0.5;
+            .toc-item.completed a {
+                color: #10b981;
             }
             
             .toc-number {
-                width: 20px;
-                height: 20px;
-                background: #27272a;
-                border-radius: 4px;
+                width: 24px;
+                height: 24px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                background: #27272a;
+                border-radius: 50%;
                 font-size: 0.75rem;
+                font-weight: 600;
             }
             
-            .toc-status {
+            .toc-check {
                 margin-left: auto;
                 color: #10b981;
             }
             
-            .toc-lock {
-                margin-left: auto;
-                font-size: 0.7rem;
-            }
-            
-            /* Skill Tree Mini */
-            .skill-tree-mini {
-                padding-top: 20px;
-                border-top: 1px solid #27272a;
-            }
-            
-            .mini-title {
-                font-size: 0.75rem;
-                color: #71717a;
-                margin-bottom: 10px;
-            }
-            
-            .mini-unlock {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                padding: 8px;
-                background: #27272a;
-                border-radius: 6px;
-                margin-bottom: 6px;
-                cursor: pointer;
-                font-size: 0.85rem;
-                color: #a1a1aa;
-            }
-            
-            .mini-unlock:hover {
-                background: #3f3f46;
-                color: #fafafa;
-            }
-            
-            .mini-more {
-                font-size: 0.8rem;
-                color: #6366f1;
-                padding: 4px 8px;
-            }
-            
-            /* Main Content */
-            .lesson-main {
-                padding: 30px 40px;
-                max-width: 900px;
-            }
-            
             /* Lesson Header */
             .lesson-header {
-                margin-bottom: 40px;
+                margin-bottom: 30px;
             }
             
             .lesson-breadcrumb {
-                font-size: 0.85rem;
                 color: #71717a;
+                font-size: 0.85rem;
                 margin-bottom: 10px;
             }
             
             .lesson-title {
-                font-size: 2.2rem;
+                font-size: 2rem;
                 font-weight: 700;
-                margin-bottom: 10px;
                 color: #fafafa;
+                margin: 0 0 10px 0;
             }
             
             .lesson-subtitle {
-                font-size: 1.1rem;
                 color: #a1a1aa;
-                margin-bottom: 20px;
+                font-size: 1.1rem;
+                margin: 0 0 15px 0;
             }
             
             .lesson-meta-bar {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 15px;
-                align-items: center;
-                margin-bottom: 20px;
+                gap: 12px;
             }
             
             .meta-item {
-                font-size: 0.9rem;
-                color: #71717a;
+                padding: 4px 12px;
+                background: #27272a;
+                border-radius: 4px;
+                font-size: 0.85rem;
+                color: #a1a1aa;
             }
             
             .meta-item.completed {
+                background: rgba(16, 185, 129, 0.1);
                 color: #10b981;
             }
             
-            /* Difficulty badges in lesson header - combined for specificity */
-            .meta-item.difficulty-beginner {
-                display: inline-block;
-                padding: 4px 10px;
-                border-radius: 4px;
-                font-weight: 600;
-                font-size: 0.8rem;
-                background: #10b981;
-                color: #ffffff !important;
-            }
-            
-            .meta-item.difficulty-intermediate {
-                display: inline-block;
-                padding: 4px 10px;
-                border-radius: 4px;
-                font-weight: 600;
-                font-size: 0.8rem;
-                background: #f59e0b;
-                color: #ffffff !important;
-            }
-            
-            .meta-item.difficulty-advanced {
-                display: inline-block;
-                padding: 4px 10px;
-                border-radius: 4px;
-                font-weight: 600;
-                font-size: 0.8rem;
-                background: #ef4444;
-                color: #ffffff !important;
-            }
-            
-            /* Career Relevance Bar */
-            .career-relevance-bar {
-                display: flex;
-                align-items: center;
-                gap: 15px;
-                padding: 15px;
-                background: #18181b;
-                border-radius: 8px;
-                margin-bottom: 20px;
-            }
-            
-            .relevance-label {
-                color: #71717a;
-                font-size: 0.9rem;
-            }
-            
-            .relevance-badges {
-                display: flex;
-                gap: 8px;
-                flex-wrap: wrap;
-            }
-            
-            .career-badge {
-                display: flex;
-                align-items: center;
-                gap: 5px;
-                padding: 6px 12px;
-                background: #27272a;
-                border: 1px solid #3f3f46;
-                border-radius: 20px;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-            
-            .career-badge:hover {
-                transform: translateY(-2px);
-                border-color: #6366f1;
-            }
-            
-            .career-badge.critical {
-                border-color: #6366f1;
-                background: rgba(99, 102, 241, 0.1);
-            }
-            
-            .career-badge.high {
-                border-color: #10b981;
+            .difficulty-beginner {
                 background: rgba(16, 185, 129, 0.1);
+                color: #10b981;
             }
             
-            .badge-icon { font-size: 1rem; }
-            .badge-name { font-size: 0.85rem; color: #fafafa; }
-            .badge-star { color: #f59e0b; }
+            .difficulty-intermediate {
+                background: rgba(245, 158, 11, 0.1);
+                color: #f59e0b;
+            }
+            
+            .difficulty-advanced {
+                background: rgba(239, 68, 68, 0.1);
+                color: #ef4444;
+            }
             
             /* Sections */
             .lesson-section {
                 margin-bottom: 40px;
-                padding: 30px;
-                background: #18181b;
-                border-radius: 12px;
-                border: 1px solid #27272a;
-            }
-            
-            .lesson-section.completed {
-                border-color: #10b981;
             }
             
             .section-header {
                 display: flex;
-                justify-content: space-between;
                 align-items: center;
+                gap: 15px;
                 margin-bottom: 20px;
             }
             
@@ -1955,6 +2620,7 @@
                 display: flex;
                 align-items: center;
                 gap: 12px;
+                margin: 0;
                 font-size: 1.5rem;
                 color: #fafafa;
             }
@@ -1962,423 +2628,169 @@
             .section-number {
                 width: 32px;
                 height: 32px;
-                background: #6366f1;
-                border-radius: 8px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 1rem;
+                background: #6366f1;
+                border-radius: 50%;
+                font-size: 0.9rem;
+                font-weight: 600;
             }
             
             .section-time {
                 color: #71717a;
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
             
-            /* Collapsible */
-            .collapsible {
-                margin-bottom: 20px;
+            /* Mark Complete Button */
+            .section-complete-bar {
+                margin-top: 25px;
+                padding-top: 20px;
+                border-top: 1px solid #27272a;
             }
             
-            .collapsible-header {
-                width: 100%;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 15px;
+            .mark-complete-btn {
+                padding: 10px 20px;
                 background: #27272a;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                color: #fafafa;
-                text-align: left;
-            }
-            
-            .collapsible-header h3,
-            .collapsible-header h4 {
-                margin: 0;
-                font-size: 1.1rem;
-            }
-            
-            .collapse-icon {
-                color: #71717a;
-                transition: transform 0.2s;
-            }
-            
-            /* Why It Matters special styling */
-            .why-matters-header {
-                background: linear-gradient(135deg, #27272a, #1f1f23);
                 border: 1px solid #3f3f46;
+                border-radius: 8px;
+                color: #a1a1aa;
+                cursor: pointer;
+                font-size: 0.95rem;
                 transition: all 0.2s;
             }
             
-            .why-matters-header:hover {
-                border-color: #6366f1;
-                background: linear-gradient(135deg, #2d2d35, #252530);
-            }
-            
-            .header-left {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
-            }
-            
-            .expand-hint {
-                font-size: 0.75rem;
-                color: #6366f1;
-                font-weight: normal;
-                opacity: 0.8;
-            }
-            
-            .collapsible[data-expanded="true"] .expand-hint {
-                display: none;
-            }
-            
-            .collapsible[data-expanded="false"] .collapsible-content {
-                display: none;
-            }
-            
-            .collapsible-content {
-                padding: 20px;
-                border: 1px solid #27272a;
-                border-top: none;
-                border-radius: 0 0 8px 8px;
-            }
-            
-            /* Core Concepts */
-            .concept-card {
-                margin-bottom: 15px;
-            }
-            
-            .concept-header {
-                background: linear-gradient(135deg, #27272a, #1f1f23);
-            }
-            
-            .concept-definition {
-                font-size: 1.05rem;
-                line-height: 1.7;
-                color: #e4e4e7;
-                margin-bottom: 20px;
-                padding: 15px;
-                background: rgba(99, 102, 241, 0.05);
-                border-left: 3px solid #6366f1;
-                border-radius: 4px;
-            }
-            
-            /* Simple concept (no dropdown) */
-            .concept-simple {
-                background: #18181b;
-                border: 1px solid #27272a;
-                border-radius: 8px;
-                margin-bottom: 15px;
-            }
-            
-            .concept-header-simple {
-                padding: 15px;
-            }
-            
-            .concept-header-simple h3 {
-                margin: 0;
+            .mark-complete-btn:hover {
+                background: #3f3f46;
                 color: #fafafa;
-                font-size: 1rem;
             }
             
-            /* Dynamic concept fields */
-            .concept-field {
-                margin: 15px 0;
-                padding: 12px 15px;
-                background: #1f1f23;
-                border-radius: 8px;
-                border-left: 3px solid #3f3f46;
+            .mark-complete-btn.completed {
+                background: rgba(16, 185, 129, 0.1);
+                border-color: #10b981;
+                color: #10b981;
             }
             
-            .concept-field > strong {
-                display: block;
-                color: #a1a1aa;
-                font-size: 0.85rem;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                margin-bottom: 8px;
-            }
-            
-            .concept-field > span {
-                color: #e4e4e7;
-                line-height: 1.6;
-            }
-            
-            /* Simple list */
-            .simple-list {
-                margin: 0;
-                padding-left: 20px;
-                color: #e4e4e7;
-            }
-            
-            .simple-list li {
-                margin: 5px 0;
-            }
-            
-            /* Concept table */
-            .concept-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 10px;
-                font-size: 0.9rem;
-            }
-            
-            .concept-table th {
-                background: #27272a;
-                color: #a1a1aa;
-                padding: 10px 12px;
-                text-align: left;
-                font-weight: 600;
-                font-size: 0.8rem;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-            
-            .concept-table td {
-                padding: 10px 12px;
-                border-bottom: 1px solid #27272a;
-                color: #e4e4e7;
-            }
-            
-            .concept-table tr:last-child td {
-                border-bottom: none;
-            }
-            
-            .concept-table tr:hover td {
-                background: rgba(99, 102, 241, 0.05);
-            }
-            
-            /* Mini cards for array items */
-            .mini-cards {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 12px;
-                margin-top: 10px;
-            }
-            
-            .mini-card {
-                background: #18181b;
-                border: 1px solid #27272a;
-                border-radius: 8px;
-                padding: 12px;
-            }
-            
-            .mini-card-row {
-                margin: 6px 0;
-            }
-            
-            .mini-label {
-                color: #71717a;
-                font-size: 0.8rem;
-            }
-            
-            .mini-value {
-                color: #e4e4e7;
-                display: block;
-                margin-top: 2px;
-            }
-            
-            /* Object content */
-            .object-content {
-                margin-top: 10px;
-            }
-            
-            .object-row {
+            /* Bottom Navigation */
+            .lesson-bottom-nav {
                 display: flex;
-                gap: 10px;
-                padding: 8px 0;
-                border-bottom: 1px solid #27272a;
+                gap: 15px;
+                margin-top: 40px;
+                padding-top: 30px;
+                border-top: 1px solid #27272a;
             }
             
-            .object-row:last-child {
-                border-bottom: none;
+            .nav-btn {
+                flex: 1;
+                padding: 15px 20px;
+                background: #1f1f23;
+                border: 1px solid #27272a;
+                border-radius: 10px;
+                cursor: pointer;
+                transition: all 0.2s;
+                text-align: left;
             }
             
-            .obj-label {
+            .nav-btn:hover {
+                background: #27272a;
+                border-color: #6366f1;
+            }
+            
+            .nav-btn.home {
+                flex: 0 0 auto;
+                text-align: center;
+            }
+            
+            .nav-direction {
+                display: block;
                 color: #71717a;
-                min-width: 120px;
-                font-size: 0.9rem;
+                font-size: 0.85rem;
+                margin-bottom: 5px;
             }
             
-            .obj-value {
-                color: #e4e4e7;
+            .nav-title {
+                color: #fafafa;
+                font-weight: 500;
+            }
+            
+            .nav-placeholder {
                 flex: 1;
             }
             
-            /* Nested objects */
-            .nested-object {
-                padding: 10px 0;
-                border-bottom: 1px solid #27272a;
+            /* Exam Weight */
+            .exam-weight-box {
+                padding: 20px;
+                background: #1f1f23;
+                border-radius: 10px;
+                margin-top: 20px;
             }
             
-            .nested-object:last-child {
-                border-bottom: none;
+            .exam-weight-box h4 {
+                margin: 0 0 15px 0;
             }
             
-            .nested-label {
-                color: #a1a1aa;
-                font-weight: 600;
-                display: block;
-                margin-bottom: 8px;
-            }
-            
-            .nested-values {
+            .exam-weight-details {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 15px;
+                margin-bottom: 15px;
             }
             
-            .nested-item {
-                color: #e4e4e7;
-                font-size: 0.9rem;
-            }
-            
-            .nested-item em {
-                color: #71717a;
-                font-style: normal;
-            }
-            
-            /* No content message */
-            .no-content {
-                color: #71717a;
-                font-style: italic;
-                text-align: center;
-                padding: 20px;
-            }
-            
-            .how-it-works {
-                margin: 20px 0;
-                padding: 20px;
-                background: #1f1f23;
-                border-radius: 8px;
-            }
-            
-            .how-it-works h4 {
-                color: #6366f1;
-                margin-bottom: 10px;
-            }
-            
-            /* Flow Diagram */
-            .visual-flow {
-                display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                gap: 10px;
-                margin-top: 15px;
-                padding: 15px;
-                background: #18181b;
-                border-radius: 8px;
-                overflow-x: auto;
-            }
-            
-            .flow-step {
+            .weight-item {
+                padding: 8px 12px;
                 background: #27272a;
-                padding: 10px 15px;
-                border-radius: 6px;
-                border: 1px solid #3f3f46;
-                font-size: 0.9rem;
-                color: #e4e4e7;
-            }
-            
-            .flow-arrow {
-                color: #6366f1;
-                font-size: 1.2rem;
-            }
-            
-            /* Examples Grid */
-            .examples-grid {
-                margin-top: 20px;
-            }
-            
-            .examples-list {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 15px;
-            }
-            
-            .example-item {
-                padding: 15px;
-                background: #1f1f23;
-                border-radius: 8px;
-                border: 1px solid #27272a;
-            }
-            
-            .example-item strong {
-                color: #6366f1;
-            }
-            
-            .example-item p {
-                margin: 8px 0;
-                color: #a1a1aa;
-                font-size: 0.9rem;
-            }
-            
-            .impl-note {
-                font-size: 0.8rem;
-                color: #71717a;
-                font-style: italic;
-            }
-            
-            /* What If Box */
-            .what-if-box {
-                margin-top: 20px;
-                padding: 20px;
-                background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
-                border: 1px solid rgba(239, 68, 68, 0.3);
-                border-radius: 8px;
-            }
-            
-            .what-if-box h4 {
-                color: #ef4444;
-                margin-bottom: 10px;
-            }
-            
-            .what-if-scenario {
-                font-style: italic;
-                color: #e4e4e7;
-            }
-            
-            .what-if-consequence {
-                color: #fca5a5;
-                margin: 10px 0;
-            }
-            
-            .real-example {
-                margin-top: 15px;
-                padding: 10px;
-                background: rgba(0,0,0,0.2);
                 border-radius: 6px;
                 font-size: 0.9rem;
-                color: #a1a1aa;
             }
             
-            /* Skill Tree Full */
+            .type-tags,
+            .yield-tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-top: 8px;
+            }
+            
+            .type-tag,
+            .yield-tag {
+                padding: 4px 10px;
+                background: #27272a;
+                border-radius: 4px;
+                font-size: 0.85rem;
+            }
+            
+            .yield-tag {
+                background: rgba(245, 158, 11, 0.1);
+                color: #fcd34d;
+            }
+            
+            /* Skill Tree */
+            .skill-tree-full {
+                padding: 10px 0;
+            }
+            
             .skill-tree-visual {
                 display: flex;
                 align-items: flex-start;
                 gap: 20px;
-                overflow-x: auto;
-                padding: 20px 0;
+                margin-bottom: 25px;
+                flex-wrap: wrap;
             }
             
             .tree-column {
-                min-width: 200px;
+                flex: 1;
+                min-width: 150px;
             }
             
             .tree-column h4 {
-                font-size: 0.85rem;
+                margin: 0 0 10px 0;
                 color: #71717a;
-                margin-bottom: 10px;
-                text-align: center;
+                font-size: 0.85rem;
             }
             
             .tree-node {
-                padding: 12px 15px;
+                padding: 12px;
                 background: #27272a;
-                border: 1px solid #3f3f46;
                 border-radius: 8px;
                 margin-bottom: 8px;
                 cursor: pointer;
@@ -2386,1079 +2798,368 @@
             }
             
             .tree-node:hover {
-                border-color: #6366f1;
-                transform: translateY(-2px);
+                background: #3f3f46;
             }
             
-            .tree-node.current-node {
-                background: linear-gradient(135deg, #6366f1, #8b5cf6);
-                border-color: #6366f1;
+            .tree-node.current {
+                background: linear-gradient(135deg, #4f46e5, #6366f1);
+                cursor: default;
             }
             
-            .tree-arrow {
-                font-size: 2rem;
-                color: #6366f1;
-                align-self: center;
+            .tree-node.prereq {
+                border-left: 3px solid #f59e0b;
+            }
+            
+            .tree-node.unlock {
+                border-left: 3px solid #10b981;
+            }
+            
+            .node-badge {
+                display: inline-block;
+                padding: 2px 8px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 4px;
+                font-size: 0.75rem;
+                margin-bottom: 5px;
             }
             
             .node-title {
                 display: block;
+                font-weight: 500;
                 color: #fafafa;
-                font-size: 0.9rem;
             }
             
-            .node-hint {
-                display: block;
-                font-size: 0.75rem;
-                color: #a1a1aa;
-                margin-top: 5px;
+            .tree-arrow {
+                color: #6366f1;
+                font-size: 1.5rem;
+                padding-top: 30px;
             }
             
-            .node-tier {
-                display: block;
-                font-size: 0.75rem;
-                color: rgba(255,255,255,0.7);
-                margin-top: 5px;
-            }
-            
-            /* Cross Domain */
-            .cross-domain-section {
-                margin-top: 30px;
+            .cascade-learning {
+                margin-top: 20px;
                 padding-top: 20px;
                 border-top: 1px solid #27272a;
             }
             
-            .cross-domain-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-                gap: 15px;
-                margin-top: 15px;
+            .cascade-block {
+                margin-bottom: 15px;
             }
             
-            .cross-domain-card {
-                padding: 15px;
-                background: #1f1f23;
-                border: 1px solid #27272a;
-                border-radius: 8px;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-            
-            .cross-domain-card:hover {
-                border-color: #6366f1;
-                transform: translateY(-2px);
-            }
-            
-            .cd-topic {
+            .cascade-block strong {
                 display: block;
-                color: #6366f1;
-                font-weight: 600;
+                color: #a1a1aa;
+                margin-bottom: 8px;
+            }
+            
+            .cascade-block ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+            
+            .cascade-block li {
+                color: #e4e4e7;
                 margin-bottom: 5px;
             }
             
-            .cd-relationship {
-                font-size: 0.85rem;
+            .builds-toward-section {
+                margin-top: 20px;
+            }
+            
+            .builds-toward-section h4 {
+                margin: 0 0 10px 0;
                 color: #a1a1aa;
             }
             
-            /* Builds Toward */
             .builds-toward-list {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 10px;
-                margin-top: 10px;
+                gap: 8px;
             }
             
             .build-badge {
-                padding: 8px 15px;
-                background: rgba(99, 102, 241, 0.1);
-                border: 1px solid rgba(99, 102, 241, 0.3);
+                padding: 6px 12px;
+                background: linear-gradient(135deg, #1e1e3f, #1e3a5f);
+                border: 1px solid #6366f1;
                 border-radius: 20px;
                 font-size: 0.85rem;
                 color: #a5b4fc;
             }
             
-            /* Career Spotlight */
-            .career-spotlight {
-                border-left: 4px solid #6366f1;
-            }
-            
-            .spotlight-header {
-                background: linear-gradient(135deg, #27272a, #1f1f23);
-            }
-            
-            .scenario-walkthrough {
-                padding: 20px;
-            }
-            
-            .scenario-header {
-                display: flex;
-                gap: 15px;
-                margin-bottom: 15px;
-            }
-            
-            .scenario-time {
-                padding: 4px 10px;
-                background: #27272a;
-                border-radius: 4px;
-                font-size: 0.85rem;
-                color: #a1a1aa;
-            }
-            
-            .scenario-role {
-                padding: 4px 10px;
-                background: rgba(99, 102, 241, 0.1);
-                border-radius: 4px;
-                font-size: 0.85rem;
-                color: #6366f1;
-            }
-            
-            .scenario-situation {
-                font-size: 1rem;
-                line-height: 1.7;
-                color: #e4e4e7;
-                margin-bottom: 20px;
-            }
-            
-            .action-steps {
-                margin: 20px 0;
-            }
-            
-            .action-step {
-                display: flex;
-                gap: 15px;
-                margin-bottom: 15px;
-                padding: 15px;
-                background: #1f1f23;
-                border-radius: 8px;
-            }
-            
-            .action-num {
-                padding: 4px 10px;
-                background: #6366f1;
-                border-radius: 4px;
-                font-size: 0.8rem;
-                height: fit-content;
-            }
-            
-            .action-step strong {
-                display: block;
-                color: #fafafa;
-                margin-bottom: 5px;
-            }
-            
-            .action-step p {
-                color: #a1a1aa;
-                font-size: 0.9rem;
-                margin: 0;
-            }
-            
-            .scenario-outcome {
-                padding: 15px;
-                background: rgba(16, 185, 129, 0.1);
-                border: 1px solid rgba(16, 185, 129, 0.3);
-                border-radius: 8px;
-                color: #10b981;
-            }
-            
-            .skills-demonstrated {
-                margin-top: 20px;
-            }
-            
-            .skills-tags {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-                margin-top: 10px;
-            }
-            
-            .skill-tag {
-                padding: 5px 12px;
-                background: #27272a;
-                border-radius: 4px;
-                font-size: 0.85rem;
-                color: #a1a1aa;
-            }
-            
-            /* Memory Hooks */
-            .memory-hooks {
-                border-left: 4px solid #f59e0b;
-            }
-            
-            .mnemonic-box {
-                padding: 15px;
-                background: rgba(245, 158, 11, 0.1);
-                border-radius: 8px;
-                margin-bottom: 15px;
-            }
-            
-            .mnemonic {
-                font-size: 1.2rem;
-                font-weight: bold;
-                color: #f59e0b;
-            }
-            
-            .alt-mnemonic {
-                color: #a1a1aa;
-                font-size: 0.9rem;
-            }
-            
-            .analogy-box {
-                margin-top: 15px;
-            }
-            
-            .analogy-mapping {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 15px;
-                margin-top: 15px;
-            }
-            
-            .analogy-item {
-                padding: 15px;
-                background: #1f1f23;
-                border-radius: 8px;
-            }
-            
-            .analogy-category {
-                color: #6366f1;
-                font-weight: bold;
-            }
-            
-            .analogy-equals {
-                margin: 0 8px;
-                color: #71717a;
-            }
-            
-            .analogy-equivalent {
-                color: #f59e0b;
-            }
-            
-            .analogy-explanation {
-                margin-top: 8px;
-                font-size: 0.85rem;
-                color: #a1a1aa;
-            }
-            
-            .common-mistakes {
-                margin-top: 20px;
-            }
-            
-            .mistake-item {
-                padding: 15px;
-                background: rgba(239, 68, 68, 0.05);
-                border: 1px solid rgba(239, 68, 68, 0.2);
-                border-radius: 8px;
-                margin-top: 10px;
-            }
-            
-            .mistake {
-                color: #ef4444;
-                font-weight: 500;
-            }
-            
-            .why-wrong, .correct-approach {
-                font-size: 0.9rem;
-                color: #a1a1aa;
-                margin-top: 8px;
-            }
-            
-            /* Micro Quiz */
-            .micro-quiz-section {
-                margin-top: 30px;
-                padding: 20px;
-                background: rgba(99, 102, 241, 0.05);
-                border: 1px solid rgba(99, 102, 241, 0.2);
-                border-radius: 8px;
-            }
-            
-            .micro-quiz-section h4 {
-                color: #6366f1;
-                margin-bottom: 15px;
-            }
-            
-            .micro-quiz {
-                padding: 15px;
-                background: #1f1f23;
-                border-radius: 8px;
-                margin-bottom: 15px;
-            }
-            
-            .micro-quiz.completed {
-                border: 1px solid #10b981;
-            }
-            
-            .quiz-question {
-                font-size: 1rem;
-                color: #e4e4e7;
-                margin-bottom: 15px;
-            }
-            
-            .fill-blank-input {
-                display: flex;
-                gap: 10px;
-            }
-            
-            .fill-blank-input input {
-                flex: 1;
-                padding: 10px 15px;
-                background: #27272a;
-                border: 1px solid #3f3f46;
-                border-radius: 6px;
-                color: #fafafa;
-            }
-            
-            .fill-blank-input button,
-            .reveal-answer button,
-            .got-it-btn {
-                padding: 10px 20px;
-                background: #6366f1;
-                border: none;
-                border-radius: 6px;
-                color: white;
-                cursor: pointer;
-            }
-            
-            .fill-blank-input button:hover,
-            .reveal-answer button:hover {
-                background: #4f46e5;
-            }
-            
-            .answer-reveal {
-                padding: 15px;
-                background: #27272a;
-                border-radius: 6px;
-                margin-top: 10px;
-            }
-            
-            .got-it-btn {
-                margin-left: 15px;
-                background: #10b981;
-            }
-            
-            .quiz-hint {
-                font-size: 0.9rem;
-                color: #f59e0b;
-                background: rgba(245, 158, 11, 0.1);
-                padding: 10px;
-                border-radius: 6px;
-                margin-top: 10px;
-            }
-            
-            .hint-btn {
-                background: transparent;
-                border: 1px solid #3f3f46;
-                color: #a1a1aa;
-                padding: 5px 10px;
-                border-radius: 4px;
-                font-size: 0.8rem;
-                cursor: pointer;
-                margin-top: 10px;
-            }
-            
-            .quiz-feedback {
-                margin-top: 10px;
-                padding: 10px;
-                border-radius: 6px;
-            }
-            
-            .quiz-feedback.correct {
-                background: rgba(16, 185, 129, 0.1);
-                color: #10b981;
-            }
-            
-            .quiz-feedback.incorrect {
-                background: rgba(239, 68, 68, 0.1);
-                color: #ef4444;
-            }
-            
-            /* Key Points */
-            .section-key-points {
-                margin-top: 25px;
-                padding-top: 20px;
-                border-top: 1px solid #27272a;
-            }
-            
-            .key-points-box, .exam-essentials-box {
-                padding: 20px;
-                background: #1f1f23;
-                border-radius: 8px;
-                margin-bottom: 15px;
-            }
-            
-            .key-points-box {
-                border-left: 4px solid #6366f1;
-            }
-            
-            .exam-essentials-box {
-                border-left: 4px solid #f59e0b;
-            }
-            
-            .exam-must-remember {
-                padding: 20px;
-                background: rgba(245, 158, 11, 0.05);
-                border: 1px solid rgba(245, 158, 11, 0.2);
-                border-radius: 8px;
-            }
-            
-            .must-remember-item {
-                padding: 10px 0;
-                border-bottom: 1px solid #27272a;
-            }
-            
-            .must-remember-item:last-child {
-                border-bottom: none;
-            }
-            
-            .must-remember-item .fact {
-                color: #f59e0b;
-                font-weight: 500;
-            }
-            
-            .must-remember-item .why-tested {
-                font-size: 0.85rem;
-                color: #a1a1aa;
-                margin-top: 5px;
-            }
-            
-            /* Section Complete */
-            .section-complete-bar {
-                margin-top: 25px;
-                padding-top: 20px;
-                border-top: 1px solid #27272a;
-                text-align: center;
-            }
-            
-            .mark-complete-btn {
-                padding: 12px 30px;
-                background: #27272a;
-                border: 1px solid #3f3f46;
-                border-radius: 8px;
-                color: #a1a1aa;
-                cursor: pointer;
-                font-size: 1rem;
-                transition: all 0.2s;
-            }
-            
-            .mark-complete-btn:hover {
-                background: #6366f1;
-                border-color: #6366f1;
-                color: white;
-            }
-            
-            .mark-complete-btn.completed {
-                background: #10b981;
-                border-color: #10b981;
-                color: white;
-            }
-            
             /* Unlock Section */
             .unlock-section {
                 text-align: center;
-            }
-            
-            .unlock-gate {
                 padding: 40px;
+                background: #1f1f23;
+                border-radius: 12px;
             }
             
-            .lock-icon {
-                font-size: 3rem;
-                margin-bottom: 20px;
-            }
-            
-            .unlock-gate h3 {
+            .unlock-section h3 {
+                margin: 0 0 10px 0;
                 color: #fafafa;
-                margin-bottom: 10px;
             }
             
-            .unlock-gate p {
+            .unlock-section p {
                 color: #a1a1aa;
                 margin-bottom: 20px;
             }
             
-            .unlock-progress {
-                max-width: 300px;
-                margin: 0 auto;
+            .unlock-buttons {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+                flex-wrap: wrap;
             }
             
-            .unlock-bar {
-                height: 8px;
-                background: #27272a;
-                border-radius: 4px;
-                overflow: hidden;
-                margin-bottom: 10px;
-            }
-            
-            .unlock-fill {
-                height: 100%;
-                background: linear-gradient(90deg, #6366f1, #8b5cf6);
-                transition: width 0.5s;
-            }
-            
-            .unlock-text {
-                color: #71717a;
-                font-size: 0.9rem;
-            }
-            
-            .unlocked-content h3 {
-                color: #10b981;
-                margin-bottom: 25px;
-            }
-            
-            .practice-options {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 20px;
-                margin-bottom: 30px;
-            }
-            
-            .practice-card {
-                padding: 25px;
-                background: #1f1f23;
-                border: 1px solid #27272a;
-                border-radius: 12px;
+            .unlock-btn {
+                padding: 12px 24px;
+                border: none;
+                border-radius: 8px;
                 cursor: pointer;
+                font-weight: 600;
+                font-size: 1rem;
                 transition: all 0.2s;
-                text-align: center;
             }
             
-            .practice-card:hover {
-                transform: translateY(-4px);
-                border-color: #6366f1;
+            .quiz-btn {
+                background: #6366f1;
+                color: white;
             }
             
-            .practice-icon {
-                font-size: 2.5rem;
-                display: block;
-                margin-bottom: 15px;
+            .quiz-btn:hover {
+                background: #4f46e5;
             }
             
-            .practice-card h4 {
-                color: #fafafa;
+            .sim-btn {
+                background: #10b981;
+                color: white;
+            }
+            
+            .sim-btn:hover {
+                background: #059669;
+            }
+            
+            /* Summary Section */
+            .takeaways-box,
+            .exam-essentials-box {
+                padding: 20px;
+                background: #1f1f23;
+                border-radius: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .takeaways-box h3,
+            .exam-essentials-box h3 {
+                margin: 0 0 15px 0;
+            }
+            
+            .takeaways-box ul,
+            .exam-essentials-box ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+            
+            .takeaways-box li,
+            .exam-essentials-box li {
+                color: #e4e4e7;
                 margin-bottom: 8px;
             }
             
-            .practice-card p {
-                color: #a1a1aa;
-                font-size: 0.9rem;
-                margin-bottom: 10px;
+            .exam-essentials-box {
+                border-left: 4px solid #fcd34d;
             }
             
-            .practice-id {
-                font-size: 0.8rem;
-                color: #71717a;
-            }
-            
-            .next-lesson-prompt {
-                margin-top: 30px;
-                padding-top: 20px;
-                border-top: 1px solid #27272a;
-            }
-            
-            .next-lesson-prompt p {
-                color: #a1a1aa;
-                margin-bottom: 15px;
-            }
-            
-            /* Bottom Navigation */
-            .lesson-bottom-nav {
-                display: flex;
-                justify-content: space-between;
-                gap: 20px;
-                margin-top: 40px;
-                padding-top: 30px;
-                border-top: 1px solid #27272a;
-            }
-            
-            .lesson-bottom-nav .nav-btn {
-                flex: 1;
-                max-width: 300px;
-                padding: 15px 20px;
-                background: #18181b;
-                border: 1px solid #27272a;
-                border-radius: 8px;
-                cursor: pointer;
-                text-align: left;
-                transition: all 0.2s;
-            }
-            
-            .lesson-bottom-nav .nav-btn:hover {
-                border-color: #6366f1;
-                transform: translateY(-2px);
-            }
-            
-            .lesson-bottom-nav .nav-btn.home {
-                max-width: 150px;
-                text-align: center;
-            }
-            
-            .nav-direction {
-                display: block;
-                font-size: 0.85rem;
-                color: #6366f1;
-                margin-bottom: 5px;
-            }
-            
-            .nav-title {
-                display: block;
-                color: #fafafa;
-                font-size: 0.95rem;
-            }
-            
-            .nav-placeholder {
-                flex: 1;
-                max-width: 300px;
-            }
-            
-            /* Career Modal */
-            .career-modal-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.8);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 9999;
+            .next-connection {
                 padding: 20px;
-            }
-            
-            .career-modal {
-                background: #18181b;
-                border-radius: 16px;
-                padding: 30px;
-                max-width: 500px;
-                width: 100%;
-                max-height: 80vh;
-                overflow-y: auto;
-                position: relative;
-            }
-            
-            .career-modal h2 {
-                margin-bottom: 15px;
-            }
-            
-            .modal-close {
-                position: absolute;
-                top: 15px;
-                right: 15px;
-                background: transparent;
-                border: none;
-                color: #a1a1aa;
-                font-size: 1.5rem;
-                cursor: pointer;
-            }
-            
-            .modal-relevance {
-                display: flex;
-                gap: 15px;
-                margin-bottom: 15px;
-            }
-            
-            .relevance-level {
-                padding: 5px 12px;
-                border-radius: 4px;
-                font-size: 0.85rem;
-                font-weight: bold;
-            }
-            
-            .relevance-level.critical {
-                background: rgba(99, 102, 241, 0.2);
-                color: #6366f1;
-            }
-            
-            .relevance-level.high {
-                background: rgba(16, 185, 129, 0.2);
-                color: #10b981;
-            }
-            
-            .job-percentage {
-                color: #a1a1aa;
-            }
-            
-            .daily-usage {
-                color: #e4e4e7;
-                line-height: 1.6;
-                margin-bottom: 20px;
-            }
-            
-            .modal-tasks, .modal-tools {
+                background: linear-gradient(135deg, #1e1e3f, #1e3a5f);
+                border-radius: 10px;
                 margin-top: 20px;
             }
             
-            .modal-tasks h4, .modal-tools h4 {
+            .next-connection h4 {
+                margin: 0 0 10px 0;
+                color: #60a5fa;
+            }
+            
+            /* Mini Skill Tree (Sidebar) */
+            .skill-tree-mini {
+                padding: 15px;
+                background: #1f1f23;
+                border-radius: 8px;
+            }
+            
+            .skill-tree-mini h4 {
+                margin: 0 0 12px 0;
+                color: #a1a1aa;
+                font-size: 0.85rem;
+            }
+            
+            .mini-prereqs,
+            .mini-unlocks {
+                margin-bottom: 10px;
+            }
+            
+            .mini-label {
+                display: block;
                 color: #71717a;
-                font-size: 0.9rem;
-                margin-bottom: 10px;
+                font-size: 0.75rem;
+                margin-bottom: 5px;
             }
             
-            .modal-tasks ul {
-                list-style: disc;
-                padding-left: 20px;
-                color: #a1a1aa;
-            }
-            
-            .tools-list {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-            
-            .tool-tag {
-                padding: 5px 12px;
-                background: #27272a;
-                border-radius: 4px;
-                font-size: 0.85rem;
-                color: #a1a1aa;
-            }
-            
-            /* Deep Dive */
-            .deep-dive-section {
-                border-left: 4px solid #8b5cf6;
-            }
-            
-            .methodology-steps {
-                margin-top: 15px;
-            }
-            
-            .method-step {
-                padding: 15px;
-                background: #1f1f23;
-                border-radius: 8px;
-                margin-bottom: 10px;
-            }
-            
-            .step-num {
-                padding: 4px 10px;
-                background: #8b5cf6;
-                border-radius: 4px;
-                font-size: 0.8rem;
-                margin-right: 10px;
-            }
-            
-            .step-question {
-                color: #e4e4e7;
-                margin: 10px 0;
-            }
-            
-            .step-outcomes {
-                display: flex;
-                gap: 15px;
-                margin-top: 10px;
-            }
-            
-            .outcome {
-                padding: 8px 12px;
-                border-radius: 4px;
-                font-size: 0.85rem;
-            }
-            
-            .outcome.yes {
-                background: rgba(16, 185, 129, 0.1);
-                color: #10b981;
-            }
-            
-            .outcome.no {
-                background: rgba(239, 68, 68, 0.1);
-                color: #ef4444;
-            }
-            
-            /* Mapping Table */
-            .mapping-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 15px;
-            }
-            
-            .mapping-table th,
-            .mapping-table td {
-                padding: 12px;
-                text-align: left;
-                border-bottom: 1px solid #27272a;
-            }
-            
-            .mapping-table th {
-                background: #1f1f23;
-                color: #a1a1aa;
-                font-weight: 500;
-            }
-            
-            .mapping-table td {
-                color: #e4e4e7;
-            }
-            
-            .category-badge {
-                padding: 4px 10px;
-                background: #6366f1;
-                border-radius: 4px;
-                font-size: 0.8rem;
-            }
-            
-            /* Flowchart */
-            .flowchart-container {
-                margin: 20px 0;
-                padding: 20px;
-                background: #1f1f23;
-                border-radius: 8px;
-            }
-            
-            .flowchart {
-                margin-top: 15px;
-            }
-            
-            .flowchart-step {
-                padding: 15px;
-                background: #27272a;
-                border-radius: 8px;
-                margin-bottom: 10px;
-                border-left: 4px solid #6366f1;
-            }
-            
-            .flowchart-step .step-number {
+            .mini-node {
                 display: inline-block;
-                width: 28px;
-                height: 28px;
-                background: #6366f1;
-                border-radius: 50%;
-                text-align: center;
-                line-height: 28px;
-                margin-right: 10px;
+                padding: 4px 8px;
+                background: #27272a;
+                border-radius: 4px;
+                font-size: 0.8rem;
+                color: #a1a1aa;
+                margin-right: 5px;
+                margin-bottom: 5px;
             }
             
-            .flowchart-step .step-question {
-                font-weight: 500;
+            .mini-node.current {
+                background: #6366f1;
+                color: white;
+            }
+            
+            /* Core Concepts */
+            .core-concepts {
+                margin: 20px 0;
+            }
+            
+            .concept-card {
+                margin-bottom: 15px;
+            }
+            
+            .concept-card.simple {
+                padding: 15px;
+                background: #27272a;
+                border-radius: 8px;
+            }
+            
+            .concept-card.simple h4 {
+                margin: 0;
                 color: #fafafa;
             }
             
-            .step-branches {
-                display: flex;
-                gap: 20px;
-                margin-top: 15px;
-                margin-left: 38px;
+            .concept-header h4 {
+                margin: 0;
             }
             
-            .branch {
-                flex: 1;
-                padding: 10px;
+            .concept-details {
+                color: #e4e4e7;
+            }
+            
+            .concept-definition {
+                padding: 12px;
+                background: rgba(99, 102, 241, 0.1);
+                border-left: 3px solid #6366f1;
+                border-radius: 4px;
+                margin-bottom: 15px;
+            }
+            
+            .how-it-works,
+            .concept-examples {
+                margin-bottom: 15px;
+            }
+            
+            .how-it-works strong,
+            .concept-examples strong {
+                display: block;
+                color: #a1a1aa;
+                margin-bottom: 8px;
+            }
+            
+            .dynamic-field {
+                margin-bottom: 12px;
+            }
+            
+            .dynamic-field strong {
+                color: #a1a1aa;
+            }
+            
+            .mini-cards {
+                display: grid;
+                gap: 10px;
+                margin-top: 8px;
+            }
+            
+            .mini-card {
+                padding: 12px;
+                background: #27272a;
                 border-radius: 6px;
             }
             
-            .branch.yes {
-                background: rgba(16, 185, 129, 0.1);
-                border: 1px solid rgba(16, 185, 129, 0.3);
+            .mini-card div {
+                margin-bottom: 5px;
             }
             
-            .branch.no {
-                background: rgba(107, 114, 128, 0.1);
-                border: 1px solid rgba(107, 114, 128, 0.3);
+            .mini-card em {
+                color: #71717a;
             }
             
-            .branch-label {
-                font-weight: 500;
-                color: #10b981;
-            }
-            
-            .branch.no .branch-label {
-                color: #9ca3af;
-            }
-            
-            .branch-result {
-                display: block;
-                font-size: 0.9rem;
-                color: #a1a1aa;
-                margin-top: 5px;
-            }
-            
-            /* Introduction Specific */
+            /* Introduction */
             .intro-hook {
                 font-size: 1.1rem;
-                line-height: 1.8;
                 color: #e4e4e7;
+                line-height: 1.7;
                 margin-bottom: 25px;
+                padding: 20px;
+                background: #1f1f23;
+                border-left: 4px solid #6366f1;
+                border-radius: 4px;
             }
             
             .learning-goals-box {
                 padding: 20px;
-                background: rgba(99, 102, 241, 0.05);
-                border: 1px solid rgba(99, 102, 241, 0.2);
-                border-radius: 8px;
+                background: #1f1f23;
+                border-radius: 10px;
                 margin-bottom: 20px;
+            }
+            
+            .learning-goals-box h3 {
+                margin: 0 0 15px 0;
             }
             
             .goals-list {
-                list-style: none;
-                padding: 0;
-                margin: 15px 0 0;
+                margin: 0;
+                padding-left: 20px;
             }
             
             .goals-list li {
-                padding: 8px 0 8px 30px;
-                position: relative;
                 color: #e4e4e7;
-            }
-            
-            .goals-list li::before {
-                content: '✓';
-                position: absolute;
-                left: 0;
-                color: #6366f1;
-            }
-            
-            .why-matters-box, .exam-weight-box {
-                margin-bottom: 20px;
-            }
-            
-            .matter-item {
-                padding: 15px;
-                background: #1f1f23;
-                border-radius: 8px;
-                margin-bottom: 10px;
-            }
-            
-            .matter-item strong {
-                color: #6366f1;
-            }
-            
-            .exam-weight-content {
-                display: flex;
-                gap: 20px;
-                margin: 15px 0;
-            }
-            
-            .weight-domain, .weight-questions {
-                padding: 8px 15px;
-                background: #27272a;
-                border-radius: 6px;
-                font-size: 0.9rem;
-            }
-            
-            .high-yield-topics ul {
-                margin-top: 10px;
-                padding-left: 20px;
-            }
-            
-            .high-yield-topics li {
-                color: #f59e0b;
-                margin-bottom: 5px;
-            }
-            
-            /* Summary Section */
-            .takeaways-box, .exam-essentials-box {
-                margin-bottom: 20px;
-            }
-            
-            .takeaways-box ul, .exam-essentials-box ul {
-                margin: 15px 0 0;
-                padding-left: 20px;
-            }
-            
-            .takeaways-box li, .exam-essentials-box li {
-                margin-bottom: 10px;
-                color: #e4e4e7;
-                line-height: 1.6;
-            }
-            
-            .career-connections {
-                margin-top: 25px;
-            }
-            
-            .career-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 15px;
-                margin-top: 15px;
-            }
-            
-            .career-connection-card {
-                padding: 15px;
-                background: #1f1f23;
-                border-radius: 8px;
-                border: 1px solid #27272a;
-            }
-            
-            .cc-role {
-                display: block;
-                color: #6366f1;
-                font-weight: 500;
                 margin-bottom: 8px;
             }
             
-            .cc-text {
-                font-size: 0.9rem;
-                color: #a1a1aa;
-                margin: 0;
-            }
-            
-            .next-connection {
-                margin-top: 25px;
-                padding: 20px;
-                background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
-                border-radius: 8px;
-                border: 1px solid rgba(99, 102, 241, 0.2);
-            }
-            
-            .next-connection h4 {
-                color: #6366f1;
-                margin-bottom: 10px;
-            }
-            
-            .next-connection p {
-                color: #e4e4e7;
-                line-height: 1.7;
-                margin: 0;
-            }
-            
-            /* Exam Traps */
-            .exam-traps {
-                margin: 20px 0;
-                padding: 20px;
-                background: rgba(239, 68, 68, 0.05);
-                border: 1px solid rgba(239, 68, 68, 0.2);
-                border-radius: 8px;
-            }
-            
-            .exam-traps h4 {
-                color: #ef4444;
+            /* Matter Items */
+            .matter-item {
                 margin-bottom: 15px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #27272a;
             }
             
-            .trap-item {
-                padding: 15px;
-                background: #1f1f23;
-                border-radius: 8px;
-                margin-bottom: 10px;
+            .matter-item:last-child {
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: none;
             }
             
-            .trap-trap {
-                color: #ef4444;
-                font-weight: 500;
-            }
-            
-            .trap-reality, .trap-tip {
-                font-size: 0.9rem;
+            .matter-item strong {
                 color: #a1a1aa;
-                margin-top: 8px;
+            }
+            
+            .matter-item p {
+                margin: 8px 0 0 0;
+                color: #e4e4e7;
             }
             
             /* Responsive */
-            @media (max-width: 1024px) {
+            @media (max-width: 900px) {
                 .enhanced-lesson-container {
                     grid-template-columns: 1fr;
                 }
                 
                 .lesson-sidebar {
-                    position: fixed;
-                    left: -280px;
-                    top: 70px;
-                    width: 260px;
-                    z-index: 100;
-                    transition: left 0.3s;
-                }
-                
-                .lesson-sidebar.open {
-                    left: 0;
+                    display: none;
                 }
                 
                 .lesson-main {
@@ -3467,340 +3168,34 @@
                 
                 .skill-tree-visual {
                     flex-direction: column;
-                    align-items: center;
-                }
-                
-                .tree-column {
-                    width: 100%;
-                    max-width: 300px;
-                    text-align: center;
-                }
-                
-                .tree-column h4 {
-                    text-align: center;
-                }
-                
-                .tree-node {
-                    text-align: center;
                 }
                 
                 .tree-arrow {
                     transform: rotate(90deg);
-                    margin: 10px 0;
-                }
-                
-                .cross-domain-grid {
-                    grid-template-columns: 1fr;
-                }
-                
-                .builds-toward-list {
-                    justify-content: center;
+                    padding: 10px 0;
                 }
             }
             
-            @media (max-width: 640px) {
-                .lesson-bottom-nav {
-                    flex-direction: column;
-                }
-                
-                .lesson-bottom-nav .nav-btn {
-                    max-width: none;
-                }
-                
-                .practice-options {
-                    grid-template-columns: 1fr;
-                }
-            }
-            
-            /* ================================================
-               LIGHT MODE
-               ================================================ */
-            
-            [data-theme="light"] .lesson-sidebar {
-                background: #ffffff;
-                border-right-color: #e2e8f0;
-            }
-            
-            [data-theme="light"] .back-btn-small {
-                border-color: #e2e8f0;
-                color: #64748b;
-            }
-            
-            [data-theme="light"] .back-btn-small:hover {
-                color: #0f172a;
-            }
-            
-            [data-theme="light"] .progress-bg {
-                stroke: #e2e8f0;
-            }
-            
-            [data-theme="light"] .progress-text {
-                color: #0f172a;
-            }
-            
-            [data-theme="light"] .toc-item a {
-                color: #64748b;
-            }
-            
-            [data-theme="light"] .toc-item a:hover {
-                background: #f1f5f9;
-                color: #0f172a;
-            }
-            
-            [data-theme="light"] .toc-item.active a {
-                background: rgba(99, 102, 241, 0.1);
-            }
-            
-            [data-theme="light"] .toc-number {
-                background: #e2e8f0;
-                color: #475569;
-            }
-            
-            [data-theme="light"] .mini-unlock {
-                background: #f1f5f9;
-                color: #475569;
-            }
-            
-            [data-theme="light"] .mini-unlock:hover {
-                background: #e2e8f0;
-                color: #0f172a;
-            }
-            
-            [data-theme="light"] .lesson-title {
-                color: #0f172a;
-            }
-            
-            [data-theme="light"] .lesson-subtitle {
-                color: #64748b;
-            }
-            
-            [data-theme="light"] .meta-item {
-                color: #64748b;
-            }
-            
-            [data-theme="light"] .career-relevance-bar {
+            /* Light Theme Support */
+            [data-theme="light"] .accordion-header {
                 background: #f8fafc;
             }
             
-            [data-theme="light"] .career-badge {
-                background: #ffffff;
-                border-color: #e2e8f0;
-            }
-            
-            [data-theme="light"] .badge-name {
-                color: #334155;
-            }
-            
-            [data-theme="light"] .lesson-section {
-                background: #ffffff;
-                border-color: #e2e8f0;
-            }
-            
-            [data-theme="light"] .section-header h2 {
-                color: #0f172a;
-            }
-            
-            [data-theme="light"] .collapsible-header {
-                background: #f1f5f9;
-                color: #0f172a;
-            }
-            
-            [data-theme="light"] .why-matters-header {
-                background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-                border-color: #cbd5e1;
-            }
-            
-            [data-theme="light"] .why-matters-header:hover {
-                border-color: #6366f1;
-                background: linear-gradient(135deg, #e2e8f0, #d1d5db);
-            }
-            
-            [data-theme="light"] .expand-hint {
-                color: #6366f1;
-            }
-            
-            [data-theme="light"] .collapsible-content {
-                border-color: #e2e8f0;
-            }
-            
-            [data-theme="light"] .concept-definition {
-                background: rgba(99, 102, 241, 0.05);
-                color: #334155;
-            }
-            
-            [data-theme="light"] .concept-simple {
-                background: #ffffff;
-                border-color: #e2e8f0;
-            }
-            
-            [data-theme="light"] .concept-header-simple h3 {
-                color: #0f172a;
-            }
-            
-            [data-theme="light"] .concept-field {
-                background: #f8fafc;
-                border-left-color: #cbd5e1;
-            }
-            
-            [data-theme="light"] .concept-field > strong {
-                color: #64748b;
-            }
-            
-            [data-theme="light"] .concept-field > span,
-            [data-theme="light"] .simple-list,
-            [data-theme="light"] .obj-value,
-            [data-theme="light"] .mini-value,
-            [data-theme="light"] .nested-item {
-                color: #334155;
-            }
-            
-            [data-theme="light"] .concept-table th {
-                background: #f1f5f9;
-                color: #64748b;
-            }
-            
-            [data-theme="light"] .concept-table td {
-                border-bottom-color: #e2e8f0;
-                color: #334155;
-            }
-            
-            [data-theme="light"] .concept-table tr:hover td {
-                background: rgba(99, 102, 241, 0.05);
-            }
-            
-            [data-theme="light"] .mini-card {
-                background: #ffffff;
-                border-color: #e2e8f0;
-            }
-            
-            [data-theme="light"] .object-row,
-            [data-theme="light"] .nested-object {
-                border-bottom-color: #e2e8f0;
-            }
-            
-            [data-theme="light"] .obj-label,
-            [data-theme="light"] .mini-label,
-            [data-theme="light"] .nested-item em {
-                color: #64748b;
-            }
-            
-            [data-theme="light"] .how-it-works,
-            [data-theme="light"] .example-item,
-            [data-theme="light"] .action-step,
-            [data-theme="light"] .method-step,
-            [data-theme="light"] .analogy-item,
-            [data-theme="light"] .career-connection-card,
-            [data-theme="light"] .trap-item,
-            [data-theme="light"] .must-remember-item,
-            [data-theme="light"] .micro-quiz,
-            [data-theme="light"] .key-points-box,
-            [data-theme="light"] .exam-essentials-box,
-            [data-theme="light"] .flowchart-container,
-            [data-theme="light"] .practice-card {
-                background: #f8fafc;
-            }
-            
-            [data-theme="light"] .visual-flow,
-            [data-theme="light"] .answer-reveal {
+            [data-theme="light"] .accordion-header:hover {
                 background: #f1f5f9;
             }
             
-            [data-theme="light"] .flow-step {
-                background: #ffffff;
-                border-color: #e2e8f0;
-                color: #334155;
-            }
-            
-            [data-theme="light"] .tree-node {
-                background: #f8fafc;
-                border-color: #e2e8f0;
-            }
-            
-            [data-theme="light"] .node-title {
-                color: #0f172a;
-            }
-            
-            [data-theme="light"] .cross-domain-card {
-                background: #f8fafc;
-                border-color: #e2e8f0;
-            }
-            
-            [data-theme="light"] .scenario-situation,
-            [data-theme="light"] .concept-content p,
-            [data-theme="light"] .daily-usage,
-            [data-theme="light"] .intro-hook,
-            [data-theme="light"] .goals-list li,
-            [data-theme="light"] .takeaways-box li,
-            [data-theme="light"] .exam-essentials-box li,
-            [data-theme="light"] .quiz-question,
-            [data-theme="light"] .next-connection p {
-                color: #334155;
-            }
-            
-            [data-theme="light"] .mark-complete-btn {
-                background: #f1f5f9;
-                border-color: #e2e8f0;
-                color: #64748b;
-            }
-            
-            [data-theme="light"] .mark-complete-btn:hover {
-                background: #6366f1;
-                color: white;
-            }
-            
-            [data-theme="light"] .unlock-bar {
-                background: #e2e8f0;
-            }
-            
-            [data-theme="light"] .lesson-bottom-nav .nav-btn {
-                background: #ffffff;
-                border-color: #e2e8f0;
-            }
-            
-            [data-theme="light"] .nav-title {
-                color: #0f172a;
-            }
-            
-            [data-theme="light"] .career-modal {
+            [data-theme="light"] .accordion-content {
                 background: #ffffff;
             }
             
-            [data-theme="light"] .mapping-table th {
-                background: #f1f5f9;
-            }
-            
-            [data-theme="light"] .mapping-table td {
-                color: #334155;
-            }
-            
-            [data-theme="light"] .fill-blank-input input {
-                background: #ffffff;
+            [data-theme="light"] .accordion-section {
                 border-color: #e2e8f0;
-                color: #0f172a;
+                background: #ffffff;
             }
         `;
         
         document.head.appendChild(styles);
-    }
-
-    // ================================================
-    // HELPER FUNCTIONS
-    // ================================================
-
-    function formatContent(text) {
-        if (!text) return '';
-        // Basic formatting - escape HTML then convert line breaks
-        let formatted = escapeHtml(text);
-        formatted = formatted.replace(/\n/g, '<br>');
-        return `<p>${formatted}</p>`;
-    }
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        if (typeof text !== 'string') return String(text);
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 
     // ================================================
@@ -3811,9 +3206,10 @@
     window.EnhancedLessonViewer = {
         show: showEnhancedLesson,
         state: LessonState,
-        CAREER_ROLES
+        CAREER_ROLES,
+        TOOL_LABS
     };
 
-    console.log('✅ Enhanced Lesson Viewer loaded');
+    console.log('✅ Enhanced Lesson Viewer v34 loaded (NEW format, accordion deep-dives)');
 
 })();
