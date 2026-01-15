@@ -75,6 +75,7 @@ const APP = {
         questions: [],
         simulations: [],
         simulationData: {}, // v29: Cache for loaded JSON files
+        lessonData: {}, // v34: Cache for enhanced lesson JSON files
         lessons: [],
         remediation: [],
         pbqs: [],
@@ -4191,8 +4192,18 @@ function getNextLesson(currentLessonId) {
 function showLessonViewer(lessonId) {
     // Check if enhanced lesson viewer is available and lesson has enhanced data
     if (typeof showEnhancedLesson === 'function') {
+        // v34: Check both lessonData cache AND ALL_LESSONS for enhanced content
         const enhancedData = APP.content.lessonData?.[lessonId];
-        if (enhancedData && (enhancedData.sections || enhancedData.skill_tree || enhancedData.role_relevance)) {
+        const lessonFromList = ALL_LESSONS.find(l => l.id === lessonId);
+        const hasEnhancedFeatures = (data) => data && (
+            data.sections || 
+            data.skill_tree || 
+            data.role_relevance || 
+            data.memory_hooks ||
+            data.introduction?.why_it_matters
+        );
+        
+        if (hasEnhancedFeatures(enhancedData) || hasEnhancedFeatures(lessonFromList)) {
             console.log(`📚 Loading enhanced lesson: ${lessonId}`);
             showEnhancedLesson(lessonId);
             return;
@@ -6756,7 +6767,15 @@ async function loadExternalContent() {
         if (data.lessons.length > 0) {
             // Enhance ALL_LESSONS with full content
             data.lessons.forEach(loadedLesson => {
-                const existingIndex = ALL_LESSONS.findIndex(l => l.id === loadedLesson.id);
+                // v34: Store in lessonData cache for enhanced-lesson-viewer
+                const lessonId = loadedLesson.lesson_id || loadedLesson.id;
+                APP.content.lessonData[lessonId] = loadedLesson;
+                // Also store under alternate key if different
+                if (loadedLesson.id && loadedLesson.id !== lessonId) {
+                    APP.content.lessonData[loadedLesson.id] = loadedLesson;
+                }
+                
+                const existingIndex = ALL_LESSONS.findIndex(l => l.id === loadedLesson.id || l.id === lessonId);
                 if (existingIndex >= 0) {
                     // Merge content
                     ALL_LESSONS[existingIndex] = {
@@ -6773,6 +6792,7 @@ async function loadExternalContent() {
                 return a.id.localeCompare(b.id);
             });
             console.log(`✅ Enhanced ${data.lessons.length} lessons with full content`);
+            console.log(`✅ Cached ${Object.keys(APP.content.lessonData).length} lessons in lessonData`);
         }
         
         if (data.simulations.length > 0) {

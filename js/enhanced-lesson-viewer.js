@@ -79,17 +79,28 @@
     function showEnhancedLesson(lessonId) {
         const content = document.getElementById('content');
         
-        // Find lesson in ALL_LESSONS or load from enhanced data
+        // Find lesson in ALL_LESSONS
         let lesson = ALL_LESSONS.find(l => l.id === lessonId);
         if (!lesson) {
             console.error('Lesson not found:', lessonId);
             return;
         }
 
-        // Try to load enhanced lesson data
-        const enhancedData = APP.content.lessonData?.[lessonId];
+        // v34: Try to load enhanced lesson data from multiple sources
+        // Check lessonData cache (populated by data-loader)
+        const enhancedData = APP.content.lessonData?.[lessonId] || 
+                            APP.content.lessonData?.[lesson.lesson_id];
+        
         if (enhancedData) {
+            // Merge enhanced data into lesson
             lesson = { ...lesson, ...enhancedData };
+            console.log(`✅ Loaded enhanced data for ${lessonId}`, {
+                hasSections: !!lesson.sections,
+                hasMemoryHooks: !!lesson.sections?.[0]?.memory_hooks,
+                hasRoleRelevance: !!lesson.role_relevance
+            });
+        } else {
+            console.log(`ℹ️ No enhanced data found in lessonData cache for ${lessonId}, using ALL_LESSONS data`);
         }
 
         LessonState.currentLesson = lesson;
