@@ -220,7 +220,7 @@
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden';
         
-        fetch('data/' + labFile)
+        fetch('data/tools/' + labFile)
             .then(r => {
                 if (!r.ok) throw new Error('Lab file not found');
                 return r.json();
@@ -236,8 +236,8 @@
                     <div style="text-align: center; padding: 80px;">
                         <div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div>
                         <h2 style="color: #fafafa; margin-bottom: 15px;">Lab Not Found</h2>
-                        <p style="color: #a1a1aa; margin-bottom: 10px;">Could not load: <code style="background: #27272a; padding: 2px 8px; border-radius: 4px;">data/${escapeHtml(labFile)}</code></p>
-                        <p style="color: #71717a; margin-bottom: 25px;">Make sure the lab JSON files are in your data/ folder.</p>
+                        <p style="color: #a1a1aa; margin-bottom: 10px;">Could not load: <code style="background: #27272a; padding: 2px 8px; border-radius: 4px;">data/tools/${escapeHtml(labFile)}</code></p>
+                        <p style="color: #71717a; margin-bottom: 25px;">Make sure the lab JSON files are in your data/tools/ folder.</p>
                         <button onclick="closeLabModal()" style="background: #6366f1; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem;">Close</button>
                     </div>
                 `;

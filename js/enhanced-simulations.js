@@ -87,8 +87,8 @@ async function loadEnhancedSimulationData(simId, simInfo) {
     // Try to load from data folder
     if (typeof SIMULATION_FILE_MAP !== 'undefined' && SIMULATION_FILE_MAP[simId]) {
         try {
-            console.log(`📥 Fetching: ./data/${SIMULATION_FILE_MAP[simId]}`);
-            const response = await fetch(`./data/${SIMULATION_FILE_MAP[simId]}`);
+            console.log(`📥 Fetching: ./data/simulations/${SIMULATION_FILE_MAP[simId]}`);
+            const response = await fetch(`./data/simulations/${SIMULATION_FILE_MAP[simId]}`);
             if (response.ok) {
                 const jsonData = await response.json();
                 jsonData.id = simId;

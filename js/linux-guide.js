@@ -66,8 +66,8 @@
             
             // Try multiple paths to support different deployment scenarios
             var paths = [
-                'data/LINUX-GUIDE-001_Linux_Security_Fundamentals.json',
-                './data/LINUX-GUIDE-001_Linux_Security_Fundamentals.json'
+                'data/tools/LINUX-GUIDE-001_Linux_Security_Fundamentals.json',
+                './data/tools/LINUX-GUIDE-001_Linux_Security_Fundamentals.json'
             ];
             
             var tryPath = function(index) {
