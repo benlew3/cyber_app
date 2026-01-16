@@ -2,357 +2,500 @@
   "lesson_id": "D1-LESSON-006",
   "domain": 1,
   "title": "Physical Security Controls",
-  "subtitle": "Protecting the Foundation: Facility Security and Environmental Controls",
-  "version": "2.0-enhanced",
   "objectives_covered": ["1.2"],
-  "estimated_duration": "90-120 minutes (core: 60 min, labs: 30-60 min)",
+  "estimated_duration": "45-55 minutes",
   "difficulty": "beginner",
-  "prerequisites": ["D1-LESSON-001"],
+  "version": "3.0-enhanced",
 
   "skill_tree": {
-    "position": {"domain": 1, "sequence": 6, "tier": "foundation"},
-    "prerequisites": [{"lesson_id": "D1-LESSON-001", "title": "Security Controls Fundamentals", "why_needed": "Physical controls are one of the four control categories"}],
-    "unlocks": [{"lesson_id": "D1-LESSON-007", "title": "Deception Technologies", "connection": "Physical deception complements technical deception"}],
-    "builds_toward": ["CompTIA Security+ SY0-701", "Physical security assessments", "Data center operations"],
+    "prerequisites": ["D1-LESSON-001"],
+    "unlocks": ["D1-LESSON-007", "D3-LESSON-002"],
     "cascade_learning": {
-      "this_lesson_establishes": ["Defense in depth layers", "Access control mechanisms", "Environmental controls", "Surveillance systems", "Physical-logical integration"],
-      "concepts_used_later": {"D4-LESSON-002": "Physical evidence handling in IR", "D5-LESSON-001": "Physical security governance"}
+      "builds_on": [
+        {"lesson": "D1-LESSON-001", "concepts": ["Physical controls are one of four control categories"]}
+      ],
+      "enables": [
+        {"lesson": "D1-LESSON-007", "concepts": ["Deception technologies include physical deception"]},
+        {"lesson": "D3-LESSON-002", "concepts": ["Infrastructure security includes physical components"]}
+      ]
     }
   },
 
   "role_relevance": {
-    "soc_analyst": {"relevance": "medium", "percentage_of_job": "15-25%", "daily_tasks": ["Monitor physical access alerts", "Correlate badge events with network activity", "Investigate impossible travel alerts"]},
-    "incident_responder": {"relevance": "high", "percentage_of_job": "20-30%", "daily_tasks": ["Secure physical evidence", "Coordinate with facility security", "Investigate physical breach aspects"]},
-    "security_engineer": {"relevance": "high", "percentage_of_job": "25-35%", "daily_tasks": ["Design access control systems", "Integrate physical and logical security", "Configure environmental monitoring"]},
-    "grc_analyst": {"relevance": "high", "percentage_of_job": "30-40%", "daily_tasks": ["Audit physical security controls", "Assess facility compliance", "Document physical security policies"]},
-    "penetration_tester": {"relevance": "medium", "percentage_of_job": "15-25%", "daily_tasks": ["Physical penetration testing", "Social engineering (tailgating)", "Badge cloning assessments"]}
+    "soc_analyst": {
+      "importance": "medium",
+      "daily_tasks": [
+        "Monitoring physical access control system alerts",
+        "Correlating badge access with network authentication",
+        "Investigating after-hours access anomalies",
+        "Reviewing CCTV footage during investigations"
+      ],
+      "real_scenario": "Alert shows VPN login from overseas while badge access shows user entered building locally—physical access logs help identify compromised credentials"
+    },
+    "incident_responder": {
+      "importance": "high",
+      "daily_tasks": [
+        "Securing physical evidence during investigations",
+        "Coordinating physical containment during breaches",
+        "Reviewing physical access logs for threat actor entry",
+        "Working with facilities during incident response"
+      ],
+      "real_scenario": "During insider threat investigation, physical access logs show employee badging into server room after hours correlating with data exfiltration timestamps"
+    },
+    "grc_analyst": {
+      "importance": "high",
+      "daily_tasks": [
+        "Auditing physical security controls for compliance",
+        "Reviewing data center physical security certifications",
+        "Assessing visitor management procedures",
+        "Documenting physical security policies"
+      ],
+      "real_scenario": "SOC 2 audit requires evidence of physical access controls—you document badge access systems, visitor logs, and CCTV retention policies"
+    },
+    "penetration_tester": {
+      "importance": "medium",
+      "daily_tasks": [
+        "Testing physical access controls during engagements",
+        "Attempting tailgating and social engineering",
+        "Identifying physical security weaknesses",
+        "Testing badge cloning vulnerabilities"
+      ],
+      "real_scenario": "During physical pentest, you successfully tailgate through a mantrap by waiting for a group of employees returning from lunch"
+    },
+    "security_engineer": {
+      "importance": "high",
+      "daily_tasks": [
+        "Designing physical security architectures",
+        "Implementing access control systems",
+        "Integrating physical and logical security",
+        "Specifying environmental controls"
+      ],
+      "real_scenario": "Designing new data center—you specify layered physical controls: perimeter fence, mantrap entry, biometric server room access, CCTV throughout"
+    }
   },
 
   "introduction": {
-    "hook": "In 2019, a major financial services company discovered their sophisticated cyber defenses were meaningless when a contractor walked into their data center, plugged in a USB device, and walked out with gigabytes of customer data. The server room had no visitor logs, the badge system wasn't monitored, and USB ports hadn't been disabled. Physical security isn't just about locksâ€”it's the foundation upon which all other security controls depend.",
+    "hook": "In 2018, a Chinese national was caught at Mar-a-Lago with four cell phones, a laptop, an external hard drive, and a thumb drive containing malware. She had talked her way past multiple checkpoints by claiming she was there for a pool party. The most sophisticated cyber defenses mean nothing if someone can walk in the front door. Physical security is often the last line of defense—and the first thing attackers try to bypass.",
     "learning_goals": [
-      "Design layered physical security using defense-in-depth principles",
-      "Select appropriate access control mechanisms for different facility zones",
-      "Implement environmental controls to protect equipment and ensure availability",
-      "Recognize physical security threats and appropriate countermeasures",
-      "Integrate physical security with logical security controls"
+      "Identify physical security control types: barriers, surveillance, access controls",
+      "Understand layered physical security (defense in depth)",
+      "Compare physical access control mechanisms",
+      "Apply environmental controls for availability"
     ],
-    "why_it_matters": {
-      "career_impact": "You'll assess facility security, recommend physical controls, and integrate physical and logical access systems.",
-      "business_connection": "Physical breaches can bypass all technical controls. Data center downtime from environmental failures costs thousands per minute.",
-      "exam_relevance": "Expect 4-6 questions on physical security controls, environmental protections, and facility security design."
-    },
-    "exam_weight": {"estimated_questions": "4-6", "high_yield_topics": ["Mantrap/access control vestibule", "UPS types", "Fire suppression (clean agents vs CO2)", "Anti-passback", "Two-person integrity"]}
+    "why_it_matters": "Physical access often equals total access. An attacker with physical access to a server can bypass encryption, install hardware keyloggers, steal hard drives, or simply walk out with equipment. Understanding physical security completes the security picture.",
+    "exam_weight": {
+      "percentage": "8-10% of Domain 1",
+      "question_count": "4-6 questions",
+      "question_types": ["Control identification", "Layered security scenarios", "Environmental controls"]
+    }
   },
 
   "sections": [
     {
       "section_id": "D1-L006-S01",
-      "title": "Physical Security Fundamentals and Defense in Depth",
-      "estimated_time": "12 minutes",
-      "content": {
-        "overview": "Physical security protects personnel, hardware, software, data, and facilities. It addresses CIA objectives and uses multiple defensive layers.",
-        "core_concepts": [
+      "title": "Physical Access Controls",
+      "content": "Physical access controls restrict who can enter facilities and specific areas within them.\n\n**Perimeter Security**\n\n*Fencing:*\n- Standard: 3-4 feet (deters casual trespass)\n- Security: 6-7 feet (deters most intruders)\n- High security: 8+ feet with razor wire (military/critical infrastructure)\n\n*Gates and Barriers:*\n- Vehicle barriers (bollards, gates)\n- Sally ports (vehicle mantraps)\n- Guard stations\n\n*Lighting:*\n- Deters intruders\n- Enables surveillance\n- Critical for parking areas and entries\n\n**Building Entry Controls**\n\n*Badge/Card Systems:*\n- Proximity cards (RFID)\n- Smart cards (chip-based)\n- Mobile credentials (phone-based)\n- Should require PIN for sensitive areas (two-factor)\n\n*Biometric Access:*\n- Fingerprint scanners\n- Facial recognition\n- Iris scanners\n- Hand geometry\n\n*Mantraps/Airlock:*\n- Two-door system—one must close before other opens\n- Prevents tailgating\n- May include weight sensors or biometrics\n- Used for high-security areas\n\n**Visitor Management**\n\n- Sign-in logs (audit trail)\n- Temporary badges (different from employee badges)\n- Escort requirements\n- Photo ID verification",
+
+      "memory_hooks": {
+        "mnemonics": [
           {
-            "concept": "Defense in Depth Layers",
-            "layers": [
-              {"layer": "Perimeter", "examples": "Fences, gates, lighting, surveillance"},
-              {"layer": "Building Exterior", "examples": "Walls, doors, windows, loading docks"},
-              {"layer": "Building Interior", "examples": "Reception, lobbies, corridors"},
-              {"layer": "Secure Areas", "examples": "Server rooms, network closets"},
-              {"layer": "High-Security Zones", "examples": "Vaults, HSM storage, key storage"}
-            ]
+            "name": "3-6-8 Fence Rule",
+            "expansion": "3ft deters, 6ft secures, 8ft+ high-security",
+            "usage": "Remember fence heights by security level"
           },
           {
-            "concept": "CPTED",
-            "full_name": "Crime Prevention Through Environmental Design",
-            "principles": [
-              {"principle": "Natural Surveillance", "meaning": "Clear sight lines, good lighting"},
-              {"principle": "Access Control", "meaning": "Defined entry points"},
-              {"principle": "Territorial Reinforcement", "meaning": "Clear boundaries and ownership"}
-            ]
+            "name": "Mantrap = Airlock",
+            "expansion": "Think of spaceship airlocks—one door must close before other opens",
+            "usage": "Mantraps work like sci-fi airlocks to prevent tailgating"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "Physical Access = Airport Security Layers",
+            "analogy": "Perimeter = airport fence. Entrance = ticket check. Security = TSA screening. Gate = boarding pass check. Plane = specific seat assignment. Each layer narrows who gets through.",
+            "why_it_works": "Everyone experiences airport security layers—perfect physical security example"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Thinking badge access alone is sufficient",
+            "correction": "Badges can be stolen, cloned, or lent. Sensitive areas should require badge + PIN or badge + biometric (two-factor physical access).",
+            "exam_trap": "Questions about 'strongest' access control look for multi-factor physical auth"
+          },
+          {
+            "mistake": "Underestimating tailgating risk",
+            "correction": "Tailgating (following someone through a door) bypasses all badge controls. Mantraps and security awareness training are essential defenses.",
+            "exam_trap": "Know that mantraps prevent tailgating"
           }
         ]
       },
-      "memory_hooks": {
-        "mnemonic": "PBIHS - Perimeter, Building, Interior, High-security, Secure areas (defense layers)",
-        "analogy": "Like an onion with multiple layers - each layer an attacker must peel back"
-      },
-      "must_remember_for_exam": [
-        {"fact": "Defense in depth: Perimeter â†’ Exterior â†’ Interior â†’ Secure â†’ High-security", "why_tested": "Layer understanding"},
-        {"fact": "CPTED = design-based crime prevention", "why_tested": "Terminology"}
+
+      "what_would_happen_if": [
+        {
+          "situation": "Data center uses badge access without anti-tailgating controls",
+          "consequence": "Attacker waits for legitimate employee, holds door, walks right in. All badge logging shows only legitimate user. Unauthorized access with no audit trail.",
+          "lesson": "Mantraps or turnstiles prevent tailgating. Badges alone don't stop physical following."
+        },
+        {
+          "situation": "Company issues identical visitor badges that don't expire",
+          "consequence": "Collected visitor badges can be reused indefinitely. Attacker with old badge appears legitimate. No way to distinguish authorized visitors from intruders.",
+          "lesson": "Visitor badges should be visually distinct, dated, and collected on exit"
+        }
       ],
-      "key_points": ["Physical security addresses CIA like logical security", "Multiple layers progressively restrict access", "CPTED uses environmental design to deter crime"]
+
+      "glossary_terms": [
+        {
+          "term": "Mantrap",
+          "definition": "Physical access control with two doors where one must close before the other opens",
+          "exam_note": "Primary defense against tailgating—also called 'airlock' or 'sally port'"
+        },
+        {
+          "term": "Tailgating",
+          "definition": "Following an authorized person through a secured door without using own credentials",
+          "exam_note": "Also called 'piggybacking'—social engineering at physical level"
+        },
+        {
+          "term": "Proximity Card",
+          "definition": "RFID-based access card that doesn't require physical contact with reader",
+          "exam_note": "Convenient but can be cloned—consider with PIN for sensitive areas"
+        },
+        {
+          "term": "Bollard",
+          "definition": "Short vertical post used to prevent vehicle access while allowing pedestrians",
+          "exam_note": "Vehicle barrier—protects buildings from ram attacks"
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A company wants to prevent unauthorized individuals from following employees into a secure data center. Which control is MOST effective?",
+        "options": [
+          "Installing CCTV cameras at the entrance",
+          "Requiring badge access with PIN code",
+          "Implementing a mantrap entry system",
+          "Training employees to challenge strangers"
+        ],
+        "correct_answer": 2,
+        "explanation": "Mantraps physically prevent tailgating—only one person can pass at a time, and both doors can't be open simultaneously. While other controls help, only mantraps physically enforce single-person entry.",
+        "wrong_answer_analysis": {
+          "0": "CCTV detects but doesn't prevent tailgating. You might see it happened but couldn't stop it.",
+          "1": "Badge + PIN strengthens authentication but doesn't prevent someone following through an open door.",
+          "3": "Training helps but relies on human compliance. Many people won't challenge someone in a business suit."
+        }
+      },
+
+      "must_remember": [
+        "Mantrap = primary tailgating prevention (two doors, one must close first)",
+        "Fence heights: 3ft deters, 6ft secures, 8ft+ high-security",
+        "Badge + PIN = two-factor physical access for sensitive areas",
+        "Visitor badges: distinct, dated, escort required, collected on exit"
+      ]
     },
+
     {
       "section_id": "D1-L006-S02",
-      "title": "Access Control Systems",
-      "estimated_time": "15 minutes",
-      "content": {
-        "overview": "Physical access control determines who can enter specific areas and when, ranging from simple locks to sophisticated biometric systems.",
-        "core_concepts": [
+      "title": "Surveillance and Monitoring",
+      "content": "Surveillance systems deter intruders and provide evidence for investigations.\n\n**Video Surveillance (CCTV)**\n\n*Camera Types:*\n- Fixed cameras: Monitor specific areas\n- PTZ (Pan-Tilt-Zoom): Operator-controlled coverage\n- Dome cameras: Discrete, vandal-resistant\n- Infrared/Night vision: Low-light areas\n\n*Recording Considerations:*\n- Storage requirements (days/weeks/months)\n- Resolution vs. storage tradeoff\n- Motion-activated vs. continuous\n- Retention policies (compliance requirements)\n\n*Camera Placement:*\n- Entry/exit points (all of them)\n- Parking areas\n- Server rooms and sensitive areas\n- Exterior perimeter\n- Avoid blind spots\n\n**Other Surveillance**\n\n*Motion Sensors:*\n- Infrared detection\n- Microwave sensors\n- Dual-technology (reduces false alarms)\n\n*Security Guards:*\n- Deterrent presence\n- Real-time response capability\n- Visitor verification\n- Patrol routes\n\n*Access Logs:*\n- Badge swipe records\n- Time and location tracking\n- Integration with logical access logs\n- Anomaly detection",
+
+      "memory_hooks": {
+        "mnemonics": [
           {
-            "concept": "Access Control Mechanisms",
-            "mechanisms": [
-              {"mechanism": "Mantrap (Access Control Vestibule)", "function": "Two interlocking doors - only one open at a time", "prevents": "Tailgating/piggybacking"},
-              {"mechanism": "Turnstiles", "function": "Single-person entry control", "prevents": "Multiple people on one badge"},
-              {"mechanism": "Anti-Passback", "function": "Must badge OUT before badging IN again", "prevents": "Badge sharing"},
-              {"mechanism": "Two-Person Integrity", "function": "Two people must authenticate simultaneously", "prevents": "Single-person malicious access"}
-            ]
+            "name": "CCTV = Eyes That Remember",
+            "expansion": "Cameras See, Capture, Track, Verify",
+            "usage": "CCTV deters (see), records (capture), monitors (track), and provides evidence (verify)"
           },
           {
-            "concept": "Card Technologies",
-            "technologies": [
-              {"type": "Proximity Cards", "security": "Lower", "note": "Vulnerable to cloning"},
-              {"type": "Smart Cards", "security": "Higher", "note": "Cryptographic operations on card"}
-            ]
-          },
-          {
-            "concept": "Lock Grades",
-            "grades": [
-              {"grade": "Grade 1", "use": "Commercial/industrial", "security": "Highest"},
-              {"grade": "Grade 2", "use": "Heavy-duty residential", "security": "Medium"},
-              {"grade": "Grade 3", "use": "Residential", "security": "Basic"}
-            ]
+            "name": "PTZ = Police Traffic Zoomer",
+            "expansion": "Pan-Tilt-Zoom cameras can follow activity like a police helicopter",
+            "usage": "Remember PTZ cameras offer flexible coverage vs fixed cameras"
           }
         ],
-        "what_would_happen_if": {
-          "scenario": "What if you didn't have anti-passback?",
-          "consequence": "Employees could share badges. One employee badges in, hands badge to friend through window, friend badges in with same card. No way to know who's actually in the building."
+        "analogies": [
+          {
+            "concept": "Surveillance = Nervous System",
+            "analogy": "CCTV cameras are eyes, motion sensors are touch receptors, guards are the brain processing input. Together they detect, report, and respond to physical threats.",
+            "why_it_works": "Body's nervous system parallels security monitoring—multiple senses working together"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Thinking cameras alone provide security",
+            "correction": "Cameras are detective controls—they record but don't prevent. Must be paired with response capabilities (guards, alarms) and preventive controls (locks, barriers).",
+            "exam_trap": "CCTV = detective control. It detects, doesn't prevent."
+          },
+          {
+            "mistake": "Ignoring CCTV retention requirements",
+            "correction": "Many compliance frameworks require specific retention periods. Too short = no evidence when needed. Too long = storage costs and privacy issues.",
+            "exam_trap": "Know retention is compliance-driven—HIPAA, PCI, etc. have requirements"
+          }
+        ]
+      },
+
+      "what_would_happen_if": [
+        {
+          "situation": "CCTV system records continuously but nobody monitors it",
+          "consequence": "Breach discovered a week later. CCTV footage shows exactly what happened—after the damage is done. Recording without monitoring is just evidence collection, not security.",
+          "lesson": "Surveillance requires monitoring for real-time response. Consider AI-based motion detection alerts."
+        },
+        {
+          "situation": "Company has cameras at main entrance but not emergency exits",
+          "consequence": "Intruder enters through propped-open emergency door. No footage of entry. Investigation has blind spot at critical point.",
+          "lesson": "ALL entry/exit points need coverage. Intruders find the gaps."
+        }
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "PTZ Camera",
+          "definition": "Pan-Tilt-Zoom camera allowing remote control of viewing angle and magnification",
+          "exam_note": "Flexible coverage but requires operator attention or automation"
+        },
+        {
+          "term": "Motion Sensor",
+          "definition": "Device detecting movement through infrared, microwave, or dual technology",
+          "exam_note": "Dual-technology reduces false alarms—requires both sensors to trigger"
+        },
+        {
+          "term": "CCTV",
+          "definition": "Closed-Circuit Television—video surveillance system transmitting to limited monitors",
+          "exam_note": "Detective control—records events but doesn't prevent them"
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An organization implements CCTV cameras throughout their facility but has no security staff monitoring the feeds. What type of control is this system primarily providing?",
+        "options": [
+          "Preventive control because cameras deter intruders",
+          "Detective control because it records events for later review",
+          "Corrective control because footage helps recover from incidents",
+          "Compensating control because it replaces security guards"
+        ],
+        "correct_answer": 1,
+        "explanation": "Unmonitored CCTV is primarily a detective control—it records what happens for later review. While cameras may have some deterrent effect, without active monitoring, they detect rather than prevent or deter.",
+        "wrong_answer_analysis": {
+          "0": "Deterrent effect requires visible cameras AND belief they're monitored. Unmonitored cameras are weak deterrents.",
+          "2": "Recording footage doesn't correct or fix anything—it just provides evidence. Corrective controls restore systems.",
+          "3": "Compensating controls provide equivalent protection. Unmonitored cameras don't replace guard response capability."
         }
       },
-      "memory_hooks": {
-        "mnemonic": "MATT - Mantrap, Anti-passback, Turnstile, Two-person integrity",
-        "common_mistakes": [{"mistake": "Confusing mantrap with turnstile", "correction": "Mantrap = two doors (vestibule). Turnstile = single rotating barrier."}]
-      },
-      "must_remember_for_exam": [
-        {"fact": "Mantrap = access control vestibule (interlocking doors)", "why_tested": "Terminology and function"},
-        {"fact": "Anti-passback prevents badge sharing", "why_tested": "Control function"},
-        {"fact": "Two-person integrity = dual control", "why_tested": "High-security requirement"},
-        {"fact": "Smart cards > proximity cards (crypto capability)", "why_tested": "Technology comparison"}
-      ],
-      "key_points": ["Mantrap prevents tailgating with interlocking doors", "Anti-passback requires badge-out before badge-in", "Two-person integrity needs simultaneous authentication", "Smart cards more secure than proximity (crypto)"],
-      "knowledge_check": {
-        "question": "A data center requires two administrators to access the main server room. One administrator cannot open the door alone. What mechanism is this?",
-        "options": ["Anti-passback", "Mantrap", "Two-person integrity", "Time-based restriction"],
-        "correct": 2,
-        "explanation": "Two-person integrity (dual control) requires two people to authenticate simultaneously. One person alone cannot open the door.",
-        "wrong_answer_analysis": [
-          {"option": 0, "why_wrong": "Anti-passback prevents reusing a badge, not requiring two people"},
-          {"option": 1, "why_wrong": "Mantraps prevent tailgating, not require multiple people"},
-          {"option": 3, "why_wrong": "Time-based restricts WHEN, not WHO/HOW MANY"}
-        ]
-      }
+
+      "must_remember": [
+        "CCTV = detective control (records, doesn't prevent)",
+        "PTZ cameras offer flexible coverage, fixed cameras monitor specific areas",
+        "Dual-technology motion sensors reduce false alarms",
+        "Coverage must include ALL entry/exit points—intruders find gaps"
+      ]
     },
+
     {
       "section_id": "D1-L006-S03",
-      "title": "Surveillance and Monitoring",
-      "estimated_time": "12 minutes",
-      "content": {
-        "overview": "Surveillance systems provide visibility, deter unauthorized activity, and provide evidence for investigations.",
-        "core_concepts": [
-          {
-            "concept": "Camera Types",
-            "types": [
-              {"type": "Fixed", "feature": "Monitor specific areas", "cost": "Lower"},
-              {"type": "PTZ", "feature": "Pan-Tilt-Zoom, operator controlled", "cost": "Higher"},
-              {"type": "Thermal", "feature": "Detect heat signatures", "use": "Night/darkness"}
-            ]
-          },
-          {
-            "concept": "Recording Systems",
-            "systems": [
-              {"type": "DVR", "records_from": "Analog cameras"},
-              {"type": "NVR", "records_from": "IP cameras (network)"}
-            ]
-          },
-          {
-            "concept": "Motion Sensors",
-            "types": [
-              {"type": "PIR (Passive Infrared)", "detects": "Heat movement"},
-              {"type": "Microwave", "detects": "Motion via reflected waves"},
-              {"type": "Dual-technology", "detects": "Both PIR AND microwave", "benefit": "Reduces false alarms"}
-            ]
-          }
-        ]
-      },
-      "must_remember_for_exam": [
-        {"fact": "PTZ = Pan-Tilt-Zoom (flexible camera)", "why_tested": "Camera terminology"},
-        {"fact": "NVR = IP cameras; DVR = analog cameras", "why_tested": "Recording system distinction"},
-        {"fact": "Dual-technology sensors reduce false alarms (require both triggers)", "why_tested": "Sensor selection"}
-      ],
-      "key_points": ["PTZ cameras offer flexibility; fixed cameras provide consistent coverage", "NVR for IP cameras; DVR for analog", "Dual-technology sensors reduce false alarms"],
-      "knowledge_check": {
-        "question": "Motion sensors are triggering false alarms from temperature changes. Which sensor type would BEST address this?",
-        "options": ["Higher-sensitivity PIR", "Ultrasonic sensors", "Dual-technology (PIR + microwave)", "Additional PIR sensors"],
-        "correct": 2,
-        "explanation": "Dual-technology requires BOTH PIR and microwave to trigger, filtering out single-factor false alarms like temperature changes.",
-        "wrong_answer_analysis": [
-          {"option": 0, "why_wrong": "Higher sensitivity would INCREASE false alarms"},
-          {"option": 1, "why_wrong": "Ultrasonic has different false alarm sources"},
-          {"option": 3, "why_wrong": "More sensors = more false alarms"}
-        ]
-      }
-    },
-    {
-      "section_id": "D1-L006-S04",
       "title": "Environmental Controls",
-      "estimated_time": "15 minutes",
-      "content": {
-        "overview": "Environmental controls protect equipment and ensure availability by maintaining appropriate conditions and protecting against hazards.",
-        "core_concepts": [
+      "content": "Environmental controls protect equipment from physical environmental threats—fire, water, temperature, power.\n\n**Fire Suppression**\n\n*Water-Based:*\n- Wet pipe: Always charged with water (fastest response)\n- Dry pipe: Water held back until activation (prevents freezing)\n- Pre-action: Requires two triggers (reduces accidental discharge)\n- Deluge: Open heads, massive water volume\n\n*Clean Agent (Data Centers):*\n- FM-200/HFC-227ea: Safe for occupied spaces\n- Inert gas systems: Displace oxygen\n- No water damage to electronics\n- Halon: Phased out (ozone depleting)\n\n**Climate Control**\n\n*Temperature:*\n- Servers optimal: 64-75°F (18-24°C)\n- Hot aisle/cold aisle configurations\n- Raised floors for cooling airflow\n\n*Humidity:*\n- Too low: Static electricity risk\n- Too high: Condensation/corrosion\n- Optimal: 40-60% relative humidity\n\n**Power Protection**\n\n*UPS (Uninterruptible Power Supply):*\n- Battery backup for immediate power loss\n- Runtime: minutes to hours depending on load\n- Bridges gap until generator starts\n\n*Generator:*\n- Long-term backup power\n- Requires fuel supply and maintenance\n- 10-30 second startup time typical\n\n*Power Conditioning:*\n- Surge protectors (spike protection)\n- Line conditioners (voltage regulation)\n- PDUs with monitoring",
+
+      "memory_hooks": {
+        "mnemonics": [
           {
-            "concept": "HVAC Requirements",
-            "requirements": [
-              {"factor": "Temperature", "optimal": "64-75Â°F (18-24Â°C)", "note": "Hot/cold aisle configuration"},
-              {"factor": "Humidity", "optimal": "40-60% RH", "too_low": "Static electricity risk", "too_high": "Condensation/corrosion"}
-            ]
+            "name": "HVAC = Humidity, Ventilation, AC Temperature",
+            "expansion": "Environmental controls manage Humidity, Ventilation, Air Conditioning/Temperature",
+            "usage": "Remember the three aspects of climate control"
           },
           {
-            "concept": "UPS Types",
-            "types": [
-              {"type": "Online (Double-conversion)", "transfer_time": "Zero (always on battery)", "protection": "Best", "cost": "Highest"},
-              {"type": "Line-interactive", "transfer_time": "2-4ms", "protection": "Good", "cost": "Medium"},
-              {"type": "Standby (Offline)", "transfer_time": "Brief gap", "protection": "Basic", "cost": "Lowest"}
-            ],
-            "exam_critical": "Online UPS = zero transfer time = best"
-          },
-          {
-            "concept": "Fire Suppression",
-            "types": [
-              {"type": "Wet Pipe Sprinkler", "mechanism": "Immediate water", "safe_for_electronics": "No"},
-              {"type": "Dry Pipe Sprinkler", "mechanism": "Air in pipes until triggered", "safe_for_electronics": "No"},
-              {"type": "Pre-Action Sprinkler", "mechanism": "TWO triggers required", "safe_for_electronics": "Better", "note": "Reduces accidental discharge"},
-              {"type": "Clean Agent (FM-200, Novec)", "mechanism": "Gas displaces oxygen", "safe_for_electronics": "Yes", "safe_for_people": "Yes"},
-              {"type": "CO2", "mechanism": "Displaces oxygen", "safe_for_electronics": "Yes", "safe_for_people": "NO - dangerous"}
-            ],
-            "exam_critical": "Clean agents safe for people AND electronics. CO2 NOT safe for people."
-          },
-          {
-            "concept": "Early Detection",
-            "vesda": {
-              "full_name": "Very Early Smoke Detection Apparatus",
-              "method": "Air sampling",
-              "benefit": "Detects fire at earliest stages"
-            }
+            "name": "Wet-Dry-Pre = Speed-Safety-Sensitive",
+            "expansion": "Wet pipe (fastest), Dry pipe (freeze-safe), Pre-action (sensitive areas)",
+            "usage": "Remember fire suppression types by their primary advantage"
           }
         ],
-        "what_would_happen_if": {
-          "scenario": "What if you used CO2 suppression in an occupied data center?",
-          "consequence": "CO2 displaces oxygen to extinguish fires. In an occupied space, this would also displace oxygen from people's lungs, causing suffocation. CO2 is only appropriate for unoccupied areas. Use clean agents (FM-200, Novec) in occupied spaces."
-        }
-      },
-      "memory_hooks": {
-        "mnemonic": "Online = Obviously best (zero transfer), CO2 = Can't Occupy (dangerous to people)",
+        "analogies": [
+          {
+            "concept": "UPS + Generator = Heartbeat + Breathing",
+            "analogy": "UPS is like your heartbeat—immediate, always ready. Generator is like breathing—takes a moment to kick in but provides sustained life support. You need both.",
+            "why_it_works": "Body systems work together for redundancy—same principle for power protection"
+          }
+        ],
         "common_mistakes": [
-          {"mistake": "Thinking all gas suppression is the same", "correction": "Clean agents (FM-200) = safe for people. CO2 = NOT safe for people."},
-          {"mistake": "Assuming wet pipe is best because it's fastest", "correction": "Wet pipe damages electronics. Pre-action or clean agents are better for data centers."}
-        ]
-      },
-      "must_remember_for_exam": [
-        {"fact": "Data center: 64-75Â°F, 40-60% humidity", "why_tested": "Environmental specs"},
-        {"fact": "Online UPS = zero transfer time (best)", "why_tested": "UPS comparison"},
-        {"fact": "Pre-action sprinklers require TWO triggers", "why_tested": "Suppression selection"},
-        {"fact": "Clean agents (FM-200) = safe for electronics AND people", "why_tested": "Suppression safety"},
-        {"fact": "CO2 = NOT safe for people (suffocation risk)", "why_tested": "Critical safety distinction"},
-        {"fact": "VESDA = very early smoke detection via air sampling", "why_tested": "Detection terminology"}
-      ],
-      "key_points": ["Temperature 64-75Â°F; Humidity 40-60%", "Online UPS = zero transfer time (best)", "Pre-action needs two triggers", "Clean agents safe for people and electronics", "CO2 dangerous to humans"],
-      "knowledge_check": {
-        "question": "A data center needs fire suppression that won't damage servers and is safe for personnel. Which is MOST appropriate?",
-        "options": ["CO2 suppression", "Wet pipe sprinklers", "FM-200 clean agent", "Dry chemical extinguishers"],
-        "correct": 2,
-        "explanation": "FM-200 is safe for electronics (no residue) AND personnel (breathable). CO2 is dangerous to humans. Sprinklers damage electronics. Dry chemical leaves residue.",
-        "wrong_answer_analysis": [
-          {"option": 0, "why_wrong": "CO2 suffocates people - dangerous in occupied areas"},
-          {"option": 1, "why_wrong": "Water damages electronic equipment"},
-          {"option": 3, "why_wrong": "Dry chemical leaves residue damaging electronics"}
-        ]
-      }
-    },
-    {
-      "section_id": "D1-L006-S05",
-      "title": "Physical-Logical Security Integration",
-      "estimated_time": "10 minutes",
-      "content": {
-        "overview": "Integrating physical and logical security provides holistic visibility and enables advanced detection like impossible travel.",
-        "core_concepts": [
           {
-            "concept": "Integration Benefits",
-            "benefits": [
-              "Single identity for physical and logical access",
-              "Require badge-in before network access",
-              "Detect impossible travel (badge in NYC, VPN from Moscow)",
-              "Correlated alerting for better investigation"
-            ]
+            "mistake": "Thinking UPS provides long-term power",
+            "correction": "UPS provides minutes of power, not hours. It bridges the gap until generators start. Generator provides sustained backup power.",
+            "exam_trap": "UPS = short-term (minutes), Generator = long-term (hours/days)"
           },
           {
-            "concept": "Visitor Management",
-            "requirements": [
-              "Visitor badges clearly different from employee badges",
-              "Pre-registration and identity verification",
-              "Escort requirements for secure areas",
-              "Automatic badge expiration"
-            ]
-          },
-          {
-            "concept": "Clean Desk Policy",
-            "purpose": "Physical control protecting information confidentiality",
-            "requirements": "Clear workspace of sensitive documents when unattended"
+            "mistake": "Using water suppression in data centers",
+            "correction": "Water destroys electronics. Data centers use clean agent systems (FM-200) or inert gas. Water is for general office areas.",
+            "exam_trap": "Know that clean agent/inert gas is appropriate for electronics, not water"
           }
         ]
       },
-      "must_remember_for_exam": [
-        {"fact": "Impossible travel = badge one location, login from distant location", "why_tested": "Detection technique"},
-        {"fact": "Visitor badges should look different from employee badges", "why_tested": "Visitor management"},
-        {"fact": "Clean desk policy = physical control for confidentiality", "why_tested": "Control classification"}
+
+      "what_would_happen_if": [
+        {
+          "situation": "Data center has UPS but no generator",
+          "consequence": "Power outage—UPS keeps systems running for 15 minutes. Then batteries die. Complete shutdown. Extended outage means significant downtime.",
+          "lesson": "UPS bridges the gap; generators provide sustained power. Need both for availability."
+        },
+        {
+          "situation": "Server room humidity drops to 20%",
+          "consequence": "Low humidity = static electricity buildup. Technician touches server, static discharge damages components. Equipment failure from environmental control failure.",
+          "lesson": "Humidity matters—too low causes static, too high causes condensation. Monitor and maintain 40-60%."
+        }
       ],
-      "key_points": ["Integrate physical and logical for holistic visibility", "Impossible travel detection catches credential compromise", "Visitor badges must be visibly different", "Clean desk is a physical security control"],
+
+      "glossary_terms": [
+        {
+          "term": "UPS (Uninterruptible Power Supply)",
+          "definition": "Battery backup providing immediate power during outages until generator starts",
+          "exam_note": "Short-term power (minutes)—bridges gap to generator"
+        },
+        {
+          "term": "Clean Agent Fire Suppression",
+          "definition": "Gas-based fire suppression that doesn't damage electronics (FM-200, inert gas)",
+          "exam_note": "Used in data centers—water would destroy equipment"
+        },
+        {
+          "term": "Hot Aisle/Cold Aisle",
+          "definition": "Data center layout where server fronts face cold aisles, backs face hot aisles",
+          "exam_note": "Efficient cooling design—prevents hot/cold air mixing"
+        },
+        {
+          "term": "Pre-action Sprinkler",
+          "definition": "Fire suppression requiring two triggers before water release",
+          "exam_note": "Reduces accidental discharge—used in sensitive areas"
+        }
+      ],
+
       "knowledge_check": {
-        "question": "An employee's VPN session originates from Germany at 2:00 PM, but their badge accessed US HQ at 1:30 PM. What does this indicate?",
-        "options": ["Split-tunneling VPN", "Credential compromise", "Time sync issue", "Badge malfunction"],
-        "correct": 1,
-        "explanation": "This is impossible travel - physically impossible to be in both locations 30 minutes apart. Strongly indicates the credentials are compromised.",
-        "wrong_answer_analysis": [
-          {"option": 0, "why_wrong": "Split tunneling affects routing, not geographic location"},
-          {"option": 2, "why_wrong": "30-minute difference would require massive sync error"},
-          {"option": 3, "why_wrong": "Badge was used at correct time - it's the VPN that's suspicious"}
+        "question": "A data center architect is selecting fire suppression for a room containing critical servers and network equipment. Which system is MOST appropriate?",
+        "options": [
+          "Wet pipe sprinkler for fastest response",
+          "Dry pipe sprinkler to prevent freezing",
+          "FM-200 clean agent system to avoid equipment damage",
+          "Deluge system for maximum water coverage"
+        ],
+        "correct_answer": 2,
+        "explanation": "FM-200 is a clean agent that suppresses fire without water, protecting sensitive electronics from water damage. Water-based systems would destroy the equipment they're protecting.",
+        "wrong_answer_analysis": {
+          "0": "Wet pipe sprinklers discharge water—would destroy servers and network equipment.",
+          "1": "Dry pipe still uses water when activated—same damage issue as wet pipe.",
+          "3": "Deluge systems discharge massive water volumes—worst option for electronics."
+        }
+      },
+
+      "must_remember": [
+        "UPS = short-term (minutes), Generator = long-term (hours)",
+        "Clean agent (FM-200) for data centers, not water",
+        "Humidity: 40-60% optimal. Low = static. High = condensation.",
+        "Hot aisle/cold aisle improves cooling efficiency"
+      ]
+    },
+
+    {
+      "section_id": "D1-L006-S04",
+      "title": "Integrating Physical and Logical Security",
+      "content": "Modern security integrates physical and logical (cyber) controls for comprehensive protection.\n\n**Convergence Benefits**\n\n*Correlated Monitoring:*\n- Badge access logs + network logins\n- Physical location vs. VPN location\n- After-hours physical access + system access\n- Impossible travel detection\n\n*Unified Response:*\n- Physical breach triggers network lockdown\n- Cyber incident triggers physical containment\n- Single security operations center (SOC)\n\n**Integration Points**\n\n*Identity Management:*\n- Same identity for physical and logical access\n- Single termination process disables both\n- Role-based physical and system access\n\n*Monitoring:*\n- Physical access systems feeding SIEM\n- Video analytics integrated with alerts\n- Environmental sensors in monitoring platform\n\n**Physical Security for Cyber Defense**\n\n*USB/Port Protection:*\n- Disable unused ports\n- USB blockers (physical)\n- Port locks and seals\n\n*Server Room Security:*\n- Locked cabinets/racks\n- Individual server locks\n- Cable locks for portable equipment\n\n*Secure Disposal:*\n- Hard drive shredding\n- Degaussing magnetic media\n- Certificate of destruction",
+
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "name": "PLACE = Physical Logical Access Correlation Events",
+            "expansion": "Integrate Physical and Logical Access for Correlated Event detection",
+            "usage": "Remember that integrating physical and logical access improves detection"
+          },
+          {
+            "name": "Impossible Travel Rule",
+            "expansion": "Can't badge into NYC and login from Tokyo 5 minutes later",
+            "usage": "Classic integration use case—physical location contradicts cyber location"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "Convergence = Body and Mind",
+            "analogy": "Physical security is the body, logical security is the mind. They must work together. A locked door (body) with shared password (weak mind) fails. Strong encryption (mind) with unlocked server room (weak body) fails.",
+            "why_it_works": "Mind-body connection shows why both security types must be strong"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Treating physical and logical security as separate",
+            "correction": "Modern attacks use physical access for cyber exploitation and vice versa. Integrated monitoring catches cross-domain attacks that siloed teams miss.",
+            "exam_trap": "Questions about 'converged' or 'integrated' security test this concept"
+          },
+          {
+            "mistake": "Forgetting physical vectors in cyber assessments",
+            "correction": "USB drops, evil maid attacks, and hardware keyloggers bypass all network security. Physical security is part of cybersecurity.",
+            "exam_trap": "Know that physical access enables many cyber attacks"
+          }
         ]
-      }
+      },
+
+      "what_would_happen_if": [
+        {
+          "situation": "Employee badges into headquarters at 9 AM but VPN shows connection from overseas at 9:05 AM",
+          "consequence": "Impossible travel alert fires. Either stolen credentials (compromised account) or the VPN is being used by someone else. Integrated monitoring catches what siloed systems miss.",
+          "lesson": "Correlating physical and logical access reveals attacks invisible to either alone"
+        },
+        {
+          "situation": "IT terminates network access but HR forgets to collect badge",
+          "consequence": "Former employee still has physical access to building. Could steal equipment, plant devices, or access unlocked workstations. Termination must be comprehensive.",
+          "lesson": "Offboarding must disable BOTH physical and logical access simultaneously"
+        }
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Converged Security",
+          "definition": "Integration of physical and logical security under unified management and monitoring",
+          "exam_note": "Modern approach—single SOC handles both domains"
+        },
+        {
+          "term": "Impossible Travel",
+          "definition": "Alert when user authenticates from locations impossibly far apart in short time",
+          "exam_note": "Requires integrating physical location with logical access data"
+        },
+        {
+          "term": "Degaussing",
+          "definition": "Erasing magnetic media by exposure to strong magnetic field",
+          "exam_note": "Physical destruction method for magnetic storage—doesn't work on SSDs"
+        },
+        {
+          "term": "Evil Maid Attack",
+          "definition": "Attack where someone with physical access installs malware or hardware",
+          "exam_note": "Physical access enables cyber attack—demonstrates convergence need"
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "A SIEM alert shows a user logged into the corporate VPN from Germany, but physical access logs show they badged into the Los Angeles office 10 minutes earlier. What does this indicate?",
+        "options": [
+          "Normal behavior—user is using VPN split tunneling",
+          "Equipment malfunction in the badge system",
+          "Possible credential compromise requiring investigation",
+          "Time zone configuration error in SIEM"
+        ],
+        "correct_answer": 2,
+        "explanation": "This is an 'impossible travel' scenario—a person cannot physically be in LA and have a VPN connection from Germany minutes later. This strongly indicates stolen credentials being used from overseas while the legitimate user is in the office.",
+        "wrong_answer_analysis": {
+          "0": "Split tunneling affects traffic routing, not apparent geographic origin of the VPN connection.",
+          "1": "While possible, correlation of two anomalies (badge + VPN location mismatch) suggests compromise, not coincidental malfunction.",
+          "3": "Time zones would affect timestamp display, not geographic location detection."
+        }
+      },
+
+      "must_remember": [
+        "Converged security = physical + logical under unified management",
+        "Impossible travel = physical and logical location don't match",
+        "Termination must disable BOTH physical AND logical access",
+        "Physical access enables cyber attacks—don't treat them separately"
+      ]
     }
   ],
 
-  "hands_on_labs": {
-    "browser_labs": [
-      {"lab_id": "lab-physical-audit", "title": "Physical Security Audit Checklist", "type": "interactive_checklist", "description": "Walk through a facility assessment checklist"}
-    ],
-    "external_labs": [
-      {"resource": "TryHackMe", "lab_name": "Physical Security Intro", "url": "https://tryhackme.com/room/introtophysicalsec", "description": "Introduction to physical security concepts"}
-    ]
-  },
-
   "summary": {
     "key_takeaways": [
-      "Defense in depth: perimeter â†’ exterior â†’ interior â†’ secure â†’ high-security",
-      "Mantrap/access control vestibule prevents tailgating with interlocking doors",
-      "Anti-passback prevents badge sharing; two-person integrity requires dual auth",
-      "Online UPS = zero transfer time (best); standby has brief gap",
-      "Clean agents (FM-200) safe for electronics AND people; CO2 dangerous to people",
-      "Data center: 64-75Â°F, 40-60% humidity"
+      "Mantrap is primary tailgating prevention",
+      "CCTV is detective (records), not preventive",
+      "UPS = short-term, Generator = long-term power",
+      "Clean agent (FM-200) for data centers, not water",
+      "Integrate physical and logical security for comprehensive protection"
     ],
-    "exam_essentials": [
-      "Mantrap = access control vestibule",
-      "Online UPS = zero transfer time",
-      "Pre-action sprinklers need TWO triggers",
-      "Clean agents safe for people; CO2 NOT safe",
-      "Anti-passback prevents badge sharing"
-    ]
-  },
-
-  "related_content": {
-    "simulations": ["D1-SIM-002"],
-    "remediation": ["D1-REM-001"],
-    "next_lesson": "D1-LESSON-007",
-    "previous_lesson": "D1-LESSON-005"
+    "exam_focus": "Control type identification, environmental controls for data centers, convergence concepts",
+    "next_lesson": "D1-LESSON-007: Deception Technologies—honeypots, honeynets, and other deceptive defenses"
   }
 }
