@@ -3,146 +3,1309 @@
   "domain": 2,
   "title": "Attack Frameworks and Methodologies",
   "subtitle": "Understanding How Attackers Think: MITRE ATT&CK, Kill Chain, and More",
-  "version": "2.0-enhanced",
+  "version": "3.0-enhanced",
   "objectives_covered": ["2.1"],
-  "estimated_duration": "75-90 minutes",
+  "estimated_duration": "90-120 minutes (core: 60 min, labs: 30-60 min)",
   "difficulty": "intermediate",
-  "prerequisites": ["D2-LESSON-001"],
+  "prerequisites": ["D2-LESSON-001", "D2-LESSON-004"],
 
   "skill_tree": {
-    "position": {"domain": 2, "sequence": 11, "tier": "intermediate"},
-    "prerequisites": [{"lesson_id": "D2-LESSON-001", "title": "Threat Actors", "why_needed": "Frameworks describe actor behaviors"}],
-    "unlocks": [{"lesson_id": "D4-LESSON-001", "title": "Security Monitoring", "connection": "Framework-based detection"}]
+    "position": {
+      "domain": 2,
+      "sequence": 11,
+      "tier": "intermediate"
+    },
+    "prerequisites": [
+      {
+        "lesson_id": "D2-LESSON-001",
+        "title": "Threat Actors & Motivations",
+        "why_needed": "Frameworks describe how different threat actors operate"
+      },
+      {
+        "lesson_id": "D2-LESSON-004",
+        "title": "Malware Types",
+        "why_needed": "Understanding malware helps identify techniques in frameworks"
+      }
+    ],
+    "unlocks": [
+      {
+        "lesson_id": "D2-LESSON-012",
+        "title": "Security Assessments",
+        "connection": "Frameworks guide assessment scope and methodology"
+      },
+      {
+        "lesson_id": "D4-LESSON-001",
+        "title": "Security Monitoring",
+        "connection": "Framework-based detection strategies"
+      },
+      {
+        "lesson_id": "D4-LESSON-002",
+        "title": "Incident Response",
+        "connection": "Frameworks help map and communicate attack paths"
+      }
+    ],
+    "related_concepts": [
+      {
+        "topic": "Threat Intelligence",
+        "lesson": "D2-LESSON-008",
+        "relationship": "Threat intel is often communicated using framework terminology"
+      },
+      {
+        "topic": "Vulnerability Management",
+        "lesson": "D4-LESSON-004",
+        "relationship": "Frameworks help prioritize vulnerabilities by technique coverage"
+      }
+    ],
+    "builds_toward": [
+      "CompTIA Security+ SY0-701 Certification",
+      "CompTIA CySA+ (extensive ATT&CK usage)",
+      "GIAC Certified Enterprise Defender (GCED)",
+      "Certified Threat Intelligence Analyst (CTIA)"
+    ],
+    "cascade_learning": {
+      "this_lesson_establishes": [
+        "MITRE ATT&CK framework structure and usage",
+        "Cyber Kill Chain stages and defensive application",
+        "Diamond Model for threat analysis",
+        "TTP terminology and application",
+        "Framework-based defense planning"
+      ],
+      "builds_on_previous": {
+        "D2-LESSON-001": "Threat actor behaviors mapped to framework techniques",
+        "D2-LESSON-004": "Malware capabilities align with framework techniques"
+      },
+      "concepts_used_later": {
+        "D2-LESSON-012": "Frameworks guide security assessment scope",
+        "D4-LESSON-001": "ATT&CK-based detection and alerting",
+        "D4-LESSON-002": "Kill Chain for incident timeline mapping",
+        "D4-LESSON-003": "Frameworks for forensic analysis structure"
+      }
+    }
   },
 
   "role_relevance": {
-    "soc_analyst": {"relevance": "critical", "percentage_of_job": "45-55%", "daily_tasks": ["Map alerts to ATT&CK", "Identify tactics", "Track TTPs"]},
-    "incident_responder": {"relevance": "critical", "percentage_of_job": "50-60%", "daily_tasks": ["Trace attack path", "Predict next moves", "Document using frameworks"]},
-    "security_engineer": {"relevance": "high", "percentage_of_job": "30-40%", "daily_tasks": ["Design defenses using ATT&CK", "Identify coverage gaps"]},
-    "penetration_tester": {"relevance": "critical", "percentage_of_job": "55-65%", "daily_tasks": ["Follow attack methodologies", "Emulate adversary TTPs"]}
+    "soc_analyst": {
+      "relevance": "critical",
+      "percentage_of_job": "45-55%",
+      "daily_usage": "Map alerts to ATT&CK techniques, identify attack stages, communicate findings using framework language",
+      "specific_tasks": [
+        "Map suspicious activity to ATT&CK techniques",
+        "Identify which Kill Chain stage an alert represents",
+        "Correlate alerts across multiple techniques",
+        "Document incidents using framework terminology",
+        "Identify detection gaps in coverage",
+        "Prioritize alerts by attack stage"
+      ],
+      "tools_youll_use": ["MITRE ATT&CK Navigator", "SIEM with ATT&CK integration", "Threat intel platforms"],
+      "real_scenario": "Alert fires for PowerShell downloading content from internet. You map this to ATT&CK T1059.001 (PowerShell) and T1105 (Ingress Tool Transfer), identify it as Initial Access/Execution stage, and escalate knowing this indicates early-stage compromise."
+    },
+    "incident_responder": {
+      "relevance": "critical",
+      "percentage_of_job": "50-60%",
+      "daily_usage": "Trace attack progression through Kill Chain, predict attacker's next moves, document using frameworks",
+      "specific_tasks": [
+        "Reconstruct attack timeline using Kill Chain stages",
+        "Predict attacker's likely next techniques",
+        "Map all observed activity to ATT&CK",
+        "Identify gaps in attacker's progression",
+        "Communicate attack story using frameworks",
+        "Recommend detections for observed techniques"
+      ],
+      "tools_youll_use": ["ATT&CK Navigator", "Diamond Model templates", "Incident documentation tools"],
+      "real_scenario": "During breach investigation, you trace attacker from Initial Access (phishing) through Execution (macro), Persistence (scheduled task), Credential Access (Mimikatz), and Lateral Movement. The framework mapping helps you ensure you've found all compromised systems."
+    },
+    "security_engineer": {
+      "relevance": "high",
+      "percentage_of_job": "30-40%",
+      "daily_usage": "Design detections for ATT&CK techniques, perform gap analysis, build defense coverage",
+      "specific_tasks": [
+        "Map detection capabilities to ATT&CK techniques",
+        "Identify techniques with no detection coverage",
+        "Design new detections for priority techniques",
+        "Evaluate security tools against ATT&CK coverage",
+        "Build ATT&CK Navigator coverage maps"
+      ],
+      "tools_youll_use": ["ATT&CK Navigator", "Detection engineering tools", "SIEM rule builders"],
+      "real_scenario": "Using ATT&CK Navigator, you map your current SIEM rules to techniques. You discover no coverage for T1003 (Credential Dumping). You design detection rules for LSASS access and Mimikatz indicators to close the gap."
+    },
+    "grc_analyst": {
+      "relevance": "medium",
+      "percentage_of_job": "20-30%",
+      "daily_usage": "Report on detection coverage, track framework-based metrics, communicate with leadership",
+      "specific_tasks": [
+        "Report on ATT&CK technique coverage percentage",
+        "Track improvement in detection capabilities",
+        "Communicate threat landscape using frameworks",
+        "Map compliance controls to Kill Chain stages"
+      ],
+      "tools_youll_use": ["ATT&CK Navigator exports", "GRC reporting platforms", "Executive dashboards"],
+      "real_scenario": "Board presentation requires demonstrating security maturity. You show ATT&CK Navigator coverage map indicating 65% technique detection, up from 40% last year, with prioritized roadmap for remaining gaps."
+    },
+    "penetration_tester": {
+      "relevance": "critical",
+      "percentage_of_job": "55-65%",
+      "daily_usage": "Plan engagements using Kill Chain, emulate adversary TTPs, report using framework language",
+      "specific_tasks": [
+        "Plan attack paths using Kill Chain methodology",
+        "Select techniques from ATT&CK for testing",
+        "Emulate specific threat actor TTPs",
+        "Document findings using ATT&CK technique IDs",
+        "Validate detection coverage against techniques used",
+        "Recommend detections based on successful techniques"
+      ],
+      "tools_youll_use": ["ATT&CK Navigator", "Atomic Red Team", "MITRE Caldera", "Cobalt Strike"],
+      "real_scenario": "Red team engagement emulating APT29. You select specific ATT&CK techniques APT29 is known to use, execute the attack chain, and document which techniques were detected vs missed, providing actionable improvement roadmap."
+    }
   },
 
   "introduction": {
-    "hook": "Attackers follow patterns. Understanding their playbooksâ€”from the Cyber Kill Chain to MITRE ATT&CKâ€”helps defenders anticipate moves, detect intrusions, and respond effectively.",
-    "exam_weight": {"estimated_questions": "4-6", "high_yield_topics": ["MITRE ATT&CK structure", "Kill Chain stages", "Diamond Model", "TTPs"]}
+    "hook": "When Target was breached in 2013, attackers followed a predictable pattern: reconnaissance of vendors, weaponized malware, delivery via phishing, exploitation of vendor credentials, installation of POS scraper, C2 communication, and exfiltration of 40 million cards. Had defenders understood this 'Kill Chain,' they could have broken it at multiple points. Today, frameworks like MITRE ATT&CK give defenders a shared vocabulary to understand, detect, and disrupt attacks. Knowing how attackers think is the first step to stopping them.",
+    
+    "learning_goals": [
+      "Understand and apply the MITRE ATT&CK framework including tactics, techniques, and procedures",
+      "Identify the seven stages of the Cyber Kill Chain and defensive applications",
+      "Apply the Diamond Model for threat analysis and attribution",
+      "Use frameworks for detection development, gap analysis, and threat hunting",
+      "Communicate security findings using framework terminology",
+      "Map observed attacks to framework elements for investigation and documentation"
+    ],
+    
+    "why_it_matters": {
+      "career_impact": "Framework knowledge is expected in nearly every security role. ATT&CK is the common language of modern security operations. Job postings frequently list ATT&CK experience as a requirement.",
+      "business_connection": "Frameworks provide structured approaches to defense investment. Organizations using ATT&CK for gap analysis can prioritize spending on highest-value detections.",
+      "exam_relevance": "Expect 4-6 questions on framework elements, particularly ATT&CK structure, Kill Chain stages, and Diamond Model components."
+    },
+    
+    "exam_weight": {
+      "domain": "Domain 2: Threats, Vulnerabilities & Mitigations (22%)",
+      "estimated_questions": "4-6 questions on frameworks",
+      "question_types": [
+        "Framework component identification: 'Tactics represent what?'",
+        "Kill Chain stage identification: 'Which stage involves weaponization?'",
+        "Diamond Model components: 'What are the four vertices?'",
+        "TTP terminology: 'What does TTP stand for?'"
+      ],
+      "high_yield_topics": [
+        "ATT&CK: Tactics = WHY, Techniques = HOW",
+        "Kill Chain: 7 stages, break anywhere to stop attack",
+        "Diamond Model: Adversary, Capability, Infrastructure, Victim",
+        "TTPs = Tactics, Techniques, and Procedures"
+      ]
+    }
   },
 
   "sections": [
     {
       "section_id": "D2-L011-S01",
       "title": "MITRE ATT&CK Framework",
-      "estimated_time": "15 minutes",
+      "estimated_time": "20 minutes",
+      
       "content": {
+        "overview": "MITRE ATT&CK (Adversarial Tactics, Techniques, and Common Knowledge) is a globally-accessible knowledge base of adversary behavior based on real-world observations. It has become the universal language for describing how attackers operate.",
+        
         "core_concepts": [
           {
             "concept": "ATT&CK Structure",
-            "definition": "Knowledge base of adversary tactics and techniques",
+            "definition": "Structured knowledge base organizing adversary behaviors into tactics, techniques, and procedures",
             "components": [
-              {"component": "Tactics", "definition": "WHY - the adversary's goal", "count": "14 tactics"},
-              {"component": "Techniques", "definition": "HOW - method to achieve goal", "count": "Hundreds"},
-              {"component": "Procedures", "definition": "Specific implementation of technique"}
-            ]
+              {
+                "component": "Tactics",
+                "definition": "The adversary's tactical goal—WHY they perform an action",
+                "description": "Represents the 'why' behind an action. Each tactic is a goal the adversary is trying to achieve.",
+                "count": "14 tactics in Enterprise ATT&CK",
+                "example": "Persistence is a tactic—the goal of maintaining access"
+              },
+              {
+                "component": "Techniques",
+                "definition": "HOW the adversary achieves the tactical goal",
+                "description": "Specific methods used to accomplish a tactic. Multiple techniques can achieve the same tactic.",
+                "count": "Hundreds of techniques with sub-techniques",
+                "example": "Scheduled Task (T1053) is a technique for achieving Persistence"
+              },
+              {
+                "component": "Procedures",
+                "definition": "Specific implementation of a technique by a particular threat actor",
+                "description": "The detailed way a specific group implements a technique",
+                "example": "APT29 uses PowerShell scripts to create scheduled tasks for persistence"
+              }
+            ],
+            "exam_key": "Tactics = WHY (goal), Techniques = HOW (method), Procedures = WHO (specific implementation)"
           },
           {
-            "concept": "The 14 Tactics",
+            "concept": "The 14 Enterprise ATT&CK Tactics",
             "tactics": [
-              "Reconnaissance", "Resource Development", "Initial Access", "Execution",
-              "Persistence", "Privilege Escalation", "Defense Evasion", "Credential Access",
-              "Discovery", "Lateral Movement", "Collection", "Command and Control",
-              "Exfiltration", "Impact"
-            ]
+              {
+                "tactic": "Reconnaissance",
+                "id": "TA0043",
+                "goal": "Gather information to plan future operations",
+                "examples": "OSINT gathering, scanning target infrastructure"
+              },
+              {
+                "tactic": "Resource Development",
+                "id": "TA0042",
+                "goal": "Establish resources for operations",
+                "examples": "Acquiring infrastructure, developing capabilities"
+              },
+              {
+                "tactic": "Initial Access",
+                "id": "TA0001",
+                "goal": "Get into the network",
+                "examples": "Phishing, exploiting public-facing apps"
+              },
+              {
+                "tactic": "Execution",
+                "id": "TA0002",
+                "goal": "Run malicious code",
+                "examples": "PowerShell, scripting, malware execution"
+              },
+              {
+                "tactic": "Persistence",
+                "id": "TA0003",
+                "goal": "Maintain access",
+                "examples": "Scheduled tasks, registry run keys, implants"
+              },
+              {
+                "tactic": "Privilege Escalation",
+                "id": "TA0004",
+                "goal": "Gain higher-level permissions",
+                "examples": "Exploiting vulnerabilities, token manipulation"
+              },
+              {
+                "tactic": "Defense Evasion",
+                "id": "TA0005",
+                "goal": "Avoid detection",
+                "examples": "Disabling security tools, obfuscation, masquerading"
+              },
+              {
+                "tactic": "Credential Access",
+                "id": "TA0006",
+                "goal": "Steal credentials",
+                "examples": "Credential dumping, keylogging, brute force"
+              },
+              {
+                "tactic": "Discovery",
+                "id": "TA0007",
+                "goal": "Learn about the environment",
+                "examples": "Network scanning, account enumeration"
+              },
+              {
+                "tactic": "Lateral Movement",
+                "id": "TA0008",
+                "goal": "Move through the environment",
+                "examples": "Remote services, pass-the-hash"
+              },
+              {
+                "tactic": "Collection",
+                "id": "TA0009",
+                "goal": "Gather data of interest",
+                "examples": "Data from local system, email collection"
+              },
+              {
+                "tactic": "Command and Control",
+                "id": "TA0011",
+                "goal": "Communicate with compromised systems",
+                "examples": "Web protocols, DNS tunneling, encrypted channels"
+              },
+              {
+                "tactic": "Exfiltration",
+                "id": "TA0010",
+                "goal": "Steal data",
+                "examples": "Exfil over C2, exfil to cloud storage"
+              },
+              {
+                "tactic": "Impact",
+                "id": "TA0040",
+                "goal": "Disrupt, destroy, or manipulate",
+                "examples": "Data destruction, ransomware, defacement"
+              }
+            ],
+            "memory_tip": "Think of it as the attacker's journey: Get In (Initial Access) → Set Up (Execution, Persistence) → Spread (Priv Esc, Lateral Movement) → Accomplish Goals (Collection, Exfil, Impact)"
           },
           {
             "concept": "ATT&CK Use Cases",
-            "uses": [
-              {"use": "Threat Intelligence", "description": "Map observed behaviors to known TTPs"},
-              {"use": "Detection Development", "description": "Build detections for specific techniques"},
-              {"use": "Gap Analysis", "description": "Identify undefended techniques"},
-              {"use": "Red Team Planning", "description": "Emulate specific adversaries"}
+            "use_cases": [
+              {
+                "use": "Threat Intelligence",
+                "description": "Map observed adversary behaviors to framework techniques",
+                "benefit": "Common language for sharing intel across teams/organizations"
+              },
+              {
+                "use": "Detection Development",
+                "description": "Build detections for specific techniques",
+                "benefit": "Focused, testable detection rules aligned to real behaviors"
+              },
+              {
+                "use": "Gap Analysis",
+                "description": "Identify techniques with no detection coverage",
+                "benefit": "Prioritized investment in detection capabilities"
+              },
+              {
+                "use": "Red Team Planning",
+                "description": "Emulate specific adversaries or technique sets",
+                "benefit": "Realistic testing of defenses against known TTPs"
+              },
+              {
+                "use": "Security Assessment",
+                "description": "Evaluate organization's defense against framework",
+                "benefit": "Structured, measurable security posture assessment"
+              }
             ]
+          },
+          {
+            "concept": "ATT&CK Matrices",
+            "matrices": [
+              {
+                "matrix": "Enterprise",
+                "coverage": "Windows, macOS, Linux, Cloud, Network, Containers",
+                "use": "Most commonly used; covers enterprise IT environments"
+              },
+              {
+                "matrix": "Mobile",
+                "coverage": "Android, iOS",
+                "use": "Mobile device threats"
+              },
+              {
+                "matrix": "ICS",
+                "coverage": "Industrial Control Systems",
+                "use": "OT/SCADA environments"
+              }
+            ]
+          }
+        ],
+
+        "definitions_and_terminology": {
+          "ATT&CK": "Adversarial Tactics, Techniques, and Common Knowledge",
+          "Tactic": "The adversary's goal—WHY they perform an action",
+          "Technique": "HOW the adversary achieves their goal",
+          "Sub-technique": "More specific variation of a technique",
+          "Procedure": "Specific implementation by a threat group",
+          "TTP": "Tactics, Techniques, and Procedures"
+        }
+      },
+
+      "key_points": [
+        "ATT&CK is the industry-standard framework for describing adversary behavior",
+        "Tactics = WHY (goal), Techniques = HOW (method), Procedures = specific implementation",
+        "14 tactics cover the full attack lifecycle from Reconnaissance to Impact",
+        "Use cases include threat intel, detection development, gap analysis, and red teaming",
+        "Multiple matrices: Enterprise (most common), Mobile, and ICS"
+      ],
+
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "name": "TTP = The Threat's Plan",
+            "expansion": "Tactics (why), Techniques (how), Procedures (who/specific)",
+            "usage": "Remember what each T and P stands for"
+          },
+          {
+            "name": "ATT&CK Tactics: RRIED PEDS DELL CI",
+            "expansion": "Reconnaissance, Resource dev, Initial access, Execution, Defense evasion, Persistence, Privilege Escalation, Discovery, Credential access, Lateral movement, Collection, C2, Exfiltration, Impact",
+            "usage": "Remember all 14 tactics in rough order"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "Tactics vs Techniques",
+            "analogy": "Tactics are like chapters in a book (the major themes/goals), while techniques are like the paragraphs (specific content achieving the chapter's purpose). You might have many paragraphs (techniques) supporting one chapter (tactic).",
+            "why_it_works": "Book structure is familiar and shows the hierarchical relationship"
+          },
+          {
+            "concept": "ATT&CK as Common Language",
+            "analogy": "ATT&CK is like medical terminology. Just as doctors worldwide can communicate precisely about conditions using ICD codes, security professionals can communicate precisely about attacks using ATT&CK technique IDs. 'T1059.001' means the same thing everywhere.",
+            "why_it_works": "Shows the value of standardized terminology"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Confusing tactics with techniques",
+            "correction": "Tactics are the goals (WHY), techniques are the methods (HOW). 'Persistence' is a tactic (goal of maintaining access); 'Scheduled Task' is a technique (method of achieving persistence).",
+            "exam_trap": "Exam questions often test this distinction"
+          },
+          {
+            "mistake": "Thinking ATT&CK is a checklist to implement",
+            "correction": "ATT&CK describes attacker behaviors, not defensive requirements. You use it to guide detection development, not as a to-do list.",
+            "exam_trap": "Understand ATT&CK is descriptive, not prescriptive"
           }
         ]
       },
-      "must_remember_for_exam": [
-        {"fact": "ATT&CK: Tactics = WHY, Techniques = HOW", "why_tested": "Framework structure"},
-        {"fact": "14 tactics from Reconnaissance to Impact", "why_tested": "Framework scope"},
-        {"fact": "TTPs = Tactics, Techniques, Procedures", "why_tested": "Terminology"}
+
+      "real_world_example": {
+        "scenario": "ATT&CK for Detection Gap Analysis",
+        "company": "MedCare Health Systems",
+        "application": "MedCare's security team mapped their SIEM detection rules to ATT&CK techniques using Navigator. Results: Strong coverage (80%) for Initial Access and Execution tactics. Weak coverage (20%) for Defense Evasion and Lateral Movement. GAP ANALYSIS revealed: No detections for T1055 (Process Injection), T1021 (Remote Services), or T1003 (Credential Dumping). OUTCOME: Prioritized detection engineering focused on these gaps, improving overall coverage from 45% to 72% of techniques.",
+        "outcome": "Framework-guided investment in detection capabilities"
+      },
+
+      "what_would_happen_if": [
+        {
+          "situation": "Security team has no common framework for describing attacks",
+          "consequence": "SOC analyst says 'malware did something suspicious.' No specificity means no actionable intelligence. Can't search for related activity, can't share with partners, can't build targeted detections.",
+          "lesson": "Frameworks provide precision. 'T1055 Process Injection' is actionable; 'suspicious activity' is not."
+        },
+        {
+          "situation": "Organization builds detections without mapping to ATT&CK",
+          "consequence": "Duplicate effort building detections that cover the same techniques. Critical gaps unnoticed because no visibility into coverage. Can't measure improvement over time.",
+          "lesson": "Framework mapping enables strategic detection development."
+        }
       ],
-      "key_points": ["Tactics = goals (why), Techniques = methods (how)", "14 tactics cover full attack lifecycle", "Used for detection, gap analysis, red teaming"]
+
+      "knowledge_check": {
+        "question": "In the MITRE ATT&CK framework, 'Persistence' represents which component?",
+        "options": [
+          "A technique describing how attackers maintain access",
+          "A tactic representing the goal of maintaining access",
+          "A procedure showing specific implementation",
+          "A sub-technique of the Execution tactic"
+        ],
+        "correct": 1,
+        "explanation": "Persistence is a TACTIC—it represents the adversary's goal (WHY) of maintaining access to a compromised system. Specific methods of achieving persistence (like Scheduled Tasks or Registry Run Keys) are TECHNIQUES (HOW).",
+        "wrong_answer_analysis": {
+          "0": "Techniques describe HOW to achieve a goal. Persistence is the goal itself.",
+          "2": "Procedures are specific implementations by threat groups, not framework categories.",
+          "3": "Persistence is its own tactic, not a sub-technique of another tactic."
+        }
+      },
+
+      "must_remember_for_exam": [
+        {
+          "fact": "ATT&CK: Tactics = WHY, Techniques = HOW",
+          "why_tested": "Fundamental framework concept"
+        },
+        {
+          "fact": "14 tactics from Reconnaissance to Impact",
+          "why_tested": "Framework scope"
+        },
+        {
+          "fact": "TTPs = Tactics, Techniques, and Procedures",
+          "why_tested": "Common terminology"
+        }
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "MITRE ATT&CK",
+          "definition": "Adversarial Tactics, Techniques, and Common Knowledge—a framework describing adversary behaviors"
+        },
+        {
+          "term": "Tactic",
+          "definition": "The adversary's goal—WHY they perform an action"
+        },
+        {
+          "term": "Technique",
+          "definition": "HOW the adversary achieves their tactical goal"
+        },
+        {
+          "term": "TTP",
+          "definition": "Tactics, Techniques, and Procedures—comprehensive description of adversary behavior"
+        }
+      ]
     },
+
     {
       "section_id": "D2-L011-S02",
       "title": "Cyber Kill Chain",
-      "estimated_time": "12 minutes",
+      "estimated_time": "15 minutes",
+      
       "content": {
+        "overview": "The Cyber Kill Chain, developed by Lockheed Martin, models the stages of a cyberattack as a sequential process. Understanding these stages helps defenders identify where attacks can be detected and disrupted.",
+        
         "core_concepts": [
           {
-            "concept": "Kill Chain Stages",
+            "concept": "Kill Chain Origin",
+            "background": "Derived from military concept of breaking an adversary's attack sequence",
+            "developer": "Lockheed Martin (2011)",
+            "principle": "Attacks follow predictable stages; disrupting ANY stage breaks the chain"
+          },
+          {
+            "concept": "The Seven Stages",
             "stages": [
-              {"stage": "1. Reconnaissance", "description": "Research targets, gather intel"},
-              {"stage": "2. Weaponization", "description": "Create attack tools, package exploits"},
-              {"stage": "3. Delivery", "description": "Transmit weapon (email, web, USB)"},
-              {"stage": "4. Exploitation", "description": "Trigger vulnerability"},
-              {"stage": "5. Installation", "description": "Install malware, establish persistence"},
-              {"stage": "6. Command & Control", "description": "Establish remote communication"},
-              {"stage": "7. Actions on Objectives", "description": "Achieve goals (steal, disrupt)"}
+              {
+                "stage": 1,
+                "name": "Reconnaissance",
+                "description": "Attacker researches and identifies targets",
+                "activities": ["OSINT gathering", "Email harvesting", "Scanning public infrastructure", "Social media research"],
+                "defensive_opportunities": ["Monitor for scanning", "Limit public information exposure", "Honeypots"],
+                "detection_difficulty": "Hard—often occurs outside your network"
+              },
+              {
+                "stage": 2,
+                "name": "Weaponization",
+                "description": "Attacker creates or acquires attack tools",
+                "activities": ["Creating malware", "Coupling exploit with payload", "Building phishing infrastructure"],
+                "defensive_opportunities": "Threat intelligence about tools and infrastructure",
+                "detection_difficulty": "Very hard—occurs entirely outside your network"
+              },
+              {
+                "stage": 3,
+                "name": "Delivery",
+                "description": "Transmit weapon to target environment",
+                "methods": ["Phishing email", "Malicious website", "USB drop", "Supply chain compromise"],
+                "defensive_opportunities": ["Email filtering", "Web filtering", "USB controls", "User awareness"],
+                "detection_difficulty": "Medium—first stage visible to defenders"
+              },
+              {
+                "stage": 4,
+                "name": "Exploitation",
+                "description": "Trigger vulnerability to execute code",
+                "methods": ["Exploit software vulnerability", "User opens malicious file", "Credential use"],
+                "defensive_opportunities": ["Patching", "Application hardening", "Exploit prevention"],
+                "detection_difficulty": "Medium—endpoint and network telemetry available"
+              },
+              {
+                "stage": 5,
+                "name": "Installation",
+                "description": "Install malware and establish persistence",
+                "methods": ["Malware installation", "Backdoor deployment", "Registry/scheduled task persistence"],
+                "defensive_opportunities": ["Endpoint protection", "Application whitelisting", "Behavioral detection"],
+                "detection_difficulty": "Medium—file and system changes detectable"
+              },
+              {
+                "stage": 6,
+                "name": "Command and Control (C2)",
+                "description": "Establish communication channel back to attacker",
+                "methods": ["HTTP/HTTPS callbacks", "DNS tunneling", "Social media C2"],
+                "defensive_opportunities": ["Network monitoring", "DNS filtering", "Traffic analysis"],
+                "detection_difficulty": "Medium—network traffic visible"
+              },
+              {
+                "stage": 7,
+                "name": "Actions on Objectives",
+                "description": "Accomplish attacker's goals",
+                "actions": ["Data exfiltration", "Data destruction", "Ransomware deployment", "Espionage"],
+                "defensive_opportunities": ["DLP", "Network monitoring", "Backup systems"],
+                "detection_difficulty": "Variable—depends on activity type"
+              }
             ]
           },
           {
             "concept": "Defensive Application",
-            "principle": "Break the chain at any stage to stop the attack",
-            "earlier_is_better": "Earlier detection = less damage"
-          }
-        ]
-      },
-      "must_remember_for_exam": [
-        {"fact": "7 stages: Recon â†’ Weaponize â†’ Deliver â†’ Exploit â†’ Install â†’ C2 â†’ Actions", "why_tested": "Sequence"},
-        {"fact": "Breaking chain at ANY stage stops attack", "why_tested": "Defense principle"}
-      ],
-      "key_points": ["7 sequential stages from Recon to Actions", "Break chain anywhere to stop attack", "Earlier detection = less damage"]
-    },
-    {
-      "section_id": "D2-L011-S03",
-      "title": "Diamond Model and Other Frameworks",
-      "estimated_time": "10 minutes",
-      "content": {
-        "core_concepts": [
-          {
-            "concept": "Diamond Model of Intrusion Analysis",
-            "components": [
-              {"vertex": "Adversary", "description": "Who is attacking"},
-              {"vertex": "Capability", "description": "Tools and techniques used"},
-              {"vertex": "Infrastructure", "description": "Resources (IPs, domains, servers)"},
-              {"vertex": "Victim", "description": "Target of the attack"}
-            ],
-            "use": "Analyze and track intrusion events"
+            "principles": [
+              {
+                "principle": "Break the chain anywhere",
+                "explanation": "Stopping the attack at ANY stage prevents mission success"
+              },
+              {
+                "principle": "Earlier is better",
+                "explanation": "Earlier detection = less damage, lower remediation cost"
+              },
+              {
+                "principle": "Defense in depth",
+                "explanation": "Multiple detection opportunities across stages"
+              },
+              {
+                "principle": "Assume breach",
+                "explanation": "Don't rely solely on early-stage prevention; detect late-stage activities"
+              }
+            ]
           },
           {
-            "concept": "OWASP Top 10",
-            "definition": "Most critical web application security risks",
-            "use": "Prioritize web security efforts"
+            "concept": "Kill Chain Limitations",
+            "limitations": [
+              "Linear model doesn't capture modern attack complexity",
+              "Stages may overlap or repeat",
+              "Insider threats may skip early stages",
+              "Living-off-the-land attacks blur Installation stage"
+            ],
+            "complement": "ATT&CK provides more granular, non-linear view"
           }
         ]
       },
-      "must_remember_for_exam": [
-        {"fact": "Diamond Model: Adversary, Capability, Infrastructure, Victim", "why_tested": "Framework"},
-        {"fact": "OWASP Top 10 = critical web app risks", "why_tested": "Standard reference"}
+
+      "key_points": [
+        "Seven stages: Recon → Weaponize → Deliver → Exploit → Install → C2 → Actions",
+        "Breaking the chain at ANY stage stops the attack",
+        "Earlier detection means less damage and lower remediation cost",
+        "Delivery is the first stage typically visible to defenders",
+        "Model is linear—doesn't capture all attack complexity"
       ],
-      "key_points": ["Diamond Model has 4 vertices for analysis", "OWASP Top 10 guides web security priorities"]
+
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "name": "Kill Chain: Really Wild Deer Eat In Cold Areas",
+            "expansion": "Reconnaissance, Weaponization, Delivery, Exploitation, Installation, Command & Control, Actions on Objectives",
+            "usage": "Remember the 7 stages in order"
+          },
+          {
+            "name": "Kill Chain Numbers: 7-3-4",
+            "expansion": "7 stages total; Stage 3 (Delivery) is first visible to defenders; Stage 4+ is when damage can occur",
+            "usage": "Remember key stage numbers"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "Kill Chain as Military Operation",
+            "analogy": "Like a military strike: gather intelligence (Recon), prepare weapons (Weaponize), transport to target (Deliver), fire weapons (Exploit), establish base (Install), maintain communications (C2), complete mission (Actions). Breaking any step disrupts the operation.",
+            "why_it_works": "The military origin makes the sequential, breakable nature clear"
+          },
+          {
+            "concept": "Breaking the Chain",
+            "analogy": "Think of it like a burglar: they case the house (Recon), get tools (Weaponize), approach the house (Deliver), pick the lock (Exploit), get inside (Install), wait for the all-clear (C2), steal valuables (Actions). If you catch them at ANY step—casing, approaching, picking lock—you stop the theft.",
+            "why_it_works": "Burglary sequence is intuitive and shows multiple intervention points"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Thinking you must stop attacks at the first stage",
+            "correction": "Defense in depth means having detection/prevention at EVERY stage. You don't have to catch Reconnaissance; catching C2 still stops the attack.",
+            "exam_trap": "Don't dismiss late-stage detection as failure—it's still successful defense"
+          },
+          {
+            "mistake": "Treating Kill Chain as comprehensive attack model",
+            "correction": "Kill Chain is simplified and linear. Real attacks are messier. Use Kill Chain for communication and basic understanding; use ATT&CK for detailed analysis.",
+            "exam_trap": "Know the limitations of the Kill Chain model"
+          }
+        ]
+      },
+
+      "real_world_example": {
+        "scenario": "Kill Chain Analysis of Ransomware Attack",
+        "company": "GlobalRetail Inc.",
+        "application": "Post-incident analysis mapped the ransomware attack to Kill Chain: (1) RECON: Attackers researched company via LinkedIn, identifying CFO. (2) WEAPONIZE: Created malicious Excel file with macro. (3) DELIVERY: Phishing email to CFO disguised as invoice. (4) EXPLOIT: CFO opened file, enabled macros. (5) INSTALLATION: Cobalt Strike beacon installed. (6) C2: Beacon connected to attacker infrastructure. (7) ACTIONS: Ransomware deployed after 2 weeks of reconnaissance. LESSON: Company had no detection at stages 5-6, allowing attacker free movement for weeks.",
+        "outcome": "Kill Chain analysis revealed detection gaps at Installation and C2 stages"
+      },
+
+      "what_would_happen_if": [
+        {
+          "situation": "Organization only focuses on blocking Delivery (email filtering)",
+          "consequence": "Attacks via other vectors (web, USB, supply chain) bypass defenses entirely. Once Delivery succeeds, no detection at later stages means full compromise.",
+          "lesson": "Defense at every stage is essential. Don't rely on single-stage prevention."
+        },
+        {
+          "situation": "Detection only exists at 'Actions on Objectives' stage",
+          "consequence": "By the time you detect, attacker has full access, persistence, and is exfiltrating data. Remediation is complex and damage is maximized.",
+          "lesson": "Earlier detection means less damage, but late-stage detection is still valuable."
+        }
+      ],
+
+      "knowledge_check": {
+        "question": "An attacker sends a phishing email containing a malicious attachment to employees. Which stage of the Cyber Kill Chain does this represent?",
+        "options": [
+          "Reconnaissance because the attacker is gathering information",
+          "Weaponization because the malicious file was created",
+          "Delivery because the weapon is being transmitted to targets",
+          "Exploitation because the user might open the attachment"
+        ],
+        "correct": 2,
+        "explanation": "Delivery is the stage where the attack weapon is transmitted to the target environment. Sending the phishing email IS the delivery. Weaponization was creating the malicious attachment; Exploitation occurs when the user opens it.",
+        "wrong_answer_analysis": {
+          "0": "Reconnaissance is gathering information about targets, not sending attacks.",
+          "1": "Weaponization is creating the malicious file. This happened BEFORE the email was sent.",
+          "3": "Exploitation occurs when the vulnerability is triggered—when the user opens the file. Sending the email is Delivery."
+        }
+      },
+
+      "must_remember_for_exam": [
+        {
+          "fact": "7 stages: Recon → Weaponize → Deliver → Exploit → Install → C2 → Actions",
+          "why_tested": "Core framework knowledge"
+        },
+        {
+          "fact": "Breaking the chain at ANY stage stops the attack",
+          "why_tested": "Key defensive principle"
+        },
+        {
+          "fact": "Delivery is first stage visible to most defenders",
+          "why_tested": "Understanding detection opportunities"
+        }
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Cyber Kill Chain",
+          "definition": "Seven-stage model of attack progression from reconnaissance to actions on objectives"
+        },
+        {
+          "term": "Actions on Objectives",
+          "definition": "Final Kill Chain stage where attacker accomplishes their goals"
+        },
+        {
+          "term": "C2 (Command and Control)",
+          "definition": "Communication channel between attacker and compromised systems"
+        }
+      ]
+    },
+
+    {
+      "section_id": "D2-L011-S03",
+      "title": "Diamond Model of Intrusion Analysis",
+      "estimated_time": "12 minutes",
+      
+      "content": {
+        "overview": "The Diamond Model provides a framework for analyzing and tracking intrusions by examining four core features of every attack. It helps analysts understand relationships between adversaries, their capabilities, infrastructure, and victims.",
+        
+        "core_concepts": [
+          {
+            "concept": "Diamond Model Structure",
+            "description": "Four vertices connected in a diamond shape representing core features of every intrusion event",
+            "vertices": [
+              {
+                "vertex": "Adversary",
+                "definition": "The threat actor conducting the attack",
+                "questions_answered": ["Who is attacking?", "What are their motivations?", "What threat group?"],
+                "examples": "APT29, FIN7, Unknown criminal group"
+              },
+              {
+                "vertex": "Capability",
+                "definition": "The tools and techniques used in the attack",
+                "questions_answered": ["What tools are being used?", "What techniques/TTPs?"],
+                "examples": "Cobalt Strike, Mimikatz, custom malware, exploit code"
+              },
+              {
+                "vertex": "Infrastructure",
+                "definition": "Resources used to deliver and control the attack",
+                "questions_answered": ["Where is the attack coming from?", "What C2 servers?"],
+                "examples": "C2 domains, IP addresses, email servers, compromised sites"
+              },
+              {
+                "vertex": "Victim",
+                "definition": "The target of the attack",
+                "questions_answered": ["Who is being targeted?", "What assets?"],
+                "examples": "Organization, specific systems, individuals"
+              }
+            ],
+            "relationships": "Each axis (Adversary-Capability, Adversary-Infrastructure, etc.) represents a trackable relationship"
+          },
+          {
+            "concept": "Diamond Model Use Cases",
+            "uses": [
+              {
+                "use": "Intrusion Analysis",
+                "description": "Structure investigation by examining each vertex",
+                "benefit": "Ensures comprehensive analysis of attack"
+              },
+              {
+                "use": "Activity Threading",
+                "description": "Connect related incidents by shared vertices",
+                "example": "Multiple attacks sharing same infrastructure may be same adversary"
+              },
+              {
+                "use": "Attribution",
+                "description": "Build adversary profile by tracking across incidents",
+                "benefit": "Identify threat groups through patterns"
+              },
+              {
+                "use": "Pivot Analysis",
+                "description": "Use one vertex to discover others",
+                "example": "Known malware hash → C2 infrastructure → other victims"
+              }
+            ]
+          },
+          {
+            "concept": "Activity Threading",
+            "definition": "Connecting intrusion events that share common vertices",
+            "example": "Three incidents using same C2 domain likely same adversary, even if targeting different victims",
+            "benefit": "Track adversary campaigns across time and targets"
+          }
+        ]
+      },
+
+      "key_points": [
+        "Four vertices: Adversary, Capability, Infrastructure, Victim",
+        "Every intrusion event involves all four elements",
+        "Vertices can pivot to discover related information",
+        "Activity threading connects incidents sharing common vertices",
+        "Useful for attribution and campaign tracking"
+      ],
+
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "name": "Diamond: ACIV",
+            "expansion": "Adversary, Capability, Infrastructure, Victim",
+            "usage": "Remember the four vertices"
+          },
+          {
+            "name": "Diamond Questions: Who, What, Where, Whom",
+            "expansion": "Who (Adversary), What tools (Capability), Where from (Infrastructure), Whom targeted (Victim)",
+            "usage": "Remember what each vertex answers"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "Diamond Model",
+            "analogy": "Think of a crime investigation: Who did it (Adversary), What weapon/method (Capability), What vehicle/location (Infrastructure), Who was the victim (Victim). Every crime has these four elements, and finding one helps find others.",
+            "why_it_works": "Crime investigation parallel is intuitive"
+          },
+          {
+            "concept": "Activity Threading",
+            "analogy": "Like connecting dots in a serial crime investigation. If the same getaway car (Infrastructure) is seen at multiple robberies, you can link them to the same gang (Adversary) even if they hit different banks (Victims).",
+            "why_it_works": "Shows how shared elements connect incidents"
+          }
+        ],
+        "common_mistakes": [
+          {
+            "mistake": "Thinking Diamond Model describes attack stages",
+            "correction": "Diamond Model describes elements of attacks, not stages. Kill Chain describes stages; Diamond Model describes components.",
+            "exam_trap": "Don't confuse Diamond (components) with Kill Chain (stages)"
+          }
+        ]
+      },
+
+      "real_world_example": {
+        "scenario": "Diamond Model Attribution",
+        "company": "Pinnacle Financial Services",
+        "application": "Pinnacle experienced a breach. Diamond Model analysis: VICTIM: Pinnacle's customer database server. CAPABILITY: Custom PowerShell dropper, Mimikatz variant. INFRASTRUCTURE: C2 domain registered same day, IP from known bulletproof hosting. Using PIVOT ANALYSIS: C2 IP linked to 3 other financial breaches. Same capability signature found in 2 other incidents. ACTIVITY THREADING connected all 5 incidents to same threat group. OUTCOME: Shared IOCs with FS-ISAC, enabling industry-wide defense.",
+        "outcome": "Diamond Model enabled attribution and collaborative defense"
+      },
+
+      "knowledge_check": {
+        "question": "A security analyst is tracking a threat actor across multiple incidents. They notice that three different attacks used the same C2 domain. In the Diamond Model, what vertex does the C2 domain represent?",
+        "options": [
+          "Adversary because it's used by the threat actor",
+          "Capability because it's a tool used in the attack",
+          "Infrastructure because it's a resource supporting the attack",
+          "Victim because it's where the attack is directed"
+        ],
+        "correct": 2,
+        "explanation": "C2 domains, IP addresses, servers, and other supporting resources are Infrastructure—the physical and logical components that support the attack. The Adversary USES the infrastructure; the Capability is the malware/tools; the Victim is the target.",
+        "wrong_answer_analysis": {
+          "0": "Adversary is the threat actor themselves, not the resources they use.",
+          "1": "Capability is the tools and techniques (malware, exploits), not supporting infrastructure.",
+          "3": "Victim is the target of the attack, not attacker resources."
+        }
+      },
+
+      "must_remember_for_exam": [
+        {
+          "fact": "Diamond Model: Adversary, Capability, Infrastructure, Victim",
+          "why_tested": "Core framework components"
+        },
+        {
+          "fact": "Infrastructure = C2 domains, IP addresses, servers",
+          "why_tested": "Vertex identification"
+        },
+        {
+          "fact": "Activity threading connects incidents sharing vertices",
+          "why_tested": "Framework application"
+        }
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "Diamond Model",
+          "definition": "Framework analyzing intrusions through four vertices: Adversary, Capability, Infrastructure, Victim"
+        },
+        {
+          "term": "Activity threading",
+          "definition": "Connecting intrusion events that share common Diamond Model vertices"
+        },
+        {
+          "term": "Pivot analysis",
+          "definition": "Using known information about one vertex to discover information about others"
+        }
+      ]
+    },
+
+    {
+      "section_id": "D2-L011-S04",
+      "title": "Other Security Frameworks",
+      "estimated_time": "10 minutes",
+      
+      "content": {
+        "overview": "Beyond ATT&CK, Kill Chain, and Diamond Model, several other frameworks guide security operations. Understanding when to use each framework helps security professionals select the right tool for the job.",
+        
+        "core_concepts": [
+          {
+            "concept": "OWASP Top 10",
+            "full_name": "Open Web Application Security Project Top 10",
+            "purpose": "Identify most critical web application security risks",
+            "scope": "Web application vulnerabilities",
+            "current_top_risks": [
+              "Broken Access Control",
+              "Cryptographic Failures",
+              "Injection",
+              "Insecure Design",
+              "Security Misconfiguration",
+              "Vulnerable Components",
+              "Authentication Failures",
+              "Data Integrity Failures",
+              "Security Logging Failures",
+              "SSRF (Server-Side Request Forgery)"
+            ],
+            "use_cases": [
+              "Guide web application security testing",
+              "Prioritize application security training",
+              "Set application security requirements"
+            ],
+            "exam_key": "Know it's for web application security risks"
+          },
+          {
+            "concept": "NIST Cybersecurity Framework (CSF)",
+            "purpose": "Provide standards and guidelines for managing cybersecurity risk",
+            "structure": {
+              "core_functions": [
+                {"function": "Identify", "purpose": "Asset management, risk assessment"},
+                {"function": "Protect", "purpose": "Safeguards and controls"},
+                {"function": "Detect", "purpose": "Monitoring and detection"},
+                {"function": "Respond", "purpose": "Response activities"},
+                {"function": "Recover", "purpose": "Recovery and resilience"}
+              ]
+            },
+            "use_cases": [
+              "Organization-wide security program structure",
+              "Compliance framework mapping",
+              "Security maturity assessment"
+            ],
+            "exam_key": "Know the five core functions: Identify, Protect, Detect, Respond, Recover"
+          },
+          {
+            "concept": "CIS Controls",
+            "full_name": "Center for Internet Security Critical Security Controls",
+            "purpose": "Prioritized, actionable security controls",
+            "structure": "18 controls organized by Implementation Groups (IG1-IG3)",
+            "use_cases": [
+              "Prioritize security implementations",
+              "Build security program from scratch",
+              "Benchmark against industry standard"
+            ],
+            "exam_key": "Actionable, prioritized security controls"
+          },
+          {
+            "concept": "Framework Comparison",
+            "comparison": [
+              {
+                "framework": "MITRE ATT&CK",
+                "focus": "Adversary behavior",
+                "use_when": "Need to understand/detect specific attack techniques"
+              },
+              {
+                "framework": "Kill Chain",
+                "focus": "Attack stages",
+                "use_when": "Need to trace attack progression"
+              },
+              {
+                "framework": "Diamond Model",
+                "focus": "Intrusion components",
+                "use_when": "Need to analyze/attribute attacks"
+              },
+              {
+                "framework": "OWASP Top 10",
+                "focus": "Web app vulnerabilities",
+                "use_when": "Need to secure web applications"
+              },
+              {
+                "framework": "NIST CSF",
+                "focus": "Security program structure",
+                "use_when": "Need to build/assess overall security program"
+              }
+            ]
+          }
+        ]
+      },
+
+      "key_points": [
+        "OWASP Top 10 identifies critical web application security risks",
+        "NIST CSF has five functions: Identify, Protect, Detect, Respond, Recover",
+        "CIS Controls provide prioritized, actionable security measures",
+        "Different frameworks serve different purposes—choose based on need",
+        "Frameworks are complementary, not competing"
+      ],
+
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "name": "NIST CSF: I-P-D-R-R (I Protect Data, Respond, Recover)",
+            "expansion": "Identify, Protect, Detect, Respond, Recover",
+            "usage": "Remember the five NIST CSF functions"
+          }
+        ],
+        "analogies": [
+          {
+            "concept": "Framework Selection",
+            "analogy": "Frameworks are like different maps for different purposes. Road maps (Kill Chain) show the journey. Topographic maps (ATT&CK) show terrain details. City maps (Diamond Model) show landmarks. You use the right map for your navigation need.",
+            "why_it_works": "Map analogy shows frameworks serve different purposes"
+          }
+        ]
+      },
+
+      "knowledge_check": {
+        "question": "A security team needs to prioritize security improvements for their web application. Which framework would be MOST appropriate?",
+        "options": [
+          "MITRE ATT&CK because it describes attacker behaviors",
+          "Cyber Kill Chain because it shows attack stages",
+          "OWASP Top 10 because it identifies web application risks",
+          "Diamond Model because it helps analyze intrusions"
+        ],
+        "correct": 2,
+        "explanation": "OWASP Top 10 specifically identifies the most critical web application security risks. It's designed to guide web application security priorities, testing, and requirements. ATT&CK and Kill Chain are more general; Diamond Model is for intrusion analysis, not application development.",
+        "wrong_answer_analysis": {
+          "0": "ATT&CK is broader and not specific to web applications.",
+          "1": "Kill Chain describes attack progression, not specific vulnerabilities to address.",
+          "3": "Diamond Model is for analyzing intrusions after they occur, not proactive security."
+        }
+      },
+
+      "must_remember_for_exam": [
+        {
+          "fact": "OWASP Top 10 = critical web application security risks",
+          "why_tested": "Framework identification"
+        },
+        {
+          "fact": "NIST CSF: Identify, Protect, Detect, Respond, Recover",
+          "why_tested": "Core framework functions"
+        },
+        {
+          "fact": "CIS Controls = prioritized actionable security controls",
+          "why_tested": "Framework purpose"
+        }
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "OWASP Top 10",
+          "definition": "List of the most critical web application security risks"
+        },
+        {
+          "term": "NIST CSF",
+          "definition": "Cybersecurity framework with five functions: Identify, Protect, Detect, Respond, Recover"
+        },
+        {
+          "term": "CIS Controls",
+          "definition": "Prioritized set of actions for cyber defense"
+        }
+      ]
+    },
+
+    {
+      "section_id": "D2-L011-S05",
+      "title": "Applying Frameworks in Practice",
+      "estimated_time": "8 minutes",
+      
+      "content": {
+        "overview": "Understanding frameworks is only valuable when applied. This section covers practical applications of frameworks in day-to-day security operations.",
+        
+        "core_concepts": [
+          {
+            "concept": "Framework Selection Guide",
+            "guidance": [
+              {
+                "scenario": "Building detection rules",
+                "best_framework": "MITRE ATT&CK",
+                "why": "Maps directly to specific techniques to detect"
+              },
+              {
+                "scenario": "Investigating an incident",
+                "best_framework": "Kill Chain + Diamond Model",
+                "why": "Kill Chain traces progression; Diamond Model structures analysis"
+              },
+              {
+                "scenario": "Securing a web application",
+                "best_framework": "OWASP Top 10",
+                "why": "Specific to web application vulnerabilities"
+              },
+              {
+                "scenario": "Building a security program",
+                "best_framework": "NIST CSF + CIS Controls",
+                "why": "Comprehensive program structure with prioritized actions"
+              },
+              {
+                "scenario": "Threat hunting",
+                "best_framework": "MITRE ATT&CK",
+                "why": "Hypothesis formation based on specific techniques"
+              }
+            ]
+          },
+          {
+            "concept": "ATT&CK Navigator",
+            "description": "Visual tool for mapping ATT&CK coverage",
+            "uses": [
+              "Create coverage heat maps",
+              "Identify detection gaps",
+              "Plan red team engagements",
+              "Compare threat actor TTPs"
+            ],
+            "access": "Free at attack.mitre.org/resources/navigator"
+          },
+          {
+            "concept": "Framework Layering",
+            "principle": "Use multiple frameworks together for comprehensive analysis",
+            "example": "During incident: Kill Chain for timeline, ATT&CK for technique detail, Diamond Model for attribution"
+          }
+        ]
+      },
+
+      "key_points": [
+        "Select frameworks based on specific use case",
+        "ATT&CK Navigator visualizes technique coverage",
+        "Frameworks are complementary—use multiple together",
+        "Kill Chain for progression, ATT&CK for detail, Diamond for attribution",
+        "Practice applying frameworks to real scenarios"
+      ],
+
+      "memory_hooks": {
+        "analogies": [
+          {
+            "concept": "Framework Layering",
+            "analogy": "Using multiple frameworks is like a doctor using different diagnostic tools. X-ray (Kill Chain) shows the big picture, MRI (ATT&CK) shows detail, blood tests (Diamond Model) identify the cause. Together they give complete diagnosis.",
+            "why_it_works": "Medical diagnosis analogy shows complementary tool use"
+          }
+        ]
+      },
+
+      "real_world_example": {
+        "scenario": "Multi-Framework Incident Response",
+        "company": "NexaTech Solutions",
+        "application": "During ransomware incident, IR team applied multiple frameworks: KILL CHAIN traced attack from phishing (Delivery) through encryption (Actions). ATT&CK mapped specific techniques: T1566.001 (Spearphishing), T1059.001 (PowerShell), T1486 (Data Encrypted for Impact). DIAMOND MODEL identified: Adversary (likely FIN7 based on TTP match), Capability (Cobalt Strike), Infrastructure (bullet-proof hosting), Victim (NexaTech domain). OUTCOME: Comprehensive understanding enabled complete remediation and threat intel sharing.",
+        "outcome": "Multi-framework approach provided complete attack picture"
+      },
+
+      "knowledge_check": {
+        "question": "A SOC analyst wants to identify which attack techniques their organization has no detection for. Which tool would be MOST useful?",
+        "options": [
+          "Cyber Kill Chain stages",
+          "Diamond Model vertices",
+          "ATT&CK Navigator coverage map",
+          "OWASP Top 10 categories"
+        ],
+        "correct": 2,
+        "explanation": "ATT&CK Navigator allows analysts to map their detection capabilities to specific techniques and visualize gaps. It creates coverage heat maps showing which techniques have detections and which don't. Kill Chain and Diamond Model don't map to specific detectable techniques; OWASP is web-specific.",
+        "wrong_answer_analysis": {
+          "0": "Kill Chain stages are too high-level for specific detection gap analysis.",
+          "1": "Diamond Model is for intrusion analysis, not detection capability assessment.",
+          "3": "OWASP Top 10 is for web application vulnerabilities, not general detection coverage."
+        }
+      },
+
+      "must_remember_for_exam": [
+        {
+          "fact": "ATT&CK Navigator visualizes technique coverage",
+          "why_tested": "Practical tool knowledge"
+        },
+        {
+          "fact": "Use Kill Chain for progression, ATT&CK for detail",
+          "why_tested": "Framework application"
+        }
+      ],
+
+      "glossary_terms": [
+        {
+          "term": "ATT&CK Navigator",
+          "definition": "Visual tool for exploring and annotating the ATT&CK matrix"
+        },
+        {
+          "term": "Coverage map",
+          "definition": "Visual representation of which techniques have detection capabilities"
+        }
+      ]
     }
   ],
 
-  "summary": {
-    "exam_essentials": [
-      "MITRE ATT&CK: Tactics = WHY, Techniques = HOW",
-      "14 ATT&CK tactics from Recon to Impact",
-      "Kill Chain: 7 stages, break anywhere to stop attack",
-      "Diamond Model: Adversary, Capability, Infrastructure, Victim",
-      "TTPs = Tactics, Techniques, Procedures"
+  "hands_on_labs": {
+    "browser_labs": [
+      {
+        "lab_id": "lab-attack-mapper",
+        "title": "ATT&CK Technique Mapper",
+        "type": "scenario_mapping",
+        "difficulty": "intermediate",
+        "estimated_time": "15 minutes",
+        "description": "Map attack scenarios to ATT&CK tactics and techniques."
+      },
+      {
+        "lab_id": "lab-kill-chain-analyzer",
+        "title": "Kill Chain Stage Identifier",
+        "type": "scenario_analysis",
+        "difficulty": "beginner",
+        "estimated_time": "12 minutes",
+        "description": "Identify Kill Chain stages in attack scenario descriptions."
+      },
+      {
+        "lab_id": "lab-diamond-model",
+        "title": "Diamond Model Analysis",
+        "type": "structured_analysis",
+        "difficulty": "intermediate",
+        "estimated_time": "15 minutes",
+        "description": "Apply Diamond Model to analyze intrusion scenarios."
+      }
+    ],
+    "external_labs": [
+      {
+        "resource": "MITRE ATT&CK Navigator",
+        "lab_name": "Create Coverage Map",
+        "url": "https://mitre-attack.github.io/attack-navigator/",
+        "cost": "Free",
+        "estimated_time": "1 hour",
+        "description": "Create your own ATT&CK Navigator layer mapping detection coverage.",
+        "role_relevance": ["soc_analyst", "security_engineer"]
+      },
+      {
+        "resource": "TryHackMe",
+        "lab_name": "MITRE Room",
+        "url": "https://tryhackme.com/room/mitre",
+        "cost": "Free",
+        "estimated_time": "2 hours",
+        "role_relevance": ["soc_analyst", "incident_responder", "penetration_tester"]
+      },
+      {
+        "resource": "Atomic Red Team",
+        "lab_name": "ATT&CK Technique Testing",
+        "url": "https://github.com/redcanaryco/atomic-red-team",
+        "cost": "Free",
+        "estimated_time": "2 hours",
+        "description": "Test ATT&CK techniques in controlled environment.",
+        "role_relevance": ["security_engineer", "penetration_tester"]
+      }
+    ],
+    "tools_introduction": [
+      {
+        "tool": "MITRE ATT&CK Navigator",
+        "category": "Framework Visualization",
+        "purpose": "Visualize and annotate ATT&CK matrix coverage",
+        "key_concepts": [
+          "Creating layers",
+          "Color-coding techniques",
+          "Exporting/sharing visualizations",
+          "Comparing threat actors"
+        ],
+        "role_relevance": ["soc_analyst", "security_engineer", "penetration_tester"]
+      },
+      {
+        "tool": "MITRE Caldera",
+        "category": "Adversary Emulation",
+        "purpose": "Automated adversary emulation using ATT&CK",
+        "key_concepts": [
+          "Ability = ATT&CK technique implementation",
+          "Adversary profiles",
+          "Automated attack chains",
+          "Detection validation"
+        ],
+        "role_relevance": ["security_engineer", "penetration_tester"]
+      }
     ]
   },
 
+  "summary": {
+    "key_takeaways": [
+      "MITRE ATT&CK is the industry-standard framework: Tactics = WHY, Techniques = HOW",
+      "14 ATT&CK tactics cover full attack lifecycle from Reconnaissance to Impact",
+      "Kill Chain has 7 stages; breaking ANY stage stops the attack",
+      "Diamond Model has 4 vertices: Adversary, Capability, Infrastructure, Victim",
+      "OWASP Top 10 identifies critical web application security risks",
+      "NIST CSF has 5 functions: Identify, Protect, Detect, Respond, Recover",
+      "Frameworks are complementary—use multiple for comprehensive analysis"
+    ],
+    "exam_essentials": [
+      "ATT&CK: Tactics = WHY (goal), Techniques = HOW (method)",
+      "TTPs = Tactics, Techniques, and Procedures",
+      "Kill Chain: 7 stages from Reconnaissance to Actions on Objectives",
+      "Break Kill Chain at ANY stage to stop attack",
+      "Diamond Model: Adversary, Capability, Infrastructure, Victim",
+      "OWASP Top 10 = web application security risks",
+      "NIST CSF: Identify, Protect, Detect, Respond, Recover"
+    ],
+    "common_exam_traps": [
+      "Tactics = WHY (goals), not HOW (that's techniques)",
+      "Kill Chain has 7 stages, not 5 or 10",
+      "Diamond Model describes components, not stages",
+      "Infrastructure = C2 domains/IPs, not attacker capabilities"
+    ],
+    "connection_to_next": "With framework knowledge established, the next lesson covers Security Assessments—structured approaches to evaluating security posture using penetration testing, vulnerability scanning, and security audits, often guided by these frameworks."
+  },
+
   "related_content": {
+    "simulations": ["D2-SIM-001", "D4-SIM-001"],
+    "remediation": ["D2-REM-001"],
     "next_lesson": "D2-LESSON-012",
     "previous_lesson": "D2-LESSON-010"
   }
