@@ -4,11 +4,15 @@
   "title": "Indicators of Compromise and Detection",
   "subtitle": "Finding Evil: IOCs, IOAs, and Threat Detection",
   "version": "3.0-enhanced",
-  "objectives_covered": ["2.4"],
+  "objectives_covered": [
+    "2.4"
+  ],
   "estimated_duration": "90-120 minutes (core: 60 min, labs: 30-60 min)",
   "difficulty": "intermediate",
-  "prerequisites": ["D2-LESSON-004", "D2-LESSON-005"],
-
+  "prerequisites": [
+    "D2-LESSON-004",
+    "D2-LESSON-005"
+  ],
   "skill_tree": {
     "position": {
       "domain": 2,
@@ -19,7 +23,7 @@
       {
         "lesson_id": "D2-LESSON-004",
         "title": "Malware Types",
-        "why_needed": "Understand what creates indicators—malware leaves specific traces"
+        "why_needed": "Understand what creates indicators\u2014malware leaves specific traces"
       },
       {
         "lesson_id": "D2-LESSON-005",
@@ -81,7 +85,6 @@
       }
     }
   },
-
   "role_relevance": {
     "soc_analyst": {
       "relevance": "critical",
@@ -95,7 +98,13 @@
         "Document IOC findings in tickets",
         "Differentiate true positives from false alarms"
       ],
-      "tools_youll_use": ["Splunk", "Microsoft Sentinel", "CrowdStrike", "VirusTotal", "MISP"],
+      "tools_youll_use": [
+        "Splunk",
+        "Microsoft Sentinel",
+        "CrowdStrike",
+        "VirusTotal",
+        "MISP"
+      ],
       "real_scenario": "Alert fires for connection to known C2 IP. You pivot from the network IOC to identify the source host, find a suspicious process hash, check the hash against threat intel, confirm it's Cobalt Strike beacon, and escalate as confirmed compromise."
     },
     "incident_responder": {
@@ -110,7 +119,13 @@
         "Validate IOCs don't generate false positives",
         "Document IOCs in incident reports"
       ],
-      "tools_youll_use": ["Velociraptor", "KAPE", "Mandiant IOC Editor", "OpenIOC", "YARA"],
+      "tools_youll_use": [
+        "Velociraptor",
+        "KAPE",
+        "Mandiant IOC Editor",
+        "OpenIOC",
+        "YARA"
+      ],
       "real_scenario": "During ransomware response, you extract file hashes from encrypted files, identify the C2 domains from memory forensics, build an IOC list, and sweep the entire environment to find all compromised hosts before containment."
     },
     "security_engineer": {
@@ -125,7 +140,13 @@
         "Implement IOC blocking at firewalls/proxies",
         "Automate IOC ingestion workflows"
       ],
-      "tools_youll_use": ["YARA", "Sigma", "Snort/Suricata", "Threat intel platforms", "SOAR"],
+      "tools_youll_use": [
+        "YARA",
+        "Sigma",
+        "Snort/Suricata",
+        "Threat intel platforms",
+        "SOAR"
+      ],
       "real_scenario": "New threat report describes APT campaign targeting your industry. You extract IOCs from the report, create detection rules in Sigma format, deploy to your SIEM, add network IOCs to firewall blocklists, and document in your threat library."
     },
     "grc_analyst": {
@@ -138,7 +159,11 @@
         "Document detection capabilities for auditors",
         "Track mean time to detect (MTTD)"
       ],
-      "tools_youll_use": ["GRC platforms", "SIEM dashboards", "Compliance reporting tools"],
+      "tools_youll_use": [
+        "GRC platforms",
+        "SIEM dashboards",
+        "Compliance reporting tools"
+      ],
       "real_scenario": "Annual security assessment requires demonstrating threat detection capabilities. You work with SOC to document IOC detection coverage mapped to MITRE ATT&CK techniques."
     },
     "penetration_tester": {
@@ -152,14 +177,16 @@
         "Document detection gaps for remediation",
         "Recommend detection improvements"
       ],
-      "tools_youll_use": ["Atomic Red Team", "Caldera", "Custom obfuscation tools"],
+      "tools_youll_use": [
+        "Atomic Red Team",
+        "Caldera",
+        "Custom obfuscation tools"
+      ],
       "real_scenario": "Red team engagement requires testing detection capabilities. You execute known attack techniques, check if IOCs are detected, document gaps where attacks succeeded without alerts, and recommend detection rule improvements."
     }
   },
-
   "introduction": {
-    "hook": "When SolarWinds was compromised, security teams worldwide scrambled to find indicators of compromise in their environments. The attackers had been inside for months, but their malicious DLL had a specific file hash, their C2 traffic went to specific domains, and their persistence mechanisms left registry artifacts. Organizations that could quickly search for these IOCs contained the breach; those that couldn't remained compromised for weeks longer. Knowing what to look for—and finding it before damage is done—is the essence of threat detection.",
-    
+    "hook": "When SolarWinds was compromised, security teams worldwide scrambled to find indicators of compromise in their environments. The attackers had been inside for months, but their malicious DLL had a specific file hash, their C2 traffic went to specific domains, and their persistence mechanisms left registry artifacts. Organizations that could quickly search for these IOCs contained the breach; those that couldn't remained compromised for weeks longer. Knowing what to look for\u2014and finding it before damage is done\u2014is the essence of threat detection.",
     "learning_goals": [
       "Distinguish between Indicators of Compromise (IOCs) and Indicators of Attack (IOAs)",
       "Identify common IOC types including file-based, network-based, host-based, and behavioral",
@@ -168,13 +195,11 @@
       "Apply IOC knowledge to real-world detection scenarios",
       "Integrate threat intelligence to enhance detection capabilities"
     ],
-    
     "why_it_matters": {
       "career_impact": "IOC detection is the core skill of SOC analysts. Your ability to quickly identify, correlate, and act on indicators determines how effectively you protect your organization.",
       "business_connection": "The average time to identify a breach is 204 days (IBM 2023). Effective IOC detection can reduce this to hours or days, dramatically limiting damage and cost.",
       "exam_relevance": "Expect 4-6 questions on indicators, detection methods, and threat hunting. Understanding the IOC vs IOA distinction is particularly high-yield."
     },
-    
     "exam_weight": {
       "domain": "Domain 2: Threats, Vulnerabilities & Mitigations (22%)",
       "estimated_questions": "4-6 questions on indicators and detection",
@@ -193,16 +218,13 @@
       ]
     }
   },
-
   "sections": [
     {
       "section_id": "D2-L008-S01",
       "title": "Indicators of Compromise (IOCs)",
       "estimated_time": "15 minutes",
-      
       "content": {
-        "overview": "An Indicator of Compromise (IOC) is forensic evidence that a security incident may have occurred. IOCs are the digital fingerprints attackers leave behind—file hashes, IP addresses, domain names, registry keys, and behavioral patterns that indicate malicious activity.",
-        
+        "overview": "An Indicator of Compromise (IOC) is forensic evidence that a security incident may have occurred. IOCs are the digital fingerprints attackers leave behind\u2014file hashes, IP addresses, domain names, registry keys, and behavioral patterns that indicate malicious activity.",
         "core_concepts": [
           {
             "concept": "IOC Definition",
@@ -220,28 +242,54 @@
             "types": [
               {
                 "type": "File-based IOCs",
-                "examples": ["Malware hashes (MD5, SHA1, SHA256)", "Malicious filenames", "File paths", "File sizes", "Packer signatures"],
+                "examples": [
+                  "Malware hashes (MD5, SHA1, SHA256)",
+                  "Malicious filenames",
+                  "File paths",
+                  "File sizes",
+                  "Packer signatures"
+                ],
                 "detection": "Endpoint protection, file integrity monitoring",
-                "strength": "Precise—hash matches are definitive",
+                "strength": "Precise\u2014hash matches are definitive",
                 "weakness": "Easily evaded by modifying file (changes hash)"
               },
               {
                 "type": "Network-based IOCs",
-                "examples": ["Malicious IP addresses", "C2 domain names", "Suspicious URLs", "Unusual ports", "Traffic patterns", "User-agent strings"],
+                "examples": [
+                  "Malicious IP addresses",
+                  "C2 domain names",
+                  "Suspicious URLs",
+                  "Unusual ports",
+                  "Traffic patterns",
+                  "User-agent strings"
+                ],
                 "detection": "Firewalls, IDS/IPS, proxy logs, DNS logs",
                 "strength": "Catches communication to known bad infrastructure",
                 "weakness": "Attackers rotate infrastructure frequently"
               },
               {
                 "type": "Host-based IOCs",
-                "examples": ["Registry key changes", "Scheduled tasks", "Service installations", "Unusual processes", "Startup entries", "WMI subscriptions"],
+                "examples": [
+                  "Registry key changes",
+                  "Scheduled tasks",
+                  "Service installations",
+                  "Unusual processes",
+                  "Startup entries",
+                  "WMI subscriptions"
+                ],
                 "detection": "EDR, SIEM with endpoint logs, host forensics",
                 "strength": "Shows persistence mechanisms and system modifications",
                 "weakness": "Requires endpoint visibility and log collection"
               },
               {
                 "type": "Behavioral IOCs",
-                "examples": ["Unusual login times", "Access from new locations", "Large data transfers", "Privilege escalation patterns", "Lateral movement"],
+                "examples": [
+                  "Unusual login times",
+                  "Access from new locations",
+                  "Large data transfers",
+                  "Privilege escalation patterns",
+                  "Lateral movement"
+                ],
                 "detection": "UEBA, SIEM correlation, anomaly detection",
                 "strength": "Catches attacks even with new/unknown tools",
                 "weakness": "Higher false positive rate, requires baseline"
@@ -269,7 +317,6 @@
             ]
           }
         ],
-
         "definitions_and_terminology": {
           "IOC": "Indicator of Compromise - forensic artifacts suggesting a security incident",
           "Atomic indicator": "Single, indivisible IOC (e.g., one hash, one IP)",
@@ -278,7 +325,6 @@
           "Pivoting": "Using one IOC to discover related IOCs",
           "Threat intelligence": "Context around IOCs explaining who, what, why"
         },
-
         "industry_standards": {
           "STIX": "Structured Threat Information eXpression - standard format for threat intel",
           "TAXII": "Trusted Automated eXchange of Intelligence Information - protocol for sharing",
@@ -287,7 +333,6 @@
           "MISP": "Malware Information Sharing Platform"
         }
       },
-
       "key_points": [
         "IOCs are forensic artifacts indicating potential compromise",
         "Types: file-based (hashes), network-based (IPs/domains), host-based (registry), behavioral",
@@ -295,7 +340,6 @@
         "IOCs have limited shelf life as attackers rotate infrastructure",
         "STIX/TAXII are standards for sharing threat intelligence"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -312,36 +356,36 @@
         "analogies": [
           {
             "concept": "IOCs as Crime Scene Evidence",
-            "analogy": "IOCs are like fingerprints, footprints, and DNA at a crime scene. The criminal is gone, but they left evidence behind. A hash is like a fingerprint—unique to that specific malware. An IP address is like a getaway car's license plate—it tells you where they went.",
+            "analogy": "IOCs are like fingerprints, footprints, and DNA at a crime scene. The criminal is gone, but they left evidence behind. A hash is like a fingerprint\u2014unique to that specific malware. An IP address is like a getaway car's license plate\u2014it tells you where they went.",
             "why_it_works": "Crime scene investigation is familiar, and the concept of forensic evidence translates directly to digital forensics"
           },
           {
             "concept": "IOC Confidence Levels",
-            "analogy": "Think of IOC confidence like witness reliability. High confidence is like DNA evidence—nearly certain match. Medium confidence is like an eyewitness description—helpful but could match others. Low confidence is like 'someone wearing a hoodie'—too common to mean much alone.",
+            "analogy": "Think of IOC confidence like witness reliability. High confidence is like DNA evidence\u2014nearly certain match. Medium confidence is like an eyewitness description\u2014helpful but could match others. Low confidence is like 'someone wearing a hoodie'\u2014too common to mean much alone.",
             "why_it_works": "Maps directly to how evidence is weighted in investigations"
           }
         ],
         "common_mistakes": [
           {
             "mistake": "Treating all IOCs equally",
-            "correction": "IOCs have confidence levels. A specific malware hash (high confidence) warrants immediate action. A generic suspicious IP (low confidence) needs correlation with other indicators.",
+            "why_wrong": "IOCs have confidence levels. A specific malware hash (high confidence) warrants immediate action.",
+            "correct_understanding": "IOCs have confidence levels. A specific malware hash (high confidence) warrants immediate action. A generic suspicious IP (low confidence) needs correlation with other indicators.",
             "exam_trap": "Questions may test whether you understand IOC prioritization"
           },
           {
             "mistake": "Assuming IOCs remain valid indefinitely",
-            "correction": "Attackers rotate infrastructure constantly. A C2 domain active today may be abandoned tomorrow. IOC TTL (time to live) matters.",
+            "why_wrong": "Attackers rotate infrastructure constantly. A C2 domain active today may be abandoned tomorrow.",
+            "correct_understanding": "Attackers rotate infrastructure constantly. A C2 domain active today may be abandoned tomorrow. IOC TTL (time to live) matters.",
             "exam_trap": "Understanding IOC freshness is important for detection strategy questions"
           }
         ]
       },
-
       "real_world_example": {
         "scenario": "SolarWinds IOC Hunt",
         "company": "MedCare Health Systems",
         "application": "When the SolarWinds compromise was disclosed, MedCare's SOC immediately received IOC lists including specific file hashes (malicious DLL), domain names (avsvmcloud.com subdomains), and IP addresses (known C2). The SOC searched their SIEM for network connections to the malicious domains (FOUND: 3 servers), searched EDR for the file hash (FOUND: on the 3 servers), examined those servers for persistence mechanisms (FOUND: scheduled tasks with suspicious commands). Within 4 hours, they identified all compromised systems and began containment.",
         "outcome": "Rapid IOC-based hunting allowed MedCare to contain the breach before data exfiltration occurred"
       },
-
       "what_would_happen_if": [
         {
           "situation": "An organization cannot search for IOCs because they don't collect endpoint logs",
@@ -354,7 +398,6 @@
           "lesson": "IOC confidence levels must inform alert prioritization. Not all indicators warrant the same response."
         }
       ],
-
       "knowledge_check": {
         "question": "A security analyst discovers that several workstations have connected to a domain associated with a known malware family. This domain is classified as which type of IOC?",
         "options": [
@@ -371,11 +414,10 @@
           "3": "Behavioral IOCs describe patterns of activity (login times, data transfer volumes). A specific domain name is an atomic network indicator, not a behavior pattern."
         }
       },
-
       "must_remember_for_exam": [
         {
           "fact": "IOC = evidence of past compromise (reactive)",
-          "why_tested": "Core definition—frequently appears in comparison questions with IOA"
+          "why_tested": "Core definition\u2014frequently appears in comparison questions with IOA"
         },
         {
           "fact": "IOC types: File-based, Network-based, Host-based, Behavioral",
@@ -386,7 +428,6 @@
           "why_tested": "Standard protocols appear in terminology questions"
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Indicator of Compromise (IOC)",
@@ -394,23 +435,20 @@
         },
         {
           "term": "STIX",
-          "definition": "Structured Threat Information eXpression—standard format for describing threat intelligence"
+          "definition": "Structured Threat Information eXpression\u2014standard format for describing threat intelligence"
         },
         {
           "term": "TAXII",
-          "definition": "Trusted Automated eXchange of Intelligence Information—protocol for sharing threat intel"
+          "definition": "Trusted Automated eXchange of Intelligence Information\u2014protocol for sharing threat intel"
         }
       ]
     },
-
     {
       "section_id": "D2-L008-S02",
       "title": "Indicators of Attack (IOAs)",
       "estimated_time": "12 minutes",
-      
       "content": {
         "overview": "While IOCs tell you what happened (reactive), Indicators of Attack (IOAs) tell you what IS happening (proactive). IOAs focus on attacker behaviors and techniques in progress, enabling detection before the attack succeeds.",
-        
         "core_concepts": [
           {
             "concept": "IOA Definition",
@@ -428,8 +466,8 @@
             "comparison": [
               {
                 "aspect": "Timing",
-                "ioc": "Reactive—detects after compromise",
-                "ioa": "Proactive—detects during attack"
+                "ioc": "Reactive\u2014detects after compromise",
+                "ioa": "Proactive\u2014detects during attack"
               },
               {
                 "aspect": "Focus",
@@ -438,13 +476,13 @@
               },
               {
                 "aspect": "Evasion difficulty",
-                "ioc": "Easy—change the hash, rotate IP",
-                "ioa": "Hard—attacker must change entire approach"
+                "ioc": "Easy\u2014change the hash, rotate IP",
+                "ioa": "Hard\u2014attacker must change entire approach"
               },
               {
                 "aspect": "False positives",
-                "ioc": "Low—specific matches",
-                "ioa": "Higher—behaviors can be legitimate"
+                "ioc": "Low\u2014specific matches",
+                "ioa": "Higher\u2014behaviors can be legitimate"
               },
               {
                 "aspect": "Unknown threats",
@@ -480,15 +518,13 @@
           }
         ]
       },
-
       "key_points": [
         "IOAs detect attacks in progress based on behavior",
         "IOAs are proactive; IOCs are reactive",
-        "IOAs are harder to evade—attackers must change techniques, not just artifacts",
+        "IOAs are harder to evade\u2014attackers must change techniques, not just artifacts",
         "IOAs may have higher false positive rates due to legitimate similar behaviors",
         "Best detection combines both IOC and IOA approaches"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -505,40 +541,40 @@
         "analogies": [
           {
             "concept": "IOC vs IOA",
-            "analogy": "Think of home security. IOC detection is like coming home to find a broken window and missing TV—you know a burglary happened. IOA detection is like motion sensors and cameras catching someone climbing through the window right now—you can interrupt the burglary in progress.",
+            "analogy": "Think of home security. IOC detection is like coming home to find a broken window and missing TV\u2014you know a burglary happened. IOA detection is like motion sensors and cameras catching someone climbing through the window right now\u2014you can interrupt the burglary in progress.",
             "why_it_works": "Shows the reactive vs proactive distinction clearly"
           },
           {
             "concept": "IOA Evasion Difficulty",
-            "analogy": "A bank robber can wear different clothes (evade IOC—new appearance), but if they still need to walk into the bank, approach the teller, and demand money (IOA—the behavior), detection is still possible. Changing the 'how' of robbery is much harder than changing the 'what' of appearance.",
+            "analogy": "A bank robber can wear different clothes (evade IOC\u2014new appearance), but if they still need to walk into the bank, approach the teller, and demand money (IOA\u2014the behavior), detection is still possible. Changing the 'how' of robbery is much harder than changing the 'what' of appearance.",
             "why_it_works": "Illustrates why behavior-based detection is more robust"
           }
         ],
         "common_mistakes": [
           {
             "mistake": "Thinking IOAs replace IOCs",
-            "correction": "IOAs and IOCs are complementary. IOCs provide precise detection of known threats; IOAs provide broader detection of attack techniques. Use both.",
+            "why_wrong": "IOAs and IOCs are complementary. IOCs provide precise detection of known threats; IOAs provide broader detection of attack techniques.",
+            "correct_understanding": "IOAs and IOCs are complementary. IOCs provide precise detection of known threats; IOAs provide broader detection of attack techniques. Use both.",
             "exam_trap": "Questions may present IOC and IOA as competing when they're complementary"
           },
           {
             "mistake": "Confusing IOA high false positives as a weakness",
-            "correction": "Higher false positives are the tradeoff for detecting unknown threats. Proper tuning and correlation reduce false positives while maintaining detection capability.",
-            "exam_trap": "Don't dismiss IOAs due to false positive concerns—understand the tradeoff"
+            "why_wrong": "Higher false positives are the tradeoff for detecting unknown threats.",
+            "correct_understanding": "Higher false positives are the tradeoff for detecting unknown threats. Proper tuning and correlation reduce false positives while maintaining detection capability.",
+            "exam_trap": "Don't dismiss IOAs due to false positive concerns\u2014understand the tradeoff"
           }
         ]
       },
-
       "real_world_example": {
         "scenario": "Novel Malware Detection via IOA",
         "company": "NexaTech Solutions",
-        "application": "NexaTech's EDR detected suspicious behavior: Excel.exe spawning cmd.exe, which spawned PowerShell.exe with encoded commands. No IOC match existed—the malware was brand new with unknown hashes. But the BEHAVIOR (Office spawning command line tools) matched a known attack pattern (IOA). The detection triggered investigation before the malware could establish persistence or exfiltrate data.",
-        "outcome": "Zero-day malware caught by behavior, not signature—IOA detection stopped an attack that IOC detection would have missed"
+        "application": "NexaTech's EDR detected suspicious behavior: Excel.exe spawning cmd.exe, which spawned PowerShell.exe with encoded commands. No IOC match existed\u2014the malware was brand new with unknown hashes. But the BEHAVIOR (Office spawning command line tools) matched a known attack pattern (IOA). The detection triggered investigation before the malware could establish persistence or exfiltrate data.",
+        "outcome": "Zero-day malware caught by behavior, not signature\u2014IOA detection stopped an attack that IOC detection would have missed"
       },
-
       "what_would_happen_if": [
         {
           "situation": "An organization relies solely on IOC-based detection",
-          "consequence": "Novel attacks using new infrastructure and unknown malware evade detection entirely. They can only detect threats after IOCs are published—days or weeks after initial attacks.",
+          "consequence": "Novel attacks using new infrastructure and unknown malware evade detection entirely. They can only detect threats after IOCs are published\u2014days or weeks after initial attacks.",
           "lesson": "IOC-only detection creates a gap for zero-day and novel attacks. IOA detection fills this gap."
         },
         {
@@ -547,7 +583,6 @@
           "lesson": "IOA detection requires baseline establishment and tuning to differentiate normal from malicious behavior."
         }
       ],
-
       "knowledge_check": {
         "question": "A security tool alerts when it detects Microsoft Word spawning a command shell, regardless of what command is executed. This is an example of:",
         "options": [
@@ -557,29 +592,27 @@
           "Anomaly detection because it deviates from baseline"
         ],
         "correct": 1,
-        "explanation": "This is IOA (Indicator of Attack) detection. The tool isn't looking for a specific hash or command (IOC), but for a suspicious BEHAVIOR pattern—Office applications shouldn't spawn command shells. This behavior indicates an attack technique regardless of the specific malware involved.",
+        "explanation": "This is IOA (Indicator of Attack) detection. The tool isn't looking for a specific hash or command (IOC), but for a suspicious BEHAVIOR pattern\u2014Office applications shouldn't spawn command shells. This behavior indicates an attack technique regardless of the specific malware involved.",
         "wrong_answer_analysis": {
           "0": "IOC detection looks for specific artifacts like file hashes or IP addresses. This detection is behavior-based, not artifact-based.",
           "2": "While this could be implemented as a rule/signature, the question asks what TYPE of indicator this is. The behavior being detected is an IOA.",
-          "3": "Anomaly detection compares to a baseline of 'normal.' This detection would fire even if the behavior had happened before—it's looking for the technique, not deviation."
+          "3": "Anomaly detection compares to a baseline of 'normal.' This detection would fire even if the behavior had happened before\u2014it's looking for the technique, not deviation."
         }
       },
-
       "must_remember_for_exam": [
         {
           "fact": "IOA = evidence of ongoing attack (proactive)",
-          "why_tested": "Core definition—always compared with IOC"
+          "why_tested": "Core definition\u2014always compared with IOC"
         },
         {
           "fact": "IOAs focus on behavior; IOCs focus on artifacts",
           "why_tested": "Key distinction that drives detection strategy"
         },
         {
-          "fact": "IOAs harder to evade—attacker must change techniques",
+          "fact": "IOAs harder to evade\u2014attacker must change techniques",
           "why_tested": "Explains why behavior-based detection is valuable"
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Indicator of Attack (IOA)",
@@ -591,20 +624,21 @@
         }
       ]
     },
-
     {
       "section_id": "D2-L008-S03",
       "title": "Detection Methods",
       "estimated_time": "15 minutes",
-      
       "content": {
         "overview": "Detection methods determine HOW security tools identify threats. Understanding the strengths and weaknesses of each approach is essential for designing effective detection strategies and choosing appropriate tools.",
-        
         "core_concepts": [
           {
             "concept": "Signature-Based Detection",
             "how_it_works": "Matches patterns (signatures) of known threats against observed activity",
-            "examples": ["Antivirus matching file hash", "IDS matching attack pattern", "Email filter matching phishing template"],
+            "examples": [
+              "Antivirus matching file hash",
+              "IDS matching attack pattern",
+              "Email filter matching phishing template"
+            ],
             "strengths": [
               "Fast and efficient",
               "Low false positive rate",
@@ -615,14 +649,18 @@
               "Cannot detect unknown threats (zero-day)",
               "Easy to evade by modifying attack",
               "Requires constant signature updates",
-              "Reactive—signature must exist first"
+              "Reactive\u2014signature must exist first"
             ],
             "exam_key": "Signature = known threats, fast, misses unknown"
           },
           {
             "concept": "Anomaly-Based Detection",
             "how_it_works": "Establishes baseline of 'normal' behavior, alerts on deviations",
-            "examples": ["User logging in from new country", "Server generating unusual traffic volume", "Process using abnormal memory"],
+            "examples": [
+              "User logging in from new country",
+              "Server generating unusual traffic volume",
+              "Process using abnormal memory"
+            ],
             "strengths": [
               "Can detect unknown threats",
               "Doesn't require prior knowledge of attack",
@@ -640,7 +678,11 @@
           {
             "concept": "Behavior-Based Detection",
             "how_it_works": "Identifies specific suspicious behaviors and techniques regardless of tools used",
-            "examples": ["Process injection detection", "Credential dumping attempts", "Ransomware encryption behavior"],
+            "examples": [
+              "Process injection detection",
+              "Credential dumping attempts",
+              "Ransomware encryption behavior"
+            ],
             "strengths": [
               "Detects evasive and polymorphic malware",
               "Harder to evade than signatures",
@@ -658,7 +700,11 @@
           {
             "concept": "Heuristic Detection",
             "how_it_works": "Uses rules and algorithms to identify potentially malicious characteristics",
-            "examples": ["File with suspicious code patterns", "Email with multiple risk indicators", "Process with suspicious API calls"],
+            "examples": [
+              "File with suspicious code patterns",
+              "Email with multiple risk indicators",
+              "Process with suspicious API calls"
+            ],
             "strengths": [
               "Can detect variants of known threats",
               "Bridges signature and anomaly approaches",
@@ -674,18 +720,46 @@
             "exam_key": "Heuristic = rule-based analysis, detects variants"
           }
         ],
-
         "detection_comparison_table": {
-          "columns": ["Method", "Detects Unknown", "False Positives", "Evasion Difficulty", "Best For"],
+          "columns": [
+            "Method",
+            "Detects Unknown",
+            "False Positives",
+            "Evasion Difficulty",
+            "Best For"
+          ],
           "rows": [
-            ["Signature", "No", "Low", "Easy", "Known threats"],
-            ["Anomaly", "Yes", "High", "Medium", "Unusual activity"],
-            ["Behavior", "Yes", "Medium", "Hard", "Attack techniques"],
-            ["Heuristic", "Partial", "Medium", "Medium", "Threat variants"]
+            [
+              "Signature",
+              "No",
+              "Low",
+              "Easy",
+              "Known threats"
+            ],
+            [
+              "Anomaly",
+              "Yes",
+              "High",
+              "Medium",
+              "Unusual activity"
+            ],
+            [
+              "Behavior",
+              "Yes",
+              "Medium",
+              "Hard",
+              "Attack techniques"
+            ],
+            [
+              "Heuristic",
+              "Partial",
+              "Medium",
+              "Medium",
+              "Threat variants"
+            ]
           ]
         }
       },
-
       "key_points": [
         "Signature-based: fast, precise for known threats, misses zero-day",
         "Anomaly-based: detects unknown threats, higher false positives, needs baseline",
@@ -693,7 +767,6 @@
         "Heuristic: rule-based analysis, bridges approaches, detects variants",
         "Best practice: layer multiple detection methods"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -710,7 +783,7 @@
         "analogies": [
           {
             "concept": "Signature vs Anomaly Detection",
-            "analogy": "Signature detection is like a bouncer with a photo list of banned individuals—precise, but useless for someone not on the list. Anomaly detection is like a bouncer who knows the regulars—anyone unfamiliar gets scrutinized, but sometimes legitimate new customers get stopped.",
+            "analogy": "Signature detection is like a bouncer with a photo list of banned individuals\u2014precise, but useless for someone not on the list. Anomaly detection is like a bouncer who knows the regulars\u2014anyone unfamiliar gets scrutinized, but sometimes legitimate new customers get stopped.",
             "why_it_works": "Shows the precision vs coverage tradeoff clearly"
           },
           {
@@ -722,24 +795,24 @@
         "common_mistakes": [
           {
             "mistake": "Thinking one detection method is 'best'",
-            "correction": "Each method has strengths and weaknesses. Defense in depth applies to detection—layer signature (fast, precise), anomaly (unknown threats), and behavior (evasive malware).",
+            "why_wrong": "Each method has strengths and weaknesses.",
+            "correct_understanding": "Each method has strengths and weaknesses. Defense in depth applies to detection\u2014layer signature (fast, precise), anomaly (unknown threats), and behavior (evasive malware).",
             "exam_trap": "Questions asking 'which is best' usually want you to match method to scenario"
           },
           {
             "mistake": "Confusing anomaly and behavior detection",
-            "correction": "Anomaly = deviation from YOUR baseline (what's normal for YOU). Behavior = matches known ATTACK techniques (what attackers DO). Anomaly is environment-specific; behavior is technique-specific.",
-            "exam_trap": "Read scenarios carefully—is it about deviation from normal or about suspicious technique?"
+            "why_wrong": "Anomaly = deviation from YOUR baseline (what's normal for YOU).",
+            "correct_understanding": "Anomaly = deviation from YOUR baseline (what's normal for YOU). Behavior = matches known ATTACK techniques (what attackers DO). Anomaly is environment-specific; behavior is technique-specific.",
+            "exam_trap": "Read scenarios carefully\u2014is it about deviation from normal or about suspicious technique?"
           }
         ]
       },
-
       "real_world_example": {
         "scenario": "Layered Detection Catches Evasive Malware",
         "company": "Coastal Community Bank",
-        "application": "Attackers sent a phishing email with a malicious macro document. LAYER 1: Signature detection missed it—the malware hash was brand new. LAYER 2: Heuristic detection flagged the document as suspicious (macro + obfuscation patterns) but didn't block. LAYER 3: When opened, behavior detection caught Word.exe spawning PowerShell.exe—known attack technique (IOA). LAYER 4: Anomaly detection noted the user never runs PowerShell typically. Combined signals triggered high-confidence alert.",
+        "application": "Attackers sent a phishing email with a malicious macro document. LAYER 1: Signature detection missed it\u2014the malware hash was brand new. LAYER 2: Heuristic detection flagged the document as suspicious (macro + obfuscation patterns) but didn't block. LAYER 3: When opened, behavior detection caught Word.exe spawning PowerShell.exe\u2014known attack technique (IOA). LAYER 4: Anomaly detection noted the user never runs PowerShell typically. Combined signals triggered high-confidence alert.",
         "outcome": "No single method caught everything, but layered detection provided defense in depth"
       },
-
       "what_would_happen_if": [
         {
           "situation": "An organization uses only signature-based antivirus",
@@ -752,7 +825,6 @@
           "lesson": "Anomaly detection requires proper baseline establishment before it's useful."
         }
       ],
-
       "knowledge_check": {
         "question": "A security team wants to detect a sophisticated attack group that constantly changes their malware but uses consistent techniques for credential theft. Which detection method would be MOST effective?",
         "options": [
@@ -762,14 +834,13 @@
           "Heuristic detection to analyze file characteristics"
         ],
         "correct": 2,
-        "explanation": "Behavior-based detection identifies attack TECHNIQUES regardless of tools used. Since the attackers constantly change their malware (defeating signatures) but use consistent techniques, behavior detection is ideal—it catches the credential theft technique whether done with Mimikatz, custom tools, or anything else.",
+        "explanation": "Behavior-based detection identifies attack TECHNIQUES regardless of tools used. Since the attackers constantly change their malware (defeating signatures) but use consistent techniques, behavior detection is ideal\u2014it catches the credential theft technique whether done with Mimikatz, custom tools, or anything else.",
         "wrong_answer_analysis": {
-          "0": "Signature-based would fail because the attackers 'constantly change their malware'—each new variant has unknown hashes.",
+          "0": "Signature-based would fail because the attackers 'constantly change their malware'\u2014each new variant has unknown hashes.",
           "1": "Anomaly-based could help but is less precise. It would detect 'unusual activity' but might miss consistent techniques that stay within normal volumes.",
           "3": "Heuristic would help detect malware variants but wouldn't specifically target the credential theft techniques mentioned."
         }
       },
-
       "must_remember_for_exam": [
         {
           "fact": "Signature = known patterns, fast, misses unknown",
@@ -784,7 +855,6 @@
           "why_tested": "Key for modern threat detection"
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Signature-based detection",
@@ -804,20 +874,17 @@
         }
       ]
     },
-
     {
       "section_id": "D2-L008-S04",
       "title": "Threat Hunting",
       "estimated_time": "12 minutes",
-      
       "content": {
         "overview": "Threat hunting is the proactive search for threats that have evaded existing detection. Unlike passive detection that waits for alerts, threat hunting ASSUMES breach and actively searches for evidence of compromise.",
-        
         "core_concepts": [
           {
             "concept": "Threat Hunting Definition",
             "definition": "Proactive, iterative search through networks to detect and isolate threats that evade existing security solutions",
-            "key_characteristic": "Assumes breach—actively looks for evidence attackers are present",
+            "key_characteristic": "Assumes breach\u2014actively looks for evidence attackers are present",
             "how_it_differs": {
               "from_monitoring": "Monitoring waits for alerts; hunting proactively searches",
               "from_incident_response": "IR responds to known incidents; hunting finds unknown compromises",
@@ -842,7 +909,7 @@
               {
                 "approach": "Baseline-driven",
                 "process": "Identify anomalies from normal, investigate deviations",
-                "example": "Service account suddenly has interactive logons—investigate why",
+                "example": "Service account suddenly has interactive logons\u2014investigate why",
                 "source": "Internal baselines, normal patterns"
               }
             ]
@@ -852,19 +919,35 @@
             "stages": [
               {
                 "stage": "Hypothesis Creation",
-                "activities": ["Review threat intel", "Identify likely attack paths", "Formulate testable hypothesis"]
+                "activities": [
+                  "Review threat intel",
+                  "Identify likely attack paths",
+                  "Formulate testable hypothesis"
+                ]
               },
               {
                 "stage": "Data Collection",
-                "activities": ["Gather relevant logs", "Collect forensic artifacts", "Ensure data completeness"]
+                "activities": [
+                  "Gather relevant logs",
+                  "Collect forensic artifacts",
+                  "Ensure data completeness"
+                ]
               },
               {
                 "stage": "Investigation",
-                "activities": ["Query and analyze data", "Identify suspicious patterns", "Pivot on findings"]
+                "activities": [
+                  "Query and analyze data",
+                  "Identify suspicious patterns",
+                  "Pivot on findings"
+                ]
               },
               {
                 "stage": "Resolution",
-                "activities": ["Validate or disprove hypothesis", "Document findings", "Create detection rules for future"]
+                "activities": [
+                  "Validate or disprove hypothesis",
+                  "Document findings",
+                  "Create detection rules for future"
+                ]
               }
             ]
           },
@@ -880,15 +963,13 @@
           }
         ]
       },
-
       "key_points": [
         "Threat hunting assumes breach and proactively searches for evidence",
         "Three approaches: hypothesis-driven, intelligence-driven, baseline-driven",
-        "Hunting differs from monitoring—proactive vs passive",
+        "Hunting differs from monitoring\u2014proactive vs passive",
         "Outputs include detections, new rules, and improved baseline understanding",
         "Requires skilled analysts and comprehensive data access"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -910,31 +991,31 @@
           },
           {
             "concept": "Hypothesis-Driven Hunting",
-            "analogy": "Like a detective with a theory. 'I think the butler did it.' Then you gather evidence specifically to prove or disprove that theory. You're not randomly looking—you have a specific idea you're testing.",
+            "analogy": "Like a detective with a theory. 'I think the butler did it.' Then you gather evidence specifically to prove or disprove that theory. You're not randomly looking\u2014you have a specific idea you're testing.",
             "why_it_works": "Shows the structured approach to hunting"
           }
         ],
         "common_mistakes": [
           {
             "mistake": "Thinking threat hunting is just running searches",
-            "correction": "Threat hunting is a methodology, not just search queries. It involves hypothesis formation, systematic investigation, and actionable outputs like new detection rules.",
+            "why_wrong": "Threat hunting is a methodology, not just search queries.",
+            "correct_understanding": "Threat hunting is a methodology, not just search queries. It involves hypothesis formation, systematic investigation, and actionable outputs like new detection rules.",
             "exam_trap": "Questions test whether you understand the methodology, not just the activity"
           },
           {
             "mistake": "Confusing threat hunting with vulnerability scanning",
-            "correction": "Vulnerability scanning finds weaknesses that COULD be exploited. Threat hunting finds evidence that exploitation HAS OCCURRED. Different purpose entirely.",
+            "why_wrong": "Vulnerability scanning finds weaknesses that COULD be exploited.",
+            "correct_understanding": "Vulnerability scanning finds weaknesses that COULD be exploited. Threat hunting finds evidence that exploitation HAS OCCURRED. Different purpose entirely.",
             "exam_trap": "Both are proactive security activities, but they answer different questions"
           }
         ]
       },
-
       "real_world_example": {
         "scenario": "Hypothesis-Driven Hunt Uncovers Breach",
         "company": "Pinnacle Financial Services",
         "application": "After reading an industry threat report about attackers targeting financial services with stolen VPN credentials, Pinnacle's threat hunter formed a hypothesis: 'Attackers may have compromised VPN accounts.' INVESTIGATION: Analyzed VPN logs for impossible travel (login from NYC, then 30 minutes later from Singapore), found one account with this pattern. Traced activity after VPN connection: account accessed file servers containing merger documents. OUTCOME: Discovered corporate espionage that had been ongoing for 3 weeks with no alerts.",
         "outcome": "Proactive hunting discovered breach that passive detection missed entirely"
       },
-
       "what_would_happen_if": [
         {
           "situation": "An organization has no threat hunting capability",
@@ -947,7 +1028,6 @@
           "lesson": "Threat hunting requires comprehensive log collection as a prerequisite."
         }
       ],
-
       "knowledge_check": {
         "question": "A security team proactively searches their environment for signs of APT activity after reading a threat intelligence report about a group targeting their industry. This activity is BEST described as:",
         "options": [
@@ -957,14 +1037,13 @@
           "Penetration testing because they're testing their defenses"
         ],
         "correct": 2,
-        "explanation": "This is threat hunting—proactive search for threats based on intelligence, not response to a known incident. The team is using threat intel to form a hypothesis ('APT may target us') and searching for evidence, which is the intelligence-driven hunting approach.",
+        "explanation": "This is threat hunting\u2014proactive search for threats based on intelligence, not response to a known incident. The team is using threat intel to form a hypothesis ('APT may target us') and searching for evidence, which is the intelligence-driven hunting approach.",
         "wrong_answer_analysis": {
-          "0": "Incident response is reactive to confirmed incidents. Here, there's no confirmed incident—they're hunting based on a threat report.",
+          "0": "Incident response is reactive to confirmed incidents. Here, there's no confirmed incident\u2014they're hunting based on a threat report.",
           "1": "Vulnerability assessment looks for weaknesses that could be exploited. This team is looking for evidence of active compromise.",
           "3": "Penetration testing attempts to exploit vulnerabilities. This team is searching for evidence of real attacker presence, not testing exploitability."
         }
       },
-
       "must_remember_for_exam": [
         {
           "fact": "Threat hunting = proactive search assuming breach",
@@ -979,7 +1058,6 @@
           "why_tested": "Comparison question"
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Threat hunting",
@@ -995,15 +1073,12 @@
         }
       ]
     },
-
     {
       "section_id": "D2-L008-S05",
       "title": "Threat Intelligence Integration",
       "estimated_time": "10 minutes",
-      
       "content": {
-        "overview": "Threat intelligence provides context to indicators—who uses them, why, and what to expect next. Integrating threat intel transforms raw IOCs into actionable detection and response.",
-        
+        "overview": "Threat intelligence provides context to indicators\u2014who uses them, why, and what to expect next. Integrating threat intel transforms raw IOCs into actionable detection and response.",
         "core_concepts": [
           {
             "concept": "Threat Intelligence Levels",
@@ -1036,25 +1111,39 @@
             "sources": [
               {
                 "source": "Open Source (OSINT)",
-                "examples": ["VirusTotal", "AlienVault OTX", "Abuse.ch"],
+                "examples": [
+                  "VirusTotal",
+                  "AlienVault OTX",
+                  "Abuse.ch"
+                ],
                 "cost": "Free",
                 "quality": "Variable"
               },
               {
                 "source": "Commercial Feeds",
-                "examples": ["Recorded Future", "Mandiant", "CrowdStrike Intel"],
+                "examples": [
+                  "Recorded Future",
+                  "Mandiant",
+                  "CrowdStrike Intel"
+                ],
                 "cost": "Paid",
                 "quality": "High, curated"
               },
               {
                 "source": "ISACs",
-                "examples": ["FS-ISAC (financial)", "H-ISAC (healthcare)"],
+                "examples": [
+                  "FS-ISAC (financial)",
+                  "H-ISAC (healthcare)"
+                ],
                 "cost": "Membership",
                 "quality": "Industry-specific, peer-shared"
               },
               {
                 "source": "Government",
-                "examples": ["CISA alerts", "FBI flash reports"],
+                "examples": [
+                  "CISA alerts",
+                  "FBI flash reports"
+                ],
                 "cost": "Free",
                 "quality": "High for major threats"
               }
@@ -1084,15 +1173,13 @@
           }
         ]
       },
-
       "key_points": [
         "Three levels: Strategic (execs), Operational (managers), Tactical (analysts)",
         "Sources: OSINT (free), Commercial (paid), ISACs (industry), Government (critical alerts)",
-        "Integration points: SIEM, firewall, EDR, email—anywhere IOCs are actionable",
+        "Integration points: SIEM, firewall, EDR, email\u2014anywhere IOCs are actionable",
         "STIX/TAXII standards enable automated sharing",
-        "Intelligence provides context—who, why, what next"
+        "Intelligence provides context\u2014who, why, what next"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -1111,19 +1198,18 @@
         "common_mistakes": [
           {
             "mistake": "Treating all IOCs the same regardless of source",
-            "correction": "IOC quality varies dramatically. A CISA emergency alert deserves immediate action. A random IOC from an unverified source needs validation.",
+            "why_wrong": "IOC quality varies dramatically. A CISA emergency alert deserves immediate action.",
+            "correct_understanding": "IOC quality varies dramatically. A CISA emergency alert deserves immediate action. A random IOC from an unverified source needs validation.",
             "exam_trap": "Questions may test understanding of source reliability"
           }
         ]
       },
-
       "real_world_example": {
         "scenario": "Intelligence-Driven Detection",
         "company": "GlobalRetail Inc.",
         "application": "GlobalRetail subscribed to FS-ISAC threat feeds. When a retail-specific campaign was reported with specific IOCs (domains, hashes, email subjects), the SOC immediately: (1) Added domains to proxy blocklist, (2) Searched SIEM for historical connections to those domains, (3) Created detection rules for the phishing email subjects, (4) Briefed executives on the threat (strategic report). The campaign targeted multiple retailers, but GlobalRetail blocked it before receiving a single malicious email.",
         "outcome": "Proactive intel integration blocked attack before it reached the organization"
       },
-
       "knowledge_check": {
         "question": "A CISO needs information about emerging threats to present to the board of directors. Which type of threat intelligence would be MOST appropriate?",
         "options": [
@@ -1133,14 +1219,13 @@
           "Technical intelligence with detection rules and signatures"
         ],
         "correct": 2,
-        "explanation": "Board presentations require strategic intelligence—high-level threat trends, business risk implications, and industry context. Executives don't need file hashes; they need to understand business risk and resource allocation decisions.",
+        "explanation": "Board presentations require strategic intelligence\u2014high-level threat trends, business risk implications, and industry context. Executives don't need file hashes; they need to understand business risk and resource allocation decisions.",
         "wrong_answer_analysis": {
           "0": "Tactical IOCs are for SOC analysts implementing detection, not board briefings.",
           "1": "Operational intelligence (campaigns, TTPs) is for security managers planning defense, not executive risk discussions.",
           "3": "Technical details like detection rules are implementation-level, inappropriate for board communication."
         }
       },
-
       "must_remember_for_exam": [
         {
           "fact": "Strategic intel = executives, threat trends; Tactical intel = analysts, IOCs",
@@ -1155,7 +1240,6 @@
           "why_tested": "Terminology"
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Threat intelligence",
@@ -1163,16 +1247,15 @@
         },
         {
           "term": "ISAC",
-          "definition": "Information Sharing and Analysis Center—industry-specific organizations for sharing threat intelligence"
+          "definition": "Information Sharing and Analysis Center\u2014industry-specific organizations for sharing threat intelligence"
         },
         {
           "term": "TTP",
-          "definition": "Tactics, Techniques, and Procedures—describes how threat actors operate"
+          "definition": "Tactics, Techniques, and Procedures\u2014describes how threat actors operate"
         }
       ]
     }
   ],
-
   "hands_on_labs": {
     "browser_labs": [
       {
@@ -1207,7 +1290,10 @@
         "url": "https://tryhackme.com/room/threatintelligence",
         "cost": "Free",
         "estimated_time": "2 hours",
-        "role_relevance": ["soc_analyst", "incident_responder"]
+        "role_relevance": [
+          "soc_analyst",
+          "incident_responder"
+        ]
       },
       {
         "resource": "VirusTotal",
@@ -1216,7 +1302,11 @@
         "cost": "Free",
         "estimated_time": "30 minutes",
         "description": "Analyze real malware samples and explore IOC relationships.",
-        "role_relevance": ["soc_analyst", "incident_responder", "security_engineer"]
+        "role_relevance": [
+          "soc_analyst",
+          "incident_responder",
+          "security_engineer"
+        ]
       },
       {
         "resource": "AlienVault OTX",
@@ -1225,7 +1315,10 @@
         "cost": "Free",
         "estimated_time": "30 minutes",
         "description": "Explore community-shared IOCs and threat reports.",
-        "role_relevance": ["soc_analyst", "security_engineer"]
+        "role_relevance": [
+          "soc_analyst",
+          "security_engineer"
+        ]
       }
     ],
     "tools_introduction": [
@@ -1239,7 +1332,10 @@
           "Rule metadata",
           "Module imports"
         ],
-        "role_relevance": ["incident_responder", "security_engineer"]
+        "role_relevance": [
+          "incident_responder",
+          "security_engineer"
+        ]
       },
       {
         "tool": "Sigma",
@@ -1251,11 +1347,13 @@
           "Detection logic",
           "Rule conversion to SIEM-specific syntax"
         ],
-        "role_relevance": ["soc_analyst", "security_engineer"]
+        "role_relevance": [
+          "soc_analyst",
+          "security_engineer"
+        ]
       }
     ]
   },
-
   "summary": {
     "key_takeaways": [
       "IOCs are forensic evidence of compromise; IOAs indicate attacks in progress",
@@ -1281,12 +1379,16 @@
       "Hunting vs Monitoring: Hunting is proactive; monitoring is passive",
       "Intelligence levels: Match audience to level (execs = strategic, analysts = tactical)"
     ],
-    "connection_to_next": "With detection fundamentals established, the next lesson covers Hardening and Configurations—the proactive measures that reduce attack surface and make detection easier by limiting what 'normal' looks like."
+    "connection_to_next": "With detection fundamentals established, the next lesson covers Hardening and Configurations\u2014the proactive measures that reduce attack surface and make detection easier by limiting what 'normal' looks like."
   },
-
   "related_content": {
-    "simulations": ["D2-SIM-001", "D4-SIM-001"],
-    "remediation": ["D2-REM-001"],
+    "simulations": [
+      "D2-SIM-001",
+      "D4-SIM-001"
+    ],
+    "remediation": [
+      "D2-REM-001"
+    ],
     "next_lesson": "D2-LESSON-009",
     "previous_lesson": "D2-LESSON-007"
   }
