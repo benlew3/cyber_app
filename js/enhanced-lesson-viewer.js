@@ -2437,8 +2437,10 @@
             /* Layout */
             .enhanced-lesson-container {
                 display: grid;
-                grid-template-columns: 260px 1fr;
+                grid-template-columns: 240px 1fr;
                 min-height: 100vh;
+                max-width: 1400px;
+                margin: 0 auto;
             }
             
             .lesson-sidebar {
@@ -2452,8 +2454,33 @@
             }
             
             .lesson-main {
-                padding: 30px 40px;
+                padding: 30px 50px;
                 max-width: 900px;
+                margin: 0 auto;
+                width: 100%;
+            }
+            
+            /* Large desktop optimization */
+            @media (min-width: 1200px) {
+                .enhanced-lesson-container {
+                    grid-template-columns: 260px 1fr;
+                }
+                
+                .lesson-main {
+                    padding: 40px 60px;
+                    max-width: 960px;
+                }
+            }
+            
+            /* Extra large screens */
+            @media (min-width: 1600px) {
+                .enhanced-lesson-container {
+                    max-width: 1500px;
+                }
+                
+                .lesson-main {
+                    max-width: 1000px;
+                }
             }
             
             /* Progress Circle */
@@ -3164,9 +3191,20 @@
             }
             
             /* Responsive */
+            @media (max-width: 1024px) {
+                .enhanced-lesson-container {
+                    grid-template-columns: 220px 1fr;
+                }
+                
+                .lesson-main {
+                    padding: 25px 35px;
+                }
+            }
+            
             @media (max-width: 900px) {
                 .enhanced-lesson-container {
                     grid-template-columns: 1fr;
+                    max-width: 100%;
                 }
                 
                 .lesson-sidebar {
@@ -3175,6 +3213,7 @@
                 
                 .lesson-main {
                     padding: 20px;
+                    max-width: 100%;
                 }
                 
                 .skill-tree-visual {
@@ -3184,6 +3223,20 @@
                 .tree-arrow {
                     transform: rotate(90deg);
                     padding: 10px 0;
+                }
+            }
+            
+            @media (max-width: 600px) {
+                .lesson-main {
+                    padding: 15px;
+                }
+                
+                .lesson-header h1 {
+                    font-size: 1.5rem;
+                }
+                
+                .career-badges {
+                    flex-wrap: wrap;
                 }
             }
             
