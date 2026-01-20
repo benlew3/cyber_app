@@ -30,7 +30,7 @@
     <!-- NEW: Linux Security Guide Styles -->
     <link rel="stylesheet" href="css/linux-guide.css">
 
-    <!--NEW: lesson header css upgrade -->
+    <!-- UPDATED: Lesson Header & Theme CSS (Dark + Light Mode) -->
     <link rel="stylesheet" href="css/lesson-headers.css">
     <link rel="stylesheet" href="css/lesson-theme-complete.css">
     
@@ -49,6 +49,14 @@
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
             line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Light mode overrides */
+        body.light-mode,
+        html[data-theme="light"] body {
+            background: #ffffff;
+            color: #18181b;
         }
         
         /* Hide loading screen immediately */
@@ -78,6 +86,12 @@
             padding: 20px;
         }
         
+        .light-mode .error-screen,
+        html[data-theme="light"] .error-screen {
+            background: #ffffff;
+            color: #18181b;
+        }
+        
         .error-content {
             text-align: center;
             max-width: 600px;
@@ -95,6 +109,11 @@
             margin-bottom: 30px;
         }
         
+        .light-mode .error-message,
+        html[data-theme="light"] .error-message {
+            color: #52525b;
+        }
+        
         /* Ensure content is visible */
         #content {
             display: block;
@@ -110,6 +129,12 @@
             font-size: 0.9em;
         }
         
+        .light-mode .lesson-content code,
+        html[data-theme="light"] .lesson-content code {
+            background: #f4f4f5;
+            color: #18181b;
+        }
+        
         .lesson-content pre {
             background: #1a1a1a;
             padding: 15px;
@@ -118,9 +143,64 @@
             margin: 10px 0;
         }
         
+        .light-mode .lesson-content pre,
+        html[data-theme="light"] .lesson-content pre {
+            background: #f4f4f5;
+            border: 1px solid #e4e4e7;
+        }
+        
         .lesson-content pre code {
             background: transparent;
             padding: 0;
+        }
+        
+        /* Theme toggle button styling */
+        .theme-toggle-btn {
+            background: var(--bg-elevated, #27272a);
+            border: 1px solid var(--border-default, #3f3f46);
+            border-radius: 9999px;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transition: all 0.2s ease;
+        }
+        
+        .theme-toggle-btn:hover {
+            background: var(--bg-hover, #3f3f46);
+            transform: scale(1.05);
+        }
+        
+        .theme-toggle-btn .icon-sun {
+            display: none;
+        }
+        
+        .theme-toggle-btn .icon-moon {
+            display: block;
+        }
+        
+        .light-mode .theme-toggle-btn,
+        html[data-theme="light"] .theme-toggle-btn {
+            background: #f4f4f5;
+            border-color: #e4e4e7;
+        }
+        
+        .light-mode .theme-toggle-btn:hover,
+        html[data-theme="light"] .theme-toggle-btn:hover {
+            background: #e4e4e7;
+        }
+        
+        .light-mode .theme-toggle-btn .icon-sun,
+        html[data-theme="light"] .theme-toggle-btn .icon-sun {
+            display: block;
+        }
+        
+        .light-mode .theme-toggle-btn .icon-moon,
+        html[data-theme="light"] .theme-toggle-btn .icon-moon {
+            display: none;
         }
     </style>
 </head>
@@ -136,7 +216,7 @@
     <!-- Error Screen (hidden by default) -->
     <div id="error-screen" class="error-screen">
         <div class="error-content">
-            <h1 class="error-title">⚠️ Loading Error</h1>
+            <h1 class="error-title">&#9888;&#65039; Loading Error</h1>
             <p class="error-message">The application failed to load properly. Please refresh the page.</p>
             <button class="btn btn-primary" onclick="location.reload()">Reload Page</button>
         </div>
@@ -157,11 +237,102 @@
     
     <!-- Error handling and loading management -->
     <script>
-        // Set theme immediately
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
+        // ============================================
+        // THEME MANAGEMENT - Apply saved theme immediately
+        // ============================================
+        (function() {
+            var savedTheme = localStorage.getItem('theme') || 'dark';
+            
+            // Also check system preference if no saved theme
+            if (!localStorage.getItem('theme')) {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                    savedTheme = 'light';
+                }
+            }
+            
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.body.setAttribute('data-theme', savedTheme);
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+            }
+        })();
         
-        // Immediate error handler
+        // Theme toggle function (global)
+        window.toggleTheme = function() {
+            var currentTheme = document.documentElement.getAttribute('data-theme');
+            var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.body.setAttribute('data-theme', newTheme);
+            document.body.classList.toggle('light-mode', newTheme === 'light');
+            localStorage.setItem('theme', newTheme);
+            
+            // Dispatch event for any listeners
+            window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: newTheme } }));
+            
+            console.log('Theme changed to:', newTheme);
+        };
+        
+        // ============================================
+        // ENCODING FIX - Fix character encoding issues in JSON content
+        // ============================================
+        window.fixEncodingIssues = function(text) {
+            if (!text || typeof text !== 'string') return text;
+            
+            // Common mojibake patterns from UTF-8 interpreted as Windows-1252
+            var replacements = [
+                ['â€"', '-'],      // em-dash
+                ['â€"', '-'],      // en-dash
+                ['â€™', "'"],      // right single quote
+                ['â€˜', "'"],      // left single quote
+                ['â€œ', '"'],      // left double quote
+                ['â€', '"'],       // right double quote (partial)
+                ['â€¦', '...'],    // ellipsis
+                ['Ã¢â‚¬â€œ', '-'], // another em-dash variant
+                ['Ã¢â‚¬â„¢', "'"], // another apostrophe variant
+            ];
+            
+            var fixed = text;
+            for (var i = 0; i < replacements.length; i++) {
+                var bad = replacements[i][0];
+                var good = replacements[i][1];
+                fixed = fixed.split(bad).join(good);
+            }
+            
+            // Also normalize unicode characters
+            fixed = fixed.replace(/\u2014/g, '-');  // em-dash
+            fixed = fixed.replace(/\u2013/g, '-');  // en-dash
+            fixed = fixed.replace(/\u2019/g, "'");  // right single quote
+            fixed = fixed.replace(/\u2018/g, "'");  // left single quote
+            fixed = fixed.replace(/\u201c/g, '"');  // left double quote
+            fixed = fixed.replace(/\u201d/g, '"');  // right double quote
+            
+            return fixed;
+        };
+        
+        // Apply encoding fix recursively to lesson data object
+        window.fixLessonEncoding = function(obj) {
+            if (typeof obj === 'string') {
+                return window.fixEncodingIssues(obj);
+            }
+            if (Array.isArray(obj)) {
+                return obj.map(window.fixLessonEncoding);
+            }
+            if (obj && typeof obj === 'object') {
+                var fixed = {};
+                for (var key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        fixed[key] = window.fixLessonEncoding(obj[key]);
+                    }
+                }
+                return fixed;
+            }
+            return obj;
+        };
+        
+        // ============================================
+        // ERROR HANDLING
+        // ============================================
         window.addEventListener('error', function(e) {
             console.error('Global error:', e.error);
             
@@ -171,14 +342,14 @@
                 !e.error.message.includes('Non-Error')) {
                 
                 // Show error screen for critical errors
-                const errorScreen = document.getElementById('error-screen');
-                if (errorScreen && !window.APP?.initialized) {
+                var errorScreen = document.getElementById('error-screen');
+                if (errorScreen && !(window.APP && window.APP.initialized)) {
                     errorScreen.style.display = 'flex';
                     
                     // Update error message
-                    const errorMsg = errorScreen.querySelector('.error-message');
+                    var errorMsg = errorScreen.querySelector('.error-message');
                     if (errorMsg) {
-                        errorMsg.textContent = `Error: ${e.error.message}`;
+                        errorMsg.textContent = 'Error: ' + e.error.message;
                     }
                 }
             }
@@ -186,12 +357,12 @@
         
         // Loading timeout - if app doesn't load in 8 seconds, show error
         setTimeout(function() {
-            if (!window.APP?.initialized) {
+            if (!(window.APP && window.APP.initialized)) {
                 console.warn('App initialization timeout - showing error screen');
-                const errorScreen = document.getElementById('error-screen');
+                var errorScreen = document.getElementById('error-screen');
                 if (errorScreen) {
                     errorScreen.style.display = 'flex';
-                    const errorMsg = errorScreen.querySelector('.error-message');
+                    var errorMsg = errorScreen.querySelector('.error-message');
                     if (errorMsg) {
                         errorMsg.textContent = 'The application is taking too long to load. Please refresh the page.';
                     }
@@ -201,7 +372,7 @@
         
         // Hide loading screen immediately
         document.addEventListener('DOMContentLoaded', function() {
-            const loadingScreen = document.getElementById('loading-screen');
+            var loadingScreen = document.getElementById('loading-screen');
             if (loadingScreen) {
                 loadingScreen.style.display = 'none';
                 loadingScreen.remove();
@@ -300,45 +471,44 @@
                     script.textContent = compiledCode;
                     document.body.appendChild(script);
                     
-                    console.log('✅ Career Quiz compiled and loaded');
+                    console.log('Career Quiz compiled and loaded');
                     
                     // Verify it loaded
                     setTimeout(function() {
                         if (window.CybersecurityCareerQuiz) {
-                            console.log('✅ CybersecurityCareerQuiz component is available');
+                            console.log('CybersecurityCareerQuiz component is available');
                         } else {
-                            console.error('❌ CybersecurityCareerQuiz not found after compilation');
+                            console.error('CybersecurityCareerQuiz not found after compilation');
                         }
                     }, 100);
                 })
                 .catch(function(error) {
-                    console.error('❌ Failed to load Career Quiz:', error);
+                    console.error('Failed to load Career Quiz:', error);
                 });
         })();
     </script>
     <script src="js/tool-labs.js"></script>
-    <!-- Fallback if app.js fails to load -->
     
+    <!-- Fallback if app.js fails to load -->
     <script>
         // Check if app.js loaded after a short delay
         setTimeout(function() {
             if (!window.APP) {
                 console.error('app.js failed to load');
-                document.getElementById('content').innerHTML = `
-                    <div class="container text-center" style="padding-top: 100px;">
-                        <h1 style="color: #ef4444;">⚠️ Application Failed to Load</h1>
-                        <p class="text-muted" style="margin: 20px 0;">
-                            The application JavaScript could not be loaded. 
-                            Please check that all JS files exist and are accessible.
-                        </p>
-                        <p style="color: #71717a; font-size: 0.9rem;">
-                            Required files: utils.js, app.js, interactive_simulation_*.js, enhanced-simulations.js
-                        </p>
-                        <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 20px;">
-                            Retry
-                        </button>
-                    </div>
-                `;
+                document.getElementById('content').innerHTML = 
+                    '<div class="container text-center" style="padding-top: 100px;">' +
+                        '<h1 style="color: #ef4444;">Application Failed to Load</h1>' +
+                        '<p class="text-muted" style="margin: 20px 0;">' +
+                            'The application JavaScript could not be loaded. ' +
+                            'Please check that all JS files exist and are accessible.' +
+                        '</p>' +
+                        '<p style="color: #71717a; font-size: 0.9rem;">' +
+                            'Required files: utils.js, app.js, interactive_simulation_*.js, enhanced-simulations.js' +
+                        '</p>' +
+                        '<button onclick="location.reload()" class="btn btn-primary" style="margin-top: 20px;">' +
+                            'Retry' +
+                        '</button>' +
+                    '</div>';
             }
         }, 1500);
     </script>
