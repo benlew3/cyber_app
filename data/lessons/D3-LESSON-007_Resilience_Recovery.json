@@ -2,26 +2,55 @@
   "lesson_id": "D3-LESSON-007",
   "domain": 3,
   "title": "Resilience and Recovery",
-  "objectives_covered": ["3.5"],
+  "objectives_covered": [
+    "3.5"
+  ],
   "estimated_duration": "55-65 minutes",
   "difficulty": "intermediate",
   "version": "2.0-enhanced",
-
   "skill_tree": {
-    "prerequisites": ["D3-LESSON-001", "D3-LESSON-002"],
-    "unlocks": ["D4-LESSON-002", "D5-LESSON-002"],
+    "prerequisites": [
+      "D3-LESSON-001",
+      "D3-LESSON-002"
+    ],
+    "unlocks": [
+      "D4-LESSON-002",
+      "D5-LESSON-002"
+    ],
     "cascade_learning": {
       "builds_on": [
-        {"lesson": "D3-LESSON-001", "concepts": ["Defense in depth", "Fail secure", "Architecture principles"]},
-        {"lesson": "D3-LESSON-002", "concepts": ["Infrastructure security", "Virtualization"]}
+        {
+          "lesson": "D3-LESSON-001",
+          "concepts": [
+            "Defense in depth",
+            "Fail secure",
+            "Architecture principles"
+          ]
+        },
+        {
+          "lesson": "D3-LESSON-002",
+          "concepts": [
+            "Infrastructure security",
+            "Virtualization"
+          ]
+        }
       ],
       "enables": [
-        {"lesson": "D4-LESSON-002", "concepts": ["Incident response includes recovery procedures"]},
-        {"lesson": "D5-LESSON-002", "concepts": ["Risk management includes business continuity"]}
+        {
+          "lesson": "D4-LESSON-002",
+          "concepts": [
+            "Incident response includes recovery procedures"
+          ]
+        },
+        {
+          "lesson": "D5-LESSON-002",
+          "concepts": [
+            "Risk management includes business continuity"
+          ]
+        }
       ]
     }
   },
-
   "role_relevance": {
     "soc_analyst": {
       "importance": "medium",
@@ -31,7 +60,7 @@
         "Alerting on backup failures",
         "Tracking recovery point status"
       ],
-      "real_scenario": "Alert shows primary database failed over to secondaryâ€”investigate cause and verify data integrity"
+      "real_scenario": "Alert shows primary database failed over to secondary\"\"investigate cause and verify data integrity"
     },
     "incident_responder": {
       "importance": "critical",
@@ -41,7 +70,7 @@
         "Making containment vs availability decisions",
         "Validating recovery success"
       ],
-      "real_scenario": "Ransomware encrypted production serversâ€”execute recovery from backup while forensics preserves evidence"
+      "real_scenario": "Ransomware encrypted production servers\"\"execute recovery from backup while forensics preserves evidence"
     },
     "grc_analyst": {
       "importance": "high",
@@ -51,7 +80,7 @@
         "Ensuring RTO/RPO meet requirements",
         "Verifying recovery testing occurs"
       ],
-      "real_scenario": "Compliance audit requires evidence of tested disaster recovery proceduresâ€”review DR test results and documentation"
+      "real_scenario": "Compliance audit requires evidence of tested disaster recovery procedures\"\"review DR test results and documentation"
     },
     "penetration_tester": {
       "importance": "low",
@@ -61,7 +90,7 @@
         "Assessing recovery procedure security",
         "Finding gaps in resilience architecture"
       ],
-      "real_scenario": "Discovered backup server accessible without authenticationâ€”critical finding for ransomware resilience"
+      "real_scenario": "Discovered backup server accessible without authentication\"\"critical finding for ransomware resilience"
     },
     "security_engineer": {
       "importance": "critical",
@@ -74,9 +103,8 @@
       "real_scenario": "Implementing immutable backups with air-gapped storage to protect against ransomware"
     }
   },
-
   "introduction": {
-    "hook": "In 2021, a ransomware attack forced the Colonial Pipeline to shut down for six days, disrupting fuel supply to the entire East Coast. They paid $4.4 million in ransom partly because their backups weren't tested for rapid recovery. Resilience isn't about preventing every failureâ€”it's about ensuring your organization survives when failures happen. The question isn't if you'll face a disaster; it's whether you'll recover from it.",
+    "hook": "In 2021, a ransomware attack forced the Colonial Pipeline to shut down for six days, disrupting fuel supply to the entire East Coast. They paid $4.4 million in ransom partly because their backups weren't tested for rapid recovery. Resilience isn't about preventing every failure\"\"it's about ensuring your organization survives when failures happen. The question isn't if you'll face a disaster; it's whether you'll recover from it.",
     "learning_goals": [
       "Design high availability architectures with appropriate redundancy",
       "Calculate and implement RTO and RPO requirements",
@@ -88,16 +116,18 @@
     "exam_weight": {
       "percentage": "5-7% of Domain 3",
       "question_count": "4-6 questions",
-      "question_types": ["RTO/RPO scenarios", "Backup strategies", "DR site selection"]
+      "question_types": [
+        "RTO/RPO scenarios",
+        "Backup strategies",
+        "DR site selection"
+      ]
     }
   },
-
   "sections": [
     {
       "section_id": "D3-L007-S01",
       "title": "High Availability Concepts",
-      "content": "High availability ensures systems remain operational despite component failures.\n\n**Availability Metrics**\n\n*Uptime Percentages*\n- 99% = 3.65 days downtime/year\n- 99.9% = 8.76 hours downtime/year\n- 99.99% = 52.6 minutes downtime/year\n- 99.999% (five nines) = 5.26 minutes/year\n\n*Calculating Availability*\n- (Total Time - Downtime) / Total Time Ã— 100\n- Higher nines = exponentially more expensive\n- Match availability to business need\n\n**Redundancy Types**\n\n*Active-Active*\n- Both systems handle traffic\n- Load balanced\n- No failover delay\n- More expensive\n- Full capacity always available\n\n*Active-Passive*\n- Primary handles traffic\n- Secondary on standby\n- Failover required on failure\n- Less expensive\n- Some delay during failover\n\n*N+1 Redundancy*\n- N systems needed + 1 spare\n- Cost-effective redundancy\n- Handles single failure\n\n**Redundancy Locations**\n\n*Server Redundancy*\n- Clustering\n- Load balancing\n- Failover clusters\n\n*Network Redundancy*\n- Dual ISPs\n- Redundant paths\n- HSRP/VRRP for gateways\n\n*Storage Redundancy*\n- RAID configurations\n- SAN replication\n- Geographic distribution\n\n*Power Redundancy*\n- Dual power supplies\n- UPS systems\n- Generators\n- Separate power feeds\n\n**Single Points of Failure**\n\n*Identification*\n- Component whose failure causes system failure\n- Must be eliminated for HA\n- Review entire chain\n\n*Mitigation*\n- Add redundancy\n- Implement failover\n- Diversify vendors/paths\n- Regular testing",
-
+      "content": "High availability ensures systems remain operational despite component failures.\n\n**Availability Metrics**\n\n*Uptime Percentages*\n- 99% = 3.65 days downtime/year\n- 99.9% = 8.76 hours downtime/year\n- 99.99% = 52.6 minutes downtime/year\n- 99.999% (five nines) = 5.26 minutes/year\n\n*Calculating Availability*\n- (Total Time - Downtime) / Total Time Ã- 100\n- Higher nines = exponentially more expensive\n- Match availability to business need\n\n**Redundancy Types**\n\n*Active-Active*\n- Both systems handle traffic\n- Load balanced\n- No failover delay\n- More expensive\n- Full capacity always available\n\n*Active-Passive*\n- Primary handles traffic\n- Secondary on standby\n- Failover required on failure\n- Less expensive\n- Some delay during failover\n\n*N+1 Redundancy*\n- N systems needed + 1 spare\n- Cost-effective redundancy\n- Handles single failure\n\n**Redundancy Locations**\n\n*Server Redundancy*\n- Clustering\n- Load balancing\n- Failover clusters\n\n*Network Redundancy*\n- Dual ISPs\n- Redundant paths\n- HSRP/VRRP for gateways\n\n*Storage Redundancy*\n- RAID configurations\n- SAN replication\n- Geographic distribution\n\n*Power Redundancy*\n- Dual power supplies\n- UPS systems\n- Generators\n- Separate power feeds\n\n**Single Points of Failure**\n\n*Identification*\n- Component whose failure causes system failure\n- Must be eliminated for HA\n- Review entire chain\n\n*Mitigation*\n- Add redundancy\n- Implement failover\n- Diversify vendors/paths\n- Regular testing",
       "key_points": [
         "Five nines (99.999%) = only 5.26 minutes downtime per year",
         "Active-Active: both handle traffic; Active-Passive: standby waits",
@@ -105,7 +135,6 @@
         "Eliminate single points of failure for true high availability",
         "Each additional nine of availability costs exponentially more"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -127,30 +156,30 @@
           },
           {
             "concept": "Single Point of Failure",
-            "analogy": "Like a chainâ€”only as strong as its weakest link. If one component fails and takes down the whole system, that's your single point of failure.",
+            "analogy": "Like a chain\"\"only as strong as its weakest link. If one component fails and takes down the whole system, that's your single point of failure.",
             "why_it_works": "One failure shouldn't cascade to total failure"
           }
         ],
         "common_mistakes": [
           {
             "mistake": "Assuming redundancy eliminates all risk",
-            "correction": "Redundancy reduces risk but doesn't eliminate it. Both systems can fail simultaneously (common cause failure). Testing and maintenance still required.",
+            "why_wrong": "Redundancy reduces risk but doesn't eliminate it. Both systems can fail simultaneously (common cause failure).",
+            "correct_understanding": "Redundancy reduces risk but doesn't eliminate it. Both systems can fail simultaneously (common cause failure). Testing and maintenance still required.",
             "exam_trap": "Redundancy reduces, not eliminates, failure risk"
           },
           {
             "mistake": "Overlooking less obvious single points of failure",
-            "correction": "SPOFs can be physical (single ISP), logical (shared authentication), or human (single admin). Review the entire dependency chain.",
-            "exam_trap": "SPOFs exist at multiple levelsâ€”not just hardware"
+            "why_wrong": "SPOFs can be physical (single ISP), logical (shared authentication), or human (single admin). Review the entire dependency chain..",
+            "correct_understanding": "SPOFs can be physical (single ISP), logical (shared authentication), or human (single admin). Review the entire dependency chain.",
+            "exam_trap": "SPOFs exist at multiple levels\"\"not just hardware"
           }
         ]
       },
-
       "real_world_example": {
         "scenario": "Eliminating single points of failure",
         "company": "Apex Financial Services",
-        "application": "After an outage caused by single router failure, Apex redesigned for HA: Network (dual ISPs, redundant routers with VRRP), Servers (active-active web cluster, database with automatic failover), Storage (RAID + SAN replication to DR site), Power (dual feeds, UPS, generator). Result: Achieved 99.99% availabilityâ€”one unplanned outage of 15 minutes in 12 months."
+        "application": "After an outage caused by single router failure, Apex redesigned for HA: Network (dual ISPs, redundant routers with VRRP), Servers (active-active web cluster, database with automatic failover), Storage (RAID + SAN replication to DR site), Power (dual feeds, UPS, generator). Result: Achieved 99.99% availability\"\"one unplanned outage of 15 minutes in 12 months."
       },
-
       "what_would_happen_if": [
         {
           "situation": "Organization has redundant servers but single internet connection",
@@ -159,11 +188,10 @@
         },
         {
           "situation": "Active-passive configured but failover never tested",
-          "consequence": "Primary fails. Automatic failover doesn't work as expectedâ€”configuration drift, credential issues, data sync problem. Extended outage.",
+          "consequence": "Primary fails. Automatic failover doesn't work as expected\"\"configuration drift, credential issues, data sync problem. Extended outage.",
           "lesson": "Failover must be tested regularly. Untested failover is unreliable failover."
         }
       ],
-
       "knowledge_check": {
         "question": "An organization requires 99.99% availability for their customer-facing application. What is the maximum acceptable downtime per year?",
         "options": [
@@ -180,7 +208,6 @@
           "3": "3.65 days is two nines (99%), much less stringent."
         }
       },
-
       "must_remember_for_exam": [
         {
           "point": "99.9% = 8.76 hours; 99.99% = 52.6 minutes; 99.999% = 5.26 minutes",
@@ -195,7 +222,6 @@
           "why_tested": "Core HA concept."
         }
       ],
-
       "glossary_terms": [
         {
           "term": "High Availability (HA)",
@@ -223,15 +249,13 @@
       "section_id": "D3-L007-S02",
       "title": "Backup and Recovery",
       "content": "Backups are the foundation of data recovery and ransomware resilience.\n\n**Backup Types**\n\n*Full Backup*\n- Complete copy of all data\n- Longest backup time\n- Fastest restore (single backup)\n- Most storage space\n- Often weekly\n\n*Incremental Backup*\n- Only changes since last backup (any type)\n- Fastest backup time\n- Slower restore (needs full + all incrementals)\n- Least storage space\n- Often daily\n\n*Differential Backup*\n- Changes since last full backup\n- Moderate backup time\n- Moderate restore time (full + latest differential)\n- Moderate storage\n- Often daily\n\n**Backup Strategies**\n\n*3-2-1 Rule*\n- 3 copies of data\n- 2 different media types\n- 1 copy offsite\n\n*3-2-1-1-0*\n- 3 copies, 2 media, 1 offsite\n- 1 copy offline/air-gapped\n- 0 errors (verified backups)\n\n*Grandfather-Father-Son (GFS)*\n- Daily (son)\n- Weekly (father)\n- Monthly (grandfather)\n- Rotation scheme\n- Balances retention and storage\n\n**RTO and RPO**\n\n*Recovery Time Objective (RTO)*\n- Maximum time to restore operations\n- How long can you be down?\n- Drives recovery solution design\n- Lower RTO = more expensive\n\n*Recovery Point Objective (RPO)*\n- Maximum acceptable data loss\n- How much data can you lose?\n- Drives backup frequency\n- Lower RPO = more frequent backups\n\n**Backup Security**\n\n*Encryption*\n- Encrypt backups at rest\n- Protect backup media\n- Secure key management\n\n*Immutable Backups*\n- Cannot be modified or deleted\n- Write-once storage (WORM)\n- Protects against ransomware\n- Critical for recovery assurance\n\n*Air-Gapped Backups*\n- Physically/logically disconnected\n- Ransomware can't reach\n- Manual intervention to access\n- Ultimate protection",
-
       "key_points": [
         "Full = complete copy; Incremental = since last any backup; Differential = since last full",
         "3-2-1 rule: 3 copies, 2 media types, 1 offsite",
         "RTO = maximum downtime acceptable; RPO = maximum data loss acceptable",
-        "Immutable backups cannot be modifiedâ€”critical for ransomware protection",
-        "Air-gapped backups are disconnectedâ€”ransomware cannot reach them"
+        "Immutable backups cannot be modified\"\"critical for ransomware protection",
+        "Air-gapped backups are disconnected\"\"ransomware cannot reach them"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -260,17 +284,18 @@
         "common_mistakes": [
           {
             "mistake": "Confusing incremental and differential",
-            "correction": "Incremental = since last backup of ANY type. Differential = since last FULL backup. Incremental chain grows; differential is always just full + latest diff.",
-            "exam_trap": "Know the differenceâ€”commonly tested"
+            "why_wrong": "Incremental = since last backup of ANY type. Differential = since last FULL backup.",
+            "correct_understanding": "Incremental = since last backup of ANY type. Differential = since last FULL backup. Incremental chain grows; differential is always just full + latest diff.",
+            "exam_trap": "Know the difference\"\"commonly tested"
           },
           {
             "mistake": "Not testing backup restoration",
-            "correction": "Backups are worthless if they can't be restored. Test restoration regularly. Verify data integrity. Document procedures.",
+            "why_wrong": "Backups are worthless if they can't be restored. Test restoration regularly.",
+            "correct_understanding": "Backups are worthless if they can't be restored. Test restoration regularly. Verify data integrity. Document procedures.",
             "exam_trap": "Tested backups are the only reliable backups"
           }
         ]
       },
-
       "what_would_happen_if": [
         {
           "situation": "Ransomware encrypts production servers and backup servers on same network",
@@ -283,7 +308,6 @@
           "lesson": "RPO must align with business data criticality."
         }
       ],
-
       "knowledge_check": {
         "question": "A company performs a full backup on Sunday and incremental backups Monday through Saturday. On Friday, the server fails. How many backups are needed to restore?",
         "options": [
@@ -293,14 +317,13 @@
           "6 (Sunday's full + all incrementals including Saturday)"
         ],
         "correct": 2,
-        "explanation": "Incremental backups contain only changes since the LAST backup. To restore Friday's state, you need Sunday's full backup plus each incremental (Monday, Tuesday, Wednesday, Thursday, Friday)â€”5 total backups.",
+        "explanation": "Incremental backups contain only changes since the LAST backup. To restore Friday's state, you need Sunday's full backup plus each incremental (Monday, Tuesday, Wednesday, Thursday, Friday)\"\"5 total backups.",
         "wrong_answer_analysis": {
           "0": "Friday's incremental only has Friday's changes, not the full dataset.",
           "1": "This would work for differential (changes since last full), not incremental.",
           "3": "Saturday's backup doesn't exist yet if failure occurred Friday."
         }
       },
-
       "must_remember_for_exam": [
         {
           "point": "Incremental = since last ANY backup; Differential = since last FULL",
@@ -315,7 +338,6 @@
           "why_tested": "Standard backup best practice."
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Recovery Time Objective (RTO)",
@@ -343,15 +365,13 @@
       "section_id": "D3-L007-S03",
       "title": "Disaster Recovery",
       "content": "Disaster recovery enables business operations to resume after major incidents.\n\n**DR Site Types**\n\n*Hot Site*\n- Fully operational duplicate\n- Real-time data replication\n- Minutes to failover\n- Most expensive\n- Lowest RTO\n\n*Warm Site*\n- Hardware in place\n- Data restored from backups\n- Hours to days to operational\n- Moderate cost\n- Moderate RTO\n\n*Cold Site*\n- Empty facility with power/connectivity\n- Hardware must be procured/installed\n- Days to weeks to operational\n- Least expensive\n- Highest RTO\n\n*Cloud-Based DR*\n- Infrastructure on demand\n- Pay for what you use\n- Geographic flexibility\n- Rapid scaling\n- DRaaS (DR as a Service)\n\n**DR Planning**\n\n*Business Impact Analysis (BIA)*\n- Identify critical processes\n- Determine RTO/RPO per system\n- Quantify impact of downtime\n- Prioritize recovery order\n\n*DR Documentation*\n- Recovery procedures\n- Contact lists\n- Vendor information\n- System dependencies\n- Network diagrams\n\n**Testing Types**\n\n*Tabletop Exercise*\n- Discussion-based\n- Walk through scenarios\n- No actual failover\n- Low cost, low risk\n- Identifies gaps in plan\n\n*Simulation*\n- Realistic scenario practice\n- Partial systems involved\n- Limited production impact\n- Tests procedures and people\n\n*Parallel Test*\n- DR site activated\n- Production continues\n- Compare results\n- Validates DR capability\n\n*Full Interruption Test*\n- Production switched to DR\n- Real failover\n- Most realistic\n- Most risky\n- Validates true capability\n\n**Recovery Strategies**\n\n*Manual Recovery*\n- Procedures executed by staff\n- Slower but flexible\n- Requires trained personnel\n\n*Automated Failover*\n- Systems detect failure\n- Automatic switchover\n- Faster recovery\n- Requires careful configuration",
-
       "key_points": [
         "Hot site: operational, minutes to failover; Cold site: empty, days to weeks",
-        "Warm site is compromiseâ€”hardware ready, data needs restoration",
+        "Warm site is compromise\"\"hardware ready, data needs restoration",
         "BIA identifies critical processes and determines RTO/RPO requirements",
-        "Test types escalate: tabletop â†’ simulation â†’ parallel â†’ full interruption",
+        "Test types escalate: tabletop â†' simulation â†' parallel â†' full interruption",
         "Cloud DR provides on-demand infrastructure with geographic flexibility"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -380,17 +400,18 @@
         "common_mistakes": [
           {
             "mistake": "Choosing DR site based only on cost",
-            "correction": "DR site must meet RTO requirements. Cold site with days of RTO doesn't help if business needs hours. Balance cost with business requirements.",
+            "why_wrong": "DR site must meet RTO requirements. Cold site with days of RTO doesn't help if business needs hours.",
+            "correct_understanding": "DR site must meet RTO requirements. Cold site with days of RTO doesn't help if business needs hours. Balance cost with business requirements.",
             "exam_trap": "Match DR site to RTO needs, not just budget"
           },
           {
             "mistake": "Only doing tabletop exercises",
-            "correction": "Tabletop tests the plan on paper. You need practical tests to verify systems actually work. Escalate to parallel/full tests periodically.",
+            "why_wrong": "Tabletop tests the plan on paper. You need practical tests to verify systems actually work.",
+            "correct_understanding": "Tabletop tests the plan on paper. You need practical tests to verify systems actually work. Escalate to parallel/full tests periodically.",
             "exam_trap": "Multiple test types should be used"
           }
         ]
       },
-
       "what_would_happen_if": [
         {
           "situation": "Organization has cold site but 4-hour RTO requirement",
@@ -403,7 +424,6 @@
           "lesson": "Plans must be tested practically. Tabletop isn't enough."
         }
       ],
-
       "knowledge_check": {
         "question": "A financial services company has an RTO of 4 hours for their trading platform. Which DR site type is most appropriate?",
         "options": [
@@ -415,12 +435,11 @@
         "correct": 2,
         "explanation": "A 4-hour RTO requires near-immediate failover capability. Hot site with real-time replication allows failover within minutes to hours. Warm and cold sites typically take longer than 4 hours to become operational.",
         "wrong_answer_analysis": {
-          "0": "Cold site takes days to weeksâ€”far exceeds 4-hour RTO.",
-          "1": "Warm site typically takes hours to daysâ€”may not meet 4-hour RTO reliably.",
+          "0": "Cold site takes days to weeks\"\"far exceeds 4-hour RTO.",
+          "1": "Warm site typically takes hours to days\"\"may not meet 4-hour RTO reliably.",
           "3": "24-hour deployment far exceeds 4-hour RTO requirement."
         }
       },
-
       "must_remember_for_exam": [
         {
           "point": "Hot = minutes RTO; Warm = hours/days; Cold = days/weeks",
@@ -435,7 +454,6 @@
           "why_tested": "Know test types and their trade-offs."
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Hot Site",
@@ -463,15 +481,13 @@
       "section_id": "D3-L007-S04",
       "title": "Business Continuity",
       "content": "Business continuity ensures organizational survival beyond just IT recovery.\n\n**BCP vs DRP**\n\n*Business Continuity Plan (BCP)*\n- Organization-wide survival\n- All business functions\n- People, processes, technology\n- Strategic focus\n- Keeping business running\n\n*Disaster Recovery Plan (DRP)*\n- IT systems recovery\n- Technical focus\n- Subset of BCP\n- Restoring technology\n\n**BCP Components**\n\n*Crisis Management*\n- Initial response\n- Decision making\n- Communication\n- Leadership coordination\n\n*Emergency Response*\n- Life safety first\n- Evacuation procedures\n- Medical response\n- Physical security\n\n*Business Recovery*\n- Critical function restoration\n- Alternate locations\n- Manual workarounds\n- Priority-based recovery\n\n**Continuity Strategies**\n\n*People*\n- Cross-training\n- Succession planning\n- Remote work capability\n- Contact procedures\n\n*Processes*\n- Manual fallback procedures\n- Alternative workflows\n- Vendor alternatives\n- Documentation\n\n*Technology*\n- System redundancy\n- Data backup\n- Alternate sites\n- Cloud services\n\n**Communication Planning**\n\n*Internal*\n- Employee notification\n- Status updates\n- Instructions and guidance\n- Return-to-work information\n\n*External*\n- Customer communication\n- Vendor coordination\n- Regulatory notification\n- Media management\n\n**Testing and Maintenance**\n\n*Testing Requirements*\n- Annual minimum testing\n- After significant changes\n- Multiple test types\n- Document results\n\n*Plan Maintenance*\n- Regular reviews (annual minimum)\n- Update contact information\n- Reflect organizational changes\n- Incorporate lessons learned",
-
       "key_points": [
         "BCP is organization-wide; DRP is IT-focused subset",
-        "BCP addresses people, processes, and technologyâ€”not just IT",
+        "BCP addresses people, processes, and technology\"\"not just IT",
         "Crisis management, emergency response, and business recovery are BCP phases",
         "Communication plans address internal (employees) and external (customers, media)",
         "Plans require regular testing and maintenance to remain valid"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -481,36 +497,37 @@
           },
           {
             "name": "PPT",
-            "expansion": "People, Processes, Technologyâ€”the three pillars of continuity",
+            "expansion": "People, Processes, Technology\"\"the three pillars of continuity",
             "usage": "BCP must address all three"
           }
         ],
         "analogies": [
           {
             "concept": "BCP vs DRP",
-            "analogy": "DRP is like having a spare tire for your car. BCP is having a plan for how to get to work even if your car is totaledâ€”alternate transportation, working from home, etc.",
+            "analogy": "DRP is like having a spare tire for your car. BCP is having a plan for how to get to work even if your car is totaled\"\"alternate transportation, working from home, etc.",
             "why_it_works": "DRP fixes one thing; BCP ensures the mission continues regardless"
           },
           {
             "concept": "Crisis Communication",
-            "analogy": "Like a ship captain communicating during emergencyâ€”crew needs orders, passengers need reassurance, coast guard needs status, families need information. Different audiences, different messages.",
+            "analogy": "Like a ship captain communicating during emergency\"\"crew needs orders, passengers need reassurance, coast guard needs status, families need information. Different audiences, different messages.",
             "why_it_works": "Multiple stakeholders need tailored communication"
           }
         ],
         "common_mistakes": [
           {
             "mistake": "Treating BCP and DRP as the same thing",
-            "correction": "DRP is IT recoveryâ€”getting systems back. BCP is business survivalâ€”keeping the organization running by any means, including manual processes.",
-            "exam_trap": "Know the distinctionâ€”commonly tested"
+            "why_wrong": "DRP is IT recovery\"\"getting systems back. BCP is business survival\"\"keeping the organization running by any means, including manual processes..",
+            "correct_understanding": "DRP is IT recovery\"\"getting systems back. BCP is business survival\"\"keeping the organization running by any means, including manual processes.",
+            "exam_trap": "Know the distinction\"\"commonly tested"
           },
           {
             "mistake": "Creating a plan and never updating it",
-            "correction": "Plans become outdated quickly. Contact info changes, systems change, threats change. Annual review minimum. Update after any significant change.",
+            "why_wrong": "Plans become outdated quickly. Contact info changes, systems change, threats change.",
+            "correct_understanding": "Plans become outdated quickly. Contact info changes, systems change, threats change. Annual review minimum. Update after any significant change.",
             "exam_trap": "Plans require ongoing maintenance"
           }
         ]
       },
-
       "what_would_happen_if": [
         {
           "situation": "DRP focuses only on IT but key business process requires manual paper backup",
@@ -523,7 +540,6 @@
           "lesson": "Plans must be maintained. Contact lists especially need frequent updates."
         }
       ],
-
       "knowledge_check": {
         "question": "What is the primary difference between a Business Continuity Plan (BCP) and a Disaster Recovery Plan (DRP)?",
         "options": [
@@ -535,12 +551,11 @@
         "correct": 2,
         "explanation": "BCP is an organization-wide plan covering people, processes, and technology to ensure business survival. DRP is a subset focused specifically on IT systems recovery. BCP is strategic and broad; DRP is technical and specific.",
         "wrong_answer_analysis": {
-          "0": "Incident size doesn't determine which planâ€”they have different scopes.",
-          "1": "This is backwardsâ€”BCP is broader; DRP is technology-focused.",
+          "0": "Incident size doesn't determine which plan\"\"they have different scopes.",
+          "1": "This is backwards\"\"BCP is broader; DRP is technology-focused.",
           "3": "Testing frequency isn't the primary distinguishing factor."
         }
       },
-
       "must_remember_for_exam": [
         {
           "point": "BCP = whole organization; DRP = IT subset of BCP",
@@ -555,7 +570,6 @@
           "why_tested": "Plan lifecycle is important concept."
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Business Continuity Plan (BCP)",
@@ -580,22 +594,20 @@
       ]
     }
   ],
-
   "hands_on_activity": {
     "title": "Business Continuity Planning Exercise",
     "objective": "Develop a basic business continuity plan for a critical system",
     "scenario": "You're developing BCP/DR documentation for Meridian Financial's customer portal.",
     "steps": [
       "Step 1: Identify critical business functions dependent on the customer portal",
-      "Step 2: Conduct business impact analysisâ€”determine RTO and RPO requirements",
+      "Step 2: Conduct business impact analysis\"\"determine RTO and RPO requirements",
       "Step 3: Design backup strategy meeting RPO (3-2-1 rule)",
       "Step 4: Select appropriate DR site type based on RTO",
       "Step 5: Document recovery procedures and responsible parties",
-      "Step 6: Plan testing strategyâ€”tabletop, simulation, parallel"
+      "Step 6: Plan testing strategy\"\"tabletop, simulation, parallel"
     ],
     "expected_outcome": "Business continuity documentation including BIA, backup strategy, DR site selection, and testing plan."
   },
-
   "what_would_you_do": {
     "scenario": "Budget constraints force choosing between hot site DR and immutable backups. Can't afford both.",
     "context": "Organization has 4-hour RTO requirement. Primary threat is ransomware. Current backups are network-attached (accessible). No air-gap or immutable storage exists.",
@@ -603,28 +615,28 @@
     "options": [
       {
         "id": "a",
-        "text": "Hot siteâ€”meets the 4-hour RTO requirement",
+        "text": "Hot site\"\"meets the 4-hour RTO requirement",
         "is_best": false,
         "feedback": "Hot site enables fast failover but if ransomware encrypts primary and backups replicate to hot site, both are compromised. Ransomware is primary threat.",
         "consequences": "Fast failover but potentially to encrypted data. Ransomware resilience not addressed."
       },
       {
         "id": "b",
-        "text": "Immutable/air-gapped backupsâ€”protects against ransomware",
+        "text": "Immutable/air-gapped backups\"\"protects against ransomware",
         "is_best": true,
         "feedback": "Ransomware is primary threat. Without immutable backups, any disaster recovery fails if ransomware encrypts everything. Slower recovery is better than no recovery.",
         "consequences": "Recovery possible even after ransomware. May not meet 4-hour RTO but will recover."
       },
       {
         "id": "c",
-        "text": "Warm site compromiseâ€”cheaper than hot, some speed",
+        "text": "Warm site compromise\"\"cheaper than hot, some speed",
         "is_best": false,
         "feedback": "Warm site still doesn't address ransomware encrypting backups. Moderate speed doesn't help if recovery data is compromised.",
         "consequences": "Neither meets RTO nor provides ransomware resilience."
       },
       {
         "id": "d",
-        "text": "Cyber insurance insteadâ€”transfer the risk",
+        "text": "Cyber insurance instead\"\"transfer the risk",
         "is_best": false,
         "feedback": "Insurance helps financially but doesn't restore operations. Still need recovery capability. Insurance is complement to controls, not replacement.",
         "consequences": "Money but no operational recovery. Business still down."
@@ -632,10 +644,9 @@
     ],
     "key_lesson": "Recoverability is prerequisite to recovery speed. Immutable backups ensure you have something to recover. Fast DR to encrypted data is useless. Address primary threat first."
   },
-
   "summary": {
     "key_takeaways": [
-      "High availability measured in ninesâ€”99.99% allows 52.6 minutes downtime/year",
+      "High availability measured in nines\"\"99.99% allows 52.6 minutes downtime/year",
       "Eliminate single points of failure for true HA",
       "3-2-1 backup rule: 3 copies, 2 media types, 1 offsite",
       "RTO = maximum downtime; RPO = maximum data loss",
@@ -650,12 +661,15 @@
       "BCP = organization-wide; DRP = IT recovery",
       "Immutable backups protect against ransomware"
     ],
-    "connection_to_next": "Resilience ensures systems survive disasters. The next lesson explores data protectionâ€”classifying, securing, and managing data throughout its lifecycle to protect the organization's most valuable asset."
+    "connection_to_next": "Resilience ensures systems survive disasters. The next lesson explores data protection\"\"classifying, securing, and managing data throughout its lifecycle to protect the organization's most valuable asset."
   },
-
   "related_content": {
-    "simulations": ["D3-SIM-005"],
-    "remediation": ["D3-REM-003"],
+    "simulations": [
+      "D3-SIM-005"
+    ],
+    "remediation": [
+      "D3-REM-003"
+    ],
     "next_lesson": "D3-LESSON-008",
     "previous_lesson": "D3-LESSON-006"
   }

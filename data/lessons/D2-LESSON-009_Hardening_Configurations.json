@@ -1,1269 +1,515 @@
 {
   "lesson_id": "D2-LESSON-009",
   "domain": 2,
-  "title": "Hardening and Secure Configurations",
-  "subtitle": "Reducing Attack Surface Through Secure Configuration",
-  "version": "3.0-enhanced",
+  "title": "System Hardening and Secure Configurations",
   "objectives_covered": [
     "2.5"
   ],
-  "estimated_duration": "90-120 minutes (core: 60 min, labs: 30-60 min)",
+  "estimated_duration": "60-75 minutes",
   "difficulty": "intermediate",
-  "prerequisites": [
-    "D2-LESSON-002",
-    "D2-LESSON-008"
-  ],
+  "version": "3.0",
   "skill_tree": {
-    "position": {
-      "domain": 2,
-      "sequence": 9,
-      "tier": "intermediate"
-    },
     "prerequisites": [
-      {
-        "lesson_id": "D2-LESSON-002",
-        "title": "Threat Vectors & Attack Surfaces",
-        "why_needed": "Hardening specifically reduces attack vectors and attack surface"
-      },
-      {
-        "lesson_id": "D2-LESSON-008",
-        "title": "Indicators & Detection",
-        "why_needed": "Detection findings inform hardening priorities"
-      }
-    ],
-    "unlocks": [
-      {
-        "lesson_id": "D2-LESSON-010",
-        "title": "Mitigation Techniques",
-        "connection": "Hardening is a foundational mitigation technique"
-      },
-      {
-        "lesson_id": "D3-LESSON-002",
-        "title": "Infrastructure Security",
-        "connection": "Infrastructure hardening applies these principles at scale"
-      },
-      {
-        "lesson_id": "D4-LESSON-004",
-        "title": "Vulnerability Management",
-        "connection": "Hardening addresses configuration vulnerabilities"
-      }
-    ],
-    "related_concepts": [
-      {
-        "topic": "Change Management",
-        "lesson": "D1-LESSON-008",
-        "relationship": "Hardening changes must follow change management process"
-      },
-      {
-        "topic": "Security Assessments",
-        "lesson": "D2-LESSON-012",
-        "relationship": "Assessments verify hardening effectiveness"
-      }
+      "Security Fundamentals",
+      "Operating Systems"
     ],
     "builds_toward": [
-      "CompTIA Security+ SY0-701 Certification",
-      "CompTIA CySA+ (system hardening)",
-      "GIAC Certified Enterprise Defender (GCED)",
-      "CIS Certified Security Practitioner"
+      "Vulnerability Management",
+      "Compliance",
+      "DevSecOps"
     ],
-    "cascade_learning": {
-      "this_lesson_establishes": [
-        "Hardening principles and methodology",
-        "Secure baseline concepts",
-        "Configuration standards (CIS, DISA STIGs)",
-        "Attack surface reduction techniques",
-        "Configuration management"
-      ],
-      "builds_on_previous": {
-        "D2-LESSON-002": "Attack vectors that hardening eliminates",
-        "D2-LESSON-008": "Detection informs which configurations to prioritize"
-      },
-      "concepts_used_later": {
-        "D2-LESSON-010": "Hardening is primary mitigation technique",
-        "D3-LESSON-002": "Infrastructure hardening at enterprise scale",
-        "D4-LESSON-004": "Configuration vulnerabilities in vulnerability management",
-        "D5-LESSON-004": "Hardening standards in compliance requirements"
-      }
-    }
+    "related_skills": [
+      "Configuration Management",
+      "Change Control",
+      "Asset Management"
+    ]
   },
   "role_relevance": {
     "soc_analyst": {
       "relevance": "medium",
-      "percentage_of_job": "15-25%",
-      "daily_usage": "Verify hardening compliance in alerts, identify misconfigurations during investigation",
-      "specific_tasks": [
-        "Identify hardening gaps during incident investigation",
-        "Verify systems match approved baseline",
-        "Report configuration drift findings",
-        "Correlate vulnerabilities with missing hardening"
-      ],
-      "tools_youll_use": [
-        "Vulnerability scanners",
-        "Configuration management consoles",
-        "SIEM"
-      ],
-      "real_scenario": "Alert investigation reveals compromised system had unnecessary service running that wasn't in baseline. You document the gap and recommend enforcement."
+      "percentage": 15,
+      "daily_tasks": [
+        "Detect configuration drift",
+        "Alert on insecure settings",
+        "Baseline deviation monitoring"
+      ]
     },
     "incident_responder": {
-      "relevance": "high",
-      "percentage_of_job": "25-35%",
-      "daily_usage": "Identify misconfiguration as root cause, recommend hardening in remediation",
-      "specific_tasks": [
-        "Determine if misconfiguration enabled breach",
-        "Recommend hardening in remediation plan",
-        "Verify hardening before system restoration",
-        "Document configuration weaknesses in incident report"
-      ],
-      "tools_youll_use": [
-        "Baseline comparison tools",
-        "Configuration scanners",
-        "Documentation templates"
-      ],
-      "real_scenario": "Post-breach analysis reveals attacker used default credentials on IoT device. Remediation includes mandatory credential changes and IoT hardening baseline."
-    },
-    "security_engineer": {
-      "relevance": "critical",
-      "percentage_of_job": "50-60%",
-      "daily_usage": "Design secure baselines, implement hardening automation, maintain configuration standards",
-      "specific_tasks": [
-        "Create and maintain secure baseline images",
-        "Implement hardening through automation (Ansible, GPO, SCCM)",
-        "Develop CIS benchmark implementation guides",
-        "Test hardening impact before deployment",
-        "Monitor for configuration drift",
-        "Remediate hardening exceptions"
-      ],
-      "tools_youll_use": [
-        "Ansible",
-        "Chef/Puppet",
-        "Group Policy",
-        "CIS-CAT",
-        "Nessus",
-        "SCAP tools"
-      ],
-      "real_scenario": "Building new server baseline: start with CIS Benchmark for Windows Server, customize for application requirements, automate deployment with Ansible, scan with CIS-CAT to verify compliance."
+      "relevance": "medium",
+      "percentage": 20,
+      "daily_tasks": [
+        "Identify misconfigurations exploited in breaches",
+        "Recommend hardening improvements"
+      ]
     },
     "grc_analyst": {
       "relevance": "high",
-      "percentage_of_job": "35-45%",
-      "daily_usage": "Audit hardening compliance, manage exceptions, report configuration posture",
-      "specific_tasks": [
-        "Audit systems against CIS Benchmarks",
-        "Track hardening exceptions and compensating controls",
-        "Report hardening compliance metrics",
-        "Map hardening requirements to compliance frameworks",
-        "Review configuration change requests"
-      ],
-      "tools_youll_use": [
-        "GRC platforms",
-        "CIS-CAT Pro",
-        "Compliance scanners",
-        "Exception tracking"
-      ],
-      "real_scenario": "PCI-DSS audit requires demonstrating hardening standards. You generate CIS Benchmark compliance reports showing 95% compliance with documented exceptions."
+      "percentage": 35,
+      "daily_tasks": [
+        "Audit baseline compliance",
+        "Track hardening metrics",
+        "Report compliance posture"
+      ]
     },
     "penetration_tester": {
       "relevance": "high",
-      "percentage_of_job": "35-45%",
-      "daily_usage": "Identify misconfigurations, test hardening effectiveness, exploit configuration gaps",
-      "specific_tasks": [
-        "Scan for default credentials",
-        "Identify unnecessary services",
-        "Test firewall rule effectiveness",
-        "Find configuration vulnerabilities",
-        "Recommend hardening improvements"
-      ],
-      "tools_youll_use": [
-        "Nmap",
-        "Nessus",
-        "CIS-CAT",
-        "Custom enumeration scripts",
-        "Metasploit"
-      ],
-      "real_scenario": "Pentest discovers development server with default Tomcat credentials, unnecessary debug endpoints, and no host firewall. Full compromise demonstrates hardening failure."
+      "percentage": 30,
+      "daily_tasks": [
+        "Find misconfigurations to exploit",
+        "Identify default credentials",
+        "Recommend hardening priorities"
+      ]
+    },
+    "security_engineer": {
+      "relevance": "critical",
+      "percentage": 50,
+      "daily_tasks": [
+        "Define security baselines",
+        "Deploy configuration management",
+        "Automate hardening enforcement"
+      ]
     }
   },
   "introduction": {
-    "hook": "In 2019, Capital One suffered a breach exposing 100 million records. The root cause? A misconfigured web application firewall with overly permissive settings. Default configurations are designed for ease of use, not security. That default admin password, those unnecessary services, that overly permissive firewall rule\u2014they're all attack vectors waiting to be exploited. Hardening transforms vulnerable systems into hardened targets.",
+    "hook": "In 2019, Capital One suffered one of the largest data breaches in financial services history - 100 million customer records stolen. The cause wasn't a sophisticated zero-day exploit or advanced malware. It was a single misconfiguration: an overly permissive AWS IAM role that allowed server-side request forgery to access S3 buckets. A $190 million fine and class action settlement followed. This pattern repeats constantly - most breaches don't require advanced hacking skills. They exploit default passwords, unnecessary services, excessive permissions, and missed hardening steps. Proper system hardening eliminates these easy wins for attackers and forces them to work much harder.",
     "learning_goals": [
-      "Understand hardening principles including least functionality and attack surface reduction",
-      "Apply secure baseline concepts to create consistent, repeatable configurations",
-      "Implement industry standards including CIS Benchmarks and DISA STIGs",
-      "Perform common hardening actions across operating systems, applications, and network devices",
-      "Understand configuration management and drift detection",
+      "Apply system hardening principles to reduce attack surface",
+      "Implement secure baselines using CIS Benchmarks and DISA STIGs",
+      "Identify common misconfigurations that lead to breaches",
+      "Use configuration management to enforce and monitor baselines",
       "Balance security hardening with operational requirements"
     ],
-    "why_it_matters": {
-      "career_impact": "Configuration errors are a leading cause of breaches. Security engineers spend significant time creating and maintaining hardened baselines. Understanding hardening is essential for any security role.",
-      "business_connection": "Misconfigurations cause 15% of breaches (Verizon DBIR). Proper hardening eliminates low-hanging fruit that attackers exploit first.",
-      "exam_relevance": "Expect 4-6 questions on hardening concepts, standards (CIS/DISA), and specific hardening actions."
-    },
-    "exam_weight": {
-      "domain": "Domain 2: Threats, Vulnerabilities & Mitigations (22%)",
-      "estimated_questions": "4-6 questions on hardening",
-      "question_types": [
-        "Hardening action identification: 'What should be done first?'",
-        "Standard identification: 'Which provides hardening guidance?'",
-        "Principle application: 'What principle does this demonstrate?'",
-        "Misconfiguration scenarios: 'What is the risk?'"
-      ],
-      "high_yield_topics": [
-        "CIS Benchmarks = industry hardening standards",
-        "DISA STIGs = government hardening guides",
-        "Least functionality = disable unnecessary features",
-        "Secure baseline = documented approved configuration",
-        "Change default credentials = critical first step"
-      ]
-    }
+    "why_it_matters": "Hardening is one of the highest-ROI security activities. Eliminating default passwords, disabling unnecessary services, and applying secure configurations prevents the majority of attacks.",
+    "exam_weight": "Hardening and secure configuration concepts appear in approximately 8-10% of Security+ exam questions"
   },
   "sections": [
     {
-      "section_id": "D2-L009-S01",
-      "title": "Hardening Fundamentals",
-      "estimated_time": "15 minutes",
-      "content": {
-        "overview": "Hardening is the process of securing systems by reducing their attack surface\u2014eliminating unnecessary functionality, securing configurations, and applying security controls. The goal is to leave only what's needed, properly configured and protected.",
-        "core_concepts": [
-          {
-            "concept": "Hardening Definition",
-            "definition": "Process of securing systems by reducing attack surface and eliminating unnecessary functionality",
-            "key_principle": "Least functionality\u2014only enable what's absolutely required",
-            "how_it_works": {
-              "methodology": "Start with everything disabled, enable only what's needed",
-              "validation": "Scan and verify configuration meets security baseline",
-              "maintenance": "Monitor for drift and remediate deviations"
-            },
-            "why_important": "Every unnecessary service, port, or feature is a potential attack vector. Hardening eliminates these before attackers can exploit them."
-          },
-          {
-            "concept": "Attack Surface Reduction",
-            "definition": "Minimizing the number of entry points available to attackers",
-            "components": [
-              {
-                "surface": "Network surface",
-                "reduction": "Close unnecessary ports, disable unused protocols"
-              },
-              {
-                "surface": "Application surface",
-                "reduction": "Remove unused features, disable debug modes"
-              },
-              {
-                "surface": "Physical surface",
-                "reduction": "Disable USB ports, lock BIOS settings"
-              },
-              {
-                "surface": "User surface",
-                "reduction": "Remove unnecessary accounts, limit privileges"
-              }
-            ]
-          },
-          {
-            "concept": "Secure Baseline",
-            "definition": "Documented, approved security configuration for a specific system type",
-            "components": [
-              "Operating system settings",
-              "Services enabled/disabled",
-              "User accounts and permissions",
-              "Network configuration",
-              "Security software settings",
-              "Audit and logging configuration"
-            ],
-            "benefits": [
-              "Consistent security across all systems",
-              "Repeatable deployment",
-              "Simplified compliance verification",
-              "Drift detection capability",
-              "Faster incident response"
-            ],
-            "process": "Create \u2192 Test \u2192 Document \u2192 Deploy \u2192 Monitor \u2192 Update"
-          },
-          {
-            "concept": "Configuration Standards",
-            "standards": [
-              {
-                "standard": "CIS Benchmarks",
-                "full_name": "Center for Internet Security Benchmarks",
-                "description": "Comprehensive, consensus-based configuration guidelines",
-                "coverage": "Operating systems, applications, cloud platforms, network devices",
-                "format": "Detailed guides with specific settings and rationale",
-                "cost": "Free (basic), Paid (CIS SecureSuite for automation)",
-                "exam_importance": "High\u2014most common hardening standard on exam"
-              },
-              {
-                "standard": "DISA STIGs",
-                "full_name": "Defense Information Systems Agency Security Technical Implementation Guides",
-                "description": "US government security configuration standards",
-                "coverage": "Systems used in DoD environments",
-                "format": "Detailed technical controls with severity ratings",
-                "cost": "Free",
-                "exam_importance": "Know what they are and their government focus"
-              },
-              {
-                "standard": "Vendor Hardening Guides",
-                "description": "Platform-specific security configuration guides from vendors",
-                "examples": [
-                  "Microsoft Security Baselines",
-                  "Cisco Security Configuration Guide",
-                  "AWS Well-Architected Framework"
-                ],
-                "advantage": "Vendor-specific expertise",
-                "consideration": "May not be as comprehensive as CIS"
-              }
-            ]
-          }
-        ],
-        "definitions_and_terminology": {
-          "Hardening": "Process of securing systems by reducing attack surface",
-          "Attack surface": "Total number of entry points where attacker could attempt access",
-          "Least functionality": "Principle of enabling only required features and services",
-          "Secure baseline": "Documented approved security configuration",
-          "Configuration drift": "Unauthorized or unintended changes from baseline",
-          "Golden image": "Pre-hardened system image used for deployment"
-        },
-        "industry_standards": {
-          "CIS Controls": "Prioritized security actions that form foundation for hardening",
-          "NIST SP 800-123": "Guide to General Server Security",
-          "NIST SP 800-70": "National Checklist Program for IT Products",
-          "ISO 27001 A.12": "Operations security controls including hardening"
-        }
-      },
+      "section_id": "D2-009-S1",
+      "title": "Hardening Fundamentals and Attack Surface",
+      "content": "System hardening is the systematic process of securing a system by reducing its attack surface - eliminating every unnecessary feature, service, or configuration that attackers could exploit. The attack surface includes all the points where an unauthorized user could enter or extract data: open ports, running services, installed applications, user accounts, network protocols, and configuration options. Every enabled feature is a potential vulnerability. The hardening principle is simple but powerful: disable what you don't need, secure what you do. This applies to operating systems, applications, network devices, databases, cloud services, and containers. A hardened system does ONE thing well with minimal exposure, rather than being a general-purpose system with maximum functionality and maximum attack surface.",
       "key_points": [
-        "Hardening reduces attack surface by eliminating unnecessary functionality",
-        "Least functionality principle: only enable what's required",
-        "Secure baseline ensures consistent, documented configuration",
-        "CIS Benchmarks are industry-standard hardening guides",
-        "DISA STIGs are government security configuration standards"
+        "Attack surface = all possible entry points for attackers (ports, services, accounts, protocols, configs)",
+        "Hardening goal: minimize attack surface while maintaining required functionality",
+        "Principle of least functionality: enable only what's necessary for the system's purpose",
+        "Every service, port, and account is a potential vulnerability",
+        "DRUPS Process: Disable services, Remove software, Update configs, Patch systems, Secure defaults"
       ],
       "memory_hooks": {
         "mnemonics": [
           {
-            "name": "HARD-en",
-            "expansion": "Harden = Remove, Access restrict, Disable defaults, Enable logging, Network lock",
-            "usage": "Remember the key hardening actions"
+            "term": "Hardening Steps",
+            "mnemonic": "DRUPS = Disable, Remove, Update, Patch, Secure",
+            "explanation": "Five core hardening actions"
           },
           {
-            "name": "CIS vs STIG",
-            "expansion": "CIS = Commercial/Industry Standard; STIG = Secure Technical Implementation (Government)",
-            "usage": "Remember which standard is for which audience"
+            "term": "Attack Surface",
+            "mnemonic": "Less = More (fewer services = more security)",
+            "explanation": "Minimizing functionality increases security"
           }
         ],
         "analogies": [
           {
-            "concept": "Hardening",
-            "analogy": "Hardening is like preparing a house before a hurricane. You board up windows (close ports), remove loose items (disable services), lock doors (change defaults), and reinforce the structure (apply patches). Everything unnecessary that could become a vulnerability is addressed.",
-            "why_it_works": "The concept of securing before attack is intuitive with storm preparation"
-          },
-          {
-            "concept": "Secure Baseline",
-            "analogy": "A secure baseline is like a recipe for building secure systems. Just as a chef follows a recipe to consistently produce the same dish, IT follows the baseline to consistently produce secure systems. Deviation from the recipe = inconsistent results.",
-            "why_it_works": "Recipe consistency maps to configuration consistency"
+            "concept": "Attack Surface",
+            "analogy": "Your attack surface is like the number of doors and windows in your house. A house with 50 doors is much harder to secure than one with 2. Hardening removes unnecessary doors."
           }
         ],
         "common_mistakes": [
           {
-            "mistake": "Thinking hardening is a one-time activity",
-            "why_wrong": "Hardening requires ongoing maintenance: monitoring for drift, updating baselines for new threats, re-hardening after changes..",
-            "correct_understanding": "Hardening requires ongoing maintenance: monitoring for drift, updating baselines for new threats, re-hardening after changes.",
-            "exam_trap": "Questions may test understanding that hardening is continuous"
+            "mistake": "Using default configurations in production",
+            "why_wrong": "Defaults prioritize ease of use over security. Default passwords, sample content, enabled debugging, and unnecessary services are well-documented and first things attackers check.",
+            "correct_understanding": "Defaults are starting points, not production configs. Always customize: change credentials, disable unnecessary features, apply security baselines.",
+            "exam_trap": "Default configurations are a major security risk and common exam topic"
           },
           {
-            "mistake": "Applying hardening without testing",
-            "why_wrong": "Aggressive hardening can break applications.",
-            "correct_understanding": "Aggressive hardening can break applications. Always test hardening changes in non-production before deployment.",
-            "exam_trap": "Scenarios may ask about the proper process for implementing hardening"
+            "mistake": "Hardening once and considering it done",
+            "why_wrong": "Configuration drift occurs constantly. Patches may reset settings, updates add services, administrators make 'temporary' changes that become permanent, and new vulnerabilities require new hardening.",
+            "correct_understanding": "Hardening is continuous. Use configuration management to enforce baselines, detect drift, and automatically remediate.",
+            "exam_trap": "Hardening requires ongoing monitoring and enforcement"
           }
         ]
       },
       "real_world_example": {
-        "scenario": "Building a Secure Baseline",
-        "company": "Pinnacle Financial Services",
-        "application": "Pinnacle needed to create a Windows Server baseline for PCI compliance. Process: (1) Started with CIS Benchmark Level 1 for Windows Server 2022, (2) Reviewed each setting with application team for compatibility, (3) Created exceptions document for business-required deviations, (4) Built golden image with approved settings, (5) Deployed using SCCM to all new servers, (6) Configured Nessus to scan weekly for drift. Result: 98% CIS compliance with documented exceptions.",
-        "outcome": "Consistent, compliant configuration across 200+ servers with automated enforcement"
+        "scenario": "A web server deployed with default Apache configuration exposes server version information, allows directory listing, has example CGI scripts enabled, and uses default SSL settings. Attackers use version info to find vulnerabilities, access sensitive files via directory listing, and exploit weak cipher suites.",
+        "company": "E-commerce Startup",
+        "application": "After hardening: version headers removed, directory listing disabled, example scripts deleted, TLS 1.3 only with strong ciphers. Attack surface reduced by 80%."
       },
       "what_would_happen_if": [
-        {
-          "situation": "An organization has no secure baseline\u2014each admin configures systems differently",
-          "consequence": "Inconsistent security posture. Some servers hardened, others vulnerable. Impossible to verify compliance. Attackers find the weakest system and pivot.",
-          "lesson": "Baselines ensure consistency. Without them, security is unpredictable."
-        },
-        {
-          "situation": "A company applies maximum hardening without testing",
-          "consequence": "Critical applications break. Users can't work. IT scrambles to undo changes. Business blames security team. Hardening effort fails.",
-          "lesson": "Hardening must be tested against application requirements before deployment."
-        }
+        "If you deploy with defaults: Attackers know exactly what to look for - default credentials, sample files, debugging endpoints - and will find them",
+        "If you don't monitor for drift: Your hardened configuration slowly becomes insecure as patches and changes accumulate"
       ],
       "knowledge_check": {
-        "question": "A security engineer is creating a standard configuration for all Windows servers in the organization. This documented configuration that defines approved security settings is called:",
+        "question": "What is the primary goal of system hardening?",
         "options": [
-          "Security policy because it defines security rules",
-          "Secure baseline because it defines approved configuration",
-          "CIS Benchmark because it's a configuration standard",
-          "Golden image because it's used for deployment"
+          "A. Improve system performance",
+          "B. Reduce attack surface by eliminating unnecessary functionality",
+          "C. Install additional security software",
+          "D. Create system backups"
         ],
-        "correct": 1,
-        "explanation": "A secure baseline is a documented, approved security configuration for a specific system type. It defines exactly how systems should be configured. While CIS Benchmarks provide guidance for creating baselines, the baseline itself is the organization's approved configuration.",
+        "correct": "B",
+        "explanation": "Hardening removes or disables unnecessary services, ports, accounts, and features - reducing the points where attackers could gain entry.",
         "wrong_answer_analysis": {
-          "0": "Security policy is higher-level direction about what should be done. The baseline is the specific technical implementation.",
-          "2": "CIS Benchmark is a reference guide. The baseline is the organization's specific approved configuration (which may be based on CIS).",
-          "3": "Golden image is a pre-configured system image used for deployment. The baseline is the documented configuration the image should match."
+          "A": "Performance may improve as a side effect but isn't the goal",
+          "C": "Adding software can increase attack surface; hardening removes functionality",
+          "D": "Backups are important but not related to hardening"
         }
       },
       "must_remember_for_exam": [
-        {
-          "fact": "Hardening = reducing attack surface through least functionality",
-          "why_tested": "Core definition"
-        },
-        {
-          "fact": "Secure baseline = documented approved configuration",
-          "why_tested": "Key concept for consistent security"
-        },
-        {
-          "fact": "CIS Benchmarks = industry-standard hardening guides",
-          "why_tested": "Most common hardening standard referenced"
-        },
-        {
-          "fact": "DISA STIGs = US government hardening standards",
-          "why_tested": "Know the acronym and purpose"
-        }
+        "Attack surface = all entry points for attackers",
+        "Default configurations are security risks",
+        "Hardening is continuous, not one-time"
       ],
       "glossary_terms": [
+        {
+          "term": "Attack Surface",
+          "definition": "The sum of all points where an unauthorized user could enter or extract data from a system"
+        },
         {
           "term": "Hardening",
-          "definition": "Process of securing systems by reducing attack surface and eliminating unnecessary functionality"
+          "definition": "The process of securing a system by reducing its attack surface and applying secure configurations"
         },
         {
-          "term": "Secure baseline",
-          "definition": "Documented, approved security configuration for a specific system type"
+          "term": "Least Functionality",
+          "definition": "The principle of enabling only the minimum features required for a system's intended purpose"
         },
         {
-          "term": "CIS Benchmarks",
-          "definition": "Consensus-based security configuration guidelines from Center for Internet Security"
-        },
-        {
-          "term": "DISA STIGs",
-          "definition": "Security Technical Implementation Guides from Defense Information Systems Agency"
+          "term": "Configuration Drift",
+          "definition": "The gradual deviation of a system's configuration from its intended secure baseline"
         }
       ]
     },
     {
-      "section_id": "D2-L009-S02",
-      "title": "Operating System Hardening",
-      "estimated_time": "15 minutes",
-      "content": {
-        "overview": "Operating system hardening applies security configurations to the foundation of any system. A well-hardened OS significantly reduces the attack surface available to threats that reach the system level.",
-        "core_concepts": [
-          {
-            "concept": "Default Credential Elimination",
-            "priority": "CRITICAL - First hardening step",
-            "what_to_change": [
-              "Local administrator/root passwords",
-              "Service account passwords",
-              "Default application passwords",
-              "BIOS/UEFI passwords",
-              "Network device admin credentials"
-            ],
-            "why_critical": "Default credentials are publicly known. Attackers try them first. Many IoT breaches trace to default passwords.",
-            "best_practice": "Use strong, unique passwords; consider PAM solutions for privileged access"
-          },
-          {
-            "concept": "Unnecessary Services",
-            "principle": "Every running service is a potential attack vector",
-            "actions": [
-              {
-                "action": "Disable unused services",
-                "examples": [
-                  "FTP if not needed",
-                  "Telnet (use SSH)",
-                  "Print spooler on servers without printing",
-                  "Remote registry if not required"
-                ]
-              },
-              {
-                "action": "Remove unnecessary features",
-                "examples": [
-                  "PowerShell v2 (downgrade attacks)",
-                  "SMBv1 (EternalBlue)",
-                  "Unnecessary Windows features"
-                ]
-              },
-              {
-                "action": "Uninstall unnecessary software",
-                "examples": [
-                  "Games",
-                  "Sample applications",
-                  "Development tools on production",
-                  "Unused browsers"
-                ]
-              }
-            ]
-          },
-          {
-            "concept": "Account Hardening",
-            "measures": [
-              {
-                "measure": "Disable guest accounts",
-                "why": "Provides unauthorized access vector"
-              },
-              {
-                "measure": "Rename administrator account",
-                "why": "Makes targeted attacks harder (though not impossible)"
-              },
-              {
-                "measure": "Limit local administrators",
-                "why": "Reduces privilege escalation risk"
-              },
-              {
-                "measure": "Implement account lockout",
-                "why": "Prevents brute force attacks"
-              },
-              {
-                "measure": "Configure password policy",
-                "why": "Enforces strong credentials"
-              }
-            ]
-          },
-          {
-            "concept": "Host Firewall Configuration",
-            "principle": "Default deny\u2014block all, allow specific",
-            "implementation": [
-              "Enable host-based firewall (Windows Firewall, iptables)",
-              "Block all inbound by default",
-              "Allow only required ports/services",
-              "Log denied connections",
-              "Review rules periodically"
-            ]
-          },
-          {
-            "concept": "Security Features Enablement",
-            "features": [
-              {
-                "feature": "BitLocker/FileVault/LUKS",
-                "purpose": "Disk encryption protects data at rest"
-              },
-              {
-                "feature": "Windows Defender/antimalware",
-                "purpose": "Real-time malware protection"
-              },
-              {
-                "feature": "Audit logging",
-                "purpose": "Detection and forensic capability"
-              },
-              {
-                "feature": "AppLocker/application whitelisting",
-                "purpose": "Prevent unauthorized executables"
-              },
-              {
-                "feature": "Secure Boot",
-                "purpose": "Prevent boot-level malware"
-              }
-            ]
-          }
-        ]
-      },
+      "section_id": "D2-009-S2",
+      "title": "Security Baselines and Industry Standards",
+      "content": "Security baselines provide standardized, tested, documented configurations that implement hardening best practices. Rather than developing your own configurations from scratch (risking missed items and untested settings), use industry baselines as starting points. CIS (Center for Internet Security) Benchmarks are the most widely adopted - free, detailed guides for Windows, Linux, macOS, AWS, Azure, databases, browsers, and more. DISA STIGs (Security Technical Implementation Guides) are mandatory for US government systems and extremely detailed. Microsoft Security Baselines provide Windows-specific settings. These baselines save enormous time, provide auditable documentation proving due diligence, and are continuously updated as new vulnerabilities emerge. However, baselines are starting points - you must customize for your environment and test before deployment.",
       "key_points": [
-        "Change default credentials FIRST\u2014attackers try these immediately",
-        "Disable unnecessary services\u2014each is a potential attack vector",
-        "Remove unnecessary software\u2014less code means fewer vulnerabilities",
-        "Enable host firewall with default-deny rules",
-        "Enable security features: encryption, antimalware, logging"
+        "CIS Benchmarks: Industry-standard, free, covers most platforms (Windows, Linux, cloud, databases)",
+        "DISA STIGs: Required for US government, extremely detailed, very restrictive",
+        "Microsoft Security Baselines: Windows-specific, integrates with Group Policy",
+        "Baselines save time, provide documentation, and are continuously updated",
+        "Customize baselines for your environment - they're starting points, not final configs"
       ],
       "memory_hooks": {
         "mnemonics": [
           {
-            "name": "OS Hardening: CARDS",
-            "expansion": "Credentials change, Accounts restrict, Remove services, Default-deny firewall, Security features enable",
-            "usage": "Remember the key OS hardening steps"
+            "term": "Baseline Sources",
+            "mnemonic": "CIS + STIG + Vendor = Complete baselines",
+            "explanation": "Three main sources for hardening guidance"
+          },
+          {
+            "term": "CIS Meaning",
+            "mnemonic": "CIS = Configure It Securely",
+            "explanation": "CIS provides prescriptive hardening guidelines"
           }
         ],
         "analogies": [
           {
-            "concept": "Default Credentials Risk",
-            "analogy": "Using default credentials is like leaving your house key under the doormat\u2014everyone knows to look there first. Attackers have lists of default passwords; they try them all automatically.",
-            "why_it_works": "The 'key under the mat' concept is universally understood as insecure"
-          },
-          {
-            "concept": "Unnecessary Services",
-            "analogy": "Unnecessary services are like leaving extra doors and windows in your house unlocked. Even if you secure the front door perfectly, an unlocked back window defeats the purpose.",
-            "why_it_works": "Multiple entry points increase risk\u2014intuitive security concept"
+            "concept": "Security Baselines",
+            "analogy": "Baselines are like building codes for security. You wouldn't build a house without following electrical and plumbing codes. Similarly, you shouldn't build servers without following security configuration codes."
           }
         ],
         "common_mistakes": [
           {
-            "mistake": "Thinking 'we don't use it' means a service is safe to leave running",
-            "why_wrong": "If YOU don't use it, attackers will.",
-            "correct_understanding": "If YOU don't use it, attackers will. Unused services with vulnerabilities are easy targets.",
-            "exam_trap": "Questions may present scenarios where unused services create risk"
+            "mistake": "Applying baselines without testing",
+            "why_wrong": "Baselines may break applications that depend on disabled features or specific configurations. Production outages from untested hardening are common and damaging.",
+            "correct_understanding": "Test baselines in staging environments that mirror production. Document necessary exceptions with business justification.",
+            "exam_trap": "Always test security baselines before production deployment"
           },
           {
-            "mistake": "Hardening without enabling logging",
-            "why_wrong": "Hardening prevents attacks, but logging detects what gets through.",
-            "correct_understanding": "Hardening prevents attacks, but logging detects what gets through. Both are essential.",
-            "exam_trap": "Complete hardening includes detection capability"
+            "mistake": "Treating baselines as one-size-fits-all",
+            "why_wrong": "Web servers, database servers, workstations, and domain controllers have very different requirements. Applying workstation settings to a database server will break things.",
+            "correct_understanding": "Use role-appropriate baselines. CIS and STIG have different guides for different system roles.",
+            "exam_trap": "Different system roles require different security baselines"
           }
         ]
       },
       "real_world_example": {
-        "scenario": "IoT Device Compromise via Defaults",
-        "company": "GlobalRetail Inc.",
-        "application": "Attackers scanned GlobalRetail's network and found IP cameras with default admin/admin credentials. They logged in, discovered the cameras were on the same network as POS systems (no segmentation), used the cameras as pivot points, and eventually compromised payment systems. ROOT CAUSE: Default credentials never changed. REMEDIATION: Changed all default credentials, segmented IoT devices, implemented network access control.",
-        "outcome": "Simple hardening step (change defaults) would have prevented the entire breach"
+        "scenario": "An organization creates custom hardening scripts based on blog posts and team knowledge. An auditor discovers 47 missing controls that CIS Benchmarks would have included. They also can't demonstrate what standard they followed.",
+        "company": "Manufacturing Company",
+        "application": "Switching to CIS Benchmarks provided comprehensive coverage, auditable documentation, and automatic updates when CIS releases new guidance."
       },
       "what_would_happen_if": [
-        {
-          "situation": "An organization skips credential changes during deployment to save time",
-          "consequence": "First automated scan by attackers finds default credentials. Systems compromised within days. Entire deployment needs to be rebuilt.",
-          "lesson": "Credential change is not optional\u2014it's the first and most critical hardening step."
-        },
-        {
-          "situation": "Server has unnecessary remote desktop enabled 'just in case'",
-          "consequence": "BlueKeep vulnerability allows pre-authentication remote code execution. Server compromised because unnecessary service was left enabled.",
-          "lesson": "If you don't need it, disable it. 'Just in case' creates attack surface."
-        }
+        "If you create your own standards: You'll likely miss controls, lack documentation for auditors, and have no update process when new threats emerge",
+        "If you apply baselines without testing: You risk production outages when hardening breaks applications that depend on disabled features"
       ],
       "knowledge_check": {
-        "question": "A newly deployed server has the default administrator account with the factory-set password. A security administrator wants to harden this system. What should be done FIRST?",
+        "question": "What is the primary benefit of using CIS Benchmarks instead of creating custom hardening standards?",
         "options": [
-          "Install antivirus software",
-          "Change the default administrator password",
-          "Enable the host-based firewall",
-          "Apply the latest security patches"
+          "A. CIS Benchmarks are required by law",
+          "B. They provide tested, documented, continuously updated configurations that demonstrate due diligence",
+          "C. They're faster to implement than any alternative",
+          "D. They work without any customization"
         ],
-        "correct": 1,
-        "explanation": "Changing default credentials should be the FIRST hardening action. Attackers have lists of default passwords and try them immediately. While all options are valid hardening steps, the system is immediately vulnerable to automated credential attacks until defaults are changed.",
+        "correct": "B",
+        "explanation": "CIS Benchmarks are extensively tested, well-documented, regularly updated, and recognized by auditors - providing both security value and compliance evidence.",
         "wrong_answer_analysis": {
-          "0": "Antivirus is important but doesn't address the immediate risk of known default credentials.",
-          "2": "Firewall is important but an attacker with valid credentials can access allowed services.",
-          "3": "Patching is critical but doesn't help if attackers log in with default credentials."
+          "A": "CIS Benchmarks are widely adopted but not legally required (except in some regulated contexts)",
+          "C": "They still require customization and testing; speed depends on environment",
+          "D": "All baselines require environment-specific customization and testing"
         }
       },
       "must_remember_for_exam": [
-        {
-          "fact": "Change default credentials = first hardening step",
-          "why_tested": "Priority question\u2014what to do first"
-        },
-        {
-          "fact": "Disable unnecessary services = reduce attack surface",
-          "why_tested": "Core hardening principle"
-        },
-        {
-          "fact": "Host firewall = default deny, allow specific",
-          "why_tested": "Firewall configuration principle"
-        }
+        "CIS Benchmarks - free, industry standard",
+        "DISA STIGs - required for US government",
+        "Test baselines before production"
       ],
       "glossary_terms": [
         {
-          "term": "Golden image",
-          "definition": "Pre-hardened system image used as template for new deployments"
+          "term": "CIS Benchmarks",
+          "definition": "Security configuration guidelines published by Center for Internet Security, widely adopted as industry standard"
         },
         {
-          "term": "Configuration drift",
-          "definition": "Unauthorized or unintended changes from the approved baseline"
+          "term": "DISA STIG",
+          "definition": "Security Technical Implementation Guide - mandatory hardening standard for US Department of Defense systems"
+        },
+        {
+          "term": "Security Baseline",
+          "definition": "A standardized set of security configurations for a specific platform or system type"
+        },
+        {
+          "term": "Due Diligence",
+          "definition": "Demonstrating reasonable care was taken to protect systems, often through documented standards"
         }
       ]
     },
     {
-      "section_id": "D2-L009-S03",
-      "title": "Application and Service Hardening",
-      "estimated_time": "12 minutes",
-      "content": {
-        "overview": "Applications and services running on hardened operating systems need their own hardening. Web servers, databases, and applications have their own attack surfaces that must be minimized.",
-        "core_concepts": [
-          {
-            "concept": "Web Server Hardening",
-            "application": "Apache, Nginx, IIS",
-            "hardening_actions": [
-              {
-                "action": "Remove default content",
-                "reason": "Default pages reveal version info and may have vulnerabilities"
-              },
-              {
-                "action": "Disable directory listing",
-                "reason": "Prevents attackers from browsing file structure"
-              },
-              {
-                "action": "Hide version information",
-                "reason": "Makes targeted attacks harder"
-              },
-              {
-                "action": "Configure TLS properly",
-                "reason": "Encrypt communications, use strong ciphers"
-              },
-              {
-                "action": "Implement security headers",
-                "reason": "X-Frame-Options, CSP, HSTS protect against attacks"
-              },
-              {
-                "action": "Restrict HTTP methods",
-                "reason": "Only allow needed methods (GET, POST)"
-              }
-            ]
-          },
-          {
-            "concept": "Database Hardening",
-            "application": "SQL Server, MySQL, PostgreSQL, Oracle",
-            "hardening_actions": [
-              {
-                "action": "Change default ports",
-                "reason": "Makes automated scanning less effective"
-              },
-              {
-                "action": "Remove sample databases",
-                "reason": "May have known vulnerabilities"
-              },
-              {
-                "action": "Restrict network access",
-                "reason": "Only allow connections from app servers"
-              },
-              {
-                "action": "Use least-privilege accounts",
-                "reason": "App shouldn't connect as db admin"
-              },
-              {
-                "action": "Enable audit logging",
-                "reason": "Track access and changes"
-              },
-              {
-                "action": "Encrypt connections",
-                "reason": "Protect data in transit"
-              }
-            ]
-          },
-          {
-            "concept": "Application Hardening",
-            "hardening_actions": [
-              {
-                "action": "Disable debug features",
-                "reason": "Debug modes expose sensitive information"
-              },
-              {
-                "action": "Remove development endpoints",
-                "reason": "/debug, /test, /admin endpoints are attack targets"
-              },
-              {
-                "action": "Implement input validation",
-                "reason": "Prevents injection attacks"
-              },
-              {
-                "action": "Configure error handling",
-                "reason": "Don't expose stack traces to users"
-              },
-              {
-                "action": "Use secure dependencies",
-                "reason": "Keep libraries updated, remove unused ones"
-              }
-            ]
-          },
-          {
-            "concept": "Service Account Hardening",
-            "principles": [
-              "Use dedicated service accounts (not personal accounts)",
-              "Implement least privilege (only permissions needed)",
-              "Disable interactive logon where possible",
-              "Use managed service accounts (Windows)",
-              "Rotate credentials regularly",
-              "Monitor service account usage"
-            ]
-          }
-        ]
-      },
+      "section_id": "D2-009-S3",
+      "title": "Common Hardening Actions",
+      "content": "Hardening actions fall into several categories that apply across platforms. Account hardening: disable or rename default admin accounts (Administrator, root, sa), remove unused accounts, enforce strong password policies, require MFA for privileged access, and implement least privilege. Service hardening: disable unnecessary services (print spooler on servers that don't print), restrict service account permissions, remove sample files and default content. Network hardening: close unused ports, enable host-based firewall with explicit allow rules, disable unnecessary protocols (SMBv1, TLS 1.0), configure network segmentation. Application hardening: remove default pages and sample applications, disable debugging and verbose errors, secure configuration files with proper permissions, update to current versions. These actions apply whether you're hardening Windows servers, Linux systems, network devices, or cloud services - the specific implementation differs but the principles remain constant.",
       "key_points": [
-        "Web servers: remove defaults, hide versions, configure TLS, add security headers",
-        "Databases: restrict access, use least-privilege accounts, encrypt connections",
-        "Applications: disable debug, remove dev endpoints, handle errors securely",
-        "Service accounts: least privilege, no interactive logon, rotate credentials"
+        "Account hardening: Disable/rename defaults, remove unused accounts, enforce MFA for privileged access",
+        "Service hardening: Disable unnecessary services, restrict service account permissions, remove samples",
+        "Network hardening: Close unused ports, enable host firewall, disable legacy protocols (SMBv1, TLS 1.0)",
+        "Application hardening: Remove defaults, disable debugging, secure config files, keep updated",
+        "PASS Framework: Ports, Accounts, Services, Software - check all four areas"
       ],
       "memory_hooks": {
         "mnemonics": [
           {
-            "name": "Web Server: DTVSH",
-            "expansion": "Defaults remove, TLS configure, Version hide, Security headers, HTTP methods restrict",
-            "usage": "Remember web server hardening priorities"
+            "term": "Hardening Areas",
+            "mnemonic": "PASS = Ports, Accounts, Services, Software",
+            "explanation": "Four key areas to harden on any system"
+          },
+          {
+            "term": "Account Security",
+            "mnemonic": "DRUM = Disable defaults, Rename admin, Use MFA, Minimize privileges",
+            "explanation": "Account hardening steps"
           }
         ],
         "analogies": [
           {
-            "concept": "Debug Mode in Production",
-            "analogy": "Running production with debug enabled is like leaving your diary open on your desk at work. Debug modes are designed to expose internal information\u2014helpful for developers, devastating in production.",
-            "why_it_works": "The concept of unintended exposure is clear"
+            "concept": "Default Accounts",
+            "analogy": "Default admin accounts are like leaving a spare key under the doormat - everyone knows to look there first. Changing defaults is like moving the key somewhere only you know."
           }
         ],
         "common_mistakes": [
           {
-            "mistake": "Only hardening the OS and forgetting applications",
-            "why_wrong": "Applications have their own attack surface.",
-            "correct_understanding": "Applications have their own attack surface. A hardened OS with an unhardened web application is still vulnerable.",
-            "exam_trap": "Comprehensive hardening includes OS AND applications"
+            "mistake": "Leaving default administrator accounts enabled with default names",
+            "why_wrong": "Default accounts (Administrator, admin, root, sa, postgres) are primary brute-force targets. Attackers try these first because they know they exist.",
+            "correct_understanding": "Rename or disable default admin accounts. Create unique administrative accounts with non-obvious names.",
+            "exam_trap": "Default accounts are the first target for attackers"
+          },
+          {
+            "mistake": "Relying only on network firewalls without host-based firewalls",
+            "why_wrong": "Network firewalls don't protect against lateral movement. Once an attacker is inside, they move freely between systems without host firewalls blocking traffic.",
+            "correct_understanding": "Enable host-based firewalls on all systems. Configure to allow only required traffic, even within trusted networks.",
+            "exam_trap": "Host firewalls protect against lateral movement"
           }
         ]
       },
       "real_world_example": {
-        "scenario": "Database Hardening Prevents Breach",
-        "company": "MedCare Health Systems",
-        "application": "Security audit found SQL Server accessible from any internal system with the 'sa' account using default password. REMEDIATION: Changed sa password, disabled sa account for app use, created least-privilege app account, restricted connections to app server IPs only, enabled TDE encryption. Pentest three months later confirmed database no longer accessible from compromised workstations.",
-        "outcome": "Proper database hardening prevented lateral movement path"
+        "scenario": "An attacker breaches a single workstation via phishing. From there, they move laterally to every system on the network because: no host firewalls, default admin passwords on servers, SMBv1 enabled everywhere, and service accounts with domain admin privileges.",
+        "company": "Law Firm",
+        "application": "Post-incident hardening: host firewalls enabled, unique admin passwords per system, SMBv1 disabled, service accounts with minimal privileges. Lateral movement now blocked at every step."
       },
+      "what_would_happen_if": [
+        "If default accounts remain: Attackers will gain admin access quickly - these accounts are always the first target",
+        "If no host firewalls: Once one system is compromised, attackers can access every other system without resistance"
+      ],
       "knowledge_check": {
-        "question": "A web application in production displays detailed error messages including stack traces when errors occur. Which hardening action should address this?",
+        "question": "Why should default administrator accounts be renamed or disabled?",
         "options": [
-          "Enable additional logging to capture more details",
-          "Configure custom error pages that don't expose internal details",
-          "Disable the application firewall to see raw errors",
-          "Increase the application's memory allocation"
+          "A. They have weaker passwords by default",
+          "B. They are well-known targets that attackers try first in brute-force attacks",
+          "C. They don't support MFA",
+          "D. They consume more system resources"
         ],
-        "correct": 1,
-        "explanation": "Production applications should show generic error pages to users, not stack traces. Detailed errors help attackers understand the application structure, identify vulnerabilities, and craft exploits. Custom error pages hide this information while logging full details for developers.",
+        "correct": "B",
+        "explanation": "Attackers know default admin accounts exist on every system. Renaming them forces attackers to first discover valid account names.",
         "wrong_answer_analysis": {
-          "0": "More logging doesn't address the exposure\u2014errors should still be hidden from users.",
-          "2": "Disabling security controls makes the problem worse, not better.",
-          "3": "Memory allocation is unrelated to error message display."
+          "A": "Password strength depends on policy, not account name",
+          "C": "Default accounts can support MFA; that's a separate configuration",
+          "D": "Account names don't affect resource usage"
         }
       },
       "must_remember_for_exam": [
-        {
-          "fact": "Disable debug features in production",
-          "why_tested": "Common misconfiguration"
-        },
-        {
-          "fact": "Database hardening includes restricting network access",
-          "why_tested": "Database security principle"
-        },
-        {
-          "fact": "Service accounts should have least privilege",
-          "why_tested": "Account security principle"
-        }
+        "PASS: Ports, Accounts, Services, Software",
+        "Disable/rename default admin accounts",
+        "Host firewalls protect against lateral movement"
       ],
       "glossary_terms": [
         {
-          "term": "Security headers",
-          "definition": "HTTP response headers that enable browser security features (CSP, HSTS, X-Frame-Options)"
+          "term": "Default Account",
+          "definition": "Pre-configured user account that comes with software installation (Administrator, root, sa)"
         },
         {
-          "term": "Service account",
-          "definition": "Account used by applications or services rather than human users"
+          "term": "Service Account",
+          "definition": "Account used by applications and services to operate, should have minimal privileges"
+        },
+        {
+          "term": "Host-based Firewall",
+          "definition": "Firewall software running on individual systems to control that system's network traffic"
+        },
+        {
+          "term": "Lateral Movement",
+          "definition": "Technique where attackers move from one compromised system to others within a network"
         }
       ]
     },
     {
-      "section_id": "D2-L009-S04",
-      "title": "Network Device Hardening",
-      "estimated_time": "10 minutes",
-      "content": {
-        "overview": "Network devices (routers, switches, firewalls) form the backbone of infrastructure. Compromising a core router provides attackers access to traffic across the entire network.",
-        "core_concepts": [
-          {
-            "concept": "Network Device Hardening Basics",
-            "actions": [
-              {
-                "action": "Change default credentials",
-                "reason": "Network device defaults are well-documented",
-                "impact": "First thing attackers try"
-              },
-              {
-                "action": "Disable unused ports",
-                "reason": "Unused switch ports allow unauthorized connections",
-                "implementation": "Shutdown or assign to quarantine VLAN"
-              },
-              {
-                "action": "Use SSH instead of Telnet",
-                "reason": "Telnet transmits credentials in clear text",
-                "implementation": "Disable Telnet, enable SSH only"
-              },
-              {
-                "action": "Implement management VLAN",
-                "reason": "Separate management traffic from user traffic",
-                "implementation": "Dedicated VLAN for device management"
-              },
-              {
-                "action": "Enable logging",
-                "reason": "Track configuration changes and access",
-                "implementation": "Send logs to central SIEM"
-              }
-            ]
-          },
-          {
-            "concept": "Router/Switch Specific",
-            "measures": [
-              "Disable CDP/LLDP on untrusted ports (information disclosure)",
-              "Implement port security (MAC limiting)",
-              "Enable DHCP snooping (prevent rogue DHCP)",
-              "Configure spanning tree protection (BPDU guard)",
-              "Implement ACLs for management access"
-            ]
-          },
-          {
-            "concept": "Firewall Specific",
-            "principles": [
-              {
-                "principle": "Default deny",
-                "implementation": "Block all, explicitly allow required traffic"
-              },
-              {
-                "principle": "Rule review",
-                "implementation": "Regularly audit and remove unused rules"
-              },
-              {
-                "principle": "Logging",
-                "implementation": "Log denied traffic for threat detection"
-              },
-              {
-                "principle": "Rule documentation",
-                "implementation": "Comment every rule with business justification"
-              }
-            ]
-          }
-        ]
-      },
+      "section_id": "D2-009-S4",
+      "title": "Configuration Management and Enforcement",
+      "content": "Hardening is only effective if configurations stay hardened - and without automated enforcement, they won't. Configuration management tools (Ansible, Puppet, Chef, Salt, Group Policy, SCCM, Intune) automatically deploy baselines, continuously enforce desired state, and detect when systems drift from compliance. Drift detection is critical: systems constantly change due to patches, updates, administrative changes, and applications making modifications. Without monitoring, hardened configurations slowly become insecure. Automated remediation can fix deviations immediately or alert for manual review. The compliance reporting these tools provide is essential for demonstrating security posture to auditors and management. Infrastructure as Code (IaC) extends this to cloud and container environments where configuration is defined in version-controlled templates.",
       "key_points": [
-        "Change default credentials on ALL network devices",
-        "SSH only\u2014disable Telnet (clear text)",
-        "Disable unused switch ports",
-        "Use management VLAN to segregate admin traffic",
-        "Firewall: default deny, log denied traffic, document rules"
+        "Configuration management tools: Ansible, Puppet, Chef, Salt, Group Policy, SCCM, Intune",
+        "Desired state configuration: define what configuration SHOULD be, tools enforce it continuously",
+        "Drift detection: identify when systems deviate from baseline (patches, changes, updates)",
+        "Automated remediation: fix deviations automatically or alert for manual review",
+        "Infrastructure as Code: version-controlled configuration templates for cloud/containers"
       ],
       "memory_hooks": {
         "mnemonics": [
           {
-            "name": "Network Hardening: SLIM",
-            "expansion": "SSH use, Log everything, Isolate management, Minimize ports",
-            "usage": "Remember network device hardening priorities"
-          }
-        ],
-        "analogies": [
-          {
-            "concept": "Unused Switch Ports",
-            "analogy": "Unused switch ports are like unlocked doors in a secure building. Anyone who walks in can plug in and potentially access the network. Disabling them is like locking unused doors.",
-            "why_it_works": "Physical security parallel makes the risk clear"
-          }
-        ],
-        "common_mistakes": [
-          {
-            "mistake": "Thinking network devices don't need hardening because they're 'infrastructure'",
-            "why_wrong": "Network devices are high-value targets. Compromising a core switch provides visibility into all traffic.",
-            "correct_understanding": "Network devices are high-value targets. Compromising a core switch provides visibility into all traffic. They need hardening as much as servers.",
-            "exam_trap": "Infrastructure hardening is often overlooked in scenarios"
-          }
-        ]
-      },
-      "knowledge_check": {
-        "question": "A network administrator needs to remotely manage switches securely. Which protocol should be used?",
-        "options": [
-          "Telnet because it's simple and widely supported",
-          "HTTP because it provides a graphical interface",
-          "SSH because it encrypts the management session",
-          "SNMP v1 because it's lightweight"
-        ],
-        "correct": 2,
-        "explanation": "SSH encrypts the entire management session including credentials. Telnet transmits everything in clear text\u2014attackers on the network can capture credentials. SSH is the only secure option for command-line remote management.",
-        "wrong_answer_analysis": {
-          "0": "Telnet transmits credentials in clear text\u2014never use for management.",
-          "1": "HTTP is unencrypted. HTTPS would be acceptable for web management, but HTTP is not.",
-          "3": "SNMP v1 is unencrypted and has no authentication. SNMPv3 with authentication would be needed."
-        }
-      },
-      "must_remember_for_exam": [
-        {
-          "fact": "SSH replaces Telnet\u2014encrypted management",
-          "why_tested": "Secure protocol selection"
-        },
-        {
-          "fact": "Disable unused switch ports",
-          "why_tested": "Physical/network access control"
-        },
-        {
-          "fact": "Management VLAN separates admin traffic",
-          "why_tested": "Network segmentation principle"
-        }
-      ],
-      "glossary_terms": [
-        {
-          "term": "Management VLAN",
-          "definition": "Dedicated network segment for device administration, separated from user traffic"
-        },
-        {
-          "term": "Port security",
-          "definition": "Switch feature limiting which MAC addresses can connect to a port"
-        }
-      ]
-    },
-    {
-      "section_id": "D2-L009-S05",
-      "title": "Configuration Management and Compliance",
-      "estimated_time": "10 minutes",
-      "content": {
-        "overview": "Hardening isn't effective unless configurations are maintained. Configuration management ensures baselines are enforced, drift is detected, and compliance is verified.",
-        "core_concepts": [
-          {
-            "concept": "Configuration Drift",
-            "definition": "When system configurations deviate from the approved baseline",
-            "causes": [
-              "Unauthorized manual changes",
-              "Failed change management",
-              "Application installations",
-              "Troubleshooting that isn't reversed",
-              "Malware modifications"
-            ],
-            "risks": "Drift reintroduces vulnerabilities that hardening eliminated",
-            "detection": "Regular scanning against baseline, file integrity monitoring"
+            "term": "Config Tools",
+            "mnemonic": "APCS + Microsoft = Ansible, Puppet, Chef, Salt + Group Policy/SCCM/Intune",
+            "explanation": "Common configuration management tools"
           },
           {
-            "concept": "Configuration Automation",
-            "tools": [
-              {
-                "tool": "Group Policy (GPO)",
-                "platform": "Windows environments",
-                "use": "Enforce configurations across domain-joined systems"
-              },
-              {
-                "tool": "Ansible",
-                "platform": "Cross-platform",
-                "use": "Agentless configuration management via SSH"
-              },
-              {
-                "tool": "Chef/Puppet",
-                "platform": "Cross-platform",
-                "use": "Agent-based continuous configuration enforcement"
-              },
-              {
-                "tool": "SCCM/Intune",
-                "platform": "Microsoft environments",
-                "use": "Endpoint configuration and compliance"
-              }
-            ],
-            "benefit": "Automated enforcement prevents drift and ensures consistency"
-          },
-          {
-            "concept": "Compliance Verification",
-            "tools": [
-              {
-                "tool": "CIS-CAT",
-                "purpose": "Scan against CIS Benchmarks",
-                "output": "Compliance score and remediation guidance"
-              },
-              {
-                "tool": "Nessus",
-                "purpose": "Configuration auditing",
-                "output": "Compliance checks against various standards"
-              },
-              {
-                "tool": "SCAP Tools",
-                "purpose": "Security Content Automation Protocol scanning",
-                "output": "Standardized compliance reporting"
-              }
-            ],
-            "frequency": "Regular scanning (weekly/monthly) plus on-demand"
-          },
-          {
-            "concept": "Exception Management",
-            "process": [
-              "Document business justification",
-              "Identify compensating controls",
-              "Get management approval",
-              "Set expiration/review date",
-              "Track in exception register",
-              "Review periodically"
-            ],
-            "principle": "Not every system can fully comply\u2014document and compensate"
-          }
-        ]
-      },
-      "key_points": [
-        "Configuration drift reintroduces vulnerabilities\u2014detect and remediate",
-        "Automation tools (GPO, Ansible, Chef) enforce configurations consistently",
-        "CIS-CAT, Nessus, SCAP tools verify compliance against standards",
-        "Exceptions require documentation, approval, and compensating controls",
-        "Regular scanning catches drift before it becomes exploitable"
-      ],
-      "memory_hooks": {
-        "mnemonics": [
-          {
-            "name": "Drift Detection: SCAN",
-            "expansion": "Schedule regular checks, Compare to baseline, Alert on deviation, Notify for remediation",
-            "usage": "Remember drift detection process"
+            "term": "Drift Problem",
+            "mnemonic": "Without enforcement, everything drifts insecure",
+            "explanation": "Configurations require continuous management"
           }
         ],
         "analogies": [
           {
             "concept": "Configuration Drift",
-            "analogy": "Configuration drift is like a diet that slowly fails. You start strict, but over time small exceptions accumulate\u2014a skipped workout here, an extra dessert there. Before you know it, you're back to where you started. Systems need continuous enforcement like diets need ongoing commitment.",
-            "why_it_works": "The gradual degradation concept is relatable"
+            "analogy": "Configuration drift is like entropy in thermodynamics - systems naturally move toward disorder over time. Configuration management is like a thermostat that constantly pulls the temperature back to the desired setting."
           }
         ],
         "common_mistakes": [
           {
-            "mistake": "Scanning for compliance once and assuming it stays that way",
-            "why_wrong": "Configurations change constantly.",
-            "correct_understanding": "Configurations change constantly. Regular scanning is required to maintain compliance.",
-            "exam_trap": "Compliance is continuous, not a one-time achievement"
+            "mistake": "Hardening systems manually without configuration management",
+            "why_wrong": "Manual hardening doesn't scale, isn't consistent, and has no enforcement mechanism. Configuration drift will undo your work over time.",
+            "correct_understanding": "Use configuration management tools to define desired state and continuously enforce it. Manual hardening is for testing; automation is for production.",
+            "exam_trap": "Configuration management is required for sustained hardening"
+          },
+          {
+            "mistake": "Making configuration exceptions without documentation",
+            "why_wrong": "Undocumented exceptions become forgotten vulnerabilities. No one remembers why settings were changed, who approved it, or when to review.",
+            "correct_understanding": "Document all exceptions with: business justification, risk assessment, approver, compensating controls, and review date.",
+            "exam_trap": "All configuration exceptions require documentation"
           }
         ]
       },
       "real_world_example": {
-        "scenario": "Configuration Drift Enables Breach",
-        "company": "NexaTech Solutions",
-        "application": "Security audit found server that was hardened at deployment had drifted: an admin had enabled remote desktop 'temporarily' during troubleshooting six months ago and never disabled it. Attackers used stolen credentials to access the RDP port and compromised the server. REMEDIATION: Implemented weekly CIS-CAT scanning, automated GPO enforcement, and change tracking. Drift detection would have caught the RDP change within one week.",
-        "outcome": "Drift detection would have prevented the breach by catching unauthorized change"
+        "scenario": "A company manually hardened 500 servers per their security baseline. Six months later, an audit found 340 servers had drifted out of compliance due to patches, application installs, and admin changes. No one knew which deviations were approved.",
+        "company": "Insurance Company",
+        "application": "Implementing Ansible for enforcement and continuous compliance scanning reduced non-compliant servers to near-zero, with documented exceptions for business-required deviations."
       },
+      "what_would_happen_if": [
+        "If you don't use configuration management: Your hardening work will slowly disappear as drift accumulates",
+        "If you don't document exceptions: You'll have unknown security gaps and no way to assess your actual risk posture"
+      ],
       "knowledge_check": {
-        "question": "A security team discovers that several servers no longer match the approved security baseline due to unauthorized changes made during troubleshooting. This situation is called:",
+        "question": "What is configuration drift and why is it a security concern?",
         "options": [
-          "Security incident because systems are compromised",
-          "Configuration drift because settings deviated from baseline",
-          "Compliance violation because standards aren't met",
-          "Change management failure because process wasn't followed"
+          "A. When configurations become more secure over time",
+          "B. When systems gradually deviate from secure baselines due to changes, reintroducing vulnerabilities",
+          "C. When new systems are deployed with outdated configurations",
+          "D. When configuration management tools fail"
         ],
-        "correct": 1,
-        "explanation": "Configuration drift specifically describes when system configurations deviate from the approved baseline. While this could also be a compliance violation and change management failure, the specific term for settings deviating from baseline is configuration drift.",
+        "correct": "B",
+        "explanation": "Configuration drift occurs as patches, updates, applications, and administrative changes accumulate, slowly undoing hardening and reintroducing security weaknesses.",
         "wrong_answer_analysis": {
-          "0": "Security incident would be if the systems were actually compromised by attackers. Drift creates risk but isn't necessarily an incident.",
-          "2": "While drift may cause compliance violations, the specific phenomenon described is drift.",
-          "3": "While change management failure contributed to the problem, the term for deviating configurations is drift."
+          "A": "Drift is deviation in any direction, typically toward less secure states",
+          "C": "This describes deployment issues, not drift of existing systems",
+          "D": "Drift occurs regardless of tools; tools help prevent it"
         }
       },
       "must_remember_for_exam": [
-        {
-          "fact": "Configuration drift = deviation from baseline",
-          "why_tested": "Terminology"
-        },
-        {
-          "fact": "Automation (GPO, Ansible) prevents drift",
-          "why_tested": "Tool purpose"
-        },
-        {
-          "fact": "CIS-CAT verifies CIS Benchmark compliance",
-          "why_tested": "Tool matching"
-        }
+        "Configuration drift reintroduces vulnerabilities",
+        "Configuration management enforces desired state",
+        "Document all exceptions with justification"
       ],
       "glossary_terms": [
         {
-          "term": "Configuration drift",
-          "definition": "Deviation of system configurations from the approved baseline over time"
+          "term": "Configuration Management",
+          "definition": "Tools and processes that automate deployment and enforcement of system configurations"
         },
         {
-          "term": "SCAP",
-          "definition": "Security Content Automation Protocol\u2014standard for automated configuration and vulnerability checking"
+          "term": "Desired State Configuration",
+          "definition": "Approach where you define what configuration should be, and tools continuously enforce it"
+        },
+        {
+          "term": "Infrastructure as Code",
+          "definition": "Managing infrastructure configuration through version-controlled code rather than manual processes"
+        },
+        {
+          "term": "Compliance Reporting",
+          "definition": "Automated reporting showing which systems meet or deviate from security baselines"
         }
       ]
     }
   ],
-  "hands_on_labs": {
-    "browser_labs": [
-      {
-        "lab_id": "lab-hardening-checklist",
-        "title": "Hardening Checklist Builder",
-        "type": "interactive_checklist",
-        "difficulty": "beginner",
-        "estimated_time": "15 minutes",
-        "description": "Build a hardening checklist for different system types, prioritizing actions."
-      },
-      {
-        "lab_id": "lab-baseline-comparison",
-        "title": "Configuration Baseline Comparison",
-        "type": "scenario_analysis",
-        "difficulty": "intermediate",
-        "estimated_time": "15 minutes",
-        "description": "Compare system configurations to CIS Benchmark and identify gaps."
-      },
-      {
-        "lab_id": "lab-drift-detection",
-        "title": "Configuration Drift Detector",
-        "type": "simulation",
-        "difficulty": "intermediate",
-        "estimated_time": "12 minutes",
-        "description": "Identify configuration drift from baseline in simulated scan results."
-      }
+  "hands_on_activity": {
+    "title": "CIS Benchmark Assessment",
+    "description": "Run a CIS benchmark assessment tool against a test system, review findings, and categorize which settings to implement, customize, or document as exceptions.",
+    "objectives": [
+      "Run baseline assessment",
+      "Interpret findings",
+      "Document remediation plan"
+    ]
+  },
+  "what_would_you_do": {
+    "scenario": "Your company's web application requires an older version of TLS (1.0) to support legacy customers. The CIS Benchmark requires TLS 1.2 minimum. Management wants to maintain customer compatibility.",
+    "considerations": [
+      "Risk of legacy protocol support",
+      "Compensating controls possible",
+      "Customer communication",
+      "Timeline for deprecation"
     ],
-    "external_labs": [
-      {
-        "resource": "TryHackMe",
-        "lab_name": "Hardening Basics",
-        "url": "https://tryhackme.com/room/dvwa",
-        "cost": "Free",
-        "estimated_time": "2 hours",
-        "role_relevance": [
-          "security_engineer",
-          "penetration_tester"
-        ]
-      },
-      {
-        "resource": "CIS",
-        "lab_name": "CIS-CAT Lite",
-        "url": "https://www.cisecurity.org/cis-cat-lite",
-        "cost": "Free",
-        "estimated_time": "1 hour",
-        "description": "Run actual CIS Benchmark scans against your own systems.",
-        "role_relevance": [
-          "security_engineer",
-          "grc_analyst"
-        ]
-      }
-    ],
-    "tools_introduction": [
-      {
-        "tool": "CIS-CAT Pro",
-        "category": "Compliance Assessment",
-        "purpose": "Automated scanning against CIS Benchmarks",
-        "key_concepts": [
-          "Benchmark selection",
-          "Scan execution",
-          "Report interpretation",
-          "Remediation guidance"
-        ],
-        "role_relevance": [
-          "security_engineer",
-          "grc_analyst"
-        ]
-      },
-      {
-        "tool": "Ansible",
-        "category": "Configuration Management",
-        "purpose": "Automated configuration enforcement",
-        "key_concepts": [
-          "Playbooks",
-          "Roles",
-          "Idempotency",
-          "SSH-based execution"
-        ],
-        "role_relevance": [
-          "security_engineer"
-        ]
-      }
+    "discussion_points": [
+      "How do you document this exception?",
+      "What compensating controls could reduce risk?",
+      "How do you create a path to compliance?"
     ]
   },
   "summary": {
     "key_takeaways": [
-      "Hardening reduces attack surface by eliminating unnecessary functionality",
-      "Secure baselines provide documented, consistent configuration",
-      "CIS Benchmarks and DISA STIGs are industry/government standards",
-      "Change default credentials FIRST\u2014attackers try these immediately",
-      "Disable unnecessary services and software\u2014each is attack surface",
-      "Application and network device hardening is as important as OS hardening",
-      "Configuration drift must be detected and remediated continuously"
+      "Hardening reduces attack surface by eliminating unnecessary functionality (DRUPS: Disable, Remove, Update, Patch, Secure)",
+      "Use industry baselines (CIS Benchmarks, DISA STIGs) - don't reinvent the wheel",
+      "Always test hardening in staging before production deployment",
+      "Configuration management tools are essential for maintaining hardened state",
+      "Document all exceptions with business justification, compensating controls, and review dates"
     ],
-    "exam_essentials": [
-      "Hardening = reduce attack surface through least functionality",
-      "Secure baseline = documented approved configuration",
-      "CIS Benchmarks = industry-standard hardening guides",
-      "DISA STIGs = government hardening standards",
-      "Change default credentials = critical first step",
-      "SSH replaces Telnet for secure management",
-      "Configuration drift = deviation from baseline"
-    ],
-    "common_exam_traps": [
-      "First hardening step is ALWAYS change default credentials",
-      "Hardening is continuous, not one-time",
-      "CIS vs DISA: CIS = industry/commercial, DISA = government",
-      "Application hardening is separate from OS hardening\u2014both needed"
-    ],
-    "connection_to_next": "With hardening fundamentals covered, the next lesson explores Mitigation Techniques\u2014the broader set of controls used to reduce risk when vulnerabilities cannot be eliminated through hardening alone."
+    "exam_tips": [
+      "Default configurations are security risks - always customize",
+      "CIS Benchmarks are the industry standard for hardening guidance",
+      "Different system roles need different baselines (servers vs workstations)",
+      "Configuration drift is why ongoing enforcement is required",
+      "Host firewalls protect against lateral movement, complementing network firewalls"
+    ]
   },
   "related_content": {
+    "lessons": [
+      "D2-LESSON-007 Vulnerability Management",
+      "D2-LESSON-010 Mitigation Techniques"
+    ],
     "simulations": [
-      "D3-SIM-004"
+      "D1-SIM-005 Gap Analysis"
     ],
-    "remediation": [
-      "D2-REM-003"
-    ],
-    "next_lesson": "D2-LESSON-010",
-    "previous_lesson": "D2-LESSON-008"
+    "labs": [
+      "CIS-CAT Assessment Lab",
+      "Group Policy Hardening Lab"
+    ]
   }
 }

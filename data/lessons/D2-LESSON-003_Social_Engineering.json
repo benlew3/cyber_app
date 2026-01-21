@@ -1,520 +1,704 @@
 {
   "lesson_id": "D2-LESSON-003",
   "domain": 2,
-  "title": "Social Engineering",
+  "title": "Social Engineering Attacks",
+  "subtitle": "Hacking Humans: Psychology-Based Attacks",
+  "version": "2.0-enhanced",
   "objectives_covered": [
     "2.2"
   ],
-  "estimated_duration": "50-60 minutes",
-  "difficulty": "beginner",
-  "version": "3.0-enhanced",
+  "estimated_duration": "90-120 minutes",
+  "difficulty": "intermediate",
+  "prerequisites": [
+    "D2-LESSON-002"
+  ],
   "skill_tree": {
+    "position": {
+      "domain": 2,
+      "sequence": 3,
+      "tier": "intermediate"
+    },
     "prerequisites": [
-      "D2-LESSON-001",
-      "D2-LESSON-002"
+      {
+        "lesson_id": "D2-LESSON-002",
+        "title": "Threat Vectors",
+        "why_needed": "Social engineering is a key human attack vector"
+      }
     ],
     "unlocks": [
-      "D2-LESSON-004",
-      "D5-LESSON-006"
+      {
+        "lesson_id": "D5-LESSON-006",
+        "title": "Security Awareness",
+        "connection": "Awareness training defends against social engineering"
+      }
+    ],
+    "builds_toward": [
+      "CompTIA Security+ SY0-701",
+      "Security Awareness Program Development",
+      "Penetration Testing"
     ],
     "cascade_learning": {
-      "builds_on": [
-        {
-          "lesson": "D2-LESSON-001",
-          "concepts": [
-            "Different actors use social engineering differently"
-          ]
-        },
-        {
-          "lesson": "D2-LESSON-002",
-          "concepts": [
-            "Social engineering exploits human attack surface"
-          ]
-        }
+      "this_lesson_establishes": [
+        "Psychological manipulation principles",
+        "Phishing variants",
+        "Pretexting techniques",
+        "Defense strategies"
       ],
-      "enables": [
-        {
-          "lesson": "D2-LESSON-004",
-          "concepts": [
-            "Malware often delivered via social engineering"
-          ]
-        },
-        {
-          "lesson": "D5-LESSON-006",
-          "concepts": [
-            "Security awareness training addresses social engineering"
-          ]
-        }
-      ]
+      "concepts_used_later": {
+        "D5-LESSON-006": "Security awareness training design",
+        "D2-LESSON-012": "Social engineering in pentests"
+      }
     }
   },
   "role_relevance": {
     "soc_analyst": {
-      "importance": "critical",
+      "relevance": "high",
+      "percentage_of_job": "30-40%",
       "daily_tasks": [
-        "Identifying social engineering attempts in reported emails",
-        "Analyzing phishing campaigns targeting organization",
-        "Correlating social engineering with follow-on attacks",
-        "Documenting social engineering indicators"
-      ],
-      "real_scenario": "User reports suspicious email\u2014you analyze headers, links, and attachments, identify phishing kit being used, and block related infrastructure"
+        "Analyze phishing reports",
+        "Investigate suspected social engineering",
+        "Track campaign patterns"
+      ]
     },
     "incident_responder": {
-      "importance": "critical",
+      "relevance": "high",
+      "percentage_of_job": "30-40%",
       "daily_tasks": [
-        "Investigating successful social engineering attacks",
-        "Determining what information attackers obtained",
-        "Containing compromises from phishing",
-        "Interviewing victims to understand attack methods"
-      ],
-      "real_scenario": "BEC incident\u2014attacker impersonated CEO via email, finance wired $200K. You trace the email chain, identify the compromise point, and work with law enforcement"
-    },
-    "grc_analyst": {
-      "importance": "high",
-      "daily_tasks": [
-        "Measuring social engineering awareness metrics",
-        "Reviewing phishing simulation results",
-        "Updating security awareness policies",
-        "Assessing human risk factors"
-      ],
-      "real_scenario": "Annual security awareness review\u2014you analyze phishing simulation click rates, identify high-risk departments, and recommend targeted training"
-    },
-    "penetration_tester": {
-      "importance": "critical",
-      "daily_tasks": [
-        "Conducting social engineering engagements",
-        "Crafting phishing campaigns for testing",
-        "Performing vishing and pretexting",
-        "Testing physical social engineering"
-      ],
-      "real_scenario": "Client engagement\u2014you craft targeted phishing emails, achieve 23% click rate, and demonstrate how one click led to domain admin access"
+        "Determine if incident started with social engineering",
+        "Interview affected users",
+        "Assess credential exposure"
+      ]
     },
     "security_engineer": {
-      "importance": "high",
+      "relevance": "high",
+      "percentage_of_job": "25-35%",
       "daily_tasks": [
-        "Implementing anti-phishing technologies",
-        "Configuring email security controls",
-        "Deploying phishing simulation platforms",
-        "Building reporting mechanisms for users"
-      ],
-      "real_scenario": "Deploying new email security stack\u2014you implement link protection, attachment sandboxing, and one-click phishing report button"
+        "Implement email security controls",
+        "Configure phishing protection",
+        "Design technical safeguards"
+      ]
+    },
+    "grc_analyst": {
+      "relevance": "high",
+      "percentage_of_job": "35-45%",
+      "daily_tasks": [
+        "Design awareness programs",
+        "Measure training effectiveness",
+        "Report on phishing metrics"
+      ]
+    },
+    "penetration_tester": {
+      "relevance": "critical",
+      "percentage_of_job": "40-50%",
+      "daily_tasks": [
+        "Conduct phishing simulations",
+        "Perform vishing/pretexting tests",
+        "Report on human vulnerabilities"
+      ]
     }
   },
   "introduction": {
-    "hook": "In 2020, a 17-year-old convinced Twitter employees he was an IT admin and gained access to internal tools. Minutes later, accounts of Obama, Biden, Elon Musk, and Apple were tweeting Bitcoin scams. No malware, no exploits, no hacking\u2014just social engineering. The $120K Bitcoin haul was tiny compared to the stock market impact. Social engineering works because humans are the vulnerability that can't be patched.",
+    "hook": "In 2020, a 17-year-old didn't use zero-day exploits to breach Twitter. He simply called employees, convinced them he was from IT, and talked them into giving up credentials. Within hours, he controlled accounts of Obama, Elon Musk, and Biden\"\"posting scams to 350 million followers. The most powerful security technology is worthless when humans can be convinced to bypass it.",
     "learning_goals": [
-      "Identify social engineering techniques and psychological principles",
-      "Recognize phishing, vishing, smishing, and other variations",
-      "Understand pretexting, impersonation, and influence tactics",
-      "Apply defenses against social engineering attacks"
+      "Identify social engineering techniques: phishing, pretexting, baiting",
+      "Recognize psychological principles attackers exploit: authority, urgency, social proof",
+      "Differentiate phishing variants: spear phishing, whaling, smishing, vishing",
+      "Implement technical and human-based defenses"
     ],
-    "why_it_matters": "Technical defenses keep improving, but humans remain exploitable. Social engineering bypasses firewalls, encryption, and access controls by targeting the human element. Understanding these techniques is essential for both defense and recognizing when you're being targeted.",
+    "why_it_matters": {
+      "career_impact": "You'll design awareness programs, test users with simulated attacks, and implement technical controls.",
+      "business_connection": "Social engineering is involved in over 90% of successful attacks. Every employee is a potential target.",
+      "exam_relevance": "Expect 8-10 questions on techniques, psychology, and defenses."
+    },
     "exam_weight": {
-      "percentage": "15-18% of Domain 2",
-      "question_count": "8-10 questions",
-      "question_types": [
-        "Technique identification",
-        "Scenario classification",
-        "Defense selection",
-        "Psychological principle matching"
+      "estimated_questions": "8-10",
+      "high_yield_topics": [
+        "Psychological principles",
+        "Phishing variants",
+        "Pretexting vs impersonation",
+        "Tailgating/piggybacking"
       ]
     }
   },
   "sections": [
     {
       "section_id": "D2-L003-S01",
-      "title": "Social Engineering Fundamentals",
-      "content": "Social engineering manipulates people into divulging information or taking actions that compromise security.\n\n**Psychological Principles Exploited**\n\n*Authority:*\n- People comply with perceived authority figures\n- 'This is IT support, I need your password'\n- Impersonating executives, IT, law enforcement\n\n*Urgency/Scarcity:*\n- Time pressure reduces critical thinking\n- 'Your account will be closed in 24 hours'\n- Creates fear of missing out or loss\n\n*Social Proof:*\n- People follow what others do\n- 'Everyone else has already completed this'\n- Fake reviews, testimonials, popularity\n\n*Liking/Trust:*\n- People help those they like\n- Building rapport before request\n- Impersonating friends, colleagues\n\n*Reciprocity:*\n- People feel obligated to return favors\n- 'I helped you, now help me'\n- Free gifts before malicious request\n\n*Commitment/Consistency:*\n- People honor prior commitments\n- Small requests escalate to larger ones\n- 'You agreed to help earlier...'\n\n**Why Social Engineering Works**\n\n- Humans want to be helpful\n- Trust is default in professional settings\n- Busy people take shortcuts\n- Pressure overrides caution\n- Confidence inspires compliance",
-      "memory_hooks": {
-        "mnemonics": [
+      "title": "Social Engineering Psychology",
+      "estimated_time": "15 minutes",
+      "content": {
+        "overview": "Social engineering exploits human psychology rather than technical vulnerabilities. Understanding the psychological principles is key to defense.",
+        "core_concepts": [
           {
-            "name": "AUSLRC",
-            "expansion": "Authority, Urgency, Social proof, Liking, Reciprocity, Commitment",
-            "usage": "Six psychological principles attackers exploit"
+            "concept": "Six Psychological Principles",
+            "principles": [
+              {
+                "principle": "Authority",
+                "description": "People comply with perceived authority figures",
+                "example": "I'm from IT and need your password"
+              },
+              {
+                "principle": "Urgency/Scarcity",
+                "description": "Time pressure prevents careful thinking",
+                "example": "Your account will be closed in 24 hours"
+              },
+              {
+                "principle": "Social Proof",
+                "description": "People follow what others do",
+                "example": "Other employees have already completed this"
+              },
+              {
+                "principle": "Reciprocity",
+                "description": "Feeling obligated to return favors",
+                "example": "I helped you, now help me"
+              },
+              {
+                "principle": "Liking",
+                "description": "People comply with those they like",
+                "example": "Building rapport before making request"
+              },
+              {
+                "principle": "Commitment/Consistency",
+                "description": "People want to be consistent with prior actions",
+                "example": "You've already verified once..."
+              }
+            ]
           },
           {
-            "name": "Hackers Hack Humans",
-            "expansion": "Social engineering is hacking people, not computers",
-            "usage": "Remember that people are the vulnerability being exploited"
+            "concept": "Social Engineering Attack Cycle",
+            "stages": [
+              {
+                "stage": "Research",
+                "description": "Gather information about target from social media, company sites"
+              },
+              {
+                "stage": "Develop Trust",
+                "description": "Build rapport, establish credibility, create believable scenario"
+              },
+              {
+                "stage": "Exploit Trust",
+                "description": "Make request using psychological triggers"
+              },
+              {
+                "stage": "Exit",
+                "description": "Cover tracks, maintain access if needed"
+              }
+            ]
           }
         ],
-        "analogies": [
-          {
-            "concept": "Social Engineering = Con Artist Techniques",
-            "analogy": "Social engineers are digital con artists using the same techniques: building trust, creating urgency, impersonating authority, and exploiting helpfulness. The 'Nigerian prince' scam is just digital version of centuries-old confidence tricks.",
-            "why_it_works": "Con artists have exploited these principles forever\u2014SE is the digital evolution"
-          }
-        ],
+        "what_would_happen_if": {
+          "scenario": "What if an attacker combined multiple psychological principles?",
+          "consequence": "Most effective attacks combine principles. 'This is Mike from IT (authority), we detected unusual activity (fear), and your account will be suspended in one hour (urgency). Other employees on your team have already verified (social proof).' Layered manipulation is harder to resist."
+        }
+      },
+      "memory_hooks": {
+        "mnemonic": "AURSLL - Authority, Urgency, Reciprocity, Social proof, Liking, Legit-looking (consistency)",
         "common_mistakes": [
           {
-            "mistake": "Thinking only naive people fall for social engineering",
-            "why_wrong": "Security researchers, executives, and IT professionals ALL fall for well-crafted attacks. Social engineering exploits fundamental human psychology\u2014helpfulness, trust, urgency response\u2014that everyone shares.",
-            "correct_understanding": "Social engineering succeeds because it exploits human nature, not stupidity: (1) We're wired to help others, (2) We defer to authority, (3) Time pressure overrides caution, (4) We trust familiar contexts. Training helps but doesn't eliminate vulnerability.",
-            "exam_trap": "Social engineering works on anyone\u2014training reduces risk but doesn't eliminate it"
+            "mistake": "Thinking only gullible people fall for social engineering",
+            "why_wrong": "Anyone can be manipulated under the right circumstances. Stress, distraction, and urgency affect everyone..",
+            "correct_understanding": "Anyone can be manipulated under the right circumstances. Stress, distraction, and urgency affect everyone.",
+            "exam_trap": ""
+          }
+        ],
+        "mnemonics": [
+          {
+            "term": "Social Engineering Principles",
+            "mnemonic": "AURUS = Authority, Urgency, Reciprocity, social proof, Scarcity",
+            "explanation": "Psychological principles attackers exploit"
           },
           {
-            "mistake": "Focusing only on phishing emails",
-            "why_wrong": "Limiting focus to email misses voice (vishing), SMS (smishing), physical (tailgating), and in-person pretexting attacks. Attackers choose the path of least resistance.",
-            "correct_understanding": "Social engineering uses ALL channels: (1) Email phishing, (2) Voice vishing, (3) SMS smishing, (4) Physical tailgating/impersonation, (5) Social media, (6) Fake websites. Comprehensive defense addresses all vectors.",
-            "exam_trap": "Know all SE channels\u2014phone, SMS, in-person, not just email"
+            "term": "Phishing Types",
+            "mnemonic": "SVW = Spear (targeted), Vishing (voice), Whaling (executives)",
+            "explanation": "Phishing attack variations"
           }
         ]
       },
-      "what_would_happen_if": [
+      "must_remember_for_exam": [
         {
-          "situation": "Attacker calls employee claiming to be IT during urgent 'security incident'",
-          "consequence": "Authority (IT) + Urgency (incident) = compliance. Employee provides password 'to verify their account isn't compromised.' Attacker now has valid credentials.",
-          "lesson": "Legitimate IT never asks for passwords. Verify identity through known channels during pressure situations."
+          "fact": "Six principles: Authority, Urgency, Social proof, Reciprocity, Liking, Consistency",
+          "why_tested": "Core framework"
         },
         {
-          "situation": "Organization relies solely on technical controls without security awareness",
-          "consequence": "Attackers bypass controls through users. User clicks link, enters credentials on fake site, opens attachment because it seems legitimate. Technical controls can't stop willing user actions.",
-          "lesson": "Humans are the last line of defense. Training complements technical controls."
+          "fact": "Authority and Urgency are most commonly exploited",
+          "why_tested": "Attack patterns"
+        },
+        {
+          "fact": "Research/reconnaissance is first step in social engineering",
+          "why_tested": "Attack cycle"
         }
       ],
-      "glossary_terms": [
-        {
-          "term": "Social Engineering",
-          "definition": "Psychological manipulation of people to divulge information or take security-compromising actions",
-          "exam_note": "Exploits human psychology, not technical vulnerabilities"
-        },
-        {
-          "term": "Pretexting",
-          "definition": "Creating a fabricated scenario to engage victim and extract information",
-          "exam_note": "The 'story' or 'cover' used in social engineering"
-        },
-        {
-          "term": "Authority Principle",
-          "definition": "Psychological tendency to comply with perceived authority figures",
-          "exam_note": "Why impersonating IT/executives/police works"
-        },
-        {
-          "term": "Urgency Principle",
-          "definition": "Psychological pressure from time constraints that reduces critical thinking",
-          "exam_note": "'Act now' messaging creates compliance through fear"
-        }
+      "key_points": [
+        "Social engineering targets human psychology, not technology",
+        "Six principles: authority, urgency, social proof, reciprocity, liking, consistency",
+        "Attack cycle: research â†' develop trust â†' exploit â†' exit"
       ],
       "knowledge_check": {
-        "question": "An attacker calls an employee claiming to be from the IT help desk during a 'critical security incident' and needs their password immediately to 'protect their account.' Which TWO psychological principles are being exploited?",
+        "question": "An attacker says: 'This is Mike from IT. Unusual activity detected. Your access will be suspended in one hour unless you verify credentials now.' Which principles?",
         "options": [
-          "Social proof and reciprocity",
+          "Reciprocity and liking",
           "Authority and urgency",
-          "Liking and commitment",
+          "Social proof and consistency",
           "Scarcity and reciprocity"
         ],
-        "correct_answer": 1,
-        "explanation": "The attacker claims to be IT (authority\u2014people comply with IT staff) and creates a 'critical security incident' requiring immediate action (urgency\u2014time pressure reduces critical thinking). These are the most commonly combined principles.",
-        "wrong_answer_analysis": {
-          "0": "Social proof would involve 'everyone else has done this.' Reciprocity would involve doing a favor first.",
-          "2": "Liking involves building rapport. Commitment involves prior agreements. Neither is present here.",
-          "3": "Scarcity involves limited availability. The scenario uses urgency (time) and authority (IT)."
-        }
-      },
-      "must_remember": [
-        "AUSLRC: Authority, Urgency, Social proof, Liking, Reciprocity, Commitment",
-        "Anyone can fall for social engineering\u2014it exploits human nature",
-        "Social engineering includes all channels: email, phone, SMS, physical",
-        "Legitimate IT never asks for passwords"
-      ]
+        "correct": 1,
+        "explanation": "Authority (claiming to be IT) and urgency (one-hour deadline). Time pressure prevents careful thinking.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_wrong": "No favor being returned (reciprocity) or rapport building (liking)"
+          },
+          {
+            "option": 2,
+            "why_wrong": "No mention of others (social proof) or prior actions (consistency)"
+          },
+          {
+            "option": 3,
+            "why_wrong": "Scarcity involves limited availability; no favor for reciprocity"
+          }
+        ]
+      }
     },
     {
       "section_id": "D2-L003-S02",
-      "title": "Phishing and Email-Based Attacks",
-      "content": "Phishing uses fraudulent emails to steal credentials, deliver malware, or manipulate victims.\n\n**Phishing Types**\n\n*Phishing (Generic):*\n- Mass emails to many targets\n- Generic messaging (Netflix, Amazon, bank)\n- Low effort, high volume\n- Relies on percentage who fall for it\n\n*Spear Phishing:*\n- Targeted at specific individuals\n- Researched, personalized content\n- Higher effort, higher success rate\n- References real projects, colleagues, events\n\n*Whaling:*\n- Spear phishing targeting executives\n- High-value targets (CEO, CFO, board)\n- Often involves financial requests\n- Extremely well-researched\n\n*Business Email Compromise (BEC):*\n- Impersonates executives or vendors\n- Requests wire transfers or data\n- May use compromised accounts\n- Often no malware\u2014just manipulation\n\n**Phishing Indicators**\n\n*Technical:*\n- Sender domain doesn't match company\n- Link destinations don't match text\n- Poor email authentication (fails SPF/DKIM)\n- Suspicious attachments\n\n*Content:*\n- Urgency and threats\n- Generic greetings ('Dear Customer')\n- Grammar and spelling errors\n- Unusual requests\n\n**Credential Harvesting**\n\n- Clone legitimate login pages\n- Capture credentials submitted\n- Often use lookalike domains\n- May proxy to real site after capture",
-      "memory_hooks": {
-        "mnemonics": [
+      "title": "Phishing Attack Variants",
+      "estimated_time": "15 minutes",
+      "content": {
+        "overview": "Phishing uses fraudulent communications to trick victims. Multiple variants target different channels and audiences.",
+        "core_concepts": [
           {
-            "name": "PSWB",
-            "expansion": "Phishing (generic), Spear phishing (targeted), Whaling (executives), BEC (impersonation)",
-            "usage": "Four types of phishing from broad to targeted"
+            "concept": "Phishing Variants",
+            "variants": [
+              {
+                "variant": "Phishing",
+                "channel": "Email",
+                "targeting": "Mass/untargeted",
+                "description": "Generic emails to many recipients"
+              },
+              {
+                "variant": "Spear Phishing",
+                "channel": "Email",
+                "targeting": "Specific individuals",
+                "description": "Personalized, researched attacks"
+              },
+              {
+                "variant": "Whaling",
+                "channel": "Email",
+                "targeting": "Executives",
+                "description": "High-value targets (C-suite)"
+              },
+              {
+                "variant": "Smishing",
+                "channel": "SMS/Text",
+                "targeting": "Varies",
+                "description": "Text message phishing"
+              },
+              {
+                "variant": "Vishing",
+                "channel": "Voice/Phone",
+                "targeting": "Varies",
+                "description": "Voice phishing calls"
+              }
+            ]
           },
           {
-            "name": "Hover Before Click",
-            "expansion": "Always hover over links to see real destination",
-            "usage": "Simple technique to identify phishing links"
-          }
-        ],
-        "analogies": [
-          {
-            "concept": "Phishing Types = Fishing Methods",
-            "analogy": "Generic phishing = casting a wide net (catch whatever swims by). Spear phishing = fishing with a spear (targeting specific fish). Whaling = hunting big game (going after the biggest catches).",
-            "why_it_works": "The fishing metaphor is literal\u2014phishing was named for this reason"
-          }
-        ],
-        "common_mistakes": [
-          {
-            "mistake": "Thinking grammar errors always indicate phishing",
-            "why_wrong": "Sophisticated attackers use perfect grammar, professional formatting, and accurate branding. Some attackers intentionally use errors to filter for more gullible targets. Grammar is unreliable indicator.",
-            "correct_understanding": "Reliable phishing indicators: (1) Sender domain mismatch, (2) Hover-over link mismatch, (3) Urgency pressure, (4) Unusual requests, (5) Generic greetings. Check TECHNICAL indicators, not just content quality.",
-            "exam_trap": "Well-crafted phishing has no grammar errors\u2014use multiple indicators"
+            "concept": "Phishing Red Flags",
+            "red_flags": [
+              "Sender address doesn't match claimed organization",
+              "Generic greeting ('Dear Customer')",
+              "Spelling and grammar errors",
+              "Urgent tone requiring immediate action",
+              "Links to suspicious domains",
+              "Requests for credentials or sensitive data",
+              "Unexpected attachments"
+            ]
           },
           {
-            "mistake": "Checking only the display name, not actual email address",
-            "why_wrong": "Display names can say anything: 'John Smith - CEO <attacker@evil.com>' shows 'John Smith - CEO' but came from attacker. This is trivially spoofed.",
-            "correct_understanding": "Always verify: (1) Actual email address (not display name), (2) Domain matches expected sender, (3) For sensitive requests, verify via separate known channel (call them directly at known number).",
-            "exam_trap": "Attackers spoof display names easily\u2014verify actual email addresses"
+            "concept": "Typosquatting and Lookalike Domains",
+            "technique": "Register domains similar to legitimate ones",
+            "examples": [
+              "micros0ft.com (zero for O)",
+              "paypa1.com (one for L)",
+              "amazon-security.com (added word)"
+            ],
+            "purpose": "Credential harvesting sites that look legitimate"
           }
         ]
       },
-      "what_would_happen_if": [
+      "memory_hooks": {
+        "mnemonic": "PSWSV: Phishing (mass), Spear (targeted), Whaling (executives), Smishing (SMS), Vishing (Voice)",
+        "common_mistakes": [
+          {
+            "mistake": "Thinking spear phishing is just better phishing",
+            "why_wrong": "Spear phishing involves specific research about the target\"\"their role, relationships, current projects. It's personalized..",
+            "correct_understanding": "Spear phishing involves specific research about the target\"\"their role, relationships, current projects. It's personalized.",
+            "exam_trap": ""
+          }
+        ],
+        "mnemonics": [
+          {
+            "term": "Physical Social Engineering",
+            "mnemonic": "TIP = Tailgating, Impersonation, Pretexting",
+            "explanation": "In-person social engineering attacks"
+          }
+        ]
+      },
+      "must_remember_for_exam": [
         {
-          "situation": "CFO receives email appearing from CEO requesting urgent wire transfer to new vendor",
-          "consequence": "BEC attack succeeds\u2014$500K wired to attacker's account. Email came from lookalike domain (company-inc.com vs company.com). No malware involved, just social engineering.",
-          "lesson": "Wire transfer requests need out-of-band verification. Call the person using known number, not one in the email."
+          "fact": "Phishing = mass, Spear Phishing = targeted, Whaling = executives",
+          "why_tested": "Classification"
         },
         {
-          "situation": "Employee clicks phishing link and enters credentials on fake login page",
-          "consequence": "Attacker has valid credentials. If no MFA, they're in. If MFA via SMS, they may try SIM swap or real-time proxy. Credential compromise is the starting point for larger attack.",
-          "lesson": "Credential harvesting is often first step. MFA helps but isn't perfect against real-time attacks."
+          "fact": "Smishing = SMS, Vishing = voice",
+          "why_tested": "Terminology"
+        },
+        {
+          "fact": "Typosquatting = lookalike domains (micros0ft.com)",
+          "why_tested": "Attack technique"
         }
       ],
-      "glossary_terms": [
-        {
-          "term": "Phishing",
-          "definition": "Fraudulent email attempting to steal credentials or deliver malware",
-          "exam_note": "Generic phishing targets mass audiences"
-        },
-        {
-          "term": "Spear Phishing",
-          "definition": "Targeted phishing attack using personalized, researched content",
-          "exam_note": "Higher effort, higher success rate than generic phishing"
-        },
-        {
-          "term": "Whaling",
-          "definition": "Spear phishing specifically targeting high-level executives",
-          "exam_note": "C-suite targeting\u2014usually involves financial requests"
-        },
-        {
-          "term": "Business Email Compromise (BEC)",
-          "definition": "Attack impersonating executives or vendors to request wire transfers or sensitive data",
-          "exam_note": "Often no malware\u2014pure social engineering"
-        }
+      "key_points": [
+        "Phishing variants: mass phishing, spear phishing (targeted), whaling (executives)",
+        "Smishing = SMS, Vishing = voice",
+        "Typosquatting creates lookalike domains for credential theft"
       ],
       "knowledge_check": {
-        "question": "An attacker sends a carefully researched email to the VP of Finance that references a real ongoing acquisition and requests tax documents for due diligence. The email appears to come from the company's legal counsel. What type of attack is this?",
+        "question": "An attacker sends personalized emails to CFOs of multiple companies, referencing their specific industry and recent news. This is:",
         "options": [
-          "Generic phishing campaign",
-          "Spear phishing with extensive reconnaissance",
-          "Whaling targeting executive",
-          "Both B and C\u2014spear phishing that qualifies as whaling"
+          "Standard phishing",
+          "Spear phishing",
+          "Whaling",
+          "Smishing"
         ],
-        "correct_answer": 3,
-        "explanation": "This is both spear phishing (targeted, researched, personalized) AND whaling (targeting an executive - VP of Finance). Whaling is a subset of spear phishing that specifically targets high-level executives.",
-        "wrong_answer_analysis": {
-          "0": "Generic phishing uses mass emails without personalization\u2014this is highly targeted.",
-          "1": "While technically spear phishing, the executive targeting makes it whaling too.",
-          "2": "While technically whaling, it's done through spear phishing techniques."
-        }
-      },
-      "must_remember": [
-        "Phishing \u2192 Spear Phishing \u2192 Whaling (increasing targeting)",
-        "BEC impersonates executives/vendors for wire transfers",
-        "Hover over links to see real destination",
-        "Verify wire transfer requests out-of-band (phone call to known number)"
-      ]
+        "correct": 2,
+        "explanation": "Whaling targets executives specifically. While personalized like spear phishing, targeting C-suite makes it whaling.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_wrong": "Standard phishing is mass/generic, not personalized"
+          },
+          {
+            "option": 1,
+            "why_wrong": "Spear phishing is targeted but whaling specifically targets executives"
+          },
+          {
+            "option": 3,
+            "why_wrong": "Smishing uses SMS, not email"
+          }
+        ]
+      }
     },
     {
       "section_id": "D2-L003-S03",
-      "title": "Voice, SMS, and Physical Social Engineering",
-      "content": "Social engineering extends beyond email to all communication channels and physical access.\n\n**Vishing (Voice Phishing)**\n\n*Techniques:*\n- Impersonating IT support, banks, government\n- Caller ID spoofing to appear legitimate\n- Pretexting with fabricated scenarios\n- Pressure tactics (urgency, authority)\n\n*Common Scenarios:*\n- 'Microsoft support' detecting problems\n- Bank fraud department verification\n- IRS/government payment demands\n- IT help desk password requests\n\n**Smishing (SMS Phishing)**\n\n*Techniques:*\n- Malicious links in text messages\n- Fake package delivery notifications\n- Bank alerts requiring 'verification'\n- Prize/lottery winner claims\n\n*Why Effective:*\n- Harder to inspect links on mobile\n- SMS feels more personal/trustworthy\n- Immediate notification creates urgency\n\n**Physical Social Engineering**\n\n*Tailgating/Piggybacking:*\n- Following authorized person through secure door\n- Exploits politeness (holding doors open)\n- Defense: Mantraps, security awareness\n\n*Impersonation:*\n- Pretending to be delivery person, contractor, IT\n- Uniform or badge creates legitimacy\n- Defense: Verify with known contacts, escort visitors\n\n*Dumpster Diving:*\n- Searching trash for sensitive information\n- Org charts, passwords, financial data\n- Defense: Shredding, secure disposal\n\n*Shoulder Surfing:*\n- Observing screens, keyboards, PIN pads\n- Public places especially vulnerable\n- Defense: Privacy screens, awareness",
-      "memory_hooks": {
-        "mnemonics": [
+      "title": "In-Person Social Engineering",
+      "estimated_time": "12 minutes",
+      "content": {
+        "overview": "Physical social engineering attacks exploit human politeness and trust in person.",
+        "core_concepts": [
           {
-            "name": "VSP = Non-Email SE",
-            "expansion": "Vishing (voice), Smishing (SMS), Physical",
-            "usage": "Three social engineering channels beyond email"
+            "concept": "Physical Attack Techniques",
+            "techniques": [
+              {
+                "technique": "Tailgating",
+                "description": "Following someone through a secure door without badging",
+                "exploits": "Politeness of holding doors"
+              },
+              {
+                "technique": "Piggybacking",
+                "description": "Same as tailgating but with victim's knowledge/consent",
+                "exploits": "Politeness, fake urgency"
+              },
+              {
+                "technique": "Shoulder Surfing",
+                "description": "Observing someone enter passwords/PINs",
+                "exploits": "Public spaces, crowded areas"
+              },
+              {
+                "technique": "Dumpster Diving",
+                "description": "Searching trash for sensitive information",
+                "exploits": "Poor document disposal"
+              }
+            ]
           },
           {
-            "name": "TIDS = Physical SE",
-            "expansion": "Tailgating, Impersonation, Dumpster diving, Shoulder surfing",
-            "usage": "Four physical social engineering techniques"
+            "concept": "Impersonation",
+            "types": [
+              {
+                "type": "Delivery Person",
+                "access_gained": "Package rooms, loading docks"
+              },
+              {
+                "type": "IT Support",
+                "access_gained": "Server rooms, workstations"
+              },
+              {
+                "type": "Contractor/Vendor",
+                "access_gained": "Various areas depending on claimed role"
+              },
+              {
+                "type": "New Employee",
+                "access_gained": "Office areas, 'looking for help'"
+              }
+            ],
+            "key_props": "Uniforms, clipboards, badges, confidence"
           }
         ],
-        "analogies": [
-          {
-            "concept": "Tailgating = Sneaking Into a Concert",
-            "analogy": "Wait for someone with a ticket to open the gate, then follow through before it closes. Same principle\u2014exploiting someone else's authorized access to bypass controls.",
-            "why_it_works": "Concert sneaking is familiar unauthorized access through tailgating"
-          }
-        ],
+        "what_would_happen_if": {
+          "scenario": "What if someone in a delivery uniform asked you to hold the door?",
+          "consequence": "Most people would hold it\"\"politeness overrides security. Attackers exploit this constantly. Security awareness must overcome natural helpfulness in specific situations."
+        }
+      },
+      "memory_hooks": {
+        "mnemonic": "TPSD - Tailgating, Piggybacking, Shoulder surfing, Dumpster diving (physical attacks)",
         "common_mistakes": [
           {
-            "mistake": "Trusting caller ID displays",
-            "why_wrong": "Caller ID spoofing is trivially easy. An incoming call showing 'IT Support' or your bank's number means NOTHING. Attackers routinely spoof caller ID to appear legitimate.",
-            "correct_understanding": "Never trust incoming caller ID. For ANY sensitive request received by phone: (1) Hang up, (2) Look up the organization's REAL number independently, (3) Call them back at that number. This defeats caller ID spoofing.",
-            "exam_trap": "Caller ID spoofing is common in vishing\u2014never trust displayed numbers"
-          },
-          {
-            "mistake": "Being polite over being secure (holding doors)",
-            "why_wrong": "Tailgating exploits social politeness norms. Holding a door for someone bypasses the physical access control system entirely. Your politeness = their unauthorized access.",
-            "correct_understanding": "Security culture must override social politeness: (1) Everyone badges in individually, (2) 'Sorry, security policy' is acceptable response, (3) Challenge unfamiliar faces, (4) Report tailgating attempts. Organizations must make this culturally acceptable.",
-            "exam_trap": "Tailgating exploits social politeness\u2014organizations must create security culture"
+            "mistake": "Confusing tailgating and piggybacking",
+            "why_wrong": "Tailgating = victim unaware. Piggybacking = victim knows but allows it (holds door open)..",
+            "correct_understanding": "Tailgating = victim unaware. Piggybacking = victim knows but allows it (holds door open).",
+            "exam_trap": ""
           }
         ]
       },
-      "what_would_happen_if": [
+      "must_remember_for_exam": [
         {
-          "situation": "Employee receives call from 'Microsoft Support' about computer problems, grants remote access",
-          "consequence": "Scammer installs malware, steals data, encrypts files for ransom. Common tech support scam targeting non-technical users. Microsoft never calls unsolicited.",
-          "lesson": "Legitimate companies don't call about problems. Hang up and call official numbers if concerned."
+          "fact": "Tailgating = following without victim awareness",
+          "why_tested": "Definition"
         },
         {
-          "situation": "Person in delivery uniform follows employee through secure door",
-          "consequence": "Attacker now inside secure area. Can plant devices, access systems, steal equipment. Uniform creates assumption of legitimacy that isn't verified.",
-          "lesson": "Verify all visitors. Escort unknowns. Don't hold doors\u2014everyone badges individually."
+          "fact": "Piggybacking = following with victim awareness/consent",
+          "why_tested": "Definition distinction"
+        },
+        {
+          "fact": "Shoulder surfing = observing credential entry",
+          "why_tested": "Physical attack"
+        },
+        {
+          "fact": "Dumpster diving = searching trash for info",
+          "why_tested": "Physical attack"
         }
       ],
-      "glossary_terms": [
-        {
-          "term": "Vishing",
-          "definition": "Voice phishing\u2014social engineering attacks conducted over phone calls",
-          "exam_note": "Often involves caller ID spoofing and impersonation"
-        },
-        {
-          "term": "Smishing",
-          "definition": "SMS phishing\u2014social engineering attacks via text messages",
-          "exam_note": "Exploits difficulty inspecting links on mobile devices"
-        },
-        {
-          "term": "Tailgating",
-          "definition": "Following an authorized person through a secure entry point",
-          "exam_note": "Also called piggybacking\u2014exploits social politeness"
-        },
-        {
-          "term": "Shoulder Surfing",
-          "definition": "Observing someone's screen, keyboard, or PIN entry to steal information",
-          "exam_note": "Common in public places\u2014defense is privacy screens"
-        }
+      "key_points": [
+        "Tailgating (unaware) vs Piggybacking (aware but allows)",
+        "Shoulder surfing observes passwords/PINs",
+        "Impersonation uses uniforms and props",
+        "Dumpster diving targets poor document disposal"
       ],
       "knowledge_check": {
-        "question": "An employee receives a text message stating 'Your package delivery failed. Click here to reschedule: [link]' when they haven't ordered anything. What type of attack is this?",
+        "question": "Someone carrying boxes asks an employee to hold the door. The employee holds it, and the person enters without badging. This is:",
         "options": [
-          "Vishing attempting to steal credentials",
-          "Smishing using fake delivery notification",
-          "Spear phishing targeting the employee",
-          "Business email compromise"
+          "Tailgating",
+          "Piggybacking",
+          "Shoulder surfing",
+          "Pretexting"
         ],
-        "correct_answer": 1,
-        "explanation": "This is smishing (SMS phishing)\u2014a text message with a malicious link using a fake delivery notification pretext. The link likely leads to credential harvesting or malware download. This is a common smishing scenario.",
-        "wrong_answer_analysis": {
-          "0": "Vishing is voice/phone-based, not SMS.",
-          "2": "Spear phishing would be email-based and targeted. This is generic SMS.",
-          "3": "BEC involves impersonating executives via email for wire transfers."
-        }
-      },
-      "must_remember": [
-        "Vishing = voice, Smishing = SMS, both use same principles as email phishing",
-        "Caller ID is easily spoofed\u2014never trust displayed numbers",
-        "TIDS physical SE: Tailgating, Impersonation, Dumpster diving, Shoulder surfing",
-        "Everyone badges individually\u2014don't hold doors for strangers"
-      ]
+        "correct": 1,
+        "explanation": "Piggybacking\"\"the employee knowingly allows entry by holding the door. Tailgating would be following closely without the employee's awareness.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_wrong": "Tailgating is following without victim's awareness\"\"here the employee actively helped"
+          },
+          {
+            "option": 2,
+            "why_wrong": "Shoulder surfing is observing credential entry, not physical access"
+          },
+          {
+            "option": 3,
+            "why_wrong": "Pretexting is creating a false scenario for information, not physical access"
+          }
+        ]
+      }
     },
     {
       "section_id": "D2-L003-S04",
-      "title": "Social Engineering Defenses",
-      "content": "Defending against social engineering requires combining technical controls with human awareness.\n\n**Security Awareness Training**\n\n*Effective Programs:*\n- Regular, ongoing training (not just annual)\n- Interactive and engaging content\n- Role-specific scenarios\n- Immediate feedback on mistakes\n\n*Key Topics:*\n- Recognizing phishing indicators\n- Reporting suspicious activity\n- Verification procedures\n- Physical security awareness\n\n**Phishing Simulations**\n\n*Purpose:*\n- Measure organizational vulnerability\n- Provide teachable moments\n- Track improvement over time\n- Identify high-risk groups\n\n*Best Practices:*\n- Progressively difficult scenarios\n- Immediate training on failure\n- Non-punitive culture\n- Executive participation\n\n**Technical Controls**\n\n*Email:*\n- Anti-phishing gateways\n- Link protection/rewriting\n- Attachment sandboxing\n- External email warnings\n- Report phishing buttons\n\n*Phone/SMS:*\n- Call authentication (STIR/SHAKEN)\n- SMS filtering\n- Verified number directories\n\n**Procedural Controls**\n\n*Verification Protocols:*\n- Out-of-band verification for sensitive requests\n- Callback procedures using known numbers\n- Multi-person approval for wire transfers\n- Change verification for vendor payments\n\n**Culture of Security**\n\n- Empower questioning of unusual requests\n- No punishment for verification delays\n- Recognition for reporting\n- Leadership modeling behavior",
-      "memory_hooks": {
-        "mnemonics": [
+      "title": "Other Social Engineering Techniques",
+      "estimated_time": "10 minutes",
+      "content": {
+        "overview": "Additional techniques beyond phishing and physical access.",
+        "core_concepts": [
           {
-            "name": "STOP-THINK-VERIFY",
-            "expansion": "Stop (don't react immediately), Think (is this unusual?), Verify (confirm through known channels)",
-            "usage": "User response to suspicious requests"
+            "concept": "Pretexting",
+            "definition": "Creating a fabricated scenario to manipulate victim",
+            "examples": [
+              "Calling as 'IT support' needing credentials",
+              "Posing as vendor conducting a survey",
+              "Claiming to be from HR updating records"
+            ],
+            "key_element": "The pretext (false story) must be believable"
           },
           {
-            "name": "TCP = SE Defense Layers",
-            "expansion": "Training, Controls (technical), Procedures",
-            "usage": "Three layers of social engineering defense"
-          }
-        ],
-        "analogies": [
-          {
-            "concept": "Security Culture = Neighborhood Watch",
-            "analogy": "In a good neighborhood watch, everyone looks out for suspicious activity and reports it without embarrassment. Security culture works the same\u2014everyone watches for threats and feels empowered to report.",
-            "why_it_works": "Neighborhood watch is familiar collective security model"
-          }
-        ],
-        "common_mistakes": [
-          {
-            "mistake": "Punishing users who fall for simulations",
-            "why_wrong": "Punishment creates fear and REDUCED reporting. Users who fear punishment won't report that they clicked something suspicious. You lose visibility into actual attacks.",
-            "correct_understanding": "Effective approach: (1) Use failures as teachable moments, (2) Celebrate reporting (even of successful attacks), (3) Track metrics without individual shaming, (4) Provide immediate training at point of failure. Non-punitive = better reporting.",
-            "exam_trap": "Phishing programs should be non-punitive to encourage reporting"
+            "concept": "Baiting",
+            "definition": "Offering something enticing to lure victim",
+            "examples": [
+              "USB drives in parking lot labeled 'Confidential'",
+              "Free software downloads containing malware",
+              "Fake job offers requiring personal info"
+            ],
+            "exploits": "Curiosity and greed"
           },
           {
-            "mistake": "Annual training only",
-            "why_wrong": "Annual training creates a brief awareness spike that quickly fades. By month 3, most training is forgotten. Attackers exploit this pattern, timing campaigns after training wears off.",
-            "correct_understanding": "Effective awareness requires: (1) Regular micro-training (monthly), (2) Ongoing phishing simulations, (3) Immediate feedback on mistakes, (4) Continuous reinforcement through internal communications. Consistent exposure beats annual cramming.",
-            "exam_trap": "Effective awareness training is ongoing, not just annual compliance"
+            "concept": "Watering Hole Attack",
+            "definition": "Compromise websites frequently visited by targets",
+            "process": [
+              "Identify sites target group visits",
+              "Compromise those sites",
+              "Wait for targets to visit",
+              "Deliver malware/exploit"
+            ],
+            "example": "Compromising industry news site to target finance professionals"
+          },
+          {
+            "concept": "Quid Pro Quo",
+            "definition": "Offering a service in exchange for information",
+            "example": "Calling employees offering IT help in exchange for their credentials",
+            "exploits": "Reciprocity\"\"getting something valuable in return"
           }
         ]
       },
-      "what_would_happen_if": [
+      "must_remember_for_exam": [
         {
-          "situation": "Organization implements phishing simulation but punishes failures with public shaming",
-          "consequence": "Users stop reporting phishing (fear of punishment). When real attacks succeed, nobody reports them. Shame culture reduces, not improves, security.",
-          "lesson": "Non-punitive culture encourages reporting. Celebrate catches, educate on misses."
+          "fact": "Pretexting = creating a false scenario",
+          "why_tested": "Technique definition"
         },
         {
-          "situation": "Company requires out-of-band verification for all wire transfers over $10K",
-          "consequence": "BEC attack fails\u2014attacker's email requests wire transfer but finance calls CEO at known number to verify. CEO says 'I didn't request that.' Attack stopped.",
-          "lesson": "Procedural controls (verification requirements) stop social engineering that bypasses technical controls."
+          "fact": "Baiting = offering something enticing (infected USB)",
+          "why_tested": "Technique definition"
+        },
+        {
+          "fact": "Watering hole = compromising sites targets visit",
+          "why_tested": "Attack pattern"
+        },
+        {
+          "fact": "Quid pro quo = something for something",
+          "why_tested": "Technique definition"
         }
       ],
-      "glossary_terms": [
-        {
-          "term": "Security Awareness Training",
-          "definition": "Educational program teaching employees to recognize and respond to security threats",
-          "exam_note": "Should be ongoing and engaging, not just annual compliance"
-        },
-        {
-          "term": "Phishing Simulation",
-          "definition": "Controlled phishing exercises to test and train employee awareness",
-          "exam_note": "Provides metrics and teachable moments\u2014should be non-punitive"
-        },
-        {
-          "term": "Out-of-Band Verification",
-          "definition": "Confirming requests through different communication channel than original request",
-          "exam_note": "Email request \u2192 phone verification using known number"
-        },
-        {
-          "term": "STIR/SHAKEN",
-          "definition": "Framework for authenticating caller ID to prevent spoofing",
-          "exam_note": "Technical control for vishing defense"
-        }
-      ],
-      "knowledge_check": {
-        "question": "A finance employee receives an email from 'CEO' requesting an urgent wire transfer. Following company policy, they call the CEO at a number they have on file to verify. The CEO confirms they did NOT send the request. What control prevented this attack?",
-        "options": [
-          "Email filtering that should have blocked the message",
-          "Phishing simulation training the employee received",
-          "Out-of-band verification procedure for wire transfers",
-          "Technical control identifying spoofed sender"
-        ],
-        "correct_answer": 2,
-        "explanation": "The procedural control\u2014requiring out-of-band verification (phone call to known number) for wire transfers\u2014stopped this BEC attack. The employee followed proper procedure and caught the fraud before money was lost.",
-        "wrong_answer_analysis": {
-          "0": "The email got through filtering\u2014it wasn't blocked.",
-          "1": "Training helped recognize the need to verify, but the procedure itself stopped the attack.",
-          "3": "Technical controls didn't stop it\u2014the email arrived. Procedure saved the day."
-        }
+      "key_points": [
+        "Pretexting creates believable false scenarios",
+        "Baiting uses curiosity (infected USB drives)",
+        "Watering hole compromises frequently visited sites",
+        "Quid pro quo offers services for information"
+      ]
+    },
+    {
+      "section_id": "D2-L003-S05",
+      "title": "Defending Against Social Engineering",
+      "estimated_time": "10 minutes",
+      "content": {
+        "overview": "Defense requires both technical controls and human awareness training.",
+        "core_concepts": [
+          {
+            "concept": "Technical Controls",
+            "controls": [
+              {
+                "control": "Email Filtering",
+                "function": "Block phishing, malware, spoofed senders"
+              },
+              {
+                "control": "DMARC/DKIM/SPF",
+                "function": "Authenticate email senders"
+              },
+              {
+                "control": "Web Filtering",
+                "function": "Block known malicious sites"
+              },
+              {
+                "control": "MFA",
+                "function": "Stolen credentials alone don't grant access"
+              }
+            ]
+          },
+          {
+            "concept": "Human Defenses",
+            "defenses": [
+              {
+                "defense": "Security Awareness Training",
+                "approach": "Regular, engaging training on threats"
+              },
+              {
+                "defense": "Phishing Simulations",
+                "approach": "Test and reinforce with fake attacks"
+              },
+              {
+                "defense": "Reporting Culture",
+                "approach": "Encourage reporting without blame"
+              },
+              {
+                "defense": "Verification Procedures",
+                "approach": "Call back on known numbers, verify requests"
+              }
+            ]
+          }
+        ]
       },
-      "must_remember": [
-        "TCP defense: Training + Controls (technical) + Procedures",
-        "STOP-THINK-VERIFY for suspicious requests",
-        "Out-of-band verification stops BEC attacks",
-        "Non-punitive culture encourages reporting"
+      "must_remember_for_exam": [
+        {
+          "fact": "MFA defeats credential theft from phishing",
+          "why_tested": "Defense effectiveness"
+        },
+        {
+          "fact": "DMARC/DKIM/SPF authenticate email senders",
+          "why_tested": "Email security"
+        },
+        {
+          "fact": "Phishing simulations test and reinforce training",
+          "why_tested": "Awareness approach"
+        }
+      ],
+      "key_points": [
+        "Technical: email filtering, DMARC, web filtering, MFA",
+        "Human: awareness training, phishing simulations, reporting culture",
+        "MFA is critical\"\"stolen passwords alone don't work"
       ]
     }
   ],
+  "hands_on_labs": {
+    "browser_labs": [
+      {
+        "lab_id": "lab-phishing-analyzer",
+        "title": "Phishing Email Analyzer",
+        "type": "interactive",
+        "description": "Identify red flags in sample phishing emails"
+      },
+      {
+        "lab_id": "lab-attack-designer",
+        "title": "Social Engineering Attack Designer",
+        "type": "scenario",
+        "description": "Design an attack using psychological principles (for defense understanding)"
+      }
+    ],
+    "external_labs": [
+      {
+        "resource": "TryHackMe",
+        "lab_name": "Phishing Emails",
+        "url": "https://tryhackme.com",
+        "description": "Analyze real phishing campaigns"
+      }
+    ]
+  },
   "summary": {
     "key_takeaways": [
-      "AUSLRC principles: Authority, Urgency, Social proof, Liking, Reciprocity, Commitment",
-      "Phishing types: Generic \u2192 Spear Phishing \u2192 Whaling \u2192 BEC",
-      "Non-email SE: Vishing (voice), Smishing (SMS), Physical (TIDS)",
-      "Defense layers: Training + Technical Controls + Procedures",
-      "Out-of-band verification stops BEC and wire fraud"
+      "Social engineering exploits psychology: authority, urgency, social proof, reciprocity, liking, consistency",
+      "Phishing variants: mass phishing, spear (targeted), whaling (executives), smishing (SMS), vishing (voice)",
+      "Physical attacks: tailgating (unaware), piggybacking (aware), shoulder surfing, dumpster diving",
+      "Pretexting creates false scenarios; baiting uses enticement (USB drops)",
+      "Defense requires technical controls AND awareness training"
     ],
-    "exam_focus": "SE technique identification, psychological principles, phishing types, defense strategies",
-    "next_lesson": "D2-LESSON-004: Malware Types\u2014the payloads delivered through social engineering"
+    "exam_essentials": [
+      "Six psychological principles: Authority, Urgency, Social proof, Reciprocity, Liking, Consistency",
+      "Phishing = mass, Spear phishing = targeted, Whaling = executives",
+      "Smishing = SMS, Vishing = voice",
+      "Tailgating = unaware, Piggybacking = aware",
+      "Pretexting = false scenario, Baiting = enticement"
+    ]
+  },
+  "related_content": {
+    "simulations": [
+      "D2-SIM-001"
+    ],
+    "remediation": [
+      "D2-REM-001"
+    ],
+    "next_lesson": "D2-LESSON-004",
+    "previous_lesson": "D2-LESSON-002"
   }
 }

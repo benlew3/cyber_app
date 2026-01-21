@@ -2,526 +2,784 @@
   "lesson_id": "D2-LESSON-001",
   "domain": 2,
   "title": "Threat Actors and Motivations",
+  "subtitle": "Know Your Enemy: Understanding Who Attacks and Why",
+  "version": "2.0-enhanced",
   "objectives_covered": [
     "2.1"
   ],
-  "estimated_duration": "50-60 minutes",
+  "estimated_duration": "90-120 minutes (core: 60 min, labs: 30-60 min)",
   "difficulty": "beginner",
-  "version": "3.0-enhanced",
+  "prerequisites": [],
   "skill_tree": {
-    "prerequisites": [
-      "D1-LESSON-001",
-      "D1-LESSON-002"
-    ],
+    "position": {
+      "domain": 2,
+      "sequence": 1,
+      "tier": "foundation"
+    },
+    "prerequisites": [],
     "unlocks": [
-      "D2-LESSON-002",
-      "D2-LESSON-003",
-      "D2-LESSON-004"
+      {
+        "lesson_id": "D2-LESSON-002",
+        "title": "Threat Vectors and Attack Surfaces",
+        "connection": "Understand HOW actors attack after knowing WHO they are"
+      },
+      {
+        "lesson_id": "D2-LESSON-003",
+        "title": "Social Engineering",
+        "connection": "Actor motivations drive social engineering tactics"
+      }
+    ],
+    "builds_toward": [
+      "CompTIA Security+ SY0-701",
+      "Threat Intelligence Analyst",
+      "SOC Analyst"
     ],
     "cascade_learning": {
-      "builds_on": [
-        {
-          "lesson": "D1-LESSON-001",
-          "concepts": [
-            "Controls protect against threats from actors"
-          ]
-        },
-        {
-          "lesson": "D1-LESSON-002",
-          "concepts": [
-            "Threat actors target CIA triad"
-          ]
-        }
+      "this_lesson_establishes": [
+        "Threat actor classification",
+        "Attack motivation analysis",
+        "Kill chain stages",
+        "MITRE ATT&CK framework basics"
       ],
-      "enables": [
-        {
-          "lesson": "D2-LESSON-002",
-          "concepts": [
-            "Understanding actors informs vector analysis"
-          ]
-        },
-        {
-          "lesson": "D2-LESSON-003",
-          "concepts": [
-            "Social engineering tactics vary by actor type"
-          ]
-        },
-        {
-          "lesson": "D5-LESSON-002",
-          "concepts": [
-            "Risk assessment considers threat actor capabilities"
-          ]
-        }
-      ]
+      "concepts_used_later": {
+        "D2-LESSON-011": "Attack frameworks in depth",
+        "D4-LESSON-001": "Threat detection based on actor TTPs",
+        "D5-LESSON-002": "Risk assessment using threat actor profiles"
+      }
     }
   },
   "role_relevance": {
     "soc_analyst": {
-      "importance": "critical",
+      "relevance": "critical",
+      "percentage_of_job": "40-50%",
       "daily_tasks": [
-        "Attributing attacks to threat actor categories",
-        "Assessing threat actor capabilities during incidents",
-        "Prioritizing alerts based on likely actor type",
-        "Consuming threat intelligence about actor groups"
-      ],
-      "real_scenario": "Alert shows sophisticated lateral movement with living-off-the-land techniques\u2014you recognize APT TTPs and escalate immediately vs treating as commodity malware"
+        "Identify attacker techniques in alerts",
+        "Correlate activity to known threat actors",
+        "Prioritize incidents based on actor sophistication"
+      ]
     },
     "incident_responder": {
-      "importance": "critical",
+      "relevance": "critical",
+      "percentage_of_job": "35-45%",
       "daily_tasks": [
-        "Determining likely threat actor during incidents",
-        "Adjusting response based on actor sophistication",
-        "Predicting attacker next moves based on motivation",
-        "Documenting attribution in incident reports"
-      ],
-      "real_scenario": "Ransomware incident shows signs of data exfiltration before encryption\u2014you recognize double-extortion tactics of organized crime groups and prepare for leak threats"
-    },
-    "grc_analyst": {
-      "importance": "high",
-      "daily_tasks": [
-        "Assessing threat landscape for risk assessments",
-        "Documenting threat actors relevant to industry",
-        "Updating risk registers with emerging threats",
-        "Briefing leadership on threat actor trends"
-      ],
-      "real_scenario": "Healthcare organization\u2014you document nation-state interest in research data and organized crime targeting for ransomware in annual risk assessment"
-    },
-    "penetration_tester": {
-      "importance": "high",
-      "daily_tasks": [
-        "Emulating specific threat actor TTPs",
-        "Scoping engagements based on threat models",
-        "Recommending defenses against relevant actors",
-        "Creating realistic attack scenarios"
-      ],
-      "real_scenario": "Financial services client\u2014you emulate FIN7 techniques specifically because they target this sector, making findings more relevant"
+        "Attribute attacks to threat actor types",
+        "Predict attacker next moves",
+        "Brief leadership on threat actor capabilities"
+      ]
     },
     "security_engineer": {
-      "importance": "high",
+      "relevance": "high",
+      "percentage_of_job": "25-35%",
       "daily_tasks": [
-        "Designing defenses against likely threat actors",
-        "Implementing controls based on threat models",
-        "Selecting security tools appropriate to threats",
-        "Prioritizing security investments"
-      ],
-      "real_scenario": "Defense contractor\u2014you implement controls specifically addressing nation-state capabilities: air-gapped networks, advanced EDR, insider threat program"
+        "Design defenses against likely threat actors",
+        "Implement controls based on threat landscape",
+        "Evaluate security products against threats"
+      ]
+    },
+    "grc_analyst": {
+      "relevance": "high",
+      "percentage_of_job": "30-40%",
+      "daily_tasks": [
+        "Assess organizational threat exposure",
+        "Document threat landscape for risk assessments",
+        "Align controls to threat profiles"
+      ]
+    },
+    "penetration_tester": {
+      "relevance": "critical",
+      "percentage_of_job": "45-55%",
+      "daily_tasks": [
+        "Emulate specific threat actors",
+        "Use ATT&CK techniques in testing",
+        "Report findings using threat actor context"
+      ]
     }
   },
   "introduction": {
-    "hook": "In 2020, SolarWinds was compromised by Russian intelligence (SVR) in one of the most sophisticated supply chain attacks ever. They spent months inside networks of 18,000 organizations including the US Treasury and Homeland Security. Meanwhile, a teenager in Florida took over Twitter accounts of Obama, Biden, and Elon Musk using social engineering. Same year, vastly different actors, completely different capabilities. Understanding WHO is attacking you changes EVERYTHING about how you defend and respond.",
+    "hook": "In 2023, a single ransomware group called LockBit attacked over 1,700 organizations, extorting over $91 million. Meanwhile, a 17-year-old breached Uber and Rockstar Games just to prove he could. Nation-state hackers from China, Russia, and North Korea conducted sophisticated espionage campaigns worldwide. Understanding WHO is attacking you is just as important as understanding HOW they attack\"\"because their identity shapes their capabilities, persistence, and objectives.",
     "learning_goals": [
-      "Identify and categorize threat actor types",
-      "Understand motivations driving different actors",
-      "Assess threat actor attributes: capability, resources, sophistication",
-      "Apply threat actor knowledge to prioritize defenses"
+      "Classify threat actors by type, capability, and sophistication",
+      "Analyze attacker motivations including financial, political, and ideological goals",
+      "Differentiate between internal and external threats",
+      "Apply Cyber Kill Chain and MITRE ATT&CK frameworks"
     ],
-    "why_it_matters": "Knowing your adversary transforms security from generic checkbox compliance to targeted defense. A script kiddie needs different defenses than a nation-state. Understanding threat actors helps you prioritize investments, predict attacks, and respond appropriately.",
+    "why_it_matters": {
+      "career_impact": "You'll assess threats, prioritize defenses, attribute attacks, and brief leadership on actor capabilities.",
+      "business_connection": "Security investments should match actual threats. A hospital faces different actors than a defense contractor.",
+      "exam_relevance": "Expect 5-7 questions on actor types, motivations, and characteristics."
+    },
     "exam_weight": {
-      "percentage": "15-20% of Domain 2",
-      "question_count": "8-12 questions",
-      "question_types": [
-        "Actor identification",
-        "Motivation matching",
-        "Attribute assessment",
-        "Scenario classification"
+      "estimated_questions": "5-7",
+      "high_yield_topics": [
+        "Nation-state characteristics",
+        "RaaS/double extortion",
+        "Insider threat types",
+        "Kill Chain stages",
+        "MITRE ATT&CK basics"
       ]
     }
   },
   "sections": [
     {
       "section_id": "D2-L001-S01",
-      "title": "Threat Actor Categories",
-      "content": "Threat actors are categorized by their relationship to the target, resources, and typical motivations.\n\n**Nation-State Actors (APTs)**\n\n*Characteristics:*\n- Government-sponsored or directed\n- Highly sophisticated and well-funded\n- Long-term persistent access goals\n- Advanced custom malware and zero-days\n\n*Motivations:* Espionage, sabotage, political influence\n*Targets:* Government, defense, critical infrastructure, research\n*Examples:* APT29 (Russia/SVR), APT41 (China), Lazarus Group (North Korea)\n\n**Organized Crime**\n\n*Characteristics:*\n- Financially motivated criminal enterprises\n- Professional operations with business models\n- Ransomware-as-a-Service, bulletproof hosting\n- Often operate from countries with weak enforcement\n\n*Motivations:* Financial gain, extortion\n*Targets:* Anyone with money\u2014healthcare, manufacturing, SMBs\n*Examples:* FIN7, REvil/Sodinokibi, Conti\n\n**Hacktivists**\n\n*Characteristics:*\n- Ideologically motivated\n- Varying skill levels (script kiddies to sophisticated)\n- Public attention is the goal\n- DDoS, defacement, data leaks\n\n*Motivations:* Political, social, environmental causes\n*Targets:* Organizations opposing their ideology\n*Examples:* Anonymous, LulzSec\n\n**Insider Threats**\n\n*Characteristics:*\n- Current or former employees, contractors\n- Authorized access abused\n- Hardest to detect\u2014legitimate credentials\n- Can be malicious or negligent\n\n*Motivations:* Financial gain, revenge, ideology, carelessness\n*Targets:* Their own organization\n\n**Script Kiddies**\n\n*Characteristics:*\n- Low skill, use others' tools\n- Opportunistic, not targeted\n- Motivated by curiosity, notoriety\n- High volume, low sophistication\n\n*Motivations:* Fun, bragging rights, learning\n*Targets:* Easy targets, whoever is vulnerable",
-      "memory_hooks": {
-        "mnemonics": [
+      "title": "Understanding Threat Actors",
+      "estimated_time": "12 minutes",
+      "content": {
+        "overview": "A threat actor is any individual, group, or entity that poses danger to security. Understanding actors helps anticipate attacks and prioritize defenses.",
+        "core_concepts": [
           {
-            "name": "NOHIS",
-            "expansion": "Nation-state, Organized crime, Hacktivists, Insiders, Script kiddies",
-            "usage": "Five main threat actor categories from most to least sophisticated"
+            "concept": "Threat Actor Attributes",
+            "attributes": [
+              {
+                "attribute": "Capability",
+                "description": "Technical sophistication, tools, custom malware ability"
+              },
+              {
+                "attribute": "Resources",
+                "description": "Funding, personnel, infrastructure, time"
+              },
+              {
+                "attribute": "Motivation",
+                "description": "Financial gain, espionage, disruption, ideology"
+              },
+              {
+                "attribute": "Intent",
+                "description": "Targeted vs opportunistic, risk tolerance"
+              },
+              {
+                "attribute": "Sophistication",
+                "description": "Advanced techniques, evasion ability, operational maturity"
+              }
+            ]
           },
           {
-            "name": "APT = Always Persistent Threat",
-            "expansion": "Nation-states are called APTs because they maintain long-term access",
-            "usage": "Remember APT = nation-state with persistent access goals"
-          }
-        ],
-        "analogies": [
-          {
-            "concept": "Threat Actors = Criminal Hierarchy",
-            "analogy": "Nation-states = intelligence agencies. Organized crime = mafia families. Hacktivists = political protesters (some peaceful, some violent). Insiders = employees who steal from the register. Script kiddies = shoplifters using stolen techniques.",
-            "why_it_works": "Maps cyber threat actors to familiar criminal categories everyone understands"
-          }
-        ],
-        "common_mistakes": [
-          {
-            "mistake": "Treating all attackers the same",
-            "why_wrong": "A script kiddie running automated tools requires completely different defenses than APT29 with custom implants and zero-days. Generic 'one-size-fits-all' security wastes resources and leaves gaps.",
-            "correct_understanding": "Match defense to threat: Script kiddies need basic hygiene (patching, strong passwords). Organized crime needs advanced endpoint protection and backups. Nation-states need defense in depth, threat hunting, and assume-breach mentality.",
-            "exam_trap": "Questions ask which controls are appropriate for specific actor types\u2014match defense complexity to threat sophistication"
-          },
-          {
-            "mistake": "Underestimating insider threats",
-            "why_wrong": "Insiders already HAVE authorized access\u2014they bypass your perimeter completely. They know where sensitive data is, how systems work, and may have privileged credentials. External attackers wish they had what insiders start with.",
-            "correct_understanding": "Insider threat defense requires: (1) Least privilege access, (2) User behavior analytics, (3) DLP monitoring, (4) Separation of duties, (5) Regular access reviews. These are DIFFERENT from external threat controls.",
-            "exam_trap": "Insider threats use legitimate credentials\u2014hardest to detect because activity looks 'normal'"
+            "concept": "The Evolving Threat Landscape",
+            "trends": [
+              {
+                "trend": "Attack Commoditization",
+                "explanation": "RaaS, exploit kits, stolen credentials make sophisticated attacks accessible"
+              },
+              {
+                "trend": "Increasing Sophistication",
+                "explanation": "Nation-state techniques trickling down to criminals"
+              },
+              {
+                "trend": "Blurring Lines",
+                "explanation": "Criminal groups work with nation-states, attribution harder"
+              }
+            ]
           }
         ]
       },
-      "what_would_happen_if": [
-        {
-          "situation": "Organization defends against script kiddies but faces APT attack",
-          "consequence": "Basic defenses (patching, AV) stop script kiddies. APT uses zero-days, custom malware, and lives off the land\u2014bypasses everything. Years of undetected access, massive data theft.",
-          "lesson": "Defense must match the threat. Know who targets your industry and build appropriate controls."
-        },
-        {
-          "situation": "Company ignores insider threat program because 'we trust our employees'",
-          "consequence": "Disgruntled employee exfiltrates customer database before resignation. No DLP, no monitoring, no detection. Trust isn't a control.",
-          "lesson": "Insider threat requires specific controls: least privilege, monitoring, DLP, separation of duties."
-        }
-      ],
-      "glossary_terms": [
-        {
-          "term": "APT (Advanced Persistent Threat)",
-          "definition": "Sophisticated threat actor, typically nation-state sponsored, maintaining long-term unauthorized access",
-          "exam_note": "APT = nation-state level capability with persistence goals"
-        },
-        {
-          "term": "Insider Threat",
-          "definition": "Threat from individuals with authorized access who misuse it maliciously or negligently",
-          "exam_note": "Hardest to detect\u2014uses legitimate credentials and access"
-        },
-        {
-          "term": "Script Kiddie",
-          "definition": "Low-skill attacker using pre-built tools without deep understanding",
-          "exam_note": "High volume, low sophistication, opportunistic"
-        },
-        {
-          "term": "Hacktivist",
-          "definition": "Attacker motivated by political or social ideology rather than financial gain",
-          "exam_note": "Public attention is goal\u2014DDoS, defacement, leaks"
-        }
-      ],
-      "knowledge_check": {
-        "question": "A manufacturing company discovers attackers have maintained access for 18 months, slowly exfiltrating intellectual property using custom malware that evades all AV products. What type of threat actor is MOST likely responsible?",
-        "options": [
-          "Script kiddie exploring the network",
-          "Hacktivist group targeting the industry",
-          "Nation-state actor conducting espionage",
-          "Insider threat selling data"
-        ],
-        "correct_answer": 2,
-        "explanation": "Long-term persistence (18 months), custom malware evading detection, and intellectual property theft are hallmarks of nation-state APT activity. This level of sophistication and patience indicates state-sponsored espionage.",
-        "wrong_answer_analysis": {
-          "0": "Script kiddies lack the sophistication for custom malware and wouldn't maintain 18-month persistence.",
-          "1": "Hacktivists seek publicity, not quiet long-term access for IP theft.",
-          "3": "While insiders could exfiltrate data, the custom malware and long-term covert access suggest external APT."
-        }
+      "memory_hooks": {
+        "mnemonic": "CRIMIS - Capability, Resources, Intent, Motivation, Internal/external, Sophistication",
+        "analogy": "Think of threat actors like criminals in the physical world: bank robbers (criminals for profit), spies (nation-states for intelligence), activists protesting (hacktivists), and disgruntled employees (insiders)",
+        "mnemonics": [
+          {
+            "term": "Threat Actor Types",
+            "mnemonic": "SHIN = Script kiddies, Hacktivists, Insiders, Nation-states",
+            "explanation": "Main threat actor categories by sophistication"
+          },
+          {
+            "term": "APT",
+            "mnemonic": "APT = Advanced Persistent Threat (nation-state level)",
+            "explanation": "Sophisticated, well-funded, long-term threat actors"
+          }
+        ]
       },
-      "must_remember": [
-        "NOHIS: Nation-state, Organized crime, Hacktivists, Insiders, Script kiddies",
-        "APT = nation-state with long-term persistence goals",
-        "Insider threats use legitimate access\u2014hardest to detect",
-        "Defense strategy must match likely threat actors"
+      "must_remember_for_exam": [
+        {
+          "fact": "Key attributes: capability, resources, motivation, intent, sophistication",
+          "why_tested": "Framework for analysis"
+        },
+        {
+          "fact": "RaaS has commoditized sophisticated attacks",
+          "why_tested": "Current threat landscape"
+        }
+      ],
+      "key_points": [
+        "Threat actors vary in capability, resources, motivation, and sophistication",
+        "Attack commoditization makes sophisticated attacks accessible to more actors",
+        "Lines between actor types are blurring"
       ]
     },
     {
       "section_id": "D2-L001-S02",
-      "title": "Threat Actor Motivations",
-      "content": "Understanding motivation helps predict behavior, targets, and appropriate responses.\n\n**Financial Gain**\n\n*Actors:* Organized crime, some insiders, some nation-states\n*Methods:* Ransomware, fraud, theft, extortion\n*Targets:* Anyone with money or valuable data\n*Behavior:* Will negotiate, follow money trail\n\n**Espionage**\n\n*Actors:* Nation-states, competitors (corporate espionage)\n*Methods:* Long-term access, data exfiltration, surveillance\n*Targets:* Government, defense, research, strategic industries\n*Behavior:* Stealth priority, persistent access, patient\n\n**Disruption/Sabotage**\n\n*Actors:* Nation-states, hacktivists, disgruntled insiders\n*Methods:* Destructive malware, DDoS, data destruction\n*Targets:* Critical infrastructure, political targets, former employers\n*Behavior:* Maximum damage, often irreversible\n\n**Ideology/Political**\n\n*Actors:* Hacktivists, nation-states, terrorists\n*Methods:* Defacement, leaks, propaganda, disruption\n*Targets:* Ideological opponents\n*Behavior:* Public visibility important\n\n**Revenge**\n\n*Actors:* Insiders, former employees, terminated contractors\n*Methods:* Data destruction, theft, sabotage, leaks\n*Targets:* Specific organization or individuals\n*Behavior:* Personal, targeted, often emotional\n\n**Curiosity/Notoriety**\n\n*Actors:* Script kiddies, researchers (gray area)\n*Methods:* Opportunistic exploitation, bragging\n*Targets:* Whoever is vulnerable\n*Behavior:* Learning, showing off, not necessarily malicious intent",
-      "memory_hooks": {
-        "mnemonics": [
+      "title": "Nation-State Actors",
+      "estimated_time": "15 minutes",
+      "content": {
+        "overview": "Nation-state actors are government-sponsored threat actors conducting cyber operations to advance national interests. They represent the most sophisticated and well-resourced threat category.",
+        "core_concepts": [
           {
-            "name": "FEDIR-C",
-            "expansion": "Financial, Espionage, Disruption, Ideology, Revenge, Curiosity",
-            "usage": "Six primary threat actor motivations"
+            "concept": "Nation-State Characteristics",
+            "characteristics": [
+              "Virtually unlimited funding and resources",
+              "Access to zero-day exploits",
+              "Custom malware development capability",
+              "Patience for long-term operations (months to years)",
+              "Legal protection within their borders"
+            ]
           },
           {
-            "name": "Follow the Money or the Mission",
-            "expansion": "Most actors are either financially motivated or mission-driven",
-            "usage": "Quick categorization: is this about money or about a cause?"
-          }
-        ],
-        "analogies": [
+            "concept": "Nation-State Motivations",
+            "motivations": [
+              {
+                "motivation": "Espionage",
+                "targets": "Political, military, economic, scientific intelligence"
+              },
+              {
+                "motivation": "Sabotage",
+                "targets": "Critical infrastructure, industrial control systems"
+              },
+              {
+                "motivation": "Influence Operations",
+                "targets": "Elections, public opinion, trust"
+              },
+              {
+                "motivation": "Financial",
+                "targets": "Sanctions evasion (North Korea), cryptocurrency theft"
+              }
+            ]
+          },
           {
-            "concept": "Motivations = Why People Commit Crimes",
-            "analogy": "Financial = bank robber. Espionage = spy. Disruption = terrorist. Ideology = activist. Revenge = spurned employee. Curiosity = juvenile delinquent.",
-            "why_it_works": "Maps cyber motivations to traditional crime motivations"
+            "concept": "Major Nation-State Actors",
+            "actors": [
+              {
+                "nation": "Russia",
+                "groups": "APT28, APT29, Sandworm",
+                "style": "Aggressive, destructive",
+                "notable": "SolarWinds, Ukraine attacks"
+              },
+              {
+                "nation": "China",
+                "groups": "APT1, APT10, APT41",
+                "style": "High volume, persistent IP theft",
+                "notable": "Massive economic espionage"
+              },
+              {
+                "nation": "North Korea",
+                "groups": "Lazarus, APT38",
+                "style": "Financial focus",
+                "notable": "WannaCry, SWIFT attacks"
+              },
+              {
+                "nation": "Iran",
+                "groups": "APT33, APT35",
+                "style": "Regional, destructive",
+                "notable": "Shamoon wiper attacks"
+              }
+            ]
           }
         ],
+        "what_would_happen_if": {
+          "scenario": "What if your organization has intellectual property valuable to a nation-state?",
+          "consequence": "You face an adversary with unlimited resources, custom tools, and patience to maintain access for years. They will study your defenses and find weaknesses. You cannot prevent all access\"\"focus on detection, segmentation, and protecting crown jewels."
+        }
+      },
+      "memory_hooks": {
+        "mnemonic": "RCNI - Russia (aggressive), China (IP theft), North Korea (money), Iran (regional)",
         "common_mistakes": [
           {
-            "mistake": "Assuming all attackers want money",
-            "why_wrong": "Nation-states seek espionage or disruption, not ransom. Hacktivists want publicity, not payment. Offering ransom to a saboteur wastes money and doesn't stop the attack.",
-            "correct_understanding": "Motivation determines response: Financial actors may negotiate. Espionage actors want persistent access (payment irrelevant). Hacktivists want attention (payment won't stop leaks). Saboteurs want destruction (no negotiation possible).",
-            "exam_trap": "Know that ransomware negotiation won't work with nation-state sabotage or hacktivist data leaks"
-          },
+            "mistake": "Thinking nation-states only target government",
+            "why_wrong": "They heavily target private sector for economic espionage and supply chain access",
+            "correct_understanding": "They heavily target private sector for economic espionage and supply chain access",
+            "exam_trap": ""
+          }
+        ],
+        "mnemonics": [
           {
-            "mistake": "Ignoring multiple motivations",
-            "why_wrong": "North Korea's Lazarus Group conducts BOTH espionage AND financial theft. Assuming single motivation leads to incomplete threat modeling and missed attack vectors.",
-            "correct_understanding": "Some actors have hybrid motivations: (1) Nation-states using crime for funding, (2) Hacktivists accepting donations, (3) Insiders motivated by revenge AND financial gain. Consider all possible motivations in threat model.",
-            "exam_trap": "Some actors blend motivations\u2014especially nation-states using cybercrime for operations funding"
+            "term": "Motivations",
+            "mnemonic": "FREDDI = Financial, Revenge, Espionage, Disruption, Data theft, Ideology",
+            "explanation": "Common attacker motivations"
           }
         ]
       },
-      "what_would_happen_if": [
+      "must_remember_for_exam": [
         {
-          "situation": "Organization offers ransom payment to nation-state conducting sabotage",
-          "consequence": "Payment doesn't help\u2014they're not motivated by money. They want destruction or access, not ransom. Wasted money, continued attack.",
-          "lesson": "Understand motivation before response. Paying ransom only works if attacker is financially motivated."
+          "fact": "APT = Advanced Persistent Threat (typically nation-state)",
+          "why_tested": "Key terminology"
         },
         {
-          "situation": "Security team assumes hacktivist attack is financially motivated",
-          "consequence": "Waste time looking for payment demands that don't exist. Miss the real goal: public embarrassment. Don't prepare for data leaks or media attention.",
-          "lesson": "Motivation determines attacker behavior. Hacktivists want publicity, not payment."
+          "fact": "Nation-states have unlimited resources and can develop zero-days",
+          "why_tested": "Capability understanding"
+        },
+        {
+          "fact": "China = IP theft, North Korea = financial, Russia = aggressive/destructive",
+          "why_tested": "Actor profiles"
         }
       ],
-      "glossary_terms": [
-        {
-          "term": "Espionage",
-          "definition": "Covert intelligence gathering for political, military, or economic advantage",
-          "exam_note": "Nation-state primary motivation\u2014stealth and persistence"
-        },
-        {
-          "term": "Sabotage",
-          "definition": "Deliberate destruction or disruption of systems and operations",
-          "exam_note": "May be nation-state, hacktivist, or revenge-motivated"
-        },
-        {
-          "term": "Hacktivism",
-          "definition": "Using hacking techniques to promote political or social causes",
-          "exam_note": "Publicity is key goal\u2014not financial gain"
-        },
-        {
-          "term": "Corporate Espionage",
-          "definition": "Theft of trade secrets or competitive intelligence between businesses",
-          "exam_note": "May involve insiders, competitors, or nation-states"
-        }
+      "key_points": [
+        "Nation-states have virtually unlimited resources and patience",
+        "APT = Advanced Persistent Threat",
+        "Major actors: Russia, China, North Korea, Iran with distinct styles"
       ],
       "knowledge_check": {
-        "question": "After a breach, attackers send the company a message threatening to release stolen customer data unless cryptocurrency is paid. What is their PRIMARY motivation?",
+        "question": "Attackers maintained access to industrial control systems for 8+ months using custom malware designed to manipulate physical processes. This BEST describes which actor?",
         "options": [
-          "Espionage to gather intelligence",
-          "Financial gain through extortion",
-          "Ideology to promote a cause",
-          "Disruption to damage operations"
+          "Organized crime",
+          "Hacktivists",
+          "Nation-state actors",
+          "Script kiddies"
         ],
-        "correct_answer": 1,
-        "explanation": "Demanding cryptocurrency payment for not releasing data is extortion for financial gain. This is the classic 'double extortion' ransomware model where attackers steal data before encrypting and demand payment to prevent release.",
-        "wrong_answer_analysis": {
-          "0": "Espionage actors don't demand ransom\u2014they want quiet, persistent access.",
-          "2": "Ideological actors would release data publicly for attention, not demand payment.",
-          "3": "Disruption-focused actors would destroy data, not leverage it for payment."
-        }
-      },
-      "must_remember": [
-        "FEDIR-C: Financial, Espionage, Disruption, Ideology, Revenge, Curiosity",
-        "Motivation determines behavior and negotiation potential",
-        "Nation-states may have hybrid motivations (espionage + crime funding)",
-        "Paying ransom only works if attacker is financially motivated"
-      ]
+        "correct": 2,
+        "explanation": "Long persistence, custom malware, and ICS targeting strongly indicates nation-state actors. This matches known operations against energy infrastructure.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_wrong": "Criminals want quick financial gain, not 8-month ICS operations"
+          },
+          {
+            "option": 1,
+            "why_wrong": "Hacktivists seek publicity, not covert long-term access"
+          },
+          {
+            "option": 3,
+            "why_wrong": "Script kiddies lack capability for custom ICS malware"
+          }
+        ]
+      }
     },
     {
       "section_id": "D2-L001-S03",
-      "title": "Threat Actor Attributes",
-      "content": "Assessing threat actor attributes helps predict capabilities and appropriate defenses.\n\n**Resources and Funding**\n\n*Nation-States:* Unlimited budgets, dedicated teams, research programs\n*Organized Crime:* Significant funding from operations, RaaS models\n*Hacktivists:* Limited, volunteer-based, crowdfunded\n*Script Kiddies:* Minimal, use free tools\n\n**Sophistication/Capability**\n\n*Levels:*\n- Low: Pre-built tools, known exploits, no customization\n- Medium: Modify tools, chain exploits, some custom code\n- High: Custom malware, zero-days, novel techniques\n- Advanced: Supply chain attacks, hardware implants, long-term operations\n\n**Internal vs. External**\n\n*External Threats:*\n- Must breach perimeter\n- Limited initial knowledge\n- Detectable at entry points\n\n*Internal Threats:*\n- Already inside perimeter\n- Know the environment\n- Legitimate access makes detection harder\n\n**Intent**\n\n*Hostile:* Active desire to cause harm\n*Non-Hostile:* Careless or negligent (accidental insider threat)\n\n**Risk = Capability \u00d7 Intent \u00d7 Opportunity**\n\nHigh-capability actor with intent but no opportunity = low immediate risk\nLow-capability actor with opportunity and intent = moderate risk\nHigh-capability actor with intent AND opportunity = critical risk",
-      "memory_hooks": {
-        "mnemonics": [
+      "title": "Organized Crime and Cybercriminals",
+      "estimated_time": "15 minutes",
+      "content": {
+        "overview": "Organized cybercriminal groups operate like businesses with profit as the primary goal. They represent a significant threat to organizations of all sizes.",
+        "core_concepts": [
           {
-            "name": "RICE",
-            "expansion": "Resources, Intent, Capability, External/Internal",
-            "usage": "Four key attributes to assess for any threat actor"
+            "concept": "Cybercrime Business Models",
+            "models": [
+              {
+                "model": "Ransomware",
+                "description": "Encrypt data, demand payment. Double extortion adds data leak threat"
+              },
+              {
+                "model": "BEC (Business Email Compromise)",
+                "description": "Impersonate executives for wire fraud",
+                "losses": "$2.7B annually"
+              },
+              {
+                "model": "Data Theft",
+                "description": "Steal and sell personal information on dark web"
+              },
+              {
+                "model": "Cryptojacking",
+                "description": "Hijack computing resources to mine cryptocurrency"
+              }
+            ]
           },
           {
-            "name": "CIO = Risk Formula",
-            "expansion": "Capability \u00d7 Intent \u00d7 Opportunity = Risk",
-            "usage": "All three factors must be present for realized risk"
-          }
-        ],
-        "analogies": [
+            "concept": "Ransomware-as-a-Service (RaaS)",
+            "how_it_works": [
+              "Core group develops ransomware platform",
+              "Affiliates sign up and conduct attacks",
+              "Revenue split: 70-80% to affiliate, 20-30% to developers"
+            ],
+            "major_groups": [
+              "LockBit",
+              "BlackCat/ALPHV",
+              "Cl0p",
+              "Royal",
+              "Black Basta"
+            ]
+          },
           {
-            "concept": "Threat Attributes = Evaluating a Burglar",
-            "analogy": "Resources = do they have tools and a getaway car? Capability = do they know how to pick locks? Internal/External = do they have keys already? Intent = do they want to rob you specifically?",
-            "why_it_works": "Physical security assessment parallels cyber threat assessment"
+            "concept": "Double Extortion",
+            "definition": "Encrypt data AND threaten to leak stolen data publicly",
+            "pressure_tactics": [
+              "Pay to decrypt",
+              "Pay to prevent data leak"
+            ],
+            "note": "Now standard practice for major ransomware groups"
           }
         ],
+        "what_would_happen_if": {
+          "scenario": "What if you paid a ransomware demand?",
+          "consequence": "You might get a decryptor (most groups provide them to maintain 'business reputation'), but there's no guarantee they'll delete your data. You're now a known payer, making you a target for future attacks. Some jurisdictions may make payment illegal or have sanctions implications."
+        }
+      },
+      "memory_hooks": {
+        "mnemonic": "RaaS = Rent-a-Ransomware (affiliate model)",
         "common_mistakes": [
           {
-            "mistake": "Only considering capability, not opportunity",
-            "why_wrong": "A highly capable APT with no path to your systems is less immediate threat than a medium-skill attacker who already has VPN credentials. Capability without opportunity equals zero current risk.",
-            "correct_understanding": "Risk formula: Capability \u00d7 Intent \u00d7 Opportunity. ALL THREE required. Reduce opportunity (attack surface) to reduce risk from even highly capable adversaries. Monitor for new opportunities (credential leaks, misconfigs).",
-            "exam_trap": "Risk requires capability AND opportunity\u2014not just sophisticated attacker"
-          },
-          {
-            "mistake": "Forgetting non-hostile insider threats",
-            "why_wrong": "Negligent insiders cause breaches through carelessness: clicking phishing, misconfiguring systems, losing devices. They're not malicious but equally damaging. Different controls needed than for malicious insiders.",
-            "correct_understanding": "Insider threats include: (1) Malicious\u2014intentional harm, (2) Negligent\u2014careless mistakes, (3) Compromised\u2014credentials stolen. Each needs different controls: malicious needs monitoring, negligent needs training, compromised needs MFA.",
-            "exam_trap": "Insider threats include both malicious AND negligent behavior"
+            "mistake": "Thinking ransomware is just encryption",
+            "why_wrong": "Double extortion means they also steal your data first. Even with backups, you face data leak risk..",
+            "correct_understanding": "Double extortion means they also steal your data first. Even with backups, you face data leak risk.",
+            "exam_trap": ""
           }
         ]
       },
-      "what_would_happen_if": [
+      "must_remember_for_exam": [
         {
-          "situation": "Organization focuses only on nation-state threats but ignores script kiddie attacks",
-          "consequence": "While defending against sophisticated attacks, basic vulnerabilities go unpatched. Script kiddie with Shodan finds exposed database. Breach from lowest-capability threat.",
-          "lesson": "Address threats at all capability levels. Basic hygiene stops most attacks regardless of actor sophistication."
+          "fact": "RaaS = Ransomware-as-a-Service (affiliate model)",
+          "why_tested": "Key terminology"
         },
         {
-          "situation": "Company considers only external threats and ignores insider risk",
-          "consequence": "All defenses face outward. Internal monitoring minimal. Malicious insider exfiltrates data using legitimate access with no detection.",
-          "lesson": "Internal threats have opportunity already\u2014need different controls (monitoring, DLP, least privilege)."
+          "fact": "Double extortion = encrypt + threaten data leak",
+          "why_tested": "Current threat tactic"
+        },
+        {
+          "fact": "BEC = Business Email Compromise ($2.7B losses)",
+          "why_tested": "Major threat category"
+        },
+        {
+          "fact": "Offline backups are critical defense against ransomware",
+          "why_tested": "Defensive control"
         }
       ],
-      "glossary_terms": [
-        {
-          "term": "Threat Actor Capability",
-          "definition": "Technical skill and sophistication level of an attacker",
-          "exam_note": "Ranges from script kiddie (low) to nation-state (high)"
-        },
-        {
-          "term": "Threat Actor Resources",
-          "definition": "Funding, personnel, and infrastructure available to attacker",
-          "exam_note": "Nation-states have most resources; script kiddies have least"
-        },
-        {
-          "term": "Attack Opportunity",
-          "definition": "Access or pathway available for threat actor to exploit",
-          "exam_note": "Insiders have high opportunity; external actors must create it"
-        },
-        {
-          "term": "Negligent Insider",
-          "definition": "Employee who causes security incidents through carelessness rather than malice",
-          "exam_note": "Non-hostile intent but still creates risk"
-        }
+      "key_points": [
+        "Cybercrime operates as business: profit-driven with specialized roles",
+        "RaaS commoditizes sophisticated attacks through affiliate model",
+        "Double extortion: encrypt + threaten to leak data",
+        "BEC causes $2.7B in annual losses"
       ],
       "knowledge_check": {
-        "question": "A threat intelligence report indicates a sophisticated APT group is targeting your industry but has no known access to your organization. An employee was recently terminated and is disgruntled. Which represents the HIGHER immediate risk?",
+        "question": "Ransomware encrypts a company's data. Before the deadline, attackers post sample stolen files and threaten to publish everything. This is called:",
         "options": [
-          "The APT group because of their high capability",
-          "The terminated employee because they have opportunity and intent",
-          "Both represent equal risk",
-          "Neither represents significant risk"
+          "Ransomware-as-a-Service",
+          "Double extortion",
+          "Business email compromise",
+          "Cryptojacking"
         ],
-        "correct_answer": 1,
-        "explanation": "Risk requires Capability \u00d7 Intent \u00d7 Opportunity. The APT has high capability but currently no opportunity. The terminated employee has lower capability but has (or recently had) opportunity and demonstrates intent through being disgruntled. Immediate risk is higher from the insider.",
-        "wrong_answer_analysis": {
-          "0": "Capability alone doesn't create risk\u2014the APT must first gain access (opportunity).",
-          "2": "They're not equal\u2014the terminated employee has proven opportunity while APT does not.",
-          "3": "Both represent risk, but the question asks about immediate/higher risk."
-        }
-      },
-      "must_remember": [
-        "RICE: Resources, Intent, Capability, External/Internal",
-        "Risk = Capability \u00d7 Intent \u00d7 Opportunity\u2014all three needed",
-        "Insiders have opportunity built-in\u2014different defense needed",
-        "Include negligent (non-hostile) insiders in threat model"
-      ]
+        "correct": 1,
+        "explanation": "Double extortion combines encryption (pay to decrypt) with data leak threats (pay to prevent publication). RaaS is the business model, not the tactic.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_wrong": "RaaS describes how ransomware is distributed, not the extortion tactic"
+          },
+          {
+            "option": 2,
+            "why_wrong": "BEC involves impersonation fraud, not ransomware"
+          },
+          {
+            "option": 3,
+            "why_wrong": "Cryptojacking is unauthorized cryptocurrency mining"
+          }
+        ]
+      }
     },
     {
       "section_id": "D2-L001-S04",
-      "title": "Threat Intelligence and Actor Tracking",
-      "content": "Operationalizing threat actor knowledge through intelligence and tracking.\n\n**Threat Intelligence Sources**\n\n*Open Source (OSINT):*\n- News reports and security blogs\n- Government advisories (CISA, FBI)\n- Vendor threat reports\n- Security researcher publications\n\n*Commercial:*\n- Threat intelligence platforms\n- Industry-specific feeds\n- Dark web monitoring\n- Indicator feeds\n\n*Information Sharing:*\n- ISACs (Information Sharing and Analysis Centers)\n- Industry groups\n- Government partnerships\n\n**Actor Naming Conventions**\n\nDifferent organizations name the same actors differently:\n- APT29 = Cozy Bear = The Dukes = NOBELIUM\n- APT41 = Winnti = BARIUM = Wicked Panda\n\n**Threat Modeling**\n\n*Process:*\n1. Identify assets worth protecting\n2. Determine likely threat actors for your industry\n3. Understand their capabilities and TTPs\n4. Map defenses to specific threats\n5. Prioritize based on likelihood and impact\n\n**Using Threat Actor Intelligence**\n\n*Detection:* Hunt for specific actor TTPs\n*Prevention:* Implement controls blocking known techniques\n*Response:* Prepare playbooks for likely scenarios\n*Investment:* Prioritize security spending on relevant threats",
-      "memory_hooks": {
-        "mnemonics": [
+      "title": "Hacktivists, Insiders, and Other Actors",
+      "estimated_time": "12 minutes",
+      "content": {
+        "overview": "Beyond nation-states and organized crime, several other threat actor categories pose significant risks with distinct motivations.",
+        "core_concepts": [
           {
-            "name": "OCI = Intelligence Sources",
-            "expansion": "Open source, Commercial, Information sharing",
-            "usage": "Three categories of threat intelligence sources"
+            "concept": "Hacktivists",
+            "characteristics": [
+              "Ideologically driven, not profit-motivated",
+              "Seek publicity for their cause",
+              "Capability ranges widely",
+              "Loosely organized or decentralized"
+            ],
+            "tactics": [
+              "Website defacement",
+              "DDoS attacks",
+              "Data breaches to expose wrongdoing",
+              "Doxing"
+            ],
+            "example": "Anonymous"
           },
           {
-            "name": "One Actor, Many Names",
-            "expansion": "Same group has different names from different vendors",
-            "usage": "Remember that APT29 = Cozy Bear = NOBELIUM are all the same group"
-          }
-        ],
-        "analogies": [
-          {
-            "concept": "Threat Intelligence = Criminal Profiling",
-            "analogy": "Law enforcement tracks criminal organizations\u2014their methods, targets, known associates. Cyber threat intelligence does the same: who are they, what do they do, how do they operate, who do they target?",
-            "why_it_works": "Criminal profiling is familiar and shows the value of understanding adversaries"
-          }
-        ],
-        "common_mistakes": [
-          {
-            "mistake": "Consuming threat intel without operationalizing it",
-            "why_wrong": "Intel sitting in reports provides zero value. Paying for threat feeds nobody uses is wasted money. Intel must drive ACTION: detection rules, hunting, playbooks, controls.",
-            "correct_understanding": "Operationalize intel through: (1) Create detection rules for IOCs, (2) Hunt for reported TTPs, (3) Update incident playbooks, (4) Brief relevant teams, (5) Assess supply chain risk. If intel doesn't change behavior, it's useless.",
-            "exam_trap": "Know that threat intel should drive specific defensive actions"
+            "concept": "Insider Threat Types",
+            "types": [
+              {
+                "type": "Malicious Insider",
+                "description": "Intentionally causes harm",
+                "motivation": "Revenge, financial gain, ideology"
+              },
+              {
+                "type": "Negligent Insider",
+                "description": "Unintentionally causes harm",
+                "examples": "Falls for phishing, ignores policies"
+              },
+              {
+                "type": "Compromised Insider",
+                "description": "Account taken over by external attacker",
+                "challenge": "Hard to distinguish from normal activity"
+              }
+            ]
           },
           {
-            "mistake": "Confusing actor names across vendors",
-            "why_wrong": "APT29 = Cozy Bear = NOBELIUM = The Dukes are ALL the same Russian actor. Tracking them as different groups means missing connections and duplicating analysis work.",
-            "correct_understanding": "Learn major actor aliases: APT29/Cozy Bear (Russia-SVR), APT28/Fancy Bear (Russia-GRU), APT41/Winnti (China), Lazarus (North Korea). Use MITRE ATT&CK as common reference for consistent naming.",
-            "exam_trap": "Exam may use different names\u2014know major actor aliases"
+            "concept": "Insider Threat Indicators",
+            "indicators": [
+              "Accessing data outside job function",
+              "Unusual working hours",
+              "Copying large amounts of data",
+              "Disgruntlement or workplace conflicts",
+              "Resignation followed by data access"
+            ]
+          },
+          {
+            "concept": "Script Kiddies",
+            "characteristics": [
+              "Limited technical knowledge",
+              "Use pre-built tools",
+              "Motivated by curiosity or reputation",
+              "Opportunistic, low persistence"
+            ],
+            "note": "Low skill but can still cause damage with available tools"
+          },
+          {
+            "concept": "Shadow IT",
+            "definition": "Unauthorized technology use by employees",
+            "examples": [
+              "Unapproved cloud services",
+              "Personal devices",
+              "Unauthorized apps"
+            ],
+            "risk": "Creates unmanaged security gaps"
           }
         ]
       },
-      "what_would_happen_if": [
+      "memory_hooks": {
+        "mnemonic": "MNC - Malicious, Negligent, Compromised (insider types)",
+        "common_mistakes": [
+          {
+            "mistake": "Focusing only on malicious insiders",
+            "why_wrong": "Negligent insiders cause more breaches. Anyone can fall for phishing..",
+            "correct_understanding": "Negligent insiders cause more breaches. Anyone can fall for phishing.",
+            "exam_trap": ""
+          }
+        ]
+      },
+      "must_remember_for_exam": [
         {
-          "situation": "Organization subscribes to threat feeds but never operationalizes them",
-          "consequence": "Paying for intelligence nobody uses. Alerts fire but nobody connects them to known actors. No hunting for reported TTPs. Expensive data, zero value.",
-          "lesson": "Threat intel must drive action\u2014detection rules, hunting, playbooks, controls."
+          "fact": "Three insider types: malicious, negligent, compromised",
+          "why_tested": "Insider classification"
         },
         {
-          "situation": "Healthcare company doesn't participate in Health-ISAC",
-          "consequence": "Misses early warning about ransomware campaign targeting healthcare. No context about actor TTPs. Slower response, less preparation. Competitors who participate are warned first.",
-          "lesson": "ISACs provide sector-specific intelligence. Participation provides early warning and context."
+          "fact": "Hacktivists = ideologically motivated, seek publicity",
+          "why_tested": "Actor distinction"
+        },
+        {
+          "fact": "Script kiddies = low skill but can still cause damage",
+          "why_tested": "Actor capability"
+        },
+        {
+          "fact": "Shadow IT = unauthorized technology creating risk",
+          "why_tested": "Security gap"
         }
       ],
-      "glossary_terms": [
-        {
-          "term": "Threat Intelligence",
-          "definition": "Information about threats and threat actors used to inform defensive decisions",
-          "exam_note": "Includes IOCs, TTPs, and strategic context about actors"
-        },
-        {
-          "term": "ISAC",
-          "definition": "Information Sharing and Analysis Center\u2014sector-specific threat sharing organization",
-          "exam_note": "Healthcare, Financial, Energy ISACs share sector-relevant intelligence"
-        },
-        {
-          "term": "Threat Modeling",
-          "definition": "Process of identifying threats, vulnerabilities, and appropriate mitigations",
-          "exam_note": "Uses threat actor knowledge to prioritize defenses"
-        },
-        {
-          "term": "TTP (Tactics, Techniques, and Procedures)",
-          "definition": "Methods and behaviors used by threat actors to conduct attacks",
-          "exam_note": "More valuable than IOCs\u2014describes how actors operate"
-        }
+      "key_points": [
+        "Hacktivists: ideologically motivated, seek publicity, use DDoS/defacement",
+        "Insider types: malicious, negligent, compromised",
+        "Watch for indicators: unusual access, odd hours, large data transfers",
+        "Script kiddies: low skill but still dangerous"
       ],
       "knowledge_check": {
-        "question": "A security analyst reads a threat report about APT29 activities but doesn't take any action because their organization 'isn't a target.' Six months later, APT29 compromises a vendor that provides services to the organization. What went wrong?",
+        "question": "A sales employee accesses engineering design files over a month, during lunch breaks and after hours, with no business need. This indicates:",
         "options": [
-          "The threat report was inaccurate",
-          "Threat intelligence wasn't operationalized into supply chain risk assessment",
-          "APT29 changed their targeting strategy",
-          "The analyst couldn't have predicted vendor compromise"
+          "Shadow IT usage",
+          "Negligent insider",
+          "Potential malicious insider",
+          "Compromised account"
         ],
-        "correct_answer": 1,
-        "explanation": "Threat intelligence should drive action\u2014including assessing supply chain risk. Knowing APT29's capabilities and targets should have prompted review of vendor security, especially vendors with access to the organization. Intel without action is wasted.",
-        "wrong_answer_analysis": {
-          "0": "The report was accurate\u2014APT29 did compromise the supply chain as consistent with their known TTPs.",
-          "2": "Supply chain attacks are a known APT29 technique\u2014this wasn't a strategy change.",
-          "3": "Supply chain risk IS predictable when you operationalize threat intel about actors known for supply chain attacks."
+        "correct": 2,
+        "explanation": "Deliberate pattern of accessing data outside job function during non-work hours suggests malicious insider activity, not negligence or shadow IT.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_wrong": "Shadow IT involves unauthorized apps, not accessing existing systems inappropriately"
+          },
+          {
+            "option": 1,
+            "why_wrong": "Pattern is too deliberate for negligence"
+          },
+          {
+            "option": 3,
+            "why_wrong": "Consistent timing during breaks suggests human intent, not automated external access"
+          }
+        ]
+      }
+    },
+    {
+      "section_id": "D2-L001-S05",
+      "title": "Attack Frameworks: Kill Chain and MITRE ATT&CK",
+      "estimated_time": "12 minutes",
+      "content": {
+        "overview": "Attack frameworks provide structured approaches to understanding how threat actors operate, enabling better defense planning.",
+        "core_concepts": [
+          {
+            "concept": "Cyber Kill Chain (Lockheed Martin)",
+            "stages": [
+              {
+                "stage": "1. Reconnaissance",
+                "description": "Research and identify targets"
+              },
+              {
+                "stage": "2. Weaponization",
+                "description": "Create attack tools"
+              },
+              {
+                "stage": "3. Delivery",
+                "description": "Transmit weapon to target (email, web, USB)"
+              },
+              {
+                "stage": "4. Exploitation",
+                "description": "Trigger vulnerability"
+              },
+              {
+                "stage": "5. Installation",
+                "description": "Install malware for persistence"
+              },
+              {
+                "stage": "6. Command & Control",
+                "description": "Establish remote access channel"
+              },
+              {
+                "stage": "7. Actions on Objectives",
+                "description": "Achieve goals (steal data, disrupt)"
+              }
+            ],
+            "defensive_value": "Break the chain at ANY stage to stop the attack. Earlier = less damage."
+          },
+          {
+            "concept": "MITRE ATT&CK Framework",
+            "definition": "Comprehensive matrix of adversary tactics and techniques based on real-world observations",
+            "structure": {
+              "tactics": "WHY - the adversary's goal (14 tactics: Initial Access, Execution, Persistence, etc.)",
+              "techniques": "HOW - methods to achieve the tactic (hundreds of techniques)"
+            },
+            "use_cases": [
+              "Map observed attacker behavior",
+              "Identify defensive gaps",
+              "Correlate threat intelligence",
+              "Plan red team exercises"
+            ]
+          }
+        ],
+        "what_would_happen_if": {
+          "scenario": "What if you could detect attacks at the Delivery stage instead of Actions on Objectives?",
+          "consequence": "You'd stop attacks before any damage occurs. This is why email security, web filtering, and endpoint protection are so valuable\"\"they break the chain early. By the time you're detecting at Actions on Objectives, the attacker has already achieved persistence and possibly exfiltrated data."
         }
       },
-      "must_remember": [
-        "OCI: Open source, Commercial, Information sharing (ISACs)",
-        "Same actor has different names: APT29 = Cozy Bear = NOBELIUM",
-        "Threat intel must drive action\u2014detection, hunting, playbooks",
-        "Threat modeling matches defenses to likely threat actors"
-      ]
+      "memory_hooks": {
+        "mnemonic": "Kill Chain: 'Really Wild Dogs Eat Icky Cold Apples' (Recon, Weaponize, Deliver, Exploit, Install, C2, Actions)",
+        "common_mistakes": [
+          {
+            "mistake": "Thinking kill chain is linear only",
+            "why_wrong": "Attackers may loop back (re-reconnaissance after initial access) and skip stages",
+            "correct_understanding": "Attackers may loop back (re-reconnaissance after initial access) and skip stages",
+            "exam_trap": ""
+          }
+        ]
+      },
+      "must_remember_for_exam": [
+        {
+          "fact": "Kill Chain 7 stages: Recon â†' Weaponize â†' Deliver â†' Exploit â†' Install â†' C2 â†' Actions",
+          "why_tested": "Framework knowledge"
+        },
+        {
+          "fact": "Breaking kill chain at ANY stage stops the attack",
+          "why_tested": "Defensive strategy"
+        },
+        {
+          "fact": "MITRE ATT&CK: Tactics = WHY, Techniques = HOW",
+          "why_tested": "Framework distinction"
+        },
+        {
+          "fact": "14 ATT&CK tactics from Initial Access to Impact",
+          "why_tested": "Framework scope"
+        }
+      ],
+      "key_points": [
+        "Kill Chain: 7 stages from Recon to Actions on Objectives",
+        "Break the chain at any stage to stop attack",
+        "MITRE ATT&CK: Tactics (why) + Techniques (how)",
+        "Earlier detection = less damage"
+      ],
+      "knowledge_check": {
+        "question": "According to Kill Chain, which stage comes IMMEDIATELY after Exploitation?",
+        "options": [
+          "Command and Control",
+          "Reconnaissance",
+          "Installation",
+          "Lateral movement"
+        ],
+        "correct": 2,
+        "explanation": "Sequence: Recon â†' Weaponize â†' Deliver â†' Exploit â†' INSTALL â†' C2 â†' Actions. After exploitation, attackers install persistence. C2 comes after installation.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_wrong": "C2 comes after Installation, not immediately after Exploitation"
+          },
+          {
+            "option": 1,
+            "why_wrong": "Reconnaissance is the first stage"
+          },
+          {
+            "option": 3,
+            "why_wrong": "Lateral movement is part of Actions on Objectives, the final stage"
+          }
+        ]
+      }
     }
   ],
+  "hands_on_labs": {
+    "browser_labs": [
+      {
+        "lab_id": "lab-actor-classification",
+        "title": "Threat Actor Classifier",
+        "type": "scenario_quiz",
+        "description": "Given attack descriptions, identify the most likely threat actor type"
+      },
+      {
+        "lab_id": "lab-kill-chain-mapping",
+        "title": "Kill Chain Mapper",
+        "type": "drag_drop",
+        "description": "Map attack steps to Kill Chain stages"
+      }
+    ],
+    "external_labs": [
+      {
+        "resource": "MITRE ATT&CK Navigator",
+        "url": "https://mitre-attack.github.io/attack-navigator/",
+        "description": "Interactive ATT&CK matrix visualization"
+      },
+      {
+        "resource": "TryHackMe",
+        "lab_name": "Threat Intelligence Tools",
+        "url": "https://tryhackme.com",
+        "description": "Hands-on threat actor analysis"
+      }
+    ],
+    "tools_introduction": [
+      {
+        "tool": "MITRE ATT&CK Navigator",
+        "purpose": "Visualize and map adversary techniques",
+        "getting_started": "Access via web browser, select techniques observed in your environment"
+      }
+    ]
+  },
   "summary": {
     "key_takeaways": [
-      "NOHIS: Nation-state, Organized crime, Hacktivists, Insiders, Script kiddies",
-      "FEDIR-C motivations: Financial, Espionage, Disruption, Ideology, Revenge, Curiosity",
-      "Risk = Capability \u00d7 Intent \u00d7 Opportunity\u2014all three needed",
-      "Same actor has multiple names (APT29 = Cozy Bear = NOBELIUM)",
-      "Threat intelligence must drive defensive action to have value"
+      "Threat actors vary in capability, resources, motivation, and sophistication",
+      "Nation-states have unlimited resources and patience; target espionage and sabotage",
+      "Organized crime is profit-driven; RaaS and double extortion dominate",
+      "Insider threats: malicious, negligent, compromised - require monitoring authorized users",
+      "Kill Chain: 7 stages; break at any point to stop attack",
+      "MITRE ATT&CK: Tactics (why) + Techniques (how)"
     ],
-    "exam_focus": "Actor identification, motivation matching, attribute assessment, intelligence operationalization",
-    "next_lesson": "D2-LESSON-002: Threat Vectors and Attack Surfaces\u2014how actors gain access"
+    "exam_essentials": [
+      "Nation-state = highest capability, espionage/sabotage motivation",
+      "RaaS = Ransomware-as-a-Service (affiliate model)",
+      "Double extortion = encrypt + threaten data leak",
+      "Insider types: malicious, negligent, compromised",
+      "Kill Chain: Recon â†' Weaponize â†' Deliver â†' Exploit â†' Install â†' C2 â†' Actions",
+      "MITRE ATT&CK: Tactics = goals, Techniques = methods"
+    ]
+  },
+  "related_content": {
+    "simulations": [
+      "D2-SIM-001"
+    ],
+    "remediation": [
+      "D2-REM-001"
+    ],
+    "next_lesson": "D2-LESSON-002",
+    "previous_lesson": "D1-LESSON-008"
   }
 }

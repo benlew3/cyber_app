@@ -2,26 +2,55 @@
   "lesson_id": "D4-LESSON-005",
   "domain": 4,
   "title": "Identity and Access Management",
-  "objectives_covered": ["4.5"],
+  "objectives_covered": [
+    "4.5"
+  ],
   "estimated_duration": "55-65 minutes",
   "difficulty": "intermediate",
   "version": "2.0-enhanced",
-
   "skill_tree": {
-    "prerequisites": ["D1-LESSON-003", "D4-LESSON-004"],
-    "unlocks": ["D4-LESSON-006", "D4-LESSON-007"],
+    "prerequisites": [
+      "D1-LESSON-003",
+      "D4-LESSON-004"
+    ],
+    "unlocks": [
+      "D4-LESSON-006",
+      "D4-LESSON-007"
+    ],
     "cascade_learning": {
       "builds_on": [
-        {"lesson": "D1-LESSON-003", "concepts": ["Authentication methods", "MFA", "Password policies"]},
-        {"lesson": "D4-LESSON-004", "concepts": ["Vulnerability management", "Misconfigurations"]}
+        {
+          "lesson": "D1-LESSON-003",
+          "concepts": [
+            "Authentication methods",
+            "MFA",
+            "Password policies"
+          ]
+        },
+        {
+          "lesson": "D4-LESSON-004",
+          "concepts": [
+            "Vulnerability management",
+            "Misconfigurations"
+          ]
+        }
       ],
       "enables": [
-        {"lesson": "D4-LESSON-006", "concepts": ["Data protection through access control"]},
-        {"lesson": "D4-LESSON-007", "concepts": ["Automating IAM processes"]}
+        {
+          "lesson": "D4-LESSON-006",
+          "concepts": [
+            "Data protection through access control"
+          ]
+        },
+        {
+          "lesson": "D4-LESSON-007",
+          "concepts": [
+            "Automating IAM processes"
+          ]
+        }
       ]
     }
   },
-
   "role_relevance": {
     "soc_analyst": {
       "importance": "high",
@@ -31,7 +60,7 @@
         "Reviewing privileged account activity",
         "Correlating access logs with incidents"
       ],
-      "real_scenario": "Alert shows admin account login from unusual locationâ€”investigate authentication logs, check for credential compromise, verify legitimate access"
+      "real_scenario": "Alert shows admin account login from unusual location\"\"investigate authentication logs, check for credential compromise, verify legitimate access"
     },
     "incident_responder": {
       "importance": "high",
@@ -41,7 +70,7 @@
         "Coordinating credential resets",
         "Identifying lateral movement via account abuse"
       ],
-      "real_scenario": "Credential compromise confirmedâ€”disable account, revoke sessions, reset password, check for persistence mechanisms in IAM"
+      "real_scenario": "Credential compromise confirmed\"\"disable account, revoke sessions, reset password, check for persistence mechanisms in IAM"
     },
     "grc_analyst": {
       "importance": "critical",
@@ -51,7 +80,7 @@
         "Auditing privileged access",
         "Reviewing separation of duties"
       ],
-      "real_scenario": "SOX audit requires access recertification evidenceâ€”generate reports showing manager approval of all access, identify segregation of duties violations"
+      "real_scenario": "SOX audit requires access recertification evidence\"\"generate reports showing manager approval of all access, identify segregation of duties violations"
     },
     "penetration_tester": {
       "importance": "high",
@@ -61,7 +90,7 @@
         "Exploiting IAM misconfigurations",
         "Testing password policies"
       ],
-      "real_scenario": "Found service account with domain admin privileges and password in scriptâ€”demonstrate risk, recommend IAM improvements"
+      "real_scenario": "Found service account with domain admin privileges and password in script\"\"demonstrate risk, recommend IAM improvements"
     },
     "security_engineer": {
       "importance": "critical",
@@ -71,12 +100,11 @@
         "Managing privileged access solutions",
         "Automating provisioning/deprovisioning"
       ],
-      "real_scenario": "Deploying PAM solutionâ€”configure just-in-time access, session recording, password vaulting for privileged accounts"
+      "real_scenario": "Deploying PAM solution\"\"configure just-in-time access, session recording, password vaulting for privileged accounts"
     }
   },
-
   "introduction": {
-    "hook": "In the SolarWinds attack, attackers didn't just compromise softwareâ€”they created new federated identity trust relationships, minted their own authentication tokens, and accessed victim organizations as 'legitimate' users. No malware needed once inside. Identity IS the new perimeter. When attackers control identity, they control everything. IAM isn't just about login pagesâ€”it's the foundation of Zero Trust and the primary target of sophisticated attacks.",
+    "hook": "In the SolarWinds attack, attackers didn't just compromise software\"\"they created new federated identity trust relationships, minted their own authentication tokens, and accessed victim organizations as 'legitimate' users. No malware needed once inside. Identity IS the new perimeter. When attackers control identity, they control everything. IAM isn't just about login pages\"\"it's the foundation of Zero Trust and the primary target of sophisticated attacks.",
     "learning_goals": [
       "Implement identity lifecycle management from provisioning to deprovisioning",
       "Configure authentication mechanisms including SSO and federation",
@@ -84,28 +112,30 @@
       "Manage privileged access with PAM solutions",
       "Conduct access reviews and maintain compliance"
     ],
-    "why_it_matters": "Identity is involved in 80%+ of breaches. Stolen credentials, privilege escalation, and IAM misconfigurations are top attack vectors. Every security role interacts with IAMâ€”from investigating authentication alerts to managing access controls.",
+    "why_it_matters": "Identity is involved in 80%+ of breaches. Stolen credentials, privilege escalation, and IAM misconfigurations are top attack vectors. Every security role interacts with IAM\"\"from investigating authentication alerts to managing access controls.",
     "exam_weight": {
       "percentage": "8-10% of Domain 4",
       "question_count": "7-9 questions",
-      "question_types": ["Authentication concepts", "Authorization models", "PAM", "Identity lifecycle"]
+      "question_types": [
+        "Authentication concepts",
+        "Authorization models",
+        "PAM",
+        "Identity lifecycle"
+      ]
     }
   },
-
   "sections": [
     {
       "section_id": "D4-L005-S01",
       "title": "Identity Lifecycle Management",
       "content": "Identity lifecycle manages accounts from creation to deletion.\n\n**Lifecycle Phases**\n\n*Provisioning (Joiner)*\n- Account creation\n- Initial access assignment\n- Credential issuance\n- Resource allocation\n\n*Maintenance (Mover)*\n- Role changes\n- Access modifications\n- Department transfers\n- Permission updates\n\n*Deprovisioning (Leaver)*\n- Account disabling\n- Access revocation\n- Resource recovery\n- Data handling\n\n**Joiner-Mover-Leaver (JML)**\n\n*Joiner Process*\n- HR triggers account creation\n- Automatic role assignment\n- Manager approval for additional access\n- Day-one productivity\n\n*Mover Process*\n- Detect role/department change\n- Add new required access\n- REMOVE old access (critical!)\n- Prevent access accumulation\n\n*Leaver Process*\n- Immediate account disable\n- Session termination\n- Access revocation\n- Hardware recovery\n- Data retention handling\n\n**Provisioning Approaches**\n\n*Manual*\n- Ticket-based requests\n- Admin creates accounts\n- Slow and error-prone\n- Doesn't scale\n\n*Automated*\n- HR system integration\n- Role-based auto-provisioning\n- Fast and consistent\n- Reduces errors\n\n*Self-service*\n- Users request access\n- Workflow approval\n- Automatic fulfillment\n- Audit trail\n\n**Identity Governance**\n\n*Access Certification*\n- Periodic access review\n- Manager attestation\n- Remove unused access\n- Compliance requirement\n\n*Segregation of Duties (SoD)*\n- Prevent toxic combinations\n- No single person with conflicting roles\n- Example: Can't approve own expenses\n- Fraud prevention",
-
       "key_points": [
         "JML: Joiner (provision), Mover (modify), Leaver (deprovision)",
-        "Mover process must REMOVE old accessâ€”prevent privilege accumulation",
+        "Mover process must REMOVE old access\"\"prevent privilege accumulation",
         "Leaver process: disable immediately, don't wait for deletion",
         "Automated provisioning tied to HR reduces errors and delays",
         "Access certification ensures ongoing appropriateness of access"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -122,35 +152,35 @@
         "analogies": [
           {
             "concept": "Identity Lifecycle",
-            "analogy": "Like employee badgesâ€”new hire gets badge (provision), promotion might change access areas (mover), leaving means badge deactivated immediately (leaver), not mailed back later",
+            "analogy": "Like employee badges\"\"new hire gets badge (provision), promotion might change access areas (mover), leaving means badge deactivated immediately (leaver), not mailed back later",
             "why_it_works": "Physical access parallel to logical access"
           },
           {
             "concept": "Privilege Accumulation",
-            "analogy": "Like collecting keys to every office you've ever worked in without returning themâ€”eventually you can access everything even though you should only access your current office",
+            "analogy": "Like collecting keys to every office you've ever worked in without returning them\"\"eventually you can access everything even though you should only access your current office",
             "why_it_works": "Illustrates danger of not removing old access"
           }
         ],
         "common_mistakes": [
           {
             "mistake": "Only adding access during role changes",
-            "correction": "Mover process must both ADD new access AND REMOVE old access. Without removal, users accumulate privileges over careerâ€”major security risk.",
+            "why_wrong": "Mover process must both ADD new access AND REMOVE old access. Without removal, users accumulate privileges over career\"\"major security risk..",
+            "correct_understanding": "Mover process must both ADD new access AND REMOVE old access. Without removal, users accumulate privileges over career\"\"major security risk.",
             "exam_trap": "Mover = add new AND remove old"
           },
           {
             "mistake": "Delaying account disabling for departing employees",
-            "correction": "Disable account immediately upon termination. Don't wait for HR paperwork or IT ticket. Disgruntled employees with active credentials are significant risk.",
+            "why_wrong": "Disable account immediately upon termination. Don't wait for HR paperwork or IT ticket.",
+            "correct_understanding": "Disable account immediately upon termination. Don't wait for HR paperwork or IT ticket. Disgruntled employees with active credentials are significant risk.",
             "exam_trap": "Disable immediately on termination"
           }
         ]
       },
-
       "real_world_example": {
         "scenario": "Privilege accumulation leading to breach",
         "company": "Meridian Healthcare",
         "application": "A 15-year employee had transferred through multiple departments: started in billing, moved to clinical systems, then to IT support. Each move added access but nothing was removed. When their credentials were phished, attackers had access to billing systems, clinical records, AND IT admin tools. Investigation revealed the user had access to 47 systems but only needed 12 for current role. Implementing proper JML process with access removal during moves reduced average user access by 60%."
       },
-
       "what_would_happen_if": [
         {
           "situation": "Departing employee's account remains active for 30 days for transition",
@@ -163,7 +193,6 @@
           "lesson": "Regular access certification removes unnecessary access and ensures compliance."
         }
       ],
-
       "knowledge_check": {
         "question": "An employee transfers from the Finance department to Marketing. What is the MOST important IAM action during this transition?",
         "options": [
@@ -175,12 +204,11 @@
         "correct": 1,
         "explanation": "The Mover process must both add new required access AND remove old access that's no longer needed. Keeping Finance access violates least privilege and enables privilege accumulation over career.",
         "wrong_answer_analysis": {
-          "0": "New account isn't neededâ€”modify existing account access.",
+          "0": "New account isn't needed\"\"modify existing account access.",
           "2": "Keeping old access violates least privilege and accumulates risk.",
-          "3": "Users won't request removalâ€”proactive removal is essential."
+          "3": "Users won't request removal\"\"proactive removal is essential."
         }
       },
-
       "must_remember_for_exam": [
         {
           "point": "JML = Joiner-Mover-Leaver lifecycle",
@@ -195,12 +223,11 @@
           "why_tested": "Critical leaver process step."
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Identity Lifecycle",
           "definition": "The complete process of managing user identities from initial provisioning through modifications to eventual deprovisioning.",
-          "exam_note": "Joiner-Mover-Leaver. Provision â†’ Modify â†’ Deprovision."
+          "exam_note": "Joiner-Mover-Leaver. Provision â†' Modify â†' Deprovision."
         },
         {
           "term": "Provisioning",
@@ -223,7 +250,6 @@
       "section_id": "D4-L005-S02",
       "title": "Authentication and Single Sign-On",
       "content": "Authentication verifies identity; SSO simplifies access across multiple systems.\n\n**Authentication Factors**\n\n*Something You Know*\n- Passwords\n- PINs\n- Security questions\n\n*Something You Have*\n- Smart cards\n- Hardware tokens\n- Mobile devices\n- Authenticator apps\n\n*Something You Are*\n- Fingerprint\n- Facial recognition\n- Iris scan\n- Voice recognition\n\n*Somewhere You Are*\n- GPS location\n- IP address\n- Network location\n\n*Something You Do*\n- Typing patterns\n- Mouse movements\n- Behavioral biometrics\n\n**Multi-Factor Authentication (MFA)**\n\n*Requirements*\n- Two or more different factors\n- Different categories (not two passwords)\n- Significantly improves security\n\n*Common Combinations*\n- Password + authenticator app\n- Smart card + PIN\n- Password + SMS code (less secure)\n\n**Single Sign-On (SSO)**\n\n*Benefits*\n- One login for multiple applications\n- Improved user experience\n- Reduced password fatigue\n- Centralized authentication\n\n*Risks*\n- Single point of compromise\n- If SSO breached, all apps exposed\n- Must be highly secured\n\n**Federation**\n\n*Concept*\n- Trust between organizations\n- Use credentials from one org in another\n- No account needed in each system\n\n*Protocols*\n- SAML (Security Assertion Markup Language)\n- OAuth 2.0 (authorization)\n- OpenID Connect (authentication on OAuth)\n\n*SAML Components*\n- Identity Provider (IdP): Authenticates users\n- Service Provider (SP): Provides service\n- Assertion: Signed statement about user\n\n**Passwordless Authentication**\n\n*Methods*\n- FIDO2/WebAuthn\n- Biometrics\n- Magic links\n- Push notifications\n\n*Benefits*\n- No password to steal\n- Phishing resistant\n- Better user experience",
-
       "key_points": [
         "MFA requires factors from different categories (know + have + are)",
         "SSO: one login for many apps; risk is single point of compromise",
@@ -231,7 +257,6 @@
         "SAML: IdP authenticates, SP provides service, assertion proves identity",
         "FIDO2/WebAuthn enables phishing-resistant passwordless authentication"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -240,7 +265,7 @@
             "usage": "Three main factor types"
           },
           {
-            "name": "SAML = IdP â†’ Assertion â†’ SP",
+            "name": "SAML = IdP â†' Assertion â†' SP",
             "expansion": "Identity Provider creates Assertion for Service Provider",
             "usage": "SAML federation flow"
           }
@@ -248,33 +273,34 @@
         "analogies": [
           {
             "concept": "SSO",
-            "analogy": "Like a master key that opens all doors in a buildingâ€”convenient but if someone steals it, they can access everything",
+            "analogy": "Like a master key that opens all doors in a building\"\"convenient but if someone steals it, they can access everything",
             "why_it_works": "Single credential, multiple access points"
           },
           {
             "concept": "Federation",
-            "analogy": "Like using your driver's license (issued by one state) as ID at a bar in another stateâ€”the bar trusts the issuing authority",
+            "analogy": "Like using your driver's license (issued by one state) as ID at a bar in another state\"\"the bar trusts the issuing authority",
             "why_it_works": "Trust relationship between organizations"
           }
         ],
         "common_mistakes": [
           {
             "mistake": "Thinking two passwords is MFA",
-            "correction": "MFA requires different factor types. Two passwords are both 'something you know'â€”not multi-factor. Need know + have or know + are.",
+            "why_wrong": "MFA requires different factor types. Two passwords are both 'something you know'\"\"not multi-factor.",
+            "correct_understanding": "MFA requires different factor types. Two passwords are both 'something you know'\"\"not multi-factor. Need know + have or know + are.",
             "exam_trap": "Different factor TYPES required"
           },
           {
             "mistake": "Confusing OAuth and SAML",
-            "correction": "SAML is for authentication (who you are). OAuth is for authorization (what you can access). OpenID Connect adds authentication to OAuth.",
+            "why_wrong": "SAML is for authentication (who you are). OAuth is for authorization (what you can access).",
+            "correct_understanding": "SAML is for authentication (who you are). OAuth is for authorization (what you can access). OpenID Connect adds authentication to OAuth.",
             "exam_trap": "SAML = authentication; OAuth = authorization"
           }
         ]
       },
-
       "what_would_happen_if": [
         {
           "situation": "SSO credentials compromised with no MFA",
-          "consequence": "Attacker accesses all connected applications with single credential. Email, HR system, financial appsâ€”all compromised. Single point of failure realized.",
+          "consequence": "Attacker accesses all connected applications with single credential. Email, HR system, financial apps\"\"all compromised. Single point of failure realized.",
           "lesson": "SSO MUST have strong MFA. Single point of access = single point of attack."
         },
         {
@@ -283,7 +309,6 @@
           "lesson": "Use authenticator apps or hardware tokens over SMS when possible."
         }
       ],
-
       "knowledge_check": {
         "question": "A user logs in with a password and then enters a code from their authenticator app. What authentication factors are used?",
         "options": [
@@ -293,14 +318,13 @@
           "Something you know and something you are"
         ],
         "correct": 1,
-        "explanation": "Password is 'something you know.' The authenticator app on the user's phone is 'something you have'â€”possession of the device generates the code. This is proper MFA with two different factor types.",
+        "explanation": "Password is 'something you know.' The authenticator app on the user's phone is 'something you have'\"\"possession of the device generates the code. This is proper MFA with two different factor types.",
         "wrong_answer_analysis": {
           "0": "The code from the app is tied to having the device, not knowledge.",
           "2": "No biometric (are) factor is involved.",
           "3": "No biometric (are) factor is involved."
         }
       },
-
       "must_remember_for_exam": [
         {
           "point": "MFA = different factor types (know/have/are)",
@@ -311,11 +335,10 @@
           "why_tested": "Protocol distinction commonly tested."
         },
         {
-          "point": "SSO single point of compromiseâ€”must be secured",
+          "point": "SSO single point of compromise\"\"must be secured",
           "why_tested": "Understand SSO risk."
         }
       ],
-
       "glossary_terms": [
         {
           "term": "Multi-Factor Authentication (MFA)",
@@ -329,7 +352,7 @@
         },
         {
           "term": "SAML",
-          "definition": "Security Assertion Markup Languageâ€”an XML-based protocol for exchanging authentication data between identity providers and service providers.",
+          "definition": "Security Assertion Markup Language\"\"an XML-based protocol for exchanging authentication data between identity providers and service providers.",
           "exam_note": "Authentication federation. IdP, SP, Assertion. XML-based."
         },
         {
@@ -343,7 +366,6 @@
       "section_id": "D4-L005-S03",
       "title": "Authorization and Access Control",
       "content": "Authorization determines what authenticated users can do.\n\n**Access Control Models**\n\n*Role-Based Access Control (RBAC)*\n- Access based on job role\n- Users assigned to roles\n- Roles have permissions\n- Simplifies management\n- Example: 'Accountant' role gets finance app access\n\n*Attribute-Based Access Control (ABAC)*\n- Access based on attributes\n- User, resource, environment attributes\n- Dynamic and flexible\n- Fine-grained control\n- Example: Access if department=HR AND location=office AND time=business-hours\n\n*Rule-Based Access Control*\n- Access based on rules\n- If-then logic\n- Often combined with other models\n- Example: Firewall rules\n\n*Discretionary Access Control (DAC)*\n- Owner controls access\n- Can delegate permissions\n- Flexible but less secure\n- Example: File sharing permissions\n\n*Mandatory Access Control (MAC)*\n- System enforces access\n- Classification labels\n- Cannot be overridden by users\n- Example: Military classifications\n\n**Least Privilege**\n\n*Principle*\n- Minimum access needed for job\n- No more, no less\n- Reduces attack surface\n- Limits breach impact\n\n*Implementation*\n- Default deny\n- Request and justify access\n- Regular access reviews\n- Just-in-time access\n\n**Segregation of Duties (SoD)**\n\n*Purpose*\n- Prevent fraud\n- No single person controls entire process\n- Require collusion for abuse\n\n*Examples*\n- Can't create and approve own purchase order\n- Developer can't deploy own code to production\n- Accountant can't approve own expense report\n\n**Permission Models**\n\n*Implicit Deny*\n- If not explicitly permitted, denied\n- Safer approach\n- Zero Trust alignment\n\n*Explicit Allow*\n- Must grant each permission\n- More administrative work\n- More secure\n\n*Permission Inheritance*\n- Child inherits from parent\n- Reduces administration\n- Can cause unexpected access",
-
       "key_points": [
         "RBAC: permissions assigned to roles; users assigned to roles",
         "ABAC: dynamic access based on user/resource/environment attributes",
@@ -351,51 +373,51 @@
         "Segregation of duties prevents single person from controlling entire process",
         "Implicit deny: if not explicitly permitted, access denied"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
             "name": "RBAC = Roles rule",
-            "expansion": "Role-Based Access Controlâ€”users get roles, roles get permissions",
+            "expansion": "Role-Based Access Control\"\"users get roles, roles get permissions",
             "usage": "RBAC model"
           },
           {
             "name": "ABAC = Attributes anywhere",
-            "expansion": "Attribute-Basedâ€”user attributes, resource attributes, environment attributes",
+            "expansion": "Attribute-Based\"\"user attributes, resource attributes, environment attributes",
             "usage": "ABAC model"
           }
         ],
         "analogies": [
           {
             "concept": "RBAC",
-            "analogy": "Like job titles at a companyâ€”all 'Managers' get manager permissions, all 'Analysts' get analyst permissions. Change role, change access.",
+            "analogy": "Like job titles at a company\"\"all 'Managers' get manager permissions, all 'Analysts' get analyst permissions. Change role, change access.",
             "why_it_works": "Permissions tied to role, not individual"
           },
           {
             "concept": "Segregation of Duties",
-            "analogy": "Like requiring two keys to open a bank vaultâ€”no single person can act alone, preventing internal theft",
+            "analogy": "Like requiring two keys to open a bank vault\"\"no single person can act alone, preventing internal theft",
             "why_it_works": "Requires collusion for abuse"
           }
         ],
         "common_mistakes": [
           {
             "mistake": "Creating unique permissions for each user",
-            "correction": "Use roles (RBAC) to group common permissions. Individual permissions don't scale and are hard to audit.",
+            "why_wrong": "Use roles (RBAC) to group common permissions. Individual permissions don't scale and are hard to audit..",
+            "correct_understanding": "Use roles (RBAC) to group common permissions. Individual permissions don't scale and are hard to audit.",
             "exam_trap": "RBAC simplifies management vs individual permissions"
           },
           {
             "mistake": "Implementing explicit allow as default",
-            "correction": "Default should be implicit deny (Zero Trust). Only explicitly granted permissions work. Safer than allowing by default.",
+            "why_wrong": "Default should be implicit deny (Zero Trust). Only explicitly granted permissions work.",
+            "correct_understanding": "Default should be implicit deny (Zero Trust). Only explicitly granted permissions work. Safer than allowing by default.",
             "exam_trap": "Implicit deny is more secure"
           }
         ]
       },
-
       "what_would_happen_if": [
         {
           "situation": "No segregation of duties for financial transactions",
           "consequence": "Employee creates fake vendor, approves fake invoices, receives payments. No one else reviews. Embezzlement goes undetected for years.",
-          "lesson": "SoD requires multiple people for sensitive processesâ€”prevents single person fraud."
+          "lesson": "SoD requires multiple people for sensitive processes\"\"prevents single person fraud."
         },
         {
           "situation": "RBAC roles become overly broad over time",
@@ -403,7 +425,6 @@
           "lesson": "Regularly review and refine roles. Role bloat defeats RBAC purpose."
         }
       ],
-
       "knowledge_check": {
         "question": "A company wants to restrict access to HR records so only HR staff can view them during business hours from the office network. Which access control model best supports these requirements?",
         "options": [
@@ -420,7 +441,6 @@
           "3": "MAC uses classification labels, not business attributes."
         }
       },
-
       "must_remember_for_exam": [
         {
           "point": "RBAC = users to roles to permissions",
@@ -435,16 +455,15 @@
           "why_tested": "Foundational access control concepts."
         }
       ],
-
       "glossary_terms": [
         {
           "term": "RBAC",
-          "definition": "Role-Based Access Controlâ€”access permissions assigned to roles, and users assigned to roles based on job function.",
-          "exam_note": "User â†’ Role â†’ Permissions. Simplifies management. Most common."
+          "definition": "Role-Based Access Control\"\"access permissions assigned to roles, and users assigned to roles based on job function.",
+          "exam_note": "User â†' Role â†' Permissions. Simplifies management. Most common."
         },
         {
           "term": "ABAC",
-          "definition": "Attribute-Based Access Controlâ€”access decisions based on attributes of user, resource, and environment evaluated dynamically.",
+          "definition": "Attribute-Based Access Control\"\"access decisions based on attributes of user, resource, and environment evaluated dynamically.",
           "exam_note": "Dynamic. Fine-grained. Multiple attribute types."
         },
         {
@@ -463,15 +482,13 @@
       "section_id": "D4-L005-S04",
       "title": "Privileged Access Management",
       "content": "Privileged accounts require special controls due to their elevated access.\n\n**Types of Privileged Accounts**\n\n*Administrative*\n- Domain admins\n- Root accounts\n- System administrators\n- Database admins\n\n*Service Accounts*\n- Application service accounts\n- Scheduled task accounts\n- Integration accounts\n- Often overlooked\n\n*Emergency/Break-glass*\n- Emergency access accounts\n- Bypass normal controls\n- Heavily audited\n- Rarely used\n\n**PAM Solutions**\n\n*Password Vaulting*\n- Centralized credential storage\n- Encrypted vault\n- Automated rotation\n- Check-out/check-in\n\n*Session Management*\n- Session recording\n- Command logging\n- Real-time monitoring\n- Suspicious activity alerts\n\n*Just-in-Time (JIT) Access*\n- No standing privileges\n- Request access when needed\n- Time-limited\n- Automatically revoked\n\n*Just Enough Access (JEA)*\n- Minimum privileges for task\n- Scoped access\n- Prevents over-provisioning\n\n**Service Account Security**\n\n*Challenges*\n- Often have high privileges\n- Passwords rarely changed\n- Used in scripts (exposed)\n- Shared across systems\n\n*Best Practices*\n- Inventory all service accounts\n- Use managed service accounts\n- Rotate passwords regularly\n- Monitor for abuse\n- Principle of least privilege\n\n**Privileged Access Workstations (PAW)**\n\n*Concept*\n- Dedicated admin workstations\n- Hardened configuration\n- No email or web browsing\n- Used only for admin tasks\n\n*Benefits*\n- Reduces attack surface\n- Protects admin credentials\n- Isolates privileged activities\n\n**Monitoring Privileged Access**\n\n*Key Activities*\n- All admin logins\n- Privilege escalation\n- Service account usage\n- Off-hours access\n- Failed authentication",
-
       "key_points": [
         "PAM protects admin, service, and emergency accounts",
         "Password vaulting: centralized, encrypted, auto-rotation, check-out/in",
         "JIT access: no standing privileges, request when needed, auto-revoked",
-        "Service accounts often overlooked but high-riskâ€”inventory and monitor",
+        "Service accounts often overlooked but high-risk\"\"inventory and monitor",
         "PAW: dedicated hardened workstations for admin tasks only"
       ],
-
       "memory_hooks": {
         "mnemonics": [
           {
@@ -488,29 +505,30 @@
         "analogies": [
           {
             "concept": "Password Vaulting",
-            "analogy": "Like a hotel safe deposit boxâ€”credentials stored securely, you check them out when needed, return them after use, and usage is logged",
+            "analogy": "Like a hotel safe deposit box\"\"credentials stored securely, you check them out when needed, return them after use, and usage is logged",
             "why_it_works": "Controlled access to valuable items"
           },
           {
             "concept": "Just-in-Time Access",
-            "analogy": "Like a rental carâ€”you don't own a car parked outside 24/7, you rent one when you need it and return it after. Less risk than permanent ownership.",
+            "analogy": "Like a rental car\"\"you don't own a car parked outside 24/7, you rent one when you need it and return it after. Less risk than permanent ownership.",
             "why_it_works": "Temporary access reduces exposure window"
           }
         ],
         "common_mistakes": [
           {
             "mistake": "Service accounts with never-expiring passwords",
-            "correction": "Service account passwords should rotate regularly. Use managed service accounts where possible. Static credentials are high-risk.",
+            "why_wrong": "Service account passwords should rotate regularly. Use managed service accounts where possible.",
+            "correct_understanding": "Service account passwords should rotate regularly. Use managed service accounts where possible. Static credentials are high-risk.",
             "exam_trap": "Service accounts need rotation too"
           },
           {
             "mistake": "Admins using regular workstations for privileged tasks",
-            "correction": "Admin credentials on regular workstations exposed to malware, phishing. Use dedicated PAW for admin tasks to isolate credentials.",
+            "why_wrong": "Admin credentials on regular workstations exposed to malware, phishing. Use dedicated PAW for admin tasks to isolate credentials..",
+            "correct_understanding": "Admin credentials on regular workstations exposed to malware, phishing. Use dedicated PAW for admin tasks to isolate credentials.",
             "exam_trap": "PAW protects privileged credentials"
           }
         ]
       },
-
       "what_would_happen_if": [
         {
           "situation": "Domain admin password stored in plaintext script",
@@ -523,7 +541,6 @@
           "lesson": "JIT access limits exposure window. No standing privileges."
         }
       ],
-
       "knowledge_check": {
         "question": "An organization wants to ensure administrators only have elevated privileges when actively performing administrative tasks. Which PAM capability addresses this?",
         "options": [
@@ -540,7 +557,6 @@
           "3": "PAW is a dedicated workstation, not access timing control."
         }
       },
-
       "must_remember_for_exam": [
         {
           "point": "JIT = no standing privileges, request when needed",
@@ -555,11 +571,10 @@
           "why_tested": "Often overlooked high-risk accounts."
         }
       ],
-
       "glossary_terms": [
         {
           "term": "PAM",
-          "definition": "Privileged Access Managementâ€”solutions for securing, managing, and monitoring privileged accounts and access.",
+          "definition": "Privileged Access Management\"\"solutions for securing, managing, and monitoring privileged accounts and access.",
           "exam_note": "Vaulting, session management, JIT. Protects admin accounts."
         },
         {
@@ -580,7 +595,6 @@
       ]
     }
   ],
-
   "hands_on_activity": {
     "title": "Access Review Exercise",
     "objective": "Practice conducting an access certification review",
@@ -597,7 +611,6 @@
     ],
     "expected_outcome": "Complete access review documenting findings, remediation actions, and compliance evidence."
   },
-
   "what_would_you_do": {
     "scenario": "During access review, you discover the CFO has local admin rights on their laptop and has been logging into production financial systems with a shared service account.",
     "context": "CFO is senior executive. IT help desk gave admin rights for software installation. Service account use started 'temporarily' 6 months ago. No ticket or approval documented.",
@@ -634,7 +647,6 @@
     ],
     "key_lesson": "Security findings apply to everyone, including executives. Document findings objectively, provide alternatives, and escalate to appropriate level (CISO for executive issues). Don't ignore or unilaterally act without communication."
   },
-
   "summary": {
     "key_takeaways": [
       "Identity lifecycle: Joiner-Mover-Leaver; movers must lose old access",
@@ -652,12 +664,15 @@
       "JIT = no standing privileges",
       "Service accounts need inventory, monitoring, rotation"
     ],
-    "connection_to_next": "IAM controls who accesses data. The next lesson covers data protectionâ€”ensuring data is secure throughout its lifecycle regardless of who accesses it."
+    "connection_to_next": "IAM controls who accesses data. The next lesson covers data protection\"\"ensuring data is secure throughout its lifecycle regardless of who accesses it."
   },
-
   "related_content": {
-    "simulations": ["D4-SIM-004"],
-    "remediation": ["D4-REM-003"],
+    "simulations": [
+      "D4-SIM-004"
+    ],
+    "remediation": [
+      "D4-REM-003"
+    ],
     "next_lesson": "D4-LESSON-006",
     "previous_lesson": "D4-LESSON-004"
   }

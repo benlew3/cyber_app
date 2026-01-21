@@ -1,518 +1,582 @@
 {
   "lesson_id": "D1-LESSON-007",
   "domain": 1,
-  "title": "Deception Technologies",
+  "title": "Deception and Disruption Technologies",
+  "subtitle": "Turning the Tables: Honeypots, Honeytokens, and Active Defense",
+  "version": "2.0-enhanced",
   "objectives_covered": [
     "1.2"
   ],
-  "estimated_duration": "40-50 minutes",
+  "estimated_duration": "75-90 minutes (core: 45 min, labs: 30-45 min)",
   "difficulty": "intermediate",
-  "version": "3.0-enhanced",
+  "prerequisites": [
+    "D1-LESSON-001",
+    "D1-LESSON-002"
+  ],
   "skill_tree": {
+    "position": {
+      "domain": 1,
+      "sequence": 7,
+      "tier": "intermediate"
+    },
     "prerequisites": [
-      "D1-LESSON-001",
-      "D1-LESSON-002"
+      {
+        "lesson_id": "D1-LESSON-001",
+        "title": "Security Controls Fundamentals",
+        "why_needed": "Deception is a detective control type"
+      },
+      {
+        "lesson_id": "D1-LESSON-002",
+        "title": "CIA Triad Fundamentals",
+        "why_needed": "Deception supports detection and intelligence gathering"
+      }
     ],
     "unlocks": [
-      "D2-LESSON-008",
-      "D4-LESSON-001"
+      {
+        "lesson_id": "D4-LESSON-001",
+        "title": "Security Monitoring",
+        "connection": "Deception alerts feed into SOC monitoring"
+      }
+    ],
+    "builds_toward": [
+      "CompTIA Security+ SY0-701",
+      "Threat intelligence analysis",
+      "SOC operations"
     ],
     "cascade_learning": {
-      "builds_on": [
-        {
-          "lesson": "D1-LESSON-001",
-          "concepts": [
-            "Deception technologies are detective controls"
-          ]
-        },
-        {
-          "lesson": "D1-LESSON-002",
-          "concepts": [
-            "Deception helps detect threats to CIA"
-          ]
-        }
+      "this_lesson_establishes": [
+        "Honeypot types and deployment",
+        "Honeytoken and honeyfile creation",
+        "DNS sinkhole concepts",
+        "Deception alert handling"
       ],
-      "enables": [
-        {
-          "lesson": "D2-LESSON-008",
-          "concepts": [
-            "Indicators of compromise from honeypots"
-          ]
-        },
-        {
-          "lesson": "D4-LESSON-001",
-          "concepts": [
-            "Security monitoring includes deception alerts"
-          ]
-        }
-      ]
+      "concepts_used_later": {
+        "D4-LESSON-001": "Deception alerts in SOC monitoring",
+        "D2-LESSON-011": "Attacker behavior analysis"
+      }
     }
   },
   "role_relevance": {
     "soc_analyst": {
-      "importance": "high",
+      "relevance": "high",
+      "percentage_of_job": "25-35%",
       "daily_tasks": [
-        "Monitoring honeypot alerts (high-fidelity indicators)",
-        "Analyzing attacker techniques from deception systems",
-        "Correlating deception alerts with other indicators",
-        "Extracting IOCs from honeypot interactions"
-      ],
-      "real_scenario": "Honeypot alert shows SSH brute force from internal IP\u2014immediate indicator of compromised internal system since legitimate users never touch honeypots"
+        "Monitor deception alerts",
+        "Investigate honeytoken triggers",
+        "Analyze honeypot captured traffic"
+      ]
     },
     "incident_responder": {
-      "importance": "high",
+      "relevance": "high",
+      "percentage_of_job": "20-30%",
       "daily_tasks": [
-        "Using honeypot data to understand attacker TTPs",
-        "Leveraging deception for early warning",
-        "Analyzing malware captured by honeypots",
-        "Tracking lateral movement via honeytoken triggers"
-      ],
-      "real_scenario": "Honeytoken credential used in authentication attempt\u2014immediately identifies compromised system where token was planted and attacker's location"
-    },
-    "grc_analyst": {
-      "importance": "low",
-      "daily_tasks": [
-        "Documenting deception technology controls",
-        "Ensuring honeypots don't create compliance issues",
-        "Reviewing deception strategy in security assessments"
-      ],
-      "real_scenario": "Audit question about deception technologies\u2014you document how honeypots provide early detection without exposing real systems"
-    },
-    "penetration_tester": {
-      "importance": "high",
-      "daily_tasks": [
-        "Identifying honeypots during engagements",
-        "Understanding deception technology limitations",
-        "Recommending deception deployment strategies",
-        "Testing whether existing honeypots are effective"
-      ],
-      "real_scenario": "During internal pentest, you identify honeypot by its unusual configuration\u2014report findings on how real attackers might also avoid it"
+        "Use deception to detect lateral movement",
+        "Analyze attacker TTPs from honeypots",
+        "Deploy canary tokens during investigations"
+      ]
     },
     "security_engineer": {
-      "importance": "critical",
+      "relevance": "high",
+      "percentage_of_job": "20-30%",
       "daily_tasks": [
-        "Deploying and configuring honeypots",
-        "Creating realistic deception environments",
-        "Integrating deception alerts with SIEM",
-        "Maintaining deception infrastructure"
-      ],
-      "real_scenario": "Deploying honeynet in AWS to detect cloud-based attacks\u2014configure realistic but isolated EC2 instances that alert on any interaction"
+        "Deploy and maintain honeypots",
+        "Integrate deception with SIEM",
+        "Design deception strategies"
+      ]
+    },
+    "grc_analyst": {
+      "relevance": "low",
+      "percentage_of_job": "5-10%",
+      "daily_tasks": [
+        "Assess deception control effectiveness",
+        "Document deception policies"
+      ]
+    },
+    "penetration_tester": {
+      "relevance": "high",
+      "percentage_of_job": "25-35%",
+      "daily_tasks": [
+        "Identify and avoid honeypots",
+        "Test deception detection capabilities",
+        "Recommend deception improvements"
+      ]
     }
   },
   "introduction": {
-    "hook": "In 2012, researchers created a fake water treatment plant control system connected to the internet. Within hours, attackers from 14 countries began probing it. Some attempted to manipulate the 'pump controls.' This honeypot revealed the real threat to critical infrastructure\u2014attackers ARE targeting these systems, and deception technology proved it. Sometimes the best way to find attackers is to give them something to attack.",
+    "hook": "What if instead of just defending against attackers, you could trick them into revealing themselves while they waste time attacking fake systems? Deception technologies present convincing fakes that have no legitimate business use\"\"meaning any interaction is immediately suspicious. It's like setting traps throughout your network that attackers can't distinguish from real systems.",
     "learning_goals": [
-      "Distinguish between honeypot types and use cases",
-      "Understand honeynets and deception networks",
-      "Apply honeytokens and honeyfiles for detection",
-      "Evaluate benefits and risks of deception technologies"
+      "Differentiate between honeypots, honeynets, honeytokens, and honeyfiles",
+      "Design deception strategies for different security objectives",
+      "Implement deception without creating additional security risks",
+      "Understand DNS sinkholes and their use cases"
     ],
-    "why_it_matters": "Deception technologies provide high-fidelity detection\u2014legitimate users never interact with fake systems, so any interaction indicates malicious activity. In a world of alert fatigue, honeypot alerts are often the clearest signal of compromise.",
+    "why_it_matters": {
+      "career_impact": "You'll deploy honeypots, analyze attacker behavior, and integrate deception into detection strategy.",
+      "business_connection": "Deception provides early breach warning with near-zero false positives\"\"any interaction is suspicious.",
+      "exam_relevance": "Expect 2-3 questions on deception types and use cases."
+    },
     "exam_weight": {
-      "percentage": "5-7% of Domain 1",
-      "question_count": "3-5 questions",
-      "question_types": [
-        "Honeypot types",
-        "Use case identification",
-        "Detection vs. prevention"
+      "estimated_questions": "2-3",
+      "high_yield_topics": [
+        "Honeypot vs honeytoken distinction",
+        "Low vs high interaction",
+        "DNS sinkhole function",
+        "Canary tokens"
       ]
     }
   },
   "sections": [
     {
       "section_id": "D1-L007-S01",
-      "title": "Honeypot Fundamentals",
-      "content": "Honeypots are decoy systems designed to attract attackers and detect malicious activity.\n\n**What Honeypots Do**\n\n*Detection:* Any interaction is suspicious\u2014legitimate users don't touch them\n*Intelligence:* Capture attacker tools, techniques, and procedures (TTPs)\n*Diversion:* Attract attackers away from real systems\n*Research:* Study new attack methods in controlled environment\n\n**Honeypot Types by Interaction Level**\n\n*Low-Interaction:*\n- Emulate limited services (fake SSH banner, basic responses)\n- Easy to deploy and maintain\n- Limited intelligence gathering\n- Low risk (minimal attack surface)\n- Example: Honeyd, Dionaea\n\n*Medium-Interaction:*\n- More realistic service emulation\n- Capture more detailed attacker behavior\n- Moderate complexity and risk\n\n*High-Interaction:*\n- Full operating systems and real services\n- Maximum intelligence gathering\n- Complex to maintain safely\n- Risk: Can be compromised and used for attacks\n- Example: Full VM with intentional vulnerabilities\n\n**Deployment Considerations**\n\n*Placement:*\n- DMZ: Detect external threats\n- Internal network: Detect lateral movement\n- Production segments: Detect insider threats\n\n*Authenticity:*\n- Must appear legitimate to be effective\n- Realistic hostnames, banners, services\n- Avoid obvious decoy indicators",
-      "memory_hooks": {
-        "mnemonics": [
+      "title": "Introduction to Deception Technology",
+      "estimated_time": "12 minutes",
+      "content": {
+        "overview": "Deception technology presents false information, systems, or data to attackers. Unlike traditional controls that keep attackers out, deception assumes breach and focuses on detection after attackers gain access.",
+        "core_concepts": [
           {
-            "name": "LMH = Risk Scale",
-            "expansion": "Low, Medium, High interaction = Low, Medium, High risk",
-            "usage": "Higher interaction honeypots gather more intel but carry more risk"
+            "concept": "Why Deception Works",
+            "reasons": [
+              {
+                "reason": "Information Asymmetry",
+                "explanation": "Attackers don't know your real network layout"
+              },
+              {
+                "reason": "High-Fidelity Alerts",
+                "explanation": "Legitimate users NEVER interact with decoys = near-zero false positives"
+              },
+              {
+                "reason": "Attacker Disruption",
+                "explanation": "Wastes attacker time on worthless targets"
+              }
+            ]
           },
           {
-            "name": "Honeypot = Bug Zapper",
-            "expansion": "Attracts pests (attackers), zaps them (detects/captures), keeps them from your food (real systems)",
-            "usage": "Honeypots attract, detect, and divert like bug zappers"
+            "concept": "Types of Deception",
+            "types": [
+              {
+                "type": "Honeypot",
+                "definition": "Decoy SYSTEM designed to attract attackers",
+                "example": "Fake server"
+              },
+              {
+                "type": "Honeynet",
+                "definition": "NETWORK of honeypots",
+                "example": "Fake network segment"
+              },
+              {
+                "type": "Honeytoken",
+                "definition": "Fake CREDENTIALS or DATA",
+                "example": "Fake user account, fake API key"
+              },
+              {
+                "type": "Honeyfile",
+                "definition": "Fake DOCUMENT with attractive name",
+                "example": "passwords.xlsx"
+              }
+            ],
+            "critical_distinction": "Honeypot = SYSTEM. Honeytoken = CREDENTIALS/DATA."
           }
         ],
-        "analogies": [
-          {
-            "concept": "Honeypot Interaction Levels = Fishing",
-            "analogy": "Low-interaction = fishing with a bobber (basic bite detection). Medium = fishing with a lure (more realistic attraction). High = fishing with live bait in natural conditions (most realistic, but the fish might eat your bait and escape).",
-            "why_it_works": "Fishing metaphor shows tradeoff between realism and risk/complexity"
-          }
-        ],
+        "what_would_happen_if": {
+          "scenario": "What if an attacker accessed a honeytoken?",
+          "consequence": "Immediate high-confidence alert. Unlike traditional security alerts with high false positive rates, honeytokens have essentially zero false positives because legitimate users have no reason to access them. This is detection gold\"\"you know someone is inside your network doing something they shouldn't."
+        }
+      },
+      "memory_hooks": {
+        "mnemonic": "Honeypot = SYSTEM, Honeytoken = SECRET (credentials/data)",
         "common_mistakes": [
           {
-            "mistake": "Deploying high-interaction honeypots without proper isolation",
-            "why_wrong": "High-interaction honeypots can be compromised and used to attack real systems. Strict network isolation is essential..",
-            "correct_understanding": "High-interaction honeypots can be compromised and used to attack real systems. Strict network isolation is essential.",
-            "exam_trap": "Know that high-interaction = higher risk, needs better isolation"
+            "mistake": "Confusing honeypot with honeytoken",
+            "why_wrong": "Honeypot is a whole system. Honeytoken is a piece of data like a fake password or API key..",
+            "correct_understanding": "Honeypot is a whole system. Honeytoken is a piece of data like a fake password or API key.",
+            "exam_trap": ""
           },
           {
-            "mistake": "Thinking honeypots prevent attacks",
-            "why_wrong": "Honeypots are detective controls, not preventive. They detect attackers but don't stop them from attacking real systems..",
-            "correct_understanding": "Honeypots are detective controls, not preventive. They detect attackers but don't stop them from attacking real systems.",
-            "exam_trap": "Honeypots = detection, not prevention"
+            "mistake": "Deploying honeypots without monitoring",
+            "why_wrong": "An unmonitored honeypot provides no value - you won't see the attacker activity it was designed to detect.",
+            "correct_understanding": "Honeypots require active monitoring and alerting to provide detection value. Integrate with SIEM.",
+            "exam_trap": "Honeypots are detective controls - they only work if you watch them"
+          }
+        ],
+        "mnemonics": [
+          {
+            "term": "Honeypot vs Honeynet",
+            "mnemonic": "Honeypot = single system trap. Honeynet = network of traps",
+            "explanation": "Scale of deception deployments"
+          },
+          {
+            "term": "Honeyfile",
+            "mnemonic": "Honeyfile = Fake file that triggers alert when accessed",
+            "explanation": "Document-level deception"
           }
         ]
       },
-      "what_would_happen_if": [
+      "must_remember_for_exam": [
         {
-          "situation": "High-interaction honeypot compromised and not properly isolated",
-          "consequence": "Attacker uses compromised honeypot as pivot point to attack real production systems. The detection tool becomes an attack vector.",
-          "lesson": "High-interaction honeypots need strict network isolation\u2014they're real systems that can be weaponized"
+          "fact": "Honeypot = decoy SYSTEM",
+          "why_tested": "Terminology distinction"
         },
         {
-          "situation": "Honeypot deployed with obviously fake configuration",
-          "consequence": "Sophisticated attackers recognize the decoy and avoid it. Less skilled attackers might be caught, but advanced threats bypass detection entirely.",
-          "lesson": "Honeypots must be realistic to be effective. Obvious fakes only catch unsophisticated attackers."
+          "fact": "Honeytoken = fake CREDENTIALS/DATA",
+          "why_tested": "Terminology distinction"
+        },
+        {
+          "fact": "Key benefit: near-zero false positives",
+          "why_tested": "Value proposition"
+        },
+        {
+          "fact": "Honeynet = network of honeypots",
+          "why_tested": "Definition"
         }
       ],
-      "glossary_terms": [
-        {
-          "term": "Honeypot",
-          "definition": "Decoy system designed to attract attackers and detect malicious activity",
-          "exam_note": "Detective control\u2014any interaction is suspicious since legitimate users don't use it"
-        },
-        {
-          "term": "Low-Interaction Honeypot",
-          "definition": "Honeypot emulating limited services with minimal complexity and risk",
-          "exam_note": "Easy to deploy, limited intelligence, low risk"
-        },
-        {
-          "term": "High-Interaction Honeypot",
-          "definition": "Honeypot using full operating systems for maximum intelligence gathering",
-          "exam_note": "Best intelligence but highest risk\u2014can be compromised"
-        },
-        {
-          "term": "TTPs",
-          "definition": "Tactics, Techniques, and Procedures\u2014methods attackers use",
-          "exam_note": "Honeypots capture attacker TTPs for threat intelligence"
-        }
+      "key_points": [
+        "Deception assumes breach - focuses on detection inside the network",
+        "Legitimate users never interact with decoys = near-zero false positives",
+        "Honeypot = system; Honeytoken = credentials/data; Honeyfile = document"
       ],
       "knowledge_check": {
-        "question": "A security team wants to study advanced attacker techniques in detail, including what tools they upload and commands they run. Which honeypot type is MOST appropriate?",
+        "question": "A security team creates a fake AWS access key and places it in a Git repository. Two weeks later, the key is used from an external IP. What type of deception detected this?",
         "options": [
-          "Low-interaction honeypot for minimal risk",
-          "High-interaction honeypot for maximum intelligence",
-          "Network-based honeypot for traffic analysis",
-          "Production system with extra logging"
+          "Honeypot",
+          "Honeynet",
+          "Honeytoken",
+          "Honeyfile"
         ],
-        "correct_answer": 1,
-        "explanation": "High-interaction honeypots provide full operating systems where attackers can upload tools, execute commands, and exhibit their full TTP repertoire. This enables detailed study of advanced techniques that low-interaction systems can't capture.",
-        "wrong_answer_analysis": {
-          "0": "Low-interaction honeypots only emulate basic services\u2014can't capture uploaded tools or detailed command sequences.",
-          "2": "Network honeypots capture traffic but not the detailed system-level activity needed to study techniques.",
-          "3": "Production systems have legitimate activity mixed in and don't provide isolated study environment."
-        }
-      },
-      "must_remember": [
-        "Honeypots = detective controls (detect, don't prevent)",
-        "Low-interaction = easy/safe but limited intel",
-        "High-interaction = best intel but requires strict isolation",
-        "Any honeypot interaction is suspicious\u2014legitimate users don't touch them"
-      ]
+        "correct": 2,
+        "explanation": "This is a honeytoken\"\"fake CREDENTIALS planted to detect unauthorized access. The AWS keys are credentials, not a system (honeypot) or file (honeyfile).",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_wrong": "Honeypot is a system, not credentials"
+          },
+          {
+            "option": 1,
+            "why_wrong": "Honeynet is multiple systems"
+          },
+          {
+            "option": 3,
+            "why_wrong": "While stored in a file, the detection triggered on credential USE, making it a honeytoken"
+          }
+        ]
+      }
     },
     {
       "section_id": "D1-L007-S02",
-      "title": "Honeynets and Deception Networks",
-      "content": "Honeynets extend the honeypot concept to entire networks of deceptive systems.\n\n**Honeynet Architecture**\n\n*Components:*\n- Multiple honeypots simulating different systems\n- Honeywall: Gateway controlling and monitoring traffic\n- Data capture: Logging all network activity\n- Alerting: Real-time notification of interactions\n\n*Honeywall Functions:*\n- Data control: Prevent outbound attacks\n- Data capture: Log all traffic\n- Data collection: Centralize logs for analysis\n\n**Modern Deception Platforms**\n\n*Enterprise Deception:*\n- Distributed decoys across network\n- Automated deployment and management\n- Integration with SIEM and SOAR\n- Realistic Active Directory decoys\n- Cloud-native deception options\n\n*Capabilities:*\n- Breadcrumbs leading to honeypots\n- Fake credentials in memory\n- Decoy file shares and databases\n- DNS deception\n\n**Deception Network Benefits**\n\n*Early Detection:*\n- Catch attackers during reconnaissance\n- Detect lateral movement attempts\n- Alert on privilege escalation efforts\n\n*Threat Intelligence:*\n- Capture attacker infrastructure\n- Collect malware samples\n- Understand targeting preferences",
-      "memory_hooks": {
-        "mnemonics": [
+      "title": "Honeypot Types and Deployment",
+      "estimated_time": "12 minutes",
+      "content": {
+        "overview": "Honeypots vary in complexity and interactivity. Understanding these variations helps you select the right approach.",
+        "core_concepts": [
           {
-            "name": "Honeynet = Honeypot Network",
-            "expansion": "Multiple honeypots + monitoring infrastructure = honeynet",
-            "usage": "Honeynet is just honeypots scaled up with central management"
+            "concept": "Interaction Levels",
+            "levels": [
+              {
+                "level": "Low-Interaction",
+                "mechanism": "Emulate services without full OS",
+                "risk": "Lower (limited attack surface)",
+                "intelligence": "Less data",
+                "maintenance": "Easier"
+              },
+              {
+                "level": "High-Interaction",
+                "mechanism": "Full operating system",
+                "risk": "Higher (can be used as pivot)",
+                "intelligence": "Rich data on attacker behavior",
+                "maintenance": "Complex"
+              }
+            ],
+            "critical_point": "High-interaction honeypots MUST be contained to prevent attackers from using them to attack real systems"
           },
           {
-            "name": "CCC = Honeywall Functions",
-            "expansion": "Control (prevent attacks), Capture (log traffic), Collect (centralize data)",
-            "usage": "Three functions of a honeywall"
-          }
-        ],
-        "analogies": [
-          {
-            "concept": "Honeynet = Movie Studio Back Lot",
-            "analogy": "Individual honeypots are single buildings. Honeynet is the entire fake town on the studio back lot\u2014looks like a real city, but every building is a prop designed to observe anyone who enters.",
-            "why_it_works": "Movie studio back lots are elaborate deceptions\u2014perfect parallel for honeynets"
-          }
-        ],
-        "common_mistakes": [
-          {
-            "mistake": "Thinking honeynets are just multiple honeypots",
-            "why_wrong": "Honeynets include the honeywall for data control, capture, and collection. Without management infrastructure, you just have multiple independent honeypots..",
-            "correct_understanding": "Honeynets include the honeywall for data control, capture, and collection. Without management infrastructure, you just have multiple independent honeypots.",
-            "exam_trap": "Know that honeywall is the distinguishing component"
-          },
-          {
-            "mistake": "Deploying deception without integration",
-            "why_wrong": "Deception alerts are useless if they don't reach analysts. Integration with SIEM ensures alerts are seen and investigated..",
-            "correct_understanding": "Deception alerts are useless if they don't reach analysts. Integration with SIEM ensures alerts are seen and investigated.",
-            "exam_trap": "Deception must integrate with monitoring\u2014standalone deception creates blind spots"
+            "concept": "Deployment Strategy",
+            "strategies": [
+              {
+                "location": "Near high-value targets",
+                "purpose": "Detect reconnaissance of critical systems"
+              },
+              {
+                "location": "Every network segment",
+                "purpose": "Detect lateral movement"
+              },
+              {
+                "location": "Along likely attack paths",
+                "purpose": "Early warning"
+              }
+            ]
           }
         ]
       },
-      "what_would_happen_if": [
+      "must_remember_for_exam": [
         {
-          "situation": "Honeynet deployed without honeywall data control",
-          "consequence": "Compromised honeypot used to launch attacks against external targets. Organization liable for attacks originating from their network. Deception becomes attack infrastructure.",
-          "lesson": "Honeywall data control is essential\u2014must prevent honeypots from being weaponized"
+          "fact": "Low-interaction = emulated (safer), High-interaction = full OS (riskier)",
+          "why_tested": "Risk comparison"
         },
         {
-          "situation": "Deception platform deployed but not integrated with SIEM",
-          "consequence": "Honeypot detects attacker, generates alert, but nobody sees it. Detection without response is useless. Attacker continues to real targets undetected.",
-          "lesson": "Deception must integrate with monitoring and response workflows"
+          "fact": "High-interaction must be CONTAINED to prevent pivot attacks",
+          "why_tested": "Security requirement"
+        },
+        {
+          "fact": "Place honeypots near critical assets and across segments",
+          "why_tested": "Deployment strategy"
         }
       ],
-      "glossary_terms": [
-        {
-          "term": "Honeynet",
-          "definition": "Network of multiple honeypots with centralized monitoring and control infrastructure",
-          "exam_note": "Key component is honeywall\u2014distinguishes honeynet from multiple independent honeypots"
-        },
-        {
-          "term": "Honeywall",
-          "definition": "Gateway device controlling and monitoring traffic to/from honeypots",
-          "exam_note": "Three functions: data control, data capture, data collection"
-        },
-        {
-          "term": "Deception Platform",
-          "definition": "Enterprise solution for deploying and managing distributed decoys",
-          "exam_note": "Modern approach\u2014automated, integrated, scalable deception"
-        },
-        {
-          "term": "Breadcrumb",
-          "definition": "Fake data planted to lure attackers toward honeypots",
-          "exam_note": "Example: Fake credentials in memory that lead to honeypot when used"
-        }
+      "key_points": [
+        "Low-interaction = safer but less data; High-interaction = riskier but rich intelligence",
+        "High-interaction honeypots MUST be contained",
+        "Place near high-value targets and across network segments"
       ],
       "knowledge_check": {
-        "question": "What is the PRIMARY function of a honeywall in a honeynet architecture?",
+        "question": "An organization wants honeypots to detect lateral movement but has limited resources and concerns about a honeypot attacking real systems. Which approach is MOST appropriate?",
         "options": [
-          "To make honeypots more attractive to attackers",
-          "To control, capture, and collect data while preventing outbound attacks",
-          "To encrypt traffic between honeypots",
-          "To load balance traffic across multiple honeypots"
+          "High-interaction honeypots",
+          "Low-interaction with strict egress filtering",
+          "Internet-facing honeypots",
+          "Single DMZ honeypot"
         ],
-        "correct_answer": 1,
-        "explanation": "The honeywall's primary functions are data control (preventing honeypots from being used to attack others), data capture (logging all traffic), and data collection (centralizing logs). This makes honeynets safe and useful.",
-        "wrong_answer_analysis": {
-          "0": "Attractiveness comes from honeypot configuration, not the honeywall.",
-          "2": "Honeywalls focus on monitoring and control, not encryption.",
-          "3": "Load balancing isn't a honeywall function\u2014each honeypot has its own purpose."
-        }
+        "correct": 1,
+        "explanation": "Low-interaction requires fewer resources, and egress filtering prevents attacking other systems. For lateral movement, internal placement is needed.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_wrong": "High-interaction requires more resources and has pivot risk"
+          },
+          {
+            "option": 2,
+            "why_wrong": "Internet-facing doesn't detect internal lateral movement"
+          },
+          {
+            "option": 3,
+            "why_wrong": "DMZ is for external attacks, not lateral movement detection"
+          }
+        ]
       },
-      "must_remember": [
-        "Honeynet = multiple honeypots + honeywall",
-        "Honeywall: Control, Capture, Collect (CCC)",
-        "Data control prevents honeypots from being weaponized",
-        "Must integrate with SIEM for alerts to be actionable"
-      ]
+      "memory_hooks": {
+        "mnemonics": [
+          {
+            "term": "Deception Benefits",
+            "mnemonic": "DAI = Detect, Alert, Intelligence",
+            "explanation": "Key benefits of deception technology"
+          }
+        ]
+      }
     },
     {
       "section_id": "D1-L007-S03",
-      "title": "Honeytokens and Honeyfiles",
-      "content": "Honeytokens are deceptive data items that trigger alerts when accessed or used.\n\n**Honeytoken Types**\n\n*Honey Credentials:*\n- Fake usernames/passwords in credential stores\n- Planted in memory, files, or databases\n- Any use indicates compromise\n- Can identify exactly where attacker found them\n\n*Honey Files/Documents:*\n- Fake sensitive documents\n- Embedded tracking (web beacons, macros)\n- File names that attract attention ('passwords.xlsx')\n- Alerts when opened or exfiltrated\n\n*Honey Database Records:*\n- Fake entries in real databases\n- Trigger on specific query patterns\n- Detect data theft\n\n*Honey DNS Entries:*\n- Fake internal DNS names\n- Only visible to attackers enumerating DNS\n- Resolution attempt = detection\n\n**Implementation Strategies**\n\n*Placement:*\n- Where attackers are likely to look\n- Memory (credential harvesting)\n- File shares (data theft)\n- Active Directory (enumeration)\n- Databases (SQL injection)\n\n*Believability:*\n- Must look legitimate\n- Appropriate naming conventions\n- Realistic but not actually useful data\n\n**Alert Triggers**\n\n- Credential authentication attempt\n- File open/copy/exfiltrate\n- DNS resolution\n- Database query\n- API call with honey key",
-      "memory_hooks": {
-        "mnemonics": [
+      "title": "Honeytokens, Honeyfiles, and Canary Tokens",
+      "estimated_time": "10 minutes",
+      "content": {
+        "overview": "Lightweight deception using fake data rather than fake systems.",
+        "core_concepts": [
           {
-            "name": "Honeytoken = Canary",
-            "expansion": "Like canary in coal mine\u2014dead canary = danger. Used honeytoken = attacker present.",
-            "usage": "Honeytokens are early warning canaries throughout your environment"
+            "concept": "Honeytoken Examples",
+            "examples": [
+              "Fake user accounts (svc_backup_admin)",
+              "Fake API keys in code repositories",
+              "Fake database records",
+              "Fake passwords in password managers"
+            ]
           },
           {
-            "name": "FCDD = Honeytoken Types",
-            "expansion": "Files, Credentials, Database records, DNS entries",
-            "usage": "Four common honeytoken types"
-          }
-        ],
-        "analogies": [
-          {
-            "concept": "Honeytokens = Marked Bills",
-            "analogy": "Banks put marked bills in cash stacks. If robbed, marked bills help track the money. Honeytokens work the same way\u2014fake credentials that identify theft when used.",
-            "why_it_works": "Marked bills are classic tracking mechanism\u2014same concept as honeytokens"
-          }
-        ],
-        "common_mistakes": [
-          {
-            "mistake": "Creating obviously fake honeytokens",
-            "why_wrong": "'test_admin/password123' won't fool sophisticated attackers. Honeytokens need realistic names and formats to be effective..",
-            "correct_understanding": "'test_admin/password123' won't fool sophisticated attackers. Honeytokens need realistic names and formats to be effective.",
-            "exam_trap": "Believability is key\u2014obvious fakes only catch script kiddies"
+            "concept": "Honeyfile Examples",
+            "examples": [
+              "passwords.xlsx",
+              "salary_data.xlsx",
+              "customer_export.csv",
+              "2024_Financial_Projections.docx"
+            ],
+            "key_point": "Named attractively to lure attackers"
           },
           {
-            "mistake": "Placing honeytokens without monitoring",
-            "why_wrong": "Honeytokens are useless without alerting. Must have monitoring in place BEFORE deployment to detect when they're triggered..",
-            "correct_understanding": "Honeytokens are useless without alerting. Must have monitoring in place BEFORE deployment to detect when they're triggered.",
-            "exam_trap": "Detection requires both deception AND monitoring"
+            "concept": "Canary Tokens",
+            "definition": "Honeytokens that 'call home' when triggered",
+            "types": [
+              {
+                "type": "Web bug",
+                "mechanism": "Invisible image that loads from remote server when document opened"
+              },
+              {
+                "type": "DNS canary",
+                "mechanism": "Unique hostname that alerts when resolved"
+              },
+              {
+                "type": "AWS keys",
+                "mechanism": "Alert when used against AWS API"
+              }
+            ],
+            "benefit": "Detection without continuous monitoring\"\"the token alerts YOU"
           }
         ]
       },
-      "what_would_happen_if": [
+      "must_remember_for_exam": [
         {
-          "situation": "Honey credentials planted in Active Directory get used",
-          "consequence": "Authentication attempt with fake credentials generates high-confidence alert. You know: 1) An attacker is present, 2) They enumerated AD, 3) They're attempting lateral movement. Immediate, actionable intelligence.",
-          "lesson": "Honey credentials provide definitive compromise indicators\u2014no false positives possible"
+          "fact": "Canary tokens call home when triggered",
+          "why_tested": "Mechanism understanding"
         },
         {
-          "situation": "Honeyfile named 'passwords.xlsx' is opened and phones home",
-          "consequence": "Embedded web beacon in document contacts your server with IP address and timing. You know data theft is occurring and from which system. Can track exfiltration in real-time.",
-          "lesson": "Honeyfiles with tracking beacons reveal data theft that might otherwise go undetected"
+          "fact": "Attractive honeyfile names: passwords.xlsx, salary_data.xlsx",
+          "why_tested": "Common patterns"
+        },
+        {
+          "fact": "Document all honeytokens to prevent IT triggering false positives",
+          "why_tested": "Operational requirement"
         }
       ],
-      "glossary_terms": [
-        {
-          "term": "Honeytoken",
-          "definition": "Fake data designed to trigger alerts when accessed or used",
-          "exam_note": "Any type of deceptive data\u2014credentials, files, records, DNS entries"
-        },
-        {
-          "term": "Honey Credentials",
-          "definition": "Fake usernames and passwords planted to detect credential theft",
-          "exam_note": "Use indicates attacker harvested credentials and is attempting access"
-        },
-        {
-          "term": "Honeyfile",
-          "definition": "Fake document containing tracking mechanisms that alert when opened",
-          "exam_note": "Often contains web beacons or macros to phone home"
-        },
-        {
-          "term": "Web Beacon",
-          "definition": "Embedded content that contacts external server when document is opened",
-          "exam_note": "Used in honeyfiles to detect when document is accessed"
-        }
+      "key_points": [
+        "Honeytokens are fake credentials/data that alert when used",
+        "Honeyfiles have attractive names to lure attackers",
+        "Canary tokens actively call home when triggered"
       ],
       "knowledge_check": {
-        "question": "A security team plants fake admin credentials in several systems across the network. Two weeks later, an authentication attempt using these credentials is detected. What can the team conclude?",
+        "question": "Fake customer records were planted in a database. These records later appear in a dark web data dump. What has been detected?",
         "options": [
-          "A system administrator made a typo during login",
-          "The authentication system has a bug creating false positives",
-          "An attacker has compromised at least one system and is attempting lateral movement",
-          "The fake credentials were accidentally deployed to production"
+          "SQL injection attack",
+          "Insider accessing wrong data",
+          "Data breach with exfiltration",
+          "Phishing attack"
         ],
-        "correct_answer": 2,
-        "explanation": "Honey credentials are never used legitimately\u2014their use definitively indicates an attacker harvested credentials from a compromised system and is attempting to use them for lateral movement. This is a high-confidence indicator of compromise.",
-        "wrong_answer_analysis": {
-          "0": "Legitimate admins don't use honey credentials\u2014they don't know they exist.",
-          "1": "Honey credential alerts are triggered by actual authentication attempts, not system bugs.",
-          "3": "The question states credentials were planted intentionally, and their use indicates theft, not deployment error."
-        }
-      },
-      "must_remember": [
-        "Honeytokens = zero false positives (legitimate users never use them)",
-        "Types: credentials, files, database records, DNS entries",
-        "Must be believable\u2014obvious fakes don't catch sophisticated attackers",
-        "Requires monitoring to generate alerts when triggered"
-      ]
+        "correct": 2,
+        "explanation": "The appearance of honeytoken records outside the organization proves data breach and exfiltration. These records have no legitimate reason to exist externally.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_wrong": "SQL injection is an attack method, not what was detected"
+          },
+          {
+            "option": 1,
+            "why_wrong": "Data reached external dark web, not just internal access"
+          },
+          {
+            "option": 3,
+            "why_wrong": "No indication of phishing involvement"
+          }
+        ]
+      }
     },
     {
       "section_id": "D1-L007-S04",
-      "title": "Deception Strategy and Limitations",
-      "content": "Effective deception requires strategic planning and understanding of limitations.\n\n**Strategic Considerations**\n\n*Coverage:*\n- Where are attackers likely to look?\n- What would they want to steal?\n- How do they move through networks?\n\n*Resource Investment:*\n- Low-interaction: Minimal resources\n- High-interaction: Significant maintenance\n- Balance coverage with manageable complexity\n\n*Integration:*\n- Connect to SIEM for alerting\n- Feed threat intelligence platforms\n- Link to incident response workflows\n\n**Benefits of Deception**\n\n*Detection Advantages:*\n- High-fidelity alerts (no false positives)\n- Early warning (catch reconnaissance)\n- Threat intelligence (capture TTPs)\n- Asymmetric advantage (cheap defense, expensive avoidance)\n\n**Limitations and Risks**\n\n*Limitations:*\n- Doesn't prevent attacks (detection only)\n- Sophisticated attackers may avoid/identify honeypots\n- Requires maintenance and monitoring\n- Can be bypassed entirely\n\n*Risks:*\n- High-interaction honeypots can be weaponized\n- Poorly isolated systems create liability\n- Legal considerations for capturing attacker data\n- Resource drain if over-deployed\n\n**Best Practices**\n\n- Start with low-interaction for breadth\n- Add high-interaction for intelligence needs\n- Integrate with existing security stack\n- Regularly update to maintain realism\n- Monitor and respond to all alerts",
-      "memory_hooks": {
-        "mnemonics": [
+      "title": "DNS Sinkholes",
+      "estimated_time": "8 minutes",
+      "content": {
+        "overview": "DNS sinkholes redirect queries for malicious domains to controlled servers instead of real destinations.",
+        "core_concepts": [
           {
-            "name": "DITE = Deception Benefits",
-            "expansion": "Detection, Intelligence, Threat diversion, Early warning",
-            "usage": "Four key benefits of deception technologies"
+            "concept": "How DNS Sinkholes Work",
+            "process": [
+              "Organization maintains list of domains to sinkhole",
+              "Internal DNS returns sinkhole IP instead of real IP",
+              "Connection goes to controlled server",
+              "Sinkhole logs the attempt and may serve warning"
+            ]
           },
           {
-            "name": "Deception \u2260 Prevention",
-            "expansion": "Honeypots detect, they don't prevent",
-            "usage": "Critical limitation to remember\u2014deception is detective control"
-          }
-        ],
-        "analogies": [
-          {
-            "concept": "Deception Strategy = Wildlife Camera Traps",
-            "analogy": "Wildlife cameras detect animals on trails but don't prevent them from traveling. You need cameras (detection) AND fences (prevention). Deception is your camera network\u2014vital for knowing what's there.",
-            "why_it_works": "Wildlife cameras clearly illustrate detection vs prevention"
-          }
-        ],
-        "common_mistakes": [
-          {
-            "mistake": "Relying on deception as primary defense",
-            "why_wrong": "Deception is one layer\u2014it detects but doesn't prevent. Must be combined with preventive controls like firewalls, patching, and access controls..",
-            "correct_understanding": "Deception is one layer\u2014it detects but doesn't prevent. Must be combined with preventive controls like firewalls, patching, and access controls.",
-            "exam_trap": "Questions asking about 'primary' or 'best' control\u2014deception is supporting, not primary"
-          },
-          {
-            "mistake": "Deploying deception without maintenance plan",
-            "why_wrong": "Honeypots need updates to remain realistic. Outdated deception is easily identified and bypassed.",
-            "correct_understanding": "Honeypots need updates to remain realistic. Outdated deception is easily identified and bypassed. Budget for ongoing maintenance.",
-            "exam_trap": "Effective deception requires ongoing investment, not deploy-and-forget"
+            "concept": "Use Cases",
+            "cases": [
+              {
+                "case": "Malware C2 blocking",
+                "explanation": "Infected systems can't reach command servers; also detects infections"
+              },
+              {
+                "case": "Phishing protection",
+                "explanation": "Redirect users from known phishing sites"
+              },
+              {
+                "case": "Threat research",
+                "explanation": "Study attack patterns and identify infected systems"
+              }
+            ]
           }
         ]
       },
-      "what_would_happen_if": [
+      "must_remember_for_exam": [
         {
-          "situation": "Organization deploys honeypots but doesn't maintain them",
-          "consequence": "Honeypots running outdated software with known signatures. Attackers' tools automatically identify and skip them. Deception provides false sense of security while detecting nothing.",
-          "lesson": "Deception requires maintenance\u2014outdated honeypots are useless or worse"
+          "fact": "DNS sinkhole redirects malicious domain queries to controlled server",
+          "why_tested": "Mechanism definition"
         },
         {
-          "situation": "Company relies solely on deception with no preventive controls",
-          "consequence": "Honeypots detect attacker, alerts fire, but no controls exist to stop the attack. Detection without prevention = watching the breach happen.",
-          "lesson": "Deception is ONE layer. Must combine with prevention, not replace it."
+          "fact": "Sinkhole blocks malware C2 AND detects infected systems",
+          "why_tested": "Dual benefit"
         }
       ],
-      "glossary_terms": [
-        {
-          "term": "Deception Technology",
-          "definition": "Security approach using fake systems, data, or resources to detect and mislead attackers",
-          "exam_note": "Detective control providing high-fidelity alerts"
-        },
-        {
-          "term": "False Positive",
-          "definition": "Alert triggered by benign activity incorrectly identified as malicious",
-          "exam_note": "Honeypots have essentially zero false positives\u2014their advantage"
-        },
-        {
-          "term": "Threat Intelligence",
-          "definition": "Information about threats and threat actors used to improve defenses",
-          "exam_note": "Honeypots generate TI by capturing attacker tools and techniques"
-        },
-        {
-          "term": "Defense in Depth",
-          "definition": "Security strategy using multiple layers of controls",
-          "exam_note": "Deception is one layer\u2014must combine with others"
-        }
+      "key_points": [
+        "DNS sinkholes redirect malicious queries to controlled servers",
+        "Detects infected systems trying to reach C2",
+        "Can display warnings and log connection attempts"
       ],
       "knowledge_check": {
-        "question": "An organization has deployed honeypots across their network and receives an alert showing attacker activity. What is the PRIMARY limitation of this detection?",
+        "question": "A security team redirects all DNS queries for known malware domains to an internal server. What capability does this provide?",
         "options": [
-          "The alert might be a false positive from legitimate traffic",
-          "The honeypot detected but did not prevent the attacker's activity",
-          "The attacker can now attack the honeypot infrastructure",
-          "The honeypot may have captured legally protected data"
+          "Encrypts malware traffic",
+          "Blocks C2 and detects infections",
+          "Removes malware automatically",
+          "Prevents malware download"
         ],
-        "correct_answer": 1,
-        "explanation": "The primary limitation of deception technology is that it's a detective control\u2014it detects attackers but doesn't prevent them from continuing their attack on real systems. While the honeypot alerted, the attacker may already be active elsewhere.",
-        "wrong_answer_analysis": {
-          "0": "Honeypots have extremely low false positive rates since legitimate users don't interact with them.",
-          "2": "While possible with high-interaction honeypots, this is a risk to manage, not the primary limitation.",
-          "3": "Legal considerations exist but aren't the primary limitation of detection-only capability."
-        }
-      },
-      "must_remember": [
-        "Deception = detection, NOT prevention",
-        "High-fidelity alerts (near-zero false positives)",
-        "Must integrate with SIEM and response workflows",
-        "Requires ongoing maintenance to remain effective"
-      ]
+        "correct": 1,
+        "explanation": "DNS sinkhole redirects traffic, blocking C2 communication AND identifying infected systems trying to reach those domains.",
+        "wrong_answer_analysis": [
+          {
+            "option": 0,
+            "why_wrong": "Sinkhole redirects, doesn't encrypt"
+          },
+          {
+            "option": 2,
+            "why_wrong": "Sinkhole detects but doesn't remove malware"
+          },
+          {
+            "option": 3,
+            "why_wrong": "Sinkhole works on C2, not initial download"
+          }
+        ]
+      }
     }
   ],
+  "hands_on_labs": {
+    "browser_labs": [
+      {
+        "lab_id": "lab-deception-design",
+        "title": "Deception Strategy Design",
+        "type": "scenario_planning",
+        "description": "Design honeypot, honeytoken, and honeyfile placement for a sample organization"
+      }
+    ],
+    "external_labs": [
+      {
+        "resource": "Canarytokens.org",
+        "lab_name": "Free Canary Token Service",
+        "url": "https://canarytokens.org",
+        "description": "Create free canary tokens (web bugs, DNS, AWS keys)"
+      },
+      {
+        "resource": "TryHackMe",
+        "lab_name": "Intro to Honeypots",
+        "url": "https://tryhackme.com",
+        "description": "Hands-on honeypot deployment"
+      }
+    ]
+  },
   "summary": {
     "key_takeaways": [
-      "Honeypots are detective controls\u2014detect, don't prevent",
-      "Low-interaction = safe/easy, High-interaction = best intel but risky",
-      "Honeytokens provide zero false positive detection",
-      "Honeywall provides control, capture, collection for honeynets",
-      "Deception is one layer\u2014must combine with other controls"
+      "Honeypot = decoy system; Honeytoken = fake credentials/data; Honeyfile = fake document",
+      "Any interaction with deception is suspicious\"\"near-zero false positives",
+      "Low-interaction is safer; high-interaction provides richer data but must be contained",
+      "DNS sinkholes redirect malicious domains and detect infected systems",
+      "Canary tokens actively call home when triggered"
     ],
-    "exam_focus": "Honeypot types, detection vs prevention, honeytoken use cases",
-    "next_lesson": "D1-LESSON-008: Change Management\u2014controlling changes to maintain security"
+    "exam_essentials": [
+      "Honeypot = SYSTEM; Honeytoken = CREDENTIALS/DATA",
+      "Low-interaction = emulated (safer); High-interaction = full OS (riskier)",
+      "DNS sinkhole redirects DNS queries for malicious domains",
+      "Canary tokens call home when triggered",
+      "Key benefit: near-zero false positives"
+    ]
+  },
+  "related_content": {
+    "simulations": [
+      "D1-SIM-003"
+    ],
+    "remediation": [
+      "D1-REM-001"
+    ],
+    "next_lesson": "D1-LESSON-008",
+    "previous_lesson": "D1-LESSON-006"
   }
 }
