@@ -1800,27 +1800,38 @@ function injectStyles() {
             gap: 8px;
             flex-wrap: wrap;
             align-items: center;
+            justify-content: flex-end;
         }
         
         .nav-btn {
-            background: transparent;
+            background: #18181b;
             color: #a1a1aa;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
+            border: 1px solid #27272a;
+            padding: 10px 14px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            min-width: 100px;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
         }
         
         .nav-btn:hover {
             background: #27272a;
             color: #fafafa;
+            border-color: #3f3f46;
         }
         
         .nav-btn.active {
             background: #27272a;
             color: #6366f1;
+            border-color: #6366f1;
         }
         
         /* Container */
@@ -2978,13 +2989,14 @@ function injectStyles() {
             .header-nav {
                 width: 100%;
                 justify-content: center;
-                gap: 4px;
+                gap: 6px;
                 padding: 8px 0;
             }
             
             .nav-btn {
                 font-size: 0.75rem;
                 padding: 8px 10px;
+                min-width: 80px;
                 min-height: 44px; /* Touch target */
             }
             
@@ -3228,6 +3240,7 @@ function injectStyles() {
             .nav-btn {
                 font-size: 0.85rem;
                 padding: 8px 12px;
+                min-width: 90px;
                 min-height: 44px;
             }
             
@@ -3675,12 +3688,15 @@ function injectStyles() {
         /* Navigation - Light Mode */
         [data-theme="light"] .nav-btn {
             color: #475569 !important;
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
         }
         
         [data-theme="light"] .nav-btn:hover,
         [data-theme="light"] .nav-btn.active {
             color: #0f172a !important;
             background: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
         }
         
         /* Back Button - Light Mode */
