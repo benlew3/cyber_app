@@ -1017,12 +1017,37 @@
             `;
         }
         
-        // OLD FORMAT fallback
+        // OBJECT FORMAT with optional mapping array
         if (mh.analogy && typeof mh.analogy === 'object') {
+            const concept = mh.analogy.concept || '';
+            const explanation = mh.analogy.explanation || '';
+            const mapping = mh.analogy.mapping || [];
+            
+            let mappingHtml = '';
+            if (mapping.length > 0) {
+                mappingHtml = `
+                    <div class="analogy-mapping">
+                        ${mapping.map(m => `
+                            <div class="mapping-item">
+                                <strong>${escapeHtml(m.category || m.type || m.item || '')}</strong>
+                                <span class="mapping-equiv">→ ${escapeHtml(m.restaurant_equivalent || m.home_equivalent || m.equivalent || m.analogy || '')}</span>
+                                ${m.explanation ? `<span class="mapping-explain">(${escapeHtml(m.explanation)})</span>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
             return `
                 <div class="memory-section analogies">
-                    <h5>🔗 Analogy: ${escapeHtml(mh.analogy.concept || '')}</h5>
-                    ${mh.analogy.explanation ? `<p>${escapeHtml(mh.analogy.explanation)}</p>` : ''}
+                    <div class="analogy-card">
+                        <div class="analogy-label">
+                            <span>💡</span> Think of it like...
+                        </div>
+                        ${concept ? `<p class="analogy-concept-text">${escapeHtml(concept)}</p>` : ''}
+                        ${explanation ? `<p class="analogy-text">${escapeHtml(explanation)}</p>` : ''}
+                        ${mappingHtml}
+                    </div>
                 </div>
             `;
         }
@@ -1925,10 +1950,29 @@
                 color: #6366f1;
             }
             
+            .analogy-label {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: #ec4899;
+                font-weight: 600;
+                margin-bottom: 10px;
+            }
+            
+            .analogy-label span {
+                font-size: 1.2rem;
+            }
+            
             .analogy-concept {
                 font-weight: 600;
                 color: #fafafa;
                 margin-bottom: 8px;
+            }
+            
+            .analogy-concept-text {
+                color: #fafafa;
+                font-weight: 500;
+                margin-bottom: 10px;
             }
             
             .analogy-comparison {
@@ -1953,6 +1997,43 @@
             .analogy-why {
                 font-size: 0.9rem;
                 color: #a1a1aa;
+            }
+            
+            /* Analogy Mapping */
+            .analogy-mapping {
+                margin-top: 12px;
+                padding: 12px;
+                background: #1f1f23;
+                border-radius: 6px;
+            }
+            
+            .mapping-item {
+                padding: 8px 0;
+                border-bottom: 1px solid #27272a;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                align-items: baseline;
+            }
+            
+            .mapping-item:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+            
+            .mapping-item strong {
+                color: #93c5fd;
+                min-width: 100px;
+            }
+            
+            .mapping-equiv {
+                color: #e4e4e7;
+            }
+            
+            .mapping-explain {
+                color: #71717a;
+                font-size: 0.9rem;
+                font-style: italic;
             }
             
             .mistake-wrong {
@@ -3258,7 +3339,8 @@
             }
             
             [data-theme="light"] .mnemonic-name,
-            [data-theme="light"] .analogy-concept {
+            [data-theme="light"] .analogy-concept,
+            [data-theme="light"] .analogy-concept-text {
                 color: #000000 !important;
             }
             
@@ -3271,12 +3353,39 @@
                 color: #4f46e5 !important;
             }
             
+            [data-theme="light"] .analogy-label {
+                color: #ec4899 !important;
+            }
+            
             [data-theme="light"] .analogy-comparison {
                 background: #eeeeee !important;
             }
             
             [data-theme="light"] .analogy-text {
                 color: #111111 !important;
+            }
+            
+            /* ANALOGY MAPPING */
+            [data-theme="light"] .analogy-mapping {
+                background: #ffffff !important;
+                border: 1px solid #e0e0e0 !important;
+            }
+            
+            [data-theme="light"] .mapping-item {
+                color: #111111 !important;
+                border-bottom-color: #f0f0f0 !important;
+            }
+            
+            [data-theme="light"] .mapping-item strong {
+                color: #2563eb !important;
+            }
+            
+            [data-theme="light"] .mapping-equiv {
+                color: #333333 !important;
+            }
+            
+            [data-theme="light"] .mapping-explain {
+                color: #555555 !important;
             }
             
             /* COMMON MISTAKES */
