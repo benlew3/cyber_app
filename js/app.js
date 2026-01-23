@@ -3880,6 +3880,523 @@ function injectStyles() {
             background: #f5f5f5 !important;
             border-color: #e0e0e0 !important;
         }
+        
+        /* ============================================
+           COMPREHENSIVE LIGHT MODE FIXES
+           Consolidated from all sources
+           ============================================ */
+        
+        /* 1. INTRO SECTION - Light grey background with black text */
+        [data-theme="light"] .intro-section {
+            background: #f5f5f5 !important;
+            border-left-color: #6366f1 !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .intro-section p,
+        [data-theme="light"] .intro-section .content-para,
+        [data-theme="light"] .intro-section span {
+            color: #111111 !important;
+        }
+        
+        /* 2. LEARNING GOALS - White background with green left border, black text */
+        [data-theme="light"] .learning-goals {
+            background: #ffffff !important;
+            border: 1px solid #e0e0e0 !important;
+            border-left: 4px solid #10b981 !important;
+        }
+        
+        [data-theme="light"] .learning-goals h3 {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .learning-goals ul {
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .learning-goals li {
+            color: #111111 !important;
+            border-bottom-color: #f0f0f0 !important;
+        }
+        
+        [data-theme="light"] .learning-goals li::before {
+            color: #10b981 !important;
+        }
+        
+        /* 3. SIDEBAR - Black for active, dark grey for inactive */
+        [data-theme="light"] .lesson-sidebar,
+        [data-theme="light"] .sidebar,
+        [data-theme="light"] [class*="sidebar"] {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .lesson-sidebar h4,
+        [data-theme="light"] .sidebar h4,
+        [data-theme="light"] .sidebar-title {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .sidebar-item,
+        [data-theme="light"] .contents-item,
+        [data-theme="light"] .nav-item,
+        [data-theme="light"] .lesson-toc a,
+        [data-theme="light"] .toc-item {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .sidebar-item:hover,
+        [data-theme="light"] .contents-item:hover,
+        [data-theme="light"] .nav-item:hover,
+        [data-theme="light"] .lesson-toc a:hover,
+        [data-theme="light"] .toc-item:hover {
+            background: #f5f5f5 !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .sidebar-item.active,
+        [data-theme="light"] .contents-item.active,
+        [data-theme="light"] .nav-item.active,
+        [data-theme="light"] .lesson-toc a.active,
+        [data-theme="light"] .toc-item.active {
+            background: #f0f0f0 !important;
+            color: #111111 !important;
+            border-left-color: #6366f1 !important;
+        }
+        
+        /* Progress circle in sidebar */
+        [data-theme="light"] .progress-circle,
+        [data-theme="light"] .progress-ring {
+            background: #f5f5f5 !important;
+        }
+        
+        [data-theme="light"] .progress-text {
+            color: #111111 !important;
+        }
+        
+        /* 4. INLINE STYLE OVERRIDES - Comprehensive coverage */
+        /* Dark backgrounds to white/light */
+        [data-theme="light"] [style*="background: #18181b"],
+        [data-theme="light"] [style*="background:#18181b"],
+        [data-theme="light"] [style*="background: #1a1a1f"],
+        [data-theme="light"] [style*="background:#1a1a1f"],
+        [data-theme="light"] [style*="background: #141416"],
+        [data-theme="light"] [style*="background:#141416"],
+        [data-theme="light"] [style*="background: #1e1e22"],
+        [data-theme="light"] [style*="background:#1e1e22"],
+        [data-theme="light"] [style*="background: #1f1f23"],
+        [data-theme="light"] [style*="background:#1f1f23"],
+        [data-theme="light"] [style*="background: #0d0d0f"],
+        [data-theme="light"] [style*="background:#0d0d0f"] {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        /* Gradient backgrounds */
+        [data-theme="light"] [style*="background: linear-gradient(135deg, #18181b"],
+        [data-theme="light"] [style*="background:linear-gradient(135deg, #18181b"],
+        [data-theme="light"] [style*="background: linear-gradient(135deg, #1a1a1f"],
+        [data-theme="light"] [style*="background: linear-gradient(135deg, #141416"] {
+            background: #ffffff !important;
+            border: 1px solid #e0e0e0 !important;
+        }
+        
+        /* Light text to black */
+        [data-theme="light"] [style*="color: #fafafa"],
+        [data-theme="light"] [style*="color:#fafafa"],
+        [data-theme="light"] [style*="color: #f4f4f5"],
+        [data-theme="light"] [style*="color:#f4f4f5"],
+        [data-theme="light"] [style*="color: #e4e4e7"],
+        [data-theme="light"] [style*="color:#e4e4e7"],
+        [data-theme="light"] [style*="color: #d4d4d8"],
+        [data-theme="light"] [style*="color:#d4d4d8"] {
+            color: #111111 !important;
+        }
+        
+        /* Muted text to dark grey */
+        [data-theme="light"] [style*="color: #a1a1aa"],
+        [data-theme="light"] [style*="color:#a1a1aa"],
+        [data-theme="light"] [style*="color: #71717a"],
+        [data-theme="light"] [style*="color:#71717a"],
+        [data-theme="light"] [style*="color: #52525b"],
+        [data-theme="light"] [style*="color:#52525b"] {
+            color: #555555 !important;
+        }
+        
+        /* Blue headings to black */
+        [data-theme="light"] [style*="color: #93c5fd"],
+        [data-theme="light"] [style*="color:#93c5fd"],
+        [data-theme="light"] [style*="color: #60a5fa"],
+        [data-theme="light"] [style*="color:#60a5fa"] {
+            color: #000000 !important;
+        }
+        
+        /* Border overrides */
+        [data-theme="light"] [style*="border-color: #27272a"],
+        [data-theme="light"] [style*="border-color:#27272a"],
+        [data-theme="light"] [style*="border: 1px solid #27272a"],
+        [data-theme="light"] [style*="border: 1px solid #3f3f46"],
+        [data-theme="light"] [style*="border: 1px solid #1f1f23"],
+        [data-theme="light"] [style*="border-bottom: 1px solid #27272a"],
+        [data-theme="light"] [style*="border-top: 1px solid #27272a"] {
+            border-color: #e0e0e0 !important;
+        }
+        
+        /* 5. DOMAIN HEADER - Black font */
+        [data-theme="light"] .back-btn {
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .back-btn:hover {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .page-title {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .page-subtitle {
+            color: #333333 !important;
+        }
+        
+        /* Domain navigation breadcrumb */
+        [data-theme="light"] .breadcrumb,
+        [data-theme="light"] [class*="breadcrumb"] {
+            color: #555555 !important;
+        }
+        
+        /* 6. LESSON SECTION BORDERS - Subtle/invisible */
+        [data-theme="light"] .lesson-section {
+            border-bottom-color: #f0f0f0 !important;
+        }
+        
+        [data-theme="light"] .lesson-section:last-of-type {
+            border-bottom: none !important;
+        }
+        
+        [data-theme="light"] .lesson-prev-next {
+            border-top-color: #f0f0f0 !important;
+        }
+        
+        /* LESSON CONTENT - All text black */
+        [data-theme="light"] .lesson-viewer {
+            background: #ffffff !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .lesson-viewer h1,
+        [data-theme="light"] .lesson-viewer h2,
+        [data-theme="light"] .lesson-viewer h3,
+        [data-theme="light"] .lesson-viewer h4,
+        [data-theme="light"] .lesson-viewer h5 {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .lesson-viewer p,
+        [data-theme="light"] .lesson-viewer li,
+        [data-theme="light"] .lesson-viewer span,
+        [data-theme="light"] .lesson-viewer div {
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .lesson-content {
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .lesson-content p,
+        [data-theme="light"] .lesson-content li,
+        [data-theme="light"] .lesson-content span {
+            color: #111111 !important;
+        }
+        
+        /* LESSON SECTION HEADINGS */
+        [data-theme="light"] .lesson-section h3 {
+            color: #000000 !important;
+        }
+        
+        /* KEY POINTS BOX */
+        [data-theme="light"] .key-points-box {
+            background: #f5f5f5 !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .key-points-box strong {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .key-points-box li {
+            color: #111111 !important;
+        }
+        
+        /* EXAM TIPS BOX */
+        [data-theme="light"] .exam-tips-box {
+            background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%) !important;
+            border-color: #c7d2fe !important;
+        }
+        
+        [data-theme="light"] .exam-tips-box strong {
+            color: #4f46e5 !important;
+        }
+        
+        [data-theme="light"] .exam-tips-box p,
+        [data-theme="light"] .exam-tips-box li {
+            color: #111111 !important;
+        }
+        
+        /* REAL WORLD BOX */
+        [data-theme="light"] .real-world-box {
+            background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%) !important;
+            border-color: #fde047 !important;
+        }
+        
+        [data-theme="light"] .real-world-box strong {
+            color: #a16207 !important;
+        }
+        
+        [data-theme="light"] .real-world-box p {
+            color: #422006 !important;
+        }
+        
+        /* LESSON BOTTOM NAV */
+        [data-theme="light"] .lesson-bottom-nav {
+            background: #f5f5f5 !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .lesson-actions .btn {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .lesson-actions .btn:hover {
+            background: #f0f0f0 !important;
+        }
+        
+        /* KNOWLEDGE CHECK */
+        [data-theme="light"] .kc-progress {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .kc-progress-value {
+            color: #111111 !important;
+        }
+        
+        /* LESSON META (objectives, duration badges) */
+        [data-theme="light"] .lesson-meta {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .lesson-meta span,
+        [data-theme="light"] .lesson-meta div {
+            color: #555555 !important;
+        }
+        
+        /* Career relevance tags */
+        [data-theme="light"] .career-tag,
+        [data-theme="light"] [class*="role-tag"],
+        [data-theme="light"] [class*="career-relevance"] span {
+            border-color: #e0e0e0 !important;
+        }
+        
+        /* Difficulty badges */
+        [data-theme="light"] .difficulty-beginner {
+            background: #10b981 !important;
+            color: #ffffff !important;
+        }
+        
+        [data-theme="light"] .difficulty-intermediate {
+            background: #f59e0b !important;
+            color: #ffffff !important;
+        }
+        
+        [data-theme="light"] .difficulty-advanced {
+            background: #ef4444 !important;
+            color: #ffffff !important;
+        }
+        
+        /* FORCE ALL TEXT IN LESSON VIEWER TO BE READABLE */
+        [data-theme="light"] .lesson-viewer *:not(.btn):not(.btn-primary):not(.difficulty-beginner):not(.difficulty-intermediate):not(.difficulty-advanced):not([class*="badge"]) {
+            color: inherit;
+        }
+        
+        /* CODE BLOCKS */
+        [data-theme="light"] .lesson-viewer code,
+        [data-theme="light"] code {
+            background: #f0f0f0 !important;
+            color: #7c3aed !important;
+        }
+        
+        [data-theme="light"] .lesson-viewer pre,
+        [data-theme="light"] pre {
+            background: #1e293b !important;
+            color: #e2e8f0 !important;
+        }
+        
+        /* TABLES */
+        [data-theme="light"] .lesson-viewer table {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .lesson-viewer th {
+            background: #f5f5f5 !important;
+            color: #000000 !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .lesson-viewer td {
+            color: #111111 !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        /* BLOCKQUOTES */
+        [data-theme="light"] .lesson-viewer blockquote {
+            background: #f5f5f5 !important;
+            border-left-color: #6366f1 !important;
+            color: #333333 !important;
+        }
+        
+        /* LINKS */
+        [data-theme="light"] .lesson-viewer a {
+            color: #4f46e5 !important;
+        }
+        
+        [data-theme="light"] .lesson-viewer a:hover {
+            color: #4338ca !important;
+        }
+        
+        /* SIMULATION/QUIZ in lesson context */
+        [data-theme="light"] .simulation-container,
+        [data-theme="light"] .pbq-container {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .simulation-step {
+            background: #f5f5f5 !important;
+        }
+        
+        /* GLOSSARY items */
+        [data-theme="light"] .glossary-container {
+            background: #ffffff !important;
+        }
+        
+        [data-theme="light"] .glossary-item {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .glossary-term {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .glossary-definition {
+            color: #333333 !important;
+        }
+        
+        /* MODALS */
+        [data-theme="light"] .modal-content,
+        [data-theme="light"] .notes-modal-content {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .modal-header,
+        [data-theme="light"] .modal-title {
+            color: #000000 !important;
+        }
+        
+        /* STAT CARDS on dashboard */
+        [data-theme="light"] .stat-card {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .stat-value {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .stat-label {
+            color: #555555 !important;
+        }
+        
+        /* ANALYTICS CARDS */
+        [data-theme="light"] .analytics-card {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .analytics-value {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .analytics-label {
+            color: #555555 !important;
+        }
+        
+        /* EXAM READINESS PANEL */
+        [data-theme="light"] .exam-readiness-panel,
+        [data-theme="light"] [class*="exam-readiness"] {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .exam-readiness-title {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .exam-readiness-subtitle {
+            color: #555555 !important;
+        }
+        
+        /* RECOMMENDATIONS PANEL */
+        [data-theme="light"] .recommendations-panel {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .recommendation-card {
+            background: #f5f5f5 !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .rec-title {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .rec-description {
+            color: #555555 !important;
+        }
+        
+        /* WEAK AREAS PANEL */
+        [data-theme="light"] .weak-areas-panel {
+            background: #fef2f2 !important;
+            border-color: #fecaca !important;
+        }
+        
+        [data-theme="light"] .weak-areas-title {
+            color: #b91c1c !important;
+        }
+        
+        [data-theme="light"] .weak-area-btn {
+            background: #ffffff !important;
+            border-color: #fecaca !important;
+            color: #b91c1c !important;
+        }
+        
+        /* ERROR/WARNING STATES */
+        [data-theme="light"] .error-container {
+            background: #ffffff !important;
+            border-color: #ef4444 !important;
+        }
+        
+        [data-theme="light"] .error-container h2,
+        [data-theme="light"] .error-container p {
+            color: #111111 !important;
+        }
     `;
     document.head.appendChild(style);
     console.log('✅ Styles injected');
