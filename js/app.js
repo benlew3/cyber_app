@@ -4110,6 +4110,48 @@ function injectStyles() {
             color: #111111 !important;
         }
         
+        /* ENHANCED LESSON VIEWER SPECIFIC */
+        [data-theme="light"] .intro-hook {
+            background: #f5f5f5 !important;
+            color: #111111 !important;
+            border-left-color: #6366f1 !important;
+        }
+        
+        [data-theme="light"] .learning-goals-box {
+            background: #ffffff !important;
+            border: 1px solid #e0e0e0 !important;
+            border-left: 4px solid #10b981 !important;
+        }
+        
+        [data-theme="light"] .learning-goals-box h3 {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .goals-list li {
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .matter-item {
+            border-bottom-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .matter-item strong {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .matter-item p {
+            color: #111111 !important;
+        }
+        
+        /* ENHANCED VIEWER LAYOUT */
+        [data-theme="light"] .enhanced-lesson-container {
+            background: #f5f5f5 !important;
+        }
+        
+        [data-theme="light"] .lesson-main {
+            background: #f5f5f5 !important;
+        }
+        
         /* LESSON SECTION HEADINGS */
         [data-theme="light"] .lesson-section h3 {
             color: #000000 !important;
