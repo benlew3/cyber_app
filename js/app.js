@@ -4200,6 +4200,93 @@ function injectStyles() {
             color: #422006 !important;
         }
         
+        /* SUMMARY SECTION - Key Takeaways, Exam Essentials, What's Next */
+        [data-theme="light"] .summary-section {
+            background: #ffffff !important;
+        }
+        
+        [data-theme="light"] .takeaways-box {
+            background: #f5f5f5 !important;
+            border: 1px solid #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .takeaways-box h3 {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .takeaways-box li {
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .exam-essentials-box {
+            background: #fffbeb !important;
+            border: 1px solid #fde047 !important;
+            border-left: 4px solid #f59e0b !important;
+        }
+        
+        [data-theme="light"] .exam-essentials-box h3 {
+            color: #92400e !important;
+        }
+        
+        [data-theme="light"] .exam-essentials-box li {
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .next-connection {
+            background: linear-gradient(135deg, #dbeafe, #e0e7ff) !important;
+            border: 1px solid #93c5fd !important;
+        }
+        
+        [data-theme="light"] .next-connection h4 {
+            color: #1e40af !important;
+        }
+        
+        [data-theme="light"] .next-connection p {
+            color: #1e3a8a !important;
+        }
+        
+        /* SKILL TREE MINI (Sidebar) */
+        [data-theme="light"] .skill-tree-mini {
+            background: #f5f5f5 !important;
+            border: 1px solid #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .skill-tree-mini h4 {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .mini-label {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .mini-node {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .mini-node.current {
+            background: #6366f1 !important;
+            color: #ffffff !important;
+        }
+        
+        /* LEARNING PATH BOX (Sidebar) */
+        [data-theme="light"] .learning-path-box {
+            background: #f5f5f5 !important;
+            border: 1px solid #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .path-requires,
+        [data-theme="light"] .path-unlocks {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .path-item {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+            color: #111111 !important;
+        }
+        
         /* LESSON BOTTOM NAV */
         [data-theme="light"] .lesson-bottom-nav {
             background: #f5f5f5 !important;
