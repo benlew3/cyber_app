@@ -4397,6 +4397,427 @@ function injectStyles() {
         [data-theme="light"] .error-container p {
             color: #111111 !important;
         }
+        
+        /* ============================================
+           ENHANCED LESSON VIEWER - LIGHT MODE
+           Memory Hooks, Accordions, Exam Weight, etc.
+           ============================================ */
+        
+        /* ACCORDION SECTIONS */
+        [data-theme="light"] .accordion-section {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .accordion-header {
+            background: #f5f5f5 !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .accordion-header:hover {
+            background: #eeeeee !important;
+        }
+        
+        [data-theme="light"] .accordion-header h3,
+        [data-theme="light"] .accordion-header h4 {
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .accordion-hint {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .accordion-badge {
+            background: #e0e0e0 !important;
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .accordion-content {
+            background: #ffffff !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .accordion-content p,
+        [data-theme="light"] .accordion-content li,
+        [data-theme="light"] .accordion-content span {
+            color: #111111 !important;
+        }
+        
+        /* MEMORY HOOKS SECTION */
+        [data-theme="light"] .memory-hooks-section,
+        [data-theme="light"] .memory-section {
+            background: #ffffff !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .memory-section h4,
+        [data-theme="light"] .memory-section h5 {
+            color: #000000 !important;
+        }
+        
+        /* MNEMONIC, ANALOGY, MISTAKE CARDS */
+        [data-theme="light"] .mnemonic-card,
+        [data-theme="light"] .analogy-card,
+        [data-theme="light"] .mistake-card {
+            background: #f5f5f5 !important;
+            border-color: #e0e0e0 !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .mnemonic-name,
+        [data-theme="light"] .analogy-concept {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .mnemonic-expansion,
+        [data-theme="light"] .analogy-why {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .mnemonic-usage {
+            color: #4f46e5 !important;
+        }
+        
+        [data-theme="light"] .analogy-comparison {
+            background: #eeeeee !important;
+        }
+        
+        [data-theme="light"] .analogy-text {
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .analogy-equals {
+            color: #6366f1 !important;
+        }
+        
+        /* COMMON MISTAKES */
+        [data-theme="light"] .common-mistakes {
+            background: #ffffff !important;
+        }
+        
+        [data-theme="light"] .mistake-wrong {
+            color: #dc2626 !important;
+        }
+        
+        [data-theme="light"] .mistake-x {
+            color: #ef4444 !important;
+        }
+        
+        [data-theme="light"] .mistake-right {
+            color: #059669 !important;
+        }
+        
+        [data-theme="light"] .mistake-check {
+            color: #10b981 !important;
+        }
+        
+        [data-theme="light"] .exam-trap-note {
+            background: #fffbeb !important;
+            color: #b45309 !important;
+        }
+        
+        /* WHY THIS MATTERS / INTRO BOX */
+        [data-theme="light"] .why-matters-box,
+        [data-theme="light"] .intro-box,
+        [data-theme="light"] .context-box {
+            background: #f5f5f5 !important;
+            border-color: #e0e0e0 !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .why-matters-box h3,
+        [data-theme="light"] .why-matters-box h4,
+        [data-theme="light"] .intro-box h3 {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .why-matters-box p,
+        [data-theme="light"] .intro-box p {
+            color: #111111 !important;
+        }
+        
+        /* EXAM WEIGHT BOX */
+        [data-theme="light"] .exam-weight-box {
+            background: #f5f5f5 !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .exam-weight-box h4 {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .weight-item {
+            background: #ffffff !important;
+            border: 1px solid #e0e0e0 !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .type-tag {
+            background: #e0e0e0 !important;
+            color: #333333 !important;
+        }
+        
+        [data-theme="light"] .yield-tag {
+            background: #fef3c7 !important;
+            color: #92400e !important;
+        }
+        
+        /* SKILL TREE */
+        [data-theme="light"] .tree-node {
+            background: #f5f5f5 !important;
+            border-color: #e0e0e0 !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .tree-node:hover {
+            background: #eeeeee !important;
+        }
+        
+        [data-theme="light"] .tree-node.current {
+            background: linear-gradient(135deg, #6366f1, #818cf8) !important;
+            color: #ffffff !important;
+        }
+        
+        [data-theme="light"] .tree-column h4 {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .node-title {
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .tree-node.current .node-title {
+            color: #ffffff !important;
+        }
+        
+        [data-theme="light"] .node-badge {
+            background: rgba(0, 0, 0, 0.1) !important;
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .tree-node.current .node-badge {
+            background: rgba(255, 255, 255, 0.3) !important;
+            color: #ffffff !important;
+        }
+        
+        /* TOOL LAB BANNER */
+        [data-theme="light"] .tool-lab-banner {
+            background: linear-gradient(135deg, #dbeafe, #e0e7ff) !important;
+            border-color: #93c5fd !important;
+            color: #1e40af !important;
+        }
+        
+        [data-theme="light"] .tool-lab-info {
+            color: #1e40af !important;
+        }
+        
+        [data-theme="light"] .tool-lab-info strong {
+            color: #1e3a8a !important;
+        }
+        
+        /* REAL WORLD EXAMPLE */
+        [data-theme="light"] .real-world-content {
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .rwe-scenario,
+        [data-theme="light"] .rwe-application,
+        [data-theme="light"] .rwe-impact {
+            background: #f5f5f5 !important;
+            border-color: #e0e0e0 !important;
+            color: #111111 !important;
+        }
+        
+        /* ROLE RELEVANCE CARDS */
+        [data-theme="light"] .role-card {
+            background: #f5f5f5 !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .role-card h4 {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .role-tasks li {
+            color: #111111 !important;
+        }
+        
+        /* CASCADE LEARNING */
+        [data-theme="light"] .cascade-learning {
+            background: #f5f5f5 !important;
+            color: #111111 !important;
+        }
+        
+        /* CONSEQUENCE SCENARIOS */
+        [data-theme="light"] .consequence-card {
+            background: #f5f5f5 !important;
+            border-color: #e0e0e0 !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .consequence-card h4 {
+            color: #000000 !important;
+        }
+        
+        /* INTERACTIVE COMMON MISTAKES */
+        [data-theme="light"] .mistake-item {
+            background: #f5f5f5 !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .mistake-item[data-expanded="true"] {
+            background: #ffffff !important;
+        }
+        
+        [data-theme="light"] .mistake-header {
+            background: #f5f5f5 !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .mistake-header:hover {
+            background: #eeeeee !important;
+        }
+        
+        [data-theme="light"] .mistake-content {
+            background: #ffffff !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .mistake-why-wrong h4 {
+            color: #dc2626 !important;
+        }
+        
+        [data-theme="light"] .mistake-why-wrong p {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .mistake-correct h4 {
+            color: #059669 !important;
+        }
+        
+        [data-theme="light"] .mistake-correct p {
+            color: #555555 !important;
+        }
+        
+        /* PROGRESS INDICATORS */
+        [data-theme="light"] .mastery-progress {
+            background: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .mastery-label {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .mastery-stats span {
+            color: #555555 !important;
+        }
+        
+        /* KNOWLEDGE CHECK IN LESSONS */
+        [data-theme="light"] .knowledge-check-box {
+            background: #f5f5f5 !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .knowledge-check-box h4 {
+            color: #000000 !important;
+        }
+        
+        /* RETENTION POINTS */
+        [data-theme="light"] .retention-box {
+            background: #f5f5f5 !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .retention-box h4 {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .retention-box li {
+            color: #111111 !important;
+        }
+        
+        /* DEEP DIVE SECTIONS */
+        [data-theme="light"] .deep-dive {
+            background: #ffffff !important;
+            border-left-color: #6366f1 !important;
+        }
+        
+        /* NAV BUTTONS IN LESSONS */
+        [data-theme="light"] .nav-arrow {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .nav-arrow:hover {
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .nav-label {
+            color: #555555 !important;
+        }
+        
+        [data-theme="light"] .nav-title {
+            color: #111111 !important;
+        }
+        
+        /* GENERIC DARK BACKGROUND OVERRIDES IN ENHANCED VIEWER */
+        [data-theme="light"] .enhanced-lesson-viewer,
+        [data-theme="light"] .enhanced-content {
+            background: #ffffff !important;
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .enhanced-lesson-viewer h1,
+        [data-theme="light"] .enhanced-lesson-viewer h2,
+        [data-theme="light"] .enhanced-lesson-viewer h3,
+        [data-theme="light"] .enhanced-lesson-viewer h4,
+        [data-theme="light"] .enhanced-lesson-viewer h5 {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .enhanced-lesson-viewer p,
+        [data-theme="light"] .enhanced-lesson-viewer li,
+        [data-theme="light"] .enhanced-lesson-viewer span,
+        [data-theme="light"] .enhanced-lesson-viewer div {
+            color: inherit !important;
+        }
+        
+        /* CATCH-ALL for any remaining dark backgrounds in lessons */
+        [data-theme="light"] .lesson-viewer [style*="background: #27272a"],
+        [data-theme="light"] .lesson-viewer [style*="background:#27272a"],
+        [data-theme="light"] .lesson-viewer [style*="background: #1f1f23"],
+        [data-theme="light"] .lesson-viewer [style*="background:#1f1f23"],
+        [data-theme="light"] .lesson-viewer [style*="background: #18181b"],
+        [data-theme="light"] .lesson-viewer [style*="background:#18181b"] {
+            background: #f5f5f5 !important;
+        }
+        
+        [data-theme="light"] .enhanced-lesson-viewer [style*="background: #27272a"],
+        [data-theme="light"] .enhanced-lesson-viewer [style*="background:#27272a"],
+        [data-theme="light"] .enhanced-lesson-viewer [style*="background: #1f1f23"],
+        [data-theme="light"] .enhanced-lesson-viewer [style*="background:#1f1f23"],
+        [data-theme="light"] .enhanced-lesson-viewer [style*="background: #18181b"],
+        [data-theme="light"] .enhanced-lesson-viewer [style*="background:#18181b"] {
+            background: #f5f5f5 !important;
+        }
+        
+        /* Force text to be readable in lessons */
+        [data-theme="light"] .lesson-viewer [style*="color: #fafafa"],
+        [data-theme="light"] .lesson-viewer [style*="color:#fafafa"],
+        [data-theme="light"] .lesson-viewer [style*="color: #e4e4e7"],
+        [data-theme="light"] .lesson-viewer [style*="color:#e4e4e7"],
+        [data-theme="light"] .lesson-viewer [style*="color: #a1a1aa"],
+        [data-theme="light"] .lesson-viewer [style*="color:#a1a1aa"] {
+            color: #111111 !important;
+        }
+        
+        [data-theme="light"] .enhanced-lesson-viewer [style*="color: #fafafa"],
+        [data-theme="light"] .enhanced-lesson-viewer [style*="color:#fafafa"],
+        [data-theme="light"] .enhanced-lesson-viewer [style*="color: #e4e4e7"],
+        [data-theme="light"] .enhanced-lesson-viewer [style*="color:#e4e4e7"],
+        [data-theme="light"] .enhanced-lesson-viewer [style*="color: #a1a1aa"],
+        [data-theme="light"] .enhanced-lesson-viewer [style*="color:#a1a1aa"] {
+            color: #111111 !important;
+        }
     `;
     document.head.appendChild(style);
     console.log('✅ Styles injected');
