@@ -284,14 +284,52 @@
     function renderAnalogyCard(analogy) {
         if (!analogy) return '';
         
-        return `
-            <div class="analogy-card">
-                <div class="analogy-label">
-                    <span>💡</span> Think of it like...
+        // Handle string format (simple analogy)
+        if (typeof analogy === 'string') {
+            return `
+                <div class="analogy-card">
+                    <div class="analogy-label">
+                        <span>💡</span> Think of it like...
+                    </div>
+                    <p class="analogy-text">${escapeHtmlSafe(analogy)}</p>
                 </div>
-                <p class="analogy-text">${escapeHtmlSafe(analogy)}</p>
-            </div>
-        `;
+            `;
+        }
+        
+        // Handle object format with concept and optional mapping/explanation
+        if (typeof analogy === 'object') {
+            const concept = analogy.concept || '';
+            const explanation = analogy.explanation || '';
+            const mapping = analogy.mapping || [];
+            
+            let mappingHtml = '';
+            if (mapping.length > 0) {
+                mappingHtml = `
+                    <div class="analogy-mapping">
+                        ${mapping.map(m => `
+                            <div class="mapping-item">
+                                <strong>${escapeHtmlSafe(m.category || m.type || m.item || '')}</strong>
+                                <span class="mapping-equiv">→ ${escapeHtmlSafe(m.restaurant_equivalent || m.home_equivalent || m.equivalent || m.analogy || '')}</span>
+                                ${m.explanation ? `<span class="mapping-explain">(${escapeHtmlSafe(m.explanation)})</span>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="analogy-card">
+                    <div class="analogy-label">
+                        <span>💡</span> Think of it like...
+                    </div>
+                    ${concept ? `<p class="analogy-concept-text">${escapeHtmlSafe(concept)}</p>` : ''}
+                    ${explanation ? `<p class="analogy-text">${escapeHtmlSafe(explanation)}</p>` : ''}
+                    ${mappingHtml}
+                </div>
+            `;
+        }
+        
+        return '';
     }
     
     function renderProgressBar(lessonId, sectionIndex, totalMistakes) {
