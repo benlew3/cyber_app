@@ -4611,12 +4611,44 @@ function injectStyles() {
             background: #eeeeee !important;
         }
         
-        [data-theme="light"] .analogy-text {
+        [data-theme="light"] .analogy-text,
+        [data-theme="light"] .analogy-concept-text {
             color: #111111 !important;
         }
         
         [data-theme="light"] .analogy-equals {
             color: #6366f1 !important;
+        }
+        
+        [data-theme="light"] .analogy-label {
+            color: #ec4899 !important;
+        }
+        
+        [data-theme="light"] .analogy-label span {
+            color: #f59e0b !important;
+        }
+        
+        /* ANALOGY MAPPING */
+        [data-theme="light"] .analogy-mapping {
+            background: #ffffff !important;
+            border-color: #e0e0e0 !important;
+        }
+        
+        [data-theme="light"] .mapping-item {
+            color: #111111 !important;
+            border-bottom-color: #f0f0f0 !important;
+        }
+        
+        [data-theme="light"] .mapping-item strong {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .mapping-equiv {
+            color: #333333 !important;
+        }
+        
+        [data-theme="light"] .mapping-explain {
+            color: #555555 !important;
         }
         
         /* COMMON MISTAKES */
