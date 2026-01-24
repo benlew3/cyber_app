@@ -1797,12 +1797,16 @@ function injectStyles() {
         
         .header-nav {
             display: flex;
-            gap: 8px;
+            flex-direction: row;
             flex-wrap: wrap;
+            gap: 8px;
             align-items: center;
         }
         
         .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             background: transparent;
             color: #a1a1aa;
             border: none;
@@ -1811,6 +1815,7 @@ function injectStyles() {
             cursor: pointer;
             font-size: 0.9rem;
             transition: all 0.2s;
+            white-space: nowrap;
         }
         
         .nav-btn:hover {
@@ -3436,8 +3441,20 @@ function injectStyles() {
         
         [data-theme="light"] .header-bar {
             background: #ffffff !important;
-            border-bottom-color: #e0e0e0 !important;
+            border-bottom: 1px solid #e0e0e0 !important;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+        }
+        
+        [data-theme="light"] .header-brand {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .header-brand span {
+            color: #000000 !important;
+        }
+        
+        [data-theme="light"] .header-nav {
+            background: transparent !important;
         }
         
         [data-theme="light"] .container {
@@ -3694,14 +3711,19 @@ function injectStyles() {
         [data-theme="light"] .nav-btn {
             color: #333333 !important;
             background: #ffffff !important;
-            border-color: #e0e0e0 !important;
+            border: 1px solid #e0e0e0 !important;
         }
         
         [data-theme="light"] .nav-btn:hover,
         [data-theme="light"] .nav-btn.active {
             color: #000000 !important;
-            background: #f0f0f0 !important;
+            background: #f5f5f5 !important;
             border-color: #c0c0c0 !important;
+        }
+        
+        [data-theme="light"] .nav-btn span,
+        [data-theme="light"] .nav-btn::before {
+            color: inherit !important;
         }
         
         /* Back Button - Light Mode (Light Grey + Black Text) */
