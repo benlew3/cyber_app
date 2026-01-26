@@ -132,9 +132,27 @@
 
         // Check for available tool lab
         const toolLab = TOOL_LABS[lessonId];
+        
+        // Domain colors
+        const domainColors = {
+            1: '#6366f1',
+            2: '#f59e0b', 
+            3: '#10b981',
+            4: '#8b5cf6',
+            5: '#ec4899'
+        };
+        const color = domainColors[lesson.domain] || '#6366f1';
 
-        // Build the enhanced lesson view
+        // Build the enhanced lesson view with loading overlay
         content.innerHTML = `
+            <!-- Loading Overlay - blocks interaction until fully loaded -->
+            <div class="lesson-loading-overlay" id="lesson-loading-overlay">
+                <div class="overlay-content">
+                    <div class="overlay-spinner" style="border-top-color: ${color};"></div>
+                    <p>Preparing lesson...</p>
+                </div>
+            </div>
+            
             <div class="enhanced-lesson-container">
                 <!-- Sidebar Navigation -->
                 <aside class="lesson-sidebar">
@@ -253,6 +271,27 @@
         
         // Inject styles if not already present
         injectEnhancedLessonStyles();
+        
+        // Remove loading overlay after everything is rendered and painted
+        // Use requestIdleCallback or fallback to ensure browser is done with layout
+        const removeOverlay = () => {
+            const overlay = document.getElementById('lesson-loading-overlay');
+            if (overlay) {
+                overlay.classList.add('fade-out');
+                setTimeout(() => {
+                    overlay.remove();
+                    console.log('✅ Lesson fully loaded and ready');
+                }, 300);
+            }
+        };
+        
+        // Wait for next animation frame + idle time to ensure full render
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                // Additional delay to ensure all content is painted
+                setTimeout(removeOverlay, 500);
+            });
+        });
     }
 
     // ================================================
@@ -2525,6 +2564,46 @@
                 color: #a5b4fc;
             }
             
+            /* Loading Overlay - blocks interaction until lesson is ready */
+            .lesson-loading-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(9, 9, 11, 0.95);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+                transition: opacity 0.3s ease;
+            }
+            
+            .lesson-loading-overlay.fade-out {
+                opacity: 0;
+                pointer-events: none;
+            }
+            
+            .overlay-content {
+                text-align: center;
+            }
+            
+            .overlay-spinner {
+                width: 50px;
+                height: 50px;
+                border: 4px solid #27272a;
+                border-top-color: #6366f1;
+                border-radius: 50%;
+                margin: 0 auto 16px;
+                animation: spin 1s linear infinite;
+            }
+            
+            .overlay-content p {
+                color: #a1a1aa;
+                font-size: 1rem;
+                margin: 0;
+            }
+            
             /* Loading Screen */
             .lesson-loading-screen {
                 display: flex;
@@ -2602,6 +2681,9 @@
                 display: grid;
                 grid-template-columns: 260px 1fr;
                 min-height: 100vh;
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
             }
             
             .lesson-sidebar {
@@ -3333,6 +3415,9 @@
             @media (max-width: 900px) {
                 .enhanced-lesson-container {
                     grid-template-columns: 1fr;
+                    width: 100%;
+                    max-width: 100%;
+                    margin: 0;
                 }
                 
                 .lesson-sidebar {
@@ -3340,9 +3425,11 @@
                 }
                 
                 .lesson-main {
-                    width: 90%;
-                    padding: 20px 0;
-                    margin: 0 auto;
+                    width: 100%;
+                    max-width: 100%;
+                    padding: 20px 16px;
+                    margin: 0;
+                    box-sizing: border-box;
                 }
                 
                 .skill-tree-visual {
@@ -3352,6 +3439,27 @@
                 .tree-arrow {
                     transform: rotate(90deg);
                     padding: 10px 0;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                .lesson-main {
+                    padding: 16px;
+                    width: 100%;
+                    max-width: 100%;
+                }
+                
+                .lesson-title {
+                    font-size: 1.4rem;
+                }
+                
+                .section-title {
+                    font-size: 1.1rem;
+                }
+                
+                .accordion-header h3,
+                .accordion-header h4 {
+                    font-size: 1rem;
                 }
             }
             
@@ -3843,6 +3951,18 @@
             /* LOADING SCREEN - Light Mode */
             [data-theme="light"] .lesson-loading-screen {
                 background: #f5f5f5 !important;
+            }
+            
+            [data-theme="light"] .lesson-loading-overlay {
+                background: rgba(245, 245, 245, 0.98) !important;
+            }
+            
+            [data-theme="light"] .overlay-spinner {
+                border-color: #e0e0e0 !important;
+            }
+            
+            [data-theme="light"] .overlay-content p {
+                color: #555555 !important;
             }
             
             [data-theme="light"] .loading-spinner {
