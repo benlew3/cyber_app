@@ -9,15 +9,110 @@ async function startInteractiveSimulation(simId) {
     
     const content = document.getElementById('content');
     
-    // Show loading
+    // Get basic sim info for loading screen
+    const simInfo = ALL_SIMULATIONS.find(s => s.id === simId) || { title: 'Simulation', domain: 1 };
+    
+    // Domain colors
+    const domainColors = {
+        1: '#6366f1',
+        2: '#f59e0b', 
+        3: '#10b981',
+        4: '#8b5cf6',
+        5: '#ec4899'
+    };
+    const color = domainColors[simInfo.domain] || '#6366f1';
+    
+    // Show enhanced loading screen
     content.innerHTML = `
-        <div class="container">
-            <div style="text-align: center; padding: 100px 20px;">
-                <div class="loading-spinner" style="margin: 0 auto;"></div>
-                <h2>Initializing Interactive Simulation...</h2>
-                <p style="color: #71717a;">Loading ${simId}</p>
+        <div class="simulation-loading-screen">
+            <div class="loading-content">
+                <div class="loading-spinner" style="border-top-color: ${color};"></div>
+                <div class="loading-domain" style="color: ${color};">Domain ${simInfo.domain} Simulation</div>
+                <h2 class="loading-title">${escapeHtml(simInfo.title || simId)}</h2>
+                <p class="loading-status">Initializing scenario...</p>
+                <div class="loading-progress">
+                    <div class="loading-progress-bar" style="background: ${color};"></div>
+                </div>
             </div>
         </div>
+        <style>
+            .simulation-loading-screen {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 80vh;
+                background: var(--bg-primary, #09090b);
+            }
+            .simulation-loading-screen .loading-content {
+                text-align: center;
+                padding: 40px;
+                max-width: 400px;
+            }
+            .simulation-loading-screen .loading-spinner {
+                width: 60px;
+                height: 60px;
+                border: 4px solid #27272a;
+                border-top-color: #6366f1;
+                border-radius: 50%;
+                margin: 0 auto 24px;
+                animation: sim-spin 1s linear infinite;
+            }
+            @keyframes sim-spin {
+                to { transform: rotate(360deg); }
+            }
+            .simulation-loading-screen .loading-domain {
+                font-size: 0.9rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 8px;
+            }
+            .simulation-loading-screen .loading-title {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #fafafa;
+                margin: 0 0 16px 0;
+            }
+            .simulation-loading-screen .loading-status {
+                color: #71717a;
+                font-size: 0.95rem;
+                margin: 0 0 20px 0;
+            }
+            .simulation-loading-screen .loading-progress {
+                width: 200px;
+                height: 4px;
+                background: #27272a;
+                border-radius: 2px;
+                margin: 0 auto;
+                overflow: hidden;
+            }
+            .simulation-loading-screen .loading-progress-bar {
+                width: 30%;
+                height: 100%;
+                border-radius: 2px;
+                animation: sim-loading-progress 1.5s ease-in-out infinite;
+            }
+            @keyframes sim-loading-progress {
+                0% { transform: translateX(-100%); width: 30%; }
+                50% { width: 60%; }
+                100% { transform: translateX(400%); width: 30%; }
+            }
+            [data-theme="light"] .simulation-loading-screen {
+                background: #f5f5f5;
+            }
+            [data-theme="light"] .simulation-loading-screen .loading-spinner {
+                border-color: #e0e0e0;
+            }
+            [data-theme="light"] .simulation-loading-screen .loading-title {
+                color: #000000;
+            }
+            [data-theme="light"] .simulation-loading-screen .loading-status {
+                color: #555555;
+            }
+            [data-theme="light"] .simulation-loading-screen .loading-progress {
+                background: #e0e0e0;
+            }
+        </style>
     `;
     
     // Get simulation data
