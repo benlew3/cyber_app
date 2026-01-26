@@ -77,6 +77,8 @@
     // ================================================
 
     function showEnhancedLesson(lessonId) {
+        console.log('🎓 showEnhancedLesson called for:', lessonId);
+        
         const content = document.getElementById('content');
         
         // Find lesson in ALL_LESSONS
@@ -86,51 +88,12 @@
             return;
         }
 
-        // Check if loading screen is already showing (from app.js showLessonViewer)
-        const hasLoadingScreen = content.querySelector('.lesson-loading-screen');
-        
-        if (hasLoadingScreen) {
-            // Loading screen already visible, render content directly
-            renderFullLesson(lessonId, lesson);
-        } else {
-            // No loading screen yet, show one first
-            content.innerHTML = renderLoadingScreen(lesson);
-            
-            // Use requestAnimationFrame to ensure loading screen renders before heavy work
-            requestAnimationFrame(() => {
-                setTimeout(() => {
-                    renderFullLesson(lessonId, lesson);
-                }, 50); // Small delay to ensure loading screen is visible
-            });
-        }
-    }
-    
-    function renderLoadingScreen(lesson) {
-        const domainColors = {
-            1: '#6366f1',
-            2: '#f59e0b', 
-            3: '#10b981',
-            4: '#8b5cf6',
-            5: '#ec4899'
-        };
-        const color = domainColors[lesson.domain] || '#6366f1';
-        
-        return `
-            <div class="lesson-loading-screen">
-                <div class="loading-content">
-                    <div class="loading-spinner" style="border-top-color: ${color};"></div>
-                    <div class="loading-domain" style="color: ${color};">Domain ${lesson.domain}</div>
-                    <h2 class="loading-title">${escapeHtml(lesson.title)}</h2>
-                    <p class="loading-status">Loading lesson content...</p>
-                    <div class="loading-progress">
-                        <div class="loading-progress-bar" style="background: ${color};"></div>
-                    </div>
-                </div>
-            </div>
-        `;
+        // Always render directly - app.js showLessonViewer handles the loading screen
+        renderFullLesson(lessonId, lesson);
     }
     
     function renderFullLesson(lessonId, lesson) {
+        console.log('🔨 renderFullLesson called for:', lessonId);
         const content = document.getElementById('content');
         
         // v34: Try to load enhanced lesson data from multiple sources
