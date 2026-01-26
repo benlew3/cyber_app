@@ -5433,9 +5433,7 @@ function showLessonViewer(lessonId) {
     };
     const color = domainColors[lesson.domain] || '#6366f1';
     
-    console.log('📺 Showing loading screen...');
-    
-    // ALWAYS show loading screen FIRST - clear everything and show loader
+    // ALWAYS show loading screen FIRST - block everything else
     content.innerHTML = `
         <div class="lesson-loading-screen" style="
             display: flex;
@@ -5468,7 +5466,7 @@ function showLessonViewer(lessonId) {
                     color: #fafafa;
                     margin: 0 0 16px 0;
                 ">${escapeHtml(lesson.title)}</h2>
-                <p class="loading-status" style="
+                <p class="loading-status" id="loading-status-text" style="
                     color: #71717a;
                     font-size: 0.95rem;
                     margin: 0 0 20px 0;
@@ -5518,50 +5516,92 @@ function showLessonViewer(lessonId) {
         </style>
     `;
     
-    // Force browser to render the loading screen before continuing
-    // Using setTimeout with 0 to push to next event loop, then another delay
-    setTimeout(() => {
-        console.log('⏳ Loading screen visible, now loading content...');
-        
-        // Check if enhanced lesson viewer is available
-        if (typeof showEnhancedLesson === 'function') {
-            const enhancedData = APP.content.lessonData?.[lessonId];
-            const lessonFromList = ALL_LESSONS.find(l => l.id === lessonId);
-            const hasEnhancedFeatures = (data) => data && (
-                data.sections || 
-                data.skill_tree || 
-                data.role_relevance || 
-                data.memory_hooks ||
-                data.introduction?.why_it_matters
-            );
-            
-            if (hasEnhancedFeatures(enhancedData) || hasEnhancedFeatures(lessonFromList)) {
-                console.log(`📚 Loading enhanced lesson: ${lessonId}`);
-                // Call renderFullLesson directly if available, otherwise showEnhancedLesson
-                if (typeof renderFullLesson === 'function') {
-                    renderFullLesson(lessonId, lesson);
-                } else {
-                    showEnhancedLesson(lessonId);
-                }
-                return;
-            }
-        }
-        
-        // Fall back to basic viewer
-        console.log('📖 Loading basic lesson viewer');
-        renderBasicLessonContent(lessonId, lesson);
-    }, 150); // 150ms delay ensures loading screen is visible
+    // Wait for enhanced data to be available, then render
+    waitForEnhancedDataAndRender(lessonId, lesson, color);
 }
 
-function renderEnhancedLessonContent(lessonId) {
-    // Call the enhanced lesson viewer's render function directly
-    if (typeof renderFullLesson === 'function') {
-        const lesson = ALL_LESSONS.find(l => l.id === lessonId);
-        renderFullLesson(lessonId, lesson);
-    } else if (typeof showEnhancedLesson === 'function') {
-        // Fallback - this shouldn't show loading screen again
-        showEnhancedLesson(lessonId);
+// Wait for enhanced lesson data to load, with timeout
+async function waitForEnhancedDataAndRender(lessonId, lesson, color) {
+    const maxWaitTime = 10000; // 10 seconds max wait
+    const checkInterval = 100; // Check every 100ms
+    let waited = 0;
+    
+    const statusText = document.getElementById('loading-status-text');
+    
+    // Check if enhanced data is available
+    const hasEnhancedData = () => {
+        const enhancedData = APP.content.lessonData?.[lessonId];
+        const lessonFromList = ALL_LESSONS.find(l => l.id === lessonId);
+        return (enhancedData && (enhancedData.sections || enhancedData.skill_tree || enhancedData.memory_hooks)) ||
+               (lessonFromList && (lessonFromList.sections || lessonFromList.skill_tree || lessonFromList.memory_hooks));
+    };
+    
+    // If already have enhanced data, render immediately
+    if (hasEnhancedData()) {
+        console.log('✅ Enhanced data already available, rendering...');
+        setTimeout(() => renderLessonContent(lessonId, lesson), 100);
+        return;
     }
+    
+    // Wait for data to load
+    console.log('⏳ Waiting for enhanced data to load...');
+    
+    while (waited < maxWaitTime) {
+        await new Promise(resolve => setTimeout(resolve, checkInterval));
+        waited += checkInterval;
+        
+        // Update status text
+        if (statusText) {
+            const seconds = Math.ceil((maxWaitTime - waited) / 1000);
+            statusText.textContent = `Loading enhanced content... (${seconds}s)`;
+        }
+        
+        if (hasEnhancedData()) {
+            console.log(`✅ Enhanced data loaded after ${waited}ms`);
+            if (statusText) statusText.textContent = 'Rendering lesson...';
+            setTimeout(() => renderLessonContent(lessonId, lesson), 100);
+            return;
+        }
+    }
+    
+    // Timeout - render with whatever we have
+    console.log('⚠️ Timeout waiting for enhanced data, rendering with available content');
+    if (statusText) statusText.textContent = 'Rendering lesson...';
+    setTimeout(() => renderLessonContent(lessonId, lesson), 100);
+}
+
+// Render the lesson content (enhanced or basic)
+function renderLessonContent(lessonId, lesson) {
+    console.log('🎨 renderLessonContent called for:', lessonId);
+    
+    // Try enhanced viewer first
+    if (typeof renderFullLesson === 'function') {
+        console.log('📚 Using enhanced lesson viewer');
+        renderFullLesson(lessonId, lesson);
+        return;
+    }
+    
+    if (typeof showEnhancedLesson === 'function') {
+        const enhancedData = APP.content.lessonData?.[lessonId];
+        const lessonFromList = ALL_LESSONS.find(l => l.id === lessonId);
+        const hasEnhancedFeatures = (data) => data && (
+            data.sections || 
+            data.skill_tree || 
+            data.role_relevance || 
+            data.memory_hooks ||
+            data.introduction?.why_it_matters
+        );
+        
+        if (hasEnhancedFeatures(enhancedData) || hasEnhancedFeatures(lessonFromList)) {
+            console.log('📚 Using showEnhancedLesson');
+            showEnhancedLesson(lessonId);
+            return;
+        }
+    }
+    
+    // Fall back to basic viewer only if no enhanced features
+    console.log('📖 Falling back to basic lesson viewer');
+    renderBasicLessonContent(lessonId, lesson);
 }
 
 function renderBasicLessonContent(lessonId, lesson) {
