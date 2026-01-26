@@ -200,9 +200,6 @@
                             ${lesson.objectives_covered ? `
                                 <span class="meta-item">📍 Objectives: ${lesson.objectives_covered.join(', ')}</span>
                             ` : ''}
-                            ${lesson.estimated_duration ? `
-                                <span class="meta-item">⏱ ${escapeHtml(lesson.estimated_duration)}</span>
-                            ` : ''}
                             ${lesson.difficulty ? `
                                 <span class="meta-item difficulty-${lesson.difficulty}">
                                     ${lesson.difficulty.charAt(0).toUpperCase() + lesson.difficulty.slice(1)}
@@ -745,7 +742,6 @@
                             <span class="section-number">${index + 1}</span>
                             ${escapeHtml(section.title)}
                         </h2>
-                        ${section.estimated_time ? `<span class="section-time">⏱ ${escapeHtml(section.estimated_time)}</span>` : ''}
                     </div>
                     
                     <!-- Main Content (always visible) -->
