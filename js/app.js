@@ -1772,19 +1772,34 @@ function injectStyles() {
             color: #fafafa !important;
             font-family: system-ui, -apple-system, sans-serif;
             line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        #main-content {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        #content {
+            width: 100%;
+            max-width: 100%;
         }
         
         /* Header */
         .header-bar {
             background: #18181b;
             border-bottom: 1px solid #27272a;
-            padding: 0 20px;
+            padding: 12px 20px;
             min-height: 60px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 20px;
             flex-wrap: wrap;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
         
         .header-brand {
@@ -1833,6 +1848,8 @@ function injectStyles() {
             max-width: 1800px;
             margin: 0 auto;
             padding: 20px 40px;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         /* Typography */
@@ -2967,13 +2984,19 @@ function injectStyles() {
             /* Container */
             .container {
                 padding: 12px 16px;
+                width: 100%;
+                box-sizing: border-box;
             }
             
-            /* Header */
+            /* Header - same width as content */
             .header-bar {
                 flex-direction: column;
                 padding: 12px 16px;
                 gap: 12px;
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+                box-sizing: border-box;
             }
             
             .header-brand {
@@ -2985,12 +3008,22 @@ function injectStyles() {
                 justify-content: center;
                 gap: 4px;
                 padding: 8px 0;
+                flex-wrap: wrap;
             }
             
             .nav-btn {
-                font-size: 0.75rem;
-                padding: 8px 10px;
-                min-height: 44px; /* Touch target */
+                font-size: 0.7rem;
+                padding: 6px 8px;
+                min-height: 40px;
+            }
+            
+            /* Container - match header width */
+            .container {
+                width: 100%;
+                max-width: 100%;
+                padding: 16px;
+                margin: 0;
+                box-sizing: border-box;
             }
             
             /* Typography */
