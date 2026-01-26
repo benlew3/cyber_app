@@ -86,6 +86,45 @@
             return;
         }
 
+        // Show loading screen immediately
+        content.innerHTML = renderLoadingScreen(lesson);
+        
+        // Use requestAnimationFrame to ensure loading screen renders before heavy work
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                renderFullLesson(lessonId, lesson);
+            }, 50); // Small delay to ensure loading screen is visible
+        });
+    }
+    
+    function renderLoadingScreen(lesson) {
+        const domainColors = {
+            1: '#6366f1',
+            2: '#f59e0b', 
+            3: '#10b981',
+            4: '#8b5cf6',
+            5: '#ec4899'
+        };
+        const color = domainColors[lesson.domain] || '#6366f1';
+        
+        return `
+            <div class="lesson-loading-screen">
+                <div class="loading-content">
+                    <div class="loading-spinner" style="border-top-color: ${color};"></div>
+                    <div class="loading-domain" style="color: ${color};">Domain ${lesson.domain}</div>
+                    <h2 class="loading-title">${escapeHtml(lesson.title)}</h2>
+                    <p class="loading-status">Loading lesson content...</p>
+                    <div class="loading-progress">
+                        <div class="loading-progress-bar" style="background: ${color};"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function renderFullLesson(lessonId, lesson) {
+        const content = document.getElementById('content');
+        
         // v34: Try to load enhanced lesson data from multiple sources
         // Check lessonData cache (populated by data-loader)
         const enhancedData = APP.content.lessonData?.[lessonId] || 
@@ -2515,6 +2554,78 @@
                 color: #a5b4fc;
             }
             
+            /* Loading Screen */
+            .lesson-loading-screen {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 80vh;
+                background: #09090b;
+            }
+            
+            .loading-content {
+                text-align: center;
+                padding: 40px;
+                max-width: 400px;
+            }
+            
+            .loading-spinner {
+                width: 60px;
+                height: 60px;
+                border: 4px solid #27272a;
+                border-top-color: #6366f1;
+                border-radius: 50%;
+                margin: 0 auto 24px;
+                animation: spin 1s linear infinite;
+            }
+            
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+            
+            .loading-domain {
+                font-size: 0.9rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 8px;
+            }
+            
+            .loading-title {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #fafafa;
+                margin: 0 0 16px 0;
+            }
+            
+            .loading-status {
+                color: #71717a;
+                font-size: 0.95rem;
+                margin: 0 0 20px 0;
+            }
+            
+            .loading-progress {
+                width: 200px;
+                height: 4px;
+                background: #27272a;
+                border-radius: 2px;
+                margin: 0 auto;
+                overflow: hidden;
+            }
+            
+            .loading-progress-bar {
+                width: 30%;
+                height: 100%;
+                border-radius: 2px;
+                animation: loading-progress 1.5s ease-in-out infinite;
+            }
+            
+            @keyframes loading-progress {
+                0% { transform: translateX(-100%); width: 30%; }
+                50% { width: 60%; }
+                100% { transform: translateX(400%); width: 30%; }
+            }
+            
             /* Layout */
             .enhanced-lesson-container {
                 display: grid;
@@ -3756,6 +3867,27 @@
             
             [data-theme="light"] .enhanced-lesson-container {
                 background: #f5f5f5 !important;
+            }
+            
+            /* LOADING SCREEN - Light Mode */
+            [data-theme="light"] .lesson-loading-screen {
+                background: #f5f5f5 !important;
+            }
+            
+            [data-theme="light"] .loading-spinner {
+                border-color: #e0e0e0 !important;
+            }
+            
+            [data-theme="light"] .loading-title {
+                color: #000000 !important;
+            }
+            
+            [data-theme="light"] .loading-status {
+                color: #555555 !important;
+            }
+            
+            [data-theme="light"] .loading-progress {
+                background: #e0e0e0 !important;
             }
             
             /* SIDEBAR ITEMS */
