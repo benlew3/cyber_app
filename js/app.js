@@ -5413,29 +5413,152 @@ function getNextLesson(currentLessonId) {
 }
 
 function showLessonViewer(lessonId) {
-    // Check if enhanced lesson viewer is available and lesson has enhanced data
-    if (typeof showEnhancedLesson === 'function') {
-        // v34: Check both lessonData cache AND ALL_LESSONS for enhanced content
-        const enhancedData = APP.content.lessonData?.[lessonId];
-        const lessonFromList = ALL_LESSONS.find(l => l.id === lessonId);
-        const hasEnhancedFeatures = (data) => data && (
-            data.sections || 
-            data.skill_tree || 
-            data.role_relevance || 
-            data.memory_hooks ||
-            data.introduction?.why_it_matters
-        );
-        
-        if (hasEnhancedFeatures(enhancedData) || hasEnhancedFeatures(lessonFromList)) {
-            console.log(`📚 Loading enhanced lesson: ${lessonId}`);
-            showEnhancedLesson(lessonId);
-            return;
-        }
-    }
-    
-    // Fall back to basic viewer
     const content = document.getElementById('content');
     const lesson = ALL_LESSONS.find(l => l.id === lessonId);
+    
+    if (!lesson) {
+        console.error('Lesson not found:', lessonId);
+        return;
+    }
+    
+    // Domain colors for loading screen
+    const domainColors = {
+        1: '#6366f1',
+        2: '#f59e0b', 
+        3: '#10b981',
+        4: '#8b5cf6',
+        5: '#ec4899'
+    };
+    const color = domainColors[lesson.domain] || '#6366f1';
+    
+    // ALWAYS show loading screen FIRST
+    content.innerHTML = `
+        <div class="lesson-loading-screen" style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            background: var(--bg-primary, #09090b);
+        ">
+            <div class="loading-content" style="text-align: center; padding: 40px; max-width: 400px;">
+                <div class="loading-spinner" style="
+                    width: 60px;
+                    height: 60px;
+                    border: 4px solid #27272a;
+                    border-top-color: ${color};
+                    border-radius: 50%;
+                    margin: 0 auto 24px;
+                    animation: lesson-spin 1s linear infinite;
+                "></div>
+                <div class="loading-domain" style="
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    margin-bottom: 8px;
+                    color: ${color};
+                ">Domain ${lesson.domain}</div>
+                <h2 class="loading-title" style="
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    color: #fafafa;
+                    margin: 0 0 16px 0;
+                ">${escapeHtml(lesson.title)}</h2>
+                <p class="loading-status" style="
+                    color: #71717a;
+                    font-size: 0.95rem;
+                    margin: 0 0 20px 0;
+                ">Loading lesson content...</p>
+                <div class="loading-progress" style="
+                    width: 200px;
+                    height: 4px;
+                    background: #27272a;
+                    border-radius: 2px;
+                    margin: 0 auto;
+                    overflow: hidden;
+                ">
+                    <div class="loading-progress-bar" style="
+                        width: 30%;
+                        height: 100%;
+                        border-radius: 2px;
+                        background: ${color};
+                        animation: lesson-loading-progress 1.5s ease-in-out infinite;
+                    "></div>
+                </div>
+            </div>
+        </div>
+        <style>
+            @keyframes lesson-spin {
+                to { transform: rotate(360deg); }
+            }
+            @keyframes lesson-loading-progress {
+                0% { transform: translateX(-100%); width: 30%; }
+                50% { width: 60%; }
+                100% { transform: translateX(400%); width: 30%; }
+            }
+            [data-theme="light"] .lesson-loading-screen {
+                background: #f5f5f5 !important;
+            }
+            [data-theme="light"] .loading-spinner {
+                border-color: #e0e0e0 !important;
+            }
+            [data-theme="light"] .loading-title {
+                color: #000000 !important;
+            }
+            [data-theme="light"] .loading-status {
+                color: #555555 !important;
+            }
+            [data-theme="light"] .loading-progress {
+                background: #e0e0e0 !important;
+            }
+        </style>
+    `;
+    
+    // Use requestAnimationFrame + setTimeout to ensure loading screen renders first
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            // Now check if enhanced lesson viewer is available
+            if (typeof showEnhancedLesson === 'function') {
+                // v34: Check both lessonData cache AND ALL_LESSONS for enhanced content
+                const enhancedData = APP.content.lessonData?.[lessonId];
+                const lessonFromList = ALL_LESSONS.find(l => l.id === lessonId);
+                const hasEnhancedFeatures = (data) => data && (
+                    data.sections || 
+                    data.skill_tree || 
+                    data.role_relevance || 
+                    data.memory_hooks ||
+                    data.introduction?.why_it_matters
+                );
+                
+                if (hasEnhancedFeatures(enhancedData) || hasEnhancedFeatures(lessonFromList)) {
+                    console.log(`📚 Loading enhanced lesson: ${lessonId}`);
+                    renderEnhancedLessonContent(lessonId);
+                    return;
+                }
+            }
+            
+            // Fall back to basic viewer
+            renderBasicLessonContent(lessonId, lesson);
+        }, 100); // 100ms delay ensures loading screen is visible
+    });
+}
+
+function renderEnhancedLessonContent(lessonId) {
+    // Call the enhanced lesson viewer's render function directly
+    if (typeof renderFullLesson === 'function') {
+        const lesson = ALL_LESSONS.find(l => l.id === lessonId);
+        renderFullLesson(lessonId, lesson);
+    } else if (typeof showEnhancedLesson === 'function') {
+        // Fallback - this shouldn't show loading screen again
+        showEnhancedLesson(lessonId);
+    }
+}
+
+function renderBasicLessonContent(lessonId, lesson) {
+    const content = document.getElementById('content');
+    if (!lesson) {
+        lesson = ALL_LESSONS.find(l => l.id === lessonId);
+    }
     if (!lesson) return;
     
     const isCompleted = APP.progress.completedLessons.includes(lessonId);
