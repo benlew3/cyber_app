@@ -86,15 +86,23 @@
             return;
         }
 
-        // Show loading screen immediately
-        content.innerHTML = renderLoadingScreen(lesson);
+        // Check if loading screen is already showing (from app.js showLessonViewer)
+        const hasLoadingScreen = content.querySelector('.lesson-loading-screen');
         
-        // Use requestAnimationFrame to ensure loading screen renders before heavy work
-        requestAnimationFrame(() => {
-            setTimeout(() => {
-                renderFullLesson(lessonId, lesson);
-            }, 50); // Small delay to ensure loading screen is visible
-        });
+        if (hasLoadingScreen) {
+            // Loading screen already visible, render content directly
+            renderFullLesson(lessonId, lesson);
+        } else {
+            // No loading screen yet, show one first
+            content.innerHTML = renderLoadingScreen(lesson);
+            
+            // Use requestAnimationFrame to ensure loading screen renders before heavy work
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    renderFullLesson(lessonId, lesson);
+                }, 50); // Small delay to ensure loading screen is visible
+            });
+        }
     }
     
     function renderLoadingScreen(lesson) {
@@ -3995,8 +4003,10 @@
     // ================================================
 
     window.showEnhancedLesson = showEnhancedLesson;
+    window.renderFullLesson = renderFullLesson; // Export for app.js to call directly
     window.EnhancedLessonViewer = {
         show: showEnhancedLesson,
+        renderContent: renderFullLesson,
         state: LessonState,
         CAREER_ROLES,
         TOOL_LABS
